@@ -28,10 +28,6 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Mic
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -39,6 +35,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -64,6 +61,7 @@ import com.arcgismaps.mapping.featureforms.TextFormElement
 import com.arcgismaps.mapping.featureforms.UtilityAssociationsFormElement
 import com.arcgismaps.mapping.featureforms.UtilityAssociationFeatureCandidate
 import com.arcgismaps.mapping.featureforms.UtilityAssociationFeatureSource
+import com.arcgismaps.toolkit.featureforms.internal.components.mlkit.FeatureFormPrompt
 import com.arcgismaps.toolkit.featureforms.internal.components.text.TextFormElement
 import com.arcgismaps.toolkit.featureforms.internal.components.voice.VoiceToForm
 import com.arcgismaps.toolkit.featureforms.internal.navigation.FeatureFormNavHost
@@ -81,6 +79,7 @@ import com.arcgismaps.utilitynetworks.UtilityAssociationGroupResult
 import com.arcgismaps.utilitynetworks.UtilityAssociationResult
 import com.arcgismaps.utilitynetworks.UtilityAssociationsFilter
 import com.arcgismaps.utilitynetworks.UtilityAssociationsFilterResult
+import kotlinx.coroutines.launch
 
 /**
  * Defines the visibility behavior of validation errors in a [FeatureForm].
@@ -366,6 +365,7 @@ public fun FeatureForm(
     typography: FeatureFormTypography = FeatureFormDefaults.typography(),
 ) {
     val state by rememberUpdatedState(featureFormState)
+    val scope = rememberCoroutineScope()
     val navController = rememberNavController(state)
     state.setNavigationCallback { route ->
         navController.navigate(route)
@@ -429,6 +429,9 @@ public fun FeatureForm(
                 navController.previousBackStackEntry != null
             }
             var showVoiceInput by rememberSaveable { mutableStateOf(false) }
+            val prompt = remember(formData) {
+                FeatureFormPrompt(formData.featureForm)
+            }
             backStackEntry?.let { entry ->
                 Column(modifier = Modifier.fillMaxWidth()) {
                     ContentAwareTopBar(
@@ -445,6 +448,7 @@ public fun FeatureForm(
                         hasBackStack = hasBackStack,
                         showFormActions = showFormActions,
                         showCloseIcon = showCloseIcon,
+                        showVoiceIcon = !showVoiceInput,
                         isNavigationEnabled = isNavigationEnabled,
                         modifier = Modifier
                             .padding(
@@ -455,7 +459,13 @@ public fun FeatureForm(
                     )
                     AnimatedVisibility(showVoiceInput) {
                         VoiceToForm(
+                            prefix = prompt.prompt,
                             onDismiss = { showVoiceInput = false },
+                            onResponse = { response ->
+                                scope.launch {
+                                    prompt.processResponse(response)
+                                }
+                            },
                             modifier = Modifier.padding(16.dp).fillMaxWidth()
                         )
                     }

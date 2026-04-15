@@ -96,6 +96,7 @@ internal fun ContentAwareTopBar(
     hasBackStack: Boolean,
     showFormActions: Boolean,
     showCloseIcon: Boolean,
+    showVoiceIcon: Boolean,
     isNavigationEnabled: Boolean,
     onSaveForm: suspend (Boolean) -> Result<Unit>,
     onDiscardForm: suspend (Boolean) -> Unit,
@@ -162,7 +163,7 @@ internal fun ContentAwareTopBar(
                 hasEdits = if (showFormActions) hasEdits else false,
                 showCloseIcon = showCloseIcon,
                 showBackIcon = hasBackStack,
-                showVoiceIcon = backStackEntry.destination.hasRoute<NavigationRoute.Form>(),
+                showVoiceIcon = backStackEntry.destination.hasRoute<NavigationRoute.Form>() && showVoiceIcon,
                 isNavigationEnabled = navigationEnabled,
                 onBackPressed = {
                     onBackAction(backStackEntry)

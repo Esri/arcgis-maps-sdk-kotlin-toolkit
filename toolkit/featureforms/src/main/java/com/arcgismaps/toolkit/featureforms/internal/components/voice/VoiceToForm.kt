@@ -19,16 +19,24 @@ package com.arcgismaps.toolkit.featureforms.internal.components.voice
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Done
-import androidx.compose.material.icons.filled.GraphicEq
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -36,32 +44,35 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.DialogProperties
+import com.arcgismaps.toolkit.featureforms.internal.components.mlkit.FeatureFormPromptResponse
 import com.arcgismaps.toolkit.featureforms.internal.components.mlkit.SpeechRecognizer
 import kotlinx.coroutines.launch
-import androidx.compose.runtime.collectAsState
 
 @RequiresApi(Build.VERSION_CODES.S)
 @Composable
 internal fun VoiceToForm(
+    prefix: String,
     onDismiss: () -> Unit,
+    onResponse: (FeatureFormPromptResponse) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val speechRecognizer = remember {
         SpeechRecognizer()
     }
     val scope = rememberCoroutineScope()
-    var isProcessing by rememberSaveable {
+    var isProcessing by remember {
         mutableStateOf(false)
     }
     Surface(
@@ -83,9 +94,18 @@ internal fun VoiceToForm(
                     tint = MaterialTheme.colorScheme.error
                 )
             }
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("Listening...", style = MaterialTheme.typography.bodyLarge)
-                Icon(Icons.Default.GraphicEq, contentDescription = "Voice recognition in progress")
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                if (isProcessing.not()) {
+                    Text("Listening...", style = MaterialTheme.typography.bodyLarge)
+                    AnimatedGraphicEq(
+                        modifier = Modifier.size(28.dp)
+                    )
+                } else {
+                    Text("Processing..", style = MaterialTheme.typography.bodyLarge)
+                }
             }
             IconButton(
                 onClick = {
@@ -100,12 +120,13 @@ internal fun VoiceToForm(
         }
     }
     if (isProcessing) {
-        VoiceResultDialog(
+        ProcessVoiceDialog(
+            prefix = prefix,
             text = speechRecognizer.response.collectAsState().value,
             onDismiss = {
-                isProcessing = false
                 onDismiss()
-            }
+            },
+            onProcessResult = onResponse
         )
     }
     LaunchedEffect(speechRecognizer) {
@@ -124,53 +145,65 @@ internal fun VoiceToForm(
 }
 
 @Composable
-private fun VoiceResultDialog(
-    text: String,
-    onDismiss: () -> Unit
+private fun AnimatedGraphicEq(
+    modifier: Modifier = Modifier,
+    barColor: Color = MaterialTheme.colorScheme.onSecondaryContainer,
 ) {
-    AlertDialog(
-        onDismissRequest = {
+    val transition = rememberInfiniteTransition(label = "graphicEq")
 
-        },
-        confirmButton = {
-            IconButton(
-                onClick = onDismiss
-            ) {
-                Icon(
-                    imageVector = Icons.Default.CheckCircle,
-                    contentDescription = "Dismiss voice input"
-                )
-            }
-        },
-        dismissButton = {
-            IconButton(
-                onClick = onDismiss
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Delete,
-                    contentDescription = "Dismiss voice input",
-                    tint = MaterialTheme.colorScheme.error
-                )
-            }
-        },
-        icon = {
-            Icon(Icons.Default.GraphicEq, contentDescription = "Voice recognition result")
-        },
-        text = {
-            Text(text)
-        },
-        properties = DialogProperties(
-            dismissOnBackPress = false,
-            dismissOnClickOutside = false
-        )
+    // Three bars with phase offsets.
+    val barA by transition.animateFloat(
+        initialValue = 0.35f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 450, easing = LinearEasing, delayMillis = 0),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "barA"
     )
+    val barB by transition.animateFloat(
+        initialValue = 0.25f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 450, easing = LinearEasing, delayMillis = 120),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "barB"
+    )
+    val barC by transition.animateFloat(
+        initialValue = 0.45f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 450, easing = LinearEasing, delayMillis = 240),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "barC"
+    )
+
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(2.dp)
+    ) {
+        EqBar(fraction = barA, color = barColor)
+        EqBar(fraction = barB, color = barColor)
+        EqBar(fraction = barC, color = barColor)
+    }
 }
 
-@RequiresApi(Build.VERSION_CODES.S)
-@Preview
 @Composable
-private fun VoiceToFormPreview() {
-    MaterialTheme {
-        VoiceToForm({})
-    }
+private fun EqBar(
+    fraction: Float,
+    color: Color,
+    maxHeight: Dp = 20.dp,
+    width: Dp = 4.dp,
+) {
+    val clamped = fraction.coerceIn(0.1f, 1f)
+    Box(
+        modifier = Modifier
+            .width(width)
+            .height(maxHeight * clamped)
+            .clip(RoundedCornerShape(2.dp))
+            .background(color)
+    )
 }

@@ -16,10 +16,57 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.components.mlkit
 
-import com.google.mlkit.genai.prompt.GenerativeModel
+import android.util.Log
+import com.arcgismaps.mapping.featureforms.FeatureForm
+import com.google.mlkit.genai.common.DownloadStatus
+import com.google.mlkit.genai.common.FeatureStatus
+import com.google.mlkit.genai.prompt.Generation
+import com.google.mlkit.genai.prompt.PromptPrefix
+import com.google.mlkit.genai.prompt.TextPart
+import com.google.mlkit.genai.prompt.generateContentRequest
+import kotlinx.coroutines.flow.takeWhile
 
-internal class PromptModel {
+internal class PromptModel(
+    private val prefix : String
+) {
+
     private val generativeModel by lazy {
+        Generation.getClient()
+    }
 
+    private val promptPrefix by lazy {
+        PromptPrefix(prefix)
+    }
+
+    suspend fun initialize() : Result<Unit> {
+        return when (val status = generativeModel.checkStatus()) {
+            FeatureStatus.AVAILABLE -> Result.success(Unit)
+            FeatureStatus.DOWNLOADABLE -> {
+                generativeModel.download().takeWhile {
+                    it !is DownloadStatus.DownloadCompleted
+                }.collect {}
+                val postDownloadStatus = generativeModel.checkStatus()
+                if (postDownloadStatus == FeatureStatus.AVAILABLE) {
+                    Result.success(Unit)
+                } else {
+                    Result.failure(Exception("Model is not available after download, status: $postDownloadStatus"))
+                }
+            }
+            FeatureStatus.UNAVAILABLE -> Result.failure(Exception("Model is unavailable"))
+            else -> Result.failure(Exception("Unknown model status: $status"))
+        }
+    }
+
+    suspend fun getResponse(prompt: String): Result<String> {
+        return try {
+            val response = generativeModel.generateContent(
+                generateContentRequest(TextPart(prompt)) {
+                    promptPrefix = this@PromptModel.promptPrefix
+                }
+            )
+            Result.success(response.candidates.first().text)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 }
