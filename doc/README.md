@@ -12,3 +12,8 @@
 ## Testing
 
 - [Testing Strategy](./testing/testing_strategy.md)
+
+## GitHub Actions
+
+- [API Compatibility PR Workflow](./github_actions/api-compat-pr.md)
+
