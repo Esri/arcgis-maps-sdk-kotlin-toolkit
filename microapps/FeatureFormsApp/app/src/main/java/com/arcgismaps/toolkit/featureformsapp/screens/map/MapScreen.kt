@@ -299,8 +299,11 @@ fun MapScreen(
             }
         )
     }
-    BackHandler(enabled = uiState !is UIState.Editing) {
-        onBackPressed()
+    BackHandler {
+        // Only allow back navigation when in the default state and not performing a task
+        if (uiState is UIState.NotEditing && isBusy.not()) {
+            onBackPressed()
+        }
     }
 }
 
