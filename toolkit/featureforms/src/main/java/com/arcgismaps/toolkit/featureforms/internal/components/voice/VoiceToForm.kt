@@ -56,16 +56,15 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.arcgismaps.toolkit.featureforms.internal.components.mlkit.FeatureFormPromptResponse
+import com.arcgismaps.toolkit.featureforms.internal.components.mlkit.FeatureFormGenerativeModel
 import com.arcgismaps.toolkit.featureforms.internal.components.mlkit.SpeechRecognizer
 import kotlinx.coroutines.launch
 
 @RequiresApi(Build.VERSION_CODES.S)
 @Composable
 internal fun VoiceToForm(
-    prefix: String,
+    model: FeatureFormGenerativeModel,
     onDismiss: () -> Unit,
-    onResponse: (FeatureFormPromptResponse) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val speechRecognizer = remember {
@@ -73,6 +72,9 @@ internal fun VoiceToForm(
     }
     val scope = rememberCoroutineScope()
     var isProcessing by remember {
+        mutableStateOf(false)
+    }
+    var showDialog by remember {
         mutableStateOf(false)
     }
     Surface(
@@ -98,7 +100,7 @@ internal fun VoiceToForm(
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                if (isProcessing.not()) {
+                if (showDialog.not()) {
                     Text("Listening...", style = MaterialTheme.typography.bodyLarge)
                     AnimatedGraphicEq(
                         modifier = Modifier.size(28.dp)
@@ -111,7 +113,7 @@ internal fun VoiceToForm(
                 onClick = {
                     scope.launch {
                         speechRecognizer.stopVoiceRecognition()
-                        isProcessing = true
+                        showDialog = true
                     }
                 }
             ) {
@@ -119,14 +121,22 @@ internal fun VoiceToForm(
             }
         }
     }
-    if (isProcessing) {
+    if (showDialog) {
         ProcessVoiceDialog(
-            prefix = prefix,
             text = speechRecognizer.response.collectAsState().value,
-            onDismiss = {
-                onDismiss()
+            isProcessing = isProcessing,
+            onConfirm = {
+                isProcessing = true
+                scope.launch {
+                    val userPrompt = """
+                    User's spoken input converted to text:
+                    ${speechRecognizer.response.value}
+                    """.trimIndent()
+                    model.getResponse(userPrompt)
+                    onDismiss()
+                }
             },
-            onProcessResult = onResponse
+            onDiscard = onDismiss
         )
     }
     LaunchedEffect(speechRecognizer) {
@@ -135,11 +145,6 @@ internal fun VoiceToForm(
             Log.e("TAG", "VoiceToForm: ready")
         }.onFailure {
             Log.e("TAG", "VoiceToForm: failed to initialize speech recognizer")
-        }
-    }
-    LaunchedEffect(speechRecognizer) {
-        speechRecognizer.response.collect {
-            Log.e("TAG", "VoiceToForm: $it")
         }
     }
 }

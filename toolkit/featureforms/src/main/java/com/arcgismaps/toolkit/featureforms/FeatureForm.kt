@@ -61,7 +61,7 @@ import com.arcgismaps.mapping.featureforms.TextFormElement
 import com.arcgismaps.mapping.featureforms.UtilityAssociationsFormElement
 import com.arcgismaps.mapping.featureforms.UtilityAssociationFeatureCandidate
 import com.arcgismaps.mapping.featureforms.UtilityAssociationFeatureSource
-import com.arcgismaps.toolkit.featureforms.internal.components.mlkit.FeatureFormPrompt
+import com.arcgismaps.toolkit.featureforms.internal.components.mlkit.FeatureFormGenerativeModel
 import com.arcgismaps.toolkit.featureforms.internal.components.text.TextFormElement
 import com.arcgismaps.toolkit.featureforms.internal.components.voice.VoiceToForm
 import com.arcgismaps.toolkit.featureforms.internal.navigation.FeatureFormNavHost
@@ -429,8 +429,8 @@ public fun FeatureForm(
                 navController.previousBackStackEntry != null
             }
             var showVoiceInput by rememberSaveable { mutableStateOf(false) }
-            val prompt = remember(formData) {
-                FeatureFormPrompt(formData.featureForm)
+            val model = remember(formData) {
+                FeatureFormGenerativeModel(formData)
             }
             backStackEntry?.let { entry ->
                 Column(modifier = Modifier.fillMaxWidth()) {
@@ -459,13 +459,8 @@ public fun FeatureForm(
                     )
                     AnimatedVisibility(showVoiceInput) {
                         VoiceToForm(
-                            prefix = prompt.prompt,
+                            model = model,
                             onDismiss = { showVoiceInput = false },
-                            onResponse = { response ->
-                                scope.launch {
-                                    prompt.processResponse(response)
-                                }
-                            },
                             modifier = Modifier.padding(16.dp).fillMaxWidth()
                         )
                     }

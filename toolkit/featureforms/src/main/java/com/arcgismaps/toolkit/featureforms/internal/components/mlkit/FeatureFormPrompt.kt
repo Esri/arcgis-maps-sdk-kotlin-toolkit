@@ -23,14 +23,22 @@ import com.arcgismaps.data.FieldType
 import com.arcgismaps.mapping.featureforms.ComboBoxFormInput
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
+import com.arcgismaps.mapping.featureforms.FormElement
+import com.arcgismaps.mapping.featureforms.GroupFormElement
 import com.arcgismaps.mapping.featureforms.RadioButtonsFormInput
 import com.arcgismaps.mapping.featureforms.SwitchFormInput
+import com.arcgismaps.toolkit.featureforms.FormStateData
+import com.arcgismaps.toolkit.featureforms.internal.components.base.BaseFieldState
+import com.arcgismaps.toolkit.featureforms.internal.components.codedvalue.CodedValueFieldState
+import com.arcgismaps.toolkit.featureforms.internal.components.datetime.DateTimeFieldState
+import com.arcgismaps.toolkit.featureforms.internal.components.text.FormTextFieldState
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import kotlin.time.Instant
+import kotlin.time.toJavaInstant
 
-@Stable
 internal class FeatureFormPrompt(
-    private val featureForm: FeatureForm
+    private val formStateData: FormStateData
 ) {
     /**
      * Backing property for [prompt].
@@ -53,11 +61,24 @@ internal class FeatureFormPrompt(
      */
     private fun buildPrompt() : String {
         val formInfo = buildString {
-            appendLine("Title: ${featureForm.title.value}")
-            featureForm.elements.forEach { element ->
-                if (element is FieldFormElement && element.isEditable.value && element.isVisible.value) {
-                    val elementPrompt = FieldFormElementPrompt.from(element)
-                    appendLine(elementPrompt)
+            appendLine("Title: ${formStateData.featureForm.title.value}")
+            formStateData.stateCollection.forEach { state ->
+                when(val element = state.formElement) {
+                    is FieldFormElement -> {
+                        state.formElement.toPromptString()?.let {
+                            appendLine(it)
+                        }
+                    }
+
+                    is GroupFormElement -> {
+                        element.elements.forEach {
+                            it.toPromptString()?.let { fieldElementPrompt ->
+                                appendLine(fieldElementPrompt)
+                            }
+                        }
+                    }
+
+                    else -> {}
                 }
             }
         }
@@ -75,7 +96,8 @@ internal class FeatureFormPrompt(
             |fields from the user response, do not include it in the answer. The user will name a
             |field only by its label. Use the label to determine the fieldName, which is the key to 
             |use in the output. If a field has coded values, use the provided name ignoring its field 
-            |type. The value should always be a string.
+            |type. The value should always be a string. If the field is a date or datetime field, 
+            |the value should be in epoch millis.
             |</instructions>
             |##
             |<output_format>
@@ -94,23 +116,31 @@ internal class FeatureFormPrompt(
     }
 
     suspend fun processResponse(response: FeatureFormPromptResponse) {
-        response.fieldValues.forEach { (fieldName, value) ->
-            featureForm.elements.firstOrNull {
-                it is FieldFormElement && it.fieldName == fieldName
-            }?.let {
-                val element = it as FieldFormElement
-                if (element.domain is CodedValueDomain) {
-                    (element.domain as CodedValueDomain).codedValues.firstOrNull { codedValue ->
-                        codedValue.name.equals(value, ignoreCase = true)
-                    }?.let { codedValue ->
-                        element.updateValue(codedValue.code)
+        formStateData.stateCollection.forEach { entry ->
+            val state = entry.state
+            if (state is BaseFieldState<*>) {
+                val element = entry.formElement as FieldFormElement
+                val value = response.fieldValues[element.fieldName]
+                Log.e("TAG", "processResponse: $value", )
+                if (value != null) {
+                    when(state) {
+                        is CodedValueFieldState -> {
+                            val codedValue = state.codedValues.entries.firstOrNull {
+                                it.value == value
+                            }
+                            state.onValueChanged(codedValue?.key)
+                        }
+                        is FormTextFieldState -> state.onValueChanged(value)
+                        is DateTimeFieldState -> {
+                            Instant.parseOrNull(value)?.let { instant ->
+                                state.onValueChanged(instant.toJavaInstant())
+                            }
+                        }
                     }
-                } else {
-                    element.updateValue(value)
                 }
             }
         }
-        featureForm.evaluateExpressions()
+        formStateData.evaluateExpressions()
     }
 }
 
@@ -193,5 +223,18 @@ private fun FieldType.name(): String {
         FieldType.TimeOnly -> "TimeOnly"
         FieldType.TimestampOffset -> "TimestampOffset"
         else -> "Unknown"
+    }
+}
+
+private fun FormElement.toPromptString(): String? {
+    return when (this) {
+        is FieldFormElement -> {
+            if (isEditable.value && isVisible.value) {
+                FieldFormElementPrompt.from(this).toString()
+            } else {
+                null
+            }
+        }
+        else -> null
     }
 }

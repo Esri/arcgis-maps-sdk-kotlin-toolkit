@@ -17,25 +17,35 @@
 package com.arcgismaps.toolkit.featureforms.internal.components.mlkit
 
 import android.util.Log
-import com.arcgismaps.mapping.featureforms.FeatureForm
+import com.arcgismaps.toolkit.featureforms.FormStateData
 import com.google.mlkit.genai.common.DownloadStatus
 import com.google.mlkit.genai.common.FeatureStatus
 import com.google.mlkit.genai.prompt.Generation
+import com.google.mlkit.genai.prompt.ModelPreference
 import com.google.mlkit.genai.prompt.PromptPrefix
 import com.google.mlkit.genai.prompt.TextPart
 import com.google.mlkit.genai.prompt.generateContentRequest
+import com.google.mlkit.genai.prompt.generationConfig
+import com.google.mlkit.genai.prompt.modelConfig
 import kotlinx.coroutines.flow.takeWhile
 
-internal class PromptModel(
-    private val prefix : String
+internal class FeatureFormGenerativeModel(
+    formStateData: FormStateData
 ) {
 
+    private val prompt = FeatureFormPrompt(formStateData)
+
     private val generativeModel by lazy {
-        Generation.getClient()
+        val config = generationConfig {
+            modelConfig = modelConfig {
+                preference = ModelPreference.FULL
+            }
+        }
+        Generation.getClient(config)
     }
 
     private val promptPrefix by lazy {
-        PromptPrefix(prefix)
+        PromptPrefix(prompt.prompt)
     }
 
     suspend fun initialize() : Result<Unit> {
@@ -57,16 +67,33 @@ internal class PromptModel(
         }
     }
 
-    suspend fun getResponse(prompt: String): Result<String> {
+    suspend fun getResponse(userPrompt: String): Result<Unit> {
         return try {
             val response = generativeModel.generateContent(
-                generateContentRequest(TextPart(prompt)) {
-                    promptPrefix = this@PromptModel.promptPrefix
+                generateContentRequest(TextPart(userPrompt)) {
+                    promptPrefix = this@FeatureFormGenerativeModel.promptPrefix
                 }
             )
-            Result.success(response.candidates.first().text)
+            val content = response.candidates.firstOrNull()?.text ?: ""
+            Log.e("TAG", "getResponse: $content", )
+            val cleanJson = content.extractJsonObject()
+            FeatureFormPromptResponse.fromJsonOrNull(cleanJson)?.let {
+                prompt.processResponse(it)
+            }
+            Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
         }
+    }
+}
+
+private fun String.extractJsonObject(): String {
+    val trimmed = trim()
+    return if (trimmed.startsWith("```")) {
+        trimmed.substringAfter('\n', trimmed)
+            .substringBeforeLast("```")
+            .trim()
+    } else {
+        trimmed
     }
 }

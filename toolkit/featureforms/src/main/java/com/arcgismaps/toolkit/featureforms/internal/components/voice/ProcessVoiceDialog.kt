@@ -16,108 +16,97 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.components.voice
 
-import android.util.Log
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.GraphicEq
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
-import com.arcgismaps.toolkit.featureforms.internal.components.mlkit.FeatureFormPromptResponse
-import com.arcgismaps.toolkit.featureforms.internal.components.mlkit.PromptModel
-import kotlinx.coroutines.launch
+import com.arcgismaps.toolkit.featureforms.R
 
 @Composable
 internal fun ProcessVoiceDialog(
-    prefix: String,
     text: String,
-    onDismiss: () -> Unit,
-    onProcessResult: (FeatureFormPromptResponse) -> Unit
+    isProcessing: Boolean,
+    onConfirm: () -> Unit,
+    onDiscard: () -> Unit
 ) {
-    val scope = rememberCoroutineScope()
-    val userPrompt = remember(text) {
-        """
-        User's spoken input converted to text:
-        $text
-        """.trimIndent()
-    }
-    val promptModel = remember {
-        PromptModel(prefix)
-    }
     AlertDialog(
-        onDismissRequest = {
-
-        },
+        onDismissRequest = { /* no-op, force user to choose an action */ },
         confirmButton = {
-            IconButton(
-                onClick = {
-                    scope.launch {
-                        promptModel.getResponse(userPrompt).onSuccess {
-                            val response =
-                                FeatureFormPromptResponse.fromJsonOrNull(it.extractJsonObject())
-                            if (response != null) {
-                                onProcessResult(response)
-                            }
-                            Log.e("TAG", "VoiceResultDialog: response: $it")
-                            Log.e("TAG", "VoiceResultDialog: $response")
-                        }.onFailure {
-                            Log.e("TAG", "VoiceResultDialog: failed to get response: ${it.message}")
-                        }
-                    }
+            if (!isProcessing) {
+                IconButton(onClick = onConfirm) {
+                    Icon(
+                        imageVector = Icons.Default.CheckCircle,
+                        contentDescription = "Dismiss voice input"
+                    )
                 }
-            ) {
-                Icon(
-                    imageVector = Icons.Default.CheckCircle,
-                    contentDescription = "Dismiss voice input"
-                )
             }
         },
         dismissButton = {
-            IconButton(
-                onClick = onDismiss
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Delete,
-                    contentDescription = "Dismiss voice input",
-                    tint = MaterialTheme.colorScheme.error
-                )
+            if (!isProcessing) {
+                IconButton(onClick = onDiscard) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = "Dismiss voice input",
+                        tint = MaterialTheme.colorScheme.error
+                    )
+                }
             }
         },
         icon = {
-            Icon(Icons.Default.GraphicEq, contentDescription = "Voice recognition result")
+            Image(
+                painterResource(R.drawable.gemini),
+                contentDescription = "Voice recognition logo",
+                modifier = Modifier.size(32.dp)
+            )
         },
         text = {
-            Text(text)
+            if (isProcessing) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(30.dp),
+                        strokeWidth = 5.dp
+                    )
+                }
+            } else {
+                Text(text)
+            }
         },
         properties = DialogProperties(
             dismissOnBackPress = false,
             dismissOnClickOutside = false
         )
     )
-    LaunchedEffect(promptModel) {
-        promptModel.initialize().onSuccess {
-            Log.e("TAG", "VoiceResultDialog: Prompt model is ready")
-        }.onFailure {
-            Log.e("TAG", "VoiceResultDialog: Failed to initialize prompt model")
-        }
-    }
 }
 
-private fun String.extractJsonObject(): String {
-    val trimmed = trim()
-    return if (trimmed.startsWith("```")) {
-        trimmed.substringAfter('\n', trimmed)
-            .substringBeforeLast("```")
-            .trim()
-    } else {
-        trimmed
-    }
+@Preview
+@Composable
+internal fun ProcessVoiceDialogPreview() {
+    ProcessVoiceDialog(
+        text = "Recognized voice input will be displayed here.",
+        isProcessing = true,
+        onConfirm = { },
+        onDiscard = { }
+    )
 }
+
