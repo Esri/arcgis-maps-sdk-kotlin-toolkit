@@ -85,7 +85,6 @@ class FormTextFieldRangeNumericTests : FeatureFormTestRunner(
                         visible = integerField.isVisible,
                         singleLine = integerField.input is TextBoxFormInput,
                         fieldType = integerField.fieldType,
-                        domain = integerField.domain as? RangeDomain,
                         minLength = (integerField.input as TextBoxFormInput).minLength.toInt(),
                         maxLength = (integerField.input as TextBoxFormInput).maxLength.toInt()
                     ),

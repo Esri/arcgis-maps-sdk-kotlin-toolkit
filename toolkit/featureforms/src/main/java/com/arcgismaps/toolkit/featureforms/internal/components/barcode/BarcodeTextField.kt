@@ -145,7 +145,6 @@ private fun BarcodeTextFieldPreview() {
                 visible = MutableStateFlow(true),
                 validationErrors = MutableStateFlow(emptyList()),
                 fieldType = FieldType.Text,
-                domain = null,
                 minLength = 0,
                 maxLength = 0
             ),

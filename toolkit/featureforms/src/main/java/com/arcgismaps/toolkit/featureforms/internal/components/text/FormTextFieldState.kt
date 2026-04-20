@@ -37,7 +37,6 @@ internal class TextFieldProperties(
     visible: StateFlow<Boolean>,
     validationErrors: StateFlow<List<ValidationErrorState>>,
     fieldType: FieldType,
-    domain: Domain?,
     val singleLine: Boolean,
     val minLength: Int,
     val maxLength: Int,

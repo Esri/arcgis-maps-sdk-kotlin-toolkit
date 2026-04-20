@@ -94,7 +94,6 @@ class FormTextFieldTests : FeatureFormTestRunner(
                         visible = field.isVisible,
                         singleLine = field.input is TextBoxFormInput,
                         fieldType = field.fieldType,
-                        domain = field.domain as? RangeDomain,
                         minLength = (field.input as TextBoxFormInput).minLength.toInt(),
                         maxLength = (field.input as TextBoxFormInput).maxLength.toInt()
                     ),
