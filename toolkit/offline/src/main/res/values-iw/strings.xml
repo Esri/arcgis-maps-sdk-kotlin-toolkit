@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright 2025 Esri
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~  http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing, software
+  ~  distributed under the License is distributed on an "AS IS" BASIS,
+  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  --><resources>
+    <string name="map_areas">אזורי מפה</string>
+    <string name="add_map_area">הוסף אזור מפה</string>
+    <string name="thumbnail_description">תמונה מוזערת של PortalItem</string>
+    <string name="download">הורד</string>
+    <string name="open">פתוח</string>
+    <string name="error">שגיאה</string>
+    <string name="loading">טוען</string>
+    <string name="loading_failed">הטעינה נכשלה</string>
+    <string name="ready_to_download">מוכן להורדה</string>
+    <string name="packaging">יצירת חבילה</string>
+    <string name="packaging_failed">יצירת חבילה נכשלה</string>
+    <string name="downloaded">הורדה הושלמה</string>
+    <string name="downloading">מוריד</string>
+    <string name="download_failed">ההורדה נכשלה</string>
+    <string name="currently_open">פתוח כרגע</string>
+    <string name="description">תיאור</string>
+    <string name="download_map_area">הורד אזור מפה</string>
+    <string name="remove_download">הסר הורדה</string>
+    <string name="delete_download">מחק הורדה</string>
+    <string name="no_image_available">אין תמונות זמינות</string>
+    <string name="refresh">רענן</string>
+    <string name="cancelled">בוטל</string>
+    <string name="cancel">ביטול</string>
+    <string name="confirm">אישור</string>
+    <string name="rename">שנה שם</string>
+    <string name="enter_a_name">הזן שם</string>
+    <string name="select_area">בחר אזור</string>
+    <string name="pan_and_zoom_text">הזז ובצע זום כדי להגדיר את האזור</string>
+    <string name="unique_name_text">השם עבור אזור המפה חייב להיות ייחודי</string>
+    <string name="next_on_demand_area_title">שטח %1$s</string>
+    <string name="directory_size">גודל: %1$s</string>
+    <string name="no_internet_connection_error_message">אין חיבור לאינטרנט</string>
+    <string name="no_internet_error_message">אין חיבור לאינטרנט. מציג אזורים שהורדו בלבד.</string>
+    <string name="no_map_areas_error_message">לא ניתן לאחזר אזורי מפה עבור מפה זו.</string>
+    <string name="no_offline_map_areas_error_message">אין אזורי מפה עבור מפה זו.</string>
+    <string name="error_fetching_areas">שגיאה באחזור אזורי מפה</string>
+    <string name="error_fetching_areas_message">אירעה שגיאה במהלך אחזור אזורי מפה.</string>
+    <string name="no_map_areas">אין אזורי מפה</string>
+    <string name="empty_on_demand_message">אין אזורי מפה עבור מפה זו. הקש על הלחצן להלן כדי להתחיל.</string>
+    <string name="offline_disabled">מצב לא מקוון מושבת</string>
+    <string name="offline_disabled_message">המפה אינה מופעלת לשימוש במצב לא-מקוון.</string>
+    <string name="level_of_detail">רמת פירוט</string>
+    <string name="room">חדר</string>
+    <string name="rooms">חדרים</string>
+    <string name="house_property">מאפיין בית</string>
+    <string name="houses">בתים</string>
+    <string name="small_building">בניין קטן</string>
+    <string name="building">מבנה</string>
+    <string name="buildings">מבנים</string>
+    <string name="street">רחוב</string>
+    <string name="streets">רחובות</string>
+    <string name="neighborhood">שכונה</string>
+    <string name="town">עיר</string>
+    <string name="city">עיר</string>
+    <string name="cities">ערים</string>
+    <string name="metropolitan_area">אזור מטרופוליני</string>
+    <string name="county">מחוז</string>
+    <string name="counties">מחוזות</string>
+    <string name="state_province">מדינה/מחוז</string>
+    <string name="states_provinces">מדינות/מחוזות</string>
+    <string name="countries_small">ארצות (קטן)</string>
+    <string name="countries_big">ארצות (גדול)</string>
+    <string name="continent">יבשת</string>
+    <string name="world_small">עולם (קטן)</string>
+    <string name="world_big">עולם (גדול)</string>
+    <string name="world">עולם</string>
+</resources>

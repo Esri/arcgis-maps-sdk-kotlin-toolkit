@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright 2025 Esri
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~  http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing, software
+  ~  distributed under the License is distributed on an "AS IS" BASIS,
+  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  --><resources>
+    <string name="map_areas">Térképterületek</string>
+    <string name="add_map_area">Térképterület hozzáadása</string>
+    <string name="thumbnail_description">Portálelem-bélyegkép</string>
+    <string name="download">Letöltés</string>
+    <string name="open">Megnyitva</string>
+    <string name="error">Hiba</string>
+    <string name="loading">Betöltés</string>
+    <string name="loading_failed">Betöltés sikertelen</string>
+    <string name="ready_to_download">Letöltésre kész</string>
+    <string name="packaging">Csomagolás</string>
+    <string name="packaging_failed">Csomagolás sikertelen</string>
+    <string name="downloaded">Letöltve</string>
+    <string name="downloading">Letöltés</string>
+    <string name="download_failed">A letöltés nem sikerült</string>
+    <string name="currently_open">Jelenleg nyitva</string>
+    <string name="description">Leírás</string>
+    <string name="download_map_area">Térképterület letöltése</string>
+    <string name="remove_download">Letöltés eltávolítása</string>
+    <string name="delete_download">Letöltés törlése</string>
+    <string name="no_image_available">Nem áll rendelkezésre kép</string>
+    <string name="refresh">Frissítés</string>
+    <string name="cancelled">Megszakítva</string>
+    <string name="cancel">Mégse</string>
+    <string name="confirm">OK</string>
+    <string name="rename">Átnevezés</string>
+    <string name="enter_a_name">Név megadása</string>
+    <string name="select_area">Terület kiválasztása</string>
+    <string name="pan_and_zoom_text">Mozgatással és nagyítással/kicsinyítéssel jelölje ki a területet</string>
+    <string name="unique_name_text">A térképterület nevének egyedinek kell lennie</string>
+    <string name="next_on_demand_area_title">Terület %1$s</string>
+    <string name="directory_size">Méret: %1$s</string>
+    <string name="no_internet_connection_error_message">Nincs internetkapcsolat</string>
+    <string name="no_internet_error_message">Nincs internetkapcsolat. Csak letöltött területek megjelenítése.</string>
+    <string name="no_map_areas_error_message">Ehhez a térképhez nem sikerült lekérni a térképterületeket.</string>
+    <string name="no_offline_map_areas_error_message">Ehhez a térképhez nincsenek térképterületek.</string>
+    <string name="error_fetching_areas">Hiba a térképterületek lekérdezése közben</string>
+    <string name="error_fetching_areas_message">Hiba történt a térképterületek lekérése közben.</string>
+    <string name="no_map_areas">Nincsenek térképterületek</string>
+    <string name="empty_on_demand_message">Ehhez a térképhez nincsenek térképterületek. A kezdéshez koppintson az alábbi gombra.</string>
+    <string name="offline_disabled">Kapcsolat nélküli állapot letiltva</string>
+    <string name="offline_disabled_message">A térkép nincs engedélyezve kapcsolat nélküli használatra</string>
+    <string name="level_of_detail">Részletességi szint</string>
+    <string name="room">Szoba</string>
+    <string name="rooms">Szobák</string>
+    <string name="house_property">Háztulajdonság</string>
+    <string name="houses">Házak</string>
+    <string name="small_building">Kis épület</string>
+    <string name="building">Épület</string>
+    <string name="buildings">Épületek</string>
+    <string name="street">Utca</string>
+    <string name="streets">Utcák</string>
+    <string name="neighborhood">Kerület</string>
+    <string name="town">Kisváros</string>
+    <string name="city">Nagyváros</string>
+    <string name="cities">Városok</string>
+    <string name="metropolitan_area">Világváros</string>
+    <string name="county">Megyeigazgatás</string>
+    <string name="counties">Megyék</string>
+    <string name="state_province">Állam/tartomány</string>
+    <string name="states_provinces">Államok/tartományok</string>
+    <string name="countries_small">Országok (kicsi)</string>
+    <string name="countries_big">Országok (nagy)</string>
+    <string name="continent">Földrész</string>
+    <string name="world_small">Világ (kicsi)</string>
+    <string name="world_big">Világ (nagy)</string>
+    <string name="world">Világ</string>
+</resources>

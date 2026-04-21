@@ -73,41 +73,6 @@
     <string name="max_datetime_helper_text">Datum početka mora biti na ili prije datuma %1$s.</string>
 
     <!-- Date Picker string values -->
-    <string name="ff_date_input_headline">Uneseni datum</string>
-    <string name="ff_date_input_headline_description">Uneseni datum: %1$s</string>
-    <string name="ff_date_input_invalid_for_pattern">Datum ne odgovara očekivanom uzorku:: %1$s</string>
-    <string name="ff_date_input_invalid_not_allowed">Datum nije dopušten: %1$s</string>
-    <string name="ff_date_input_invalid_year_range">
-        Datum izvan očekivanog raspona godina %1$s - %2$s
-    </string>
-    <string name="ff_date_input_label">Datum</string>
-    <string name="ff_date_input_no_input_description">Nema</string>
-    <string name="ff_date_input_title">Odaberi datum</string>
-    <string name="ff_date_picker_headline">"Odabran datum"</string>
-    <string name="ff_date_picker_headline_description">Trenutačni odabir: %1$s</string>
-    <string name="ff_date_picker_navigate_to_year_description">Navigiraj na godinu %1$s</string>
-    <string name="ff_date_picker_no_selection_description">Nema</string>
-    <string name="ff_date_picker_scroll_to_earlier_years">Pomakni radi prikaza ranijih godina</string>
-    <string name="ff_date_picker_scroll_to_later_years">Pomakni radi prikaza kasnijih godina</string>
-    <string name="ff_date_picker_switch_to_calendar_mode">Prebaci na način unosa u kalendar</string>
-    <string name="ff_date_picker_switch_to_day_selection">
-        "Prevucite prstom za odabir godine ili dodirnite za povratak na odabir dana"
-    </string>
-    <string name="ff_date_picker_switch_to_input_mode">Prebaci na način unosa teksta</string>
-    <string name="ff_date_picker_switch_to_next_month">"Promijeni na sljedeći mjesec"</string>
-    <string name="ff_date_picker_switch_to_previous_month">"Promijeni na prethodni mjesec"</string>
-    <string name="ff_date_picker_switch_to_year_selection">"Prebaci na odabir godine"</string>
-    <string name="ff_date_picker_title">"Odaberi datum"</string>
-    <string name="ff_date_picker_today_description">Danas</string>
-    <string name="ff_date_picker_year_picker_pane_title">Odabirač godine vidljiv</string>
-    <string name="ff_date_range_input_invalid_range_input">Neispravni unos raspona datuma</string>
-    <string name="ff_date_range_input_title">Unesite datume</string>
-    <string name="ff_date_range_picker_day_in_range">U rasponu</string>
-    <string name="ff_date_range_picker_end_headline">Datum kraja</string>
-    <string name="ff_date_range_picker_scroll_to_next_month">Pomaknite se za prikaz sljedećeg mjeseca</string>
-    <string name="ff_date_range_picker_scroll_to_previous_month">Pomaknite se za prikaz prethodnog mjeseca</string>
-    <string name="ff_date_range_picker_start_headline">Datum početka</string>
-    <string name="ff_date_range_picker_title">Odaberi datume</string>
 
     <!-- Time Picker string values -->
     <string name="ff_time_picker_am">Ujutro</string>
@@ -145,4 +110,56 @@
     <string name="tap_to_scan">Dodirni i skeniraj</string>
     <string name="unable_to_open_the_camera">Nije moguće otvoriti kameru</string>
     <string name="value_must_be_a_guid">Vrijednost mora biti ispravni GUID</string>
+    <string name="delete_attachment_title">Želite li izbrisati privitak?</string>
+    <string name="delete_attachment_confirmation">Jeste li sigurni da želite izbrisati ovaj privitak?</string>
+    <string name="download_failed">Nije moguće preuzeti ovu datoteku.</string>
+    <string name="file_size_exceeds_limit">Veličina datoteke premašuje ograničenje</string>
+    <string name="unsupported_file_type">Nepodržana vrsta datoteke</string>
+    <string name="save">Spremi</string>
+    <string name="discard">Odbaci</string>
+    <string name="none_selected">Ništa nije odabrano</string>
+    <string name="the_form_has_validation_errors">Obrazac ima pogreške prilikom provjere valjanosti</string>
+    <string name="the_form_has_edits">Obrazac sadrži izmjene</string>
+    <string name="do_you_want_to_save_your_changes">Želite li spremiti promjene?</string>
+    <string name="no_associations_found">Nema udruženja za prikaz</string>
+    <string name="terminal">Terminal</string>
+    <string name="terminal_with_value">Terminal : %1$s</string>
+    <string name="content_visible">Sadržaj je vidljiv</string>
+    <string name="percent_along">Postotak dužine</string>
+    <string name="from_element">Iz elementa</string>
+    <string name="to_element">U element</string>
+    <string name="association_type">Vrsta udruženja</string>
+    <string name="remove_association">Ukloni udruženje</string>
+    <string name="remove_association_tooltip">Uklanja samo udruženje. Geoobjekt ostaje.</string>
+    <string name="remove">Ukloni</string>
+    <string name="association_settings">Postavke udruženja</string>
+    <string name="percent_along_edge">%1$d %%</string>
+    <string name="visible_content">Vidljivi sadržaj</string>
+    <string name="content">Sadržaj</string>
+    <string name="containment_visible_value">Vidljivo: %1$s</string>
+    <string name="from_network_data_source">Iz mrežnog izvora podataka</string>
+    <string name="on_map">Na karti</string>
+    <string name="network_data_source">Mrežni izvor podataka</string>
+    <string name="available_asset_types">Dostupne vrste sredstava</string>
+    <string name="count">Broj %1$d</string>
+    <string name="new_association">Novo povezivanje</string>
+    <string name="add">Dodaj</string>
+    <string name="failed_to_create_association">Kreiranje udruženja nije uspjelo. %1$s</string>
+    <string name="available_features">%1$d Dostupni geoobjekti</string>
+    <string name="loading2">Učitavanje...</string>
+    <plurals name="you_have_errors_that_must_be_fixed_before_saving">
+        <item quantity="zero">Imate %1$d pogreške koje morate ispraviti prije spremanja.</item>
+        <item quantity="one">Imate %1$d pogrešku koju morate ispraviti prije spremanja.</item>
+        <item quantity="two">Imate %1$d pogreške koje morate ispraviti prije spremanja</item>
+        <item quantity="few">Imate %1$d pogreške koje morate ispraviti prije spremanja</item>
+        <item quantity="many">Imate %1$d pogreške koje morate ispraviti prije spremanja</item>
+        <item quantity="other">Imate %1$d pogreške koje morate ispraviti prije spremanja</item>
+    </plurals>
+    <string name="search_features">Pretraži geoobjekte</string>
+    <string name="choose_to_add">Odaberite za dodavanje</string>
+    <string name="no_features_found">Geoobjekti nisu pronađeni</string>
+    <string name="refine_your_search_tip">Precizirajte pretragu ili odaberite drugi mrežni izvor.</string>
+    <string name="select_terminal">Odaberi terminal</string>
+    <string name="show_on_map">Prikaži na karti</string>
+    <string name="more_information">Više informacija</string>
 </resources>

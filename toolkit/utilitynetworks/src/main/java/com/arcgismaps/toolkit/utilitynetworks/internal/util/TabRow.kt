@@ -16,6 +16,7 @@
 package com.arcgismaps.toolkit.utilitynetworks.internal.util
 
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -35,7 +36,7 @@ internal fun TabRow(
         stringResource(R.string.new_trace) to TraceNavRoute.TraceOptions,
         stringResource(R.string.results) to TraceNavRoute.TraceResults
     )
-    TabRow(
+    SecondaryTabRow(
         selectedTabIndex = selectedIndex,
         modifier = Modifier.padding(bottom = 16.dp)
     ) {

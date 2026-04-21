@@ -73,41 +73,6 @@
     <string name="max_datetime_helper_text">La data deve corrispondere o essere antecedente a %1$s</string>
 
     <!-- Date Picker string values -->
-    <string name="ff_date_input_headline">Data inserita</string>
-    <string name="ff_date_input_headline_description">Data inserita: %1$s</string>
-    <string name="ff_date_input_invalid_for_pattern">La data non corrisponde al modello previsto: %1$s</string>
-    <string name="ff_date_input_invalid_not_allowed">Data non consentita: %1$s</string>
-    <string name="ff_date_input_invalid_year_range">
-        Data esterna all\'intervallo dell\'anno previsto %1$s - %2$s
-    </string>
-    <string name="ff_date_input_label">Data</string>
-    <string name="ff_date_input_no_input_description">Nessuno</string>
-    <string name="ff_date_input_title">Selezionare data</string>
-    <string name="ff_date_picker_headline">"Data selezionata"</string>
-    <string name="ff_date_picker_headline_description">Selezione corrente: %1$s</string>
-    <string name="ff_date_picker_navigate_to_year_description">Sposta all\'anno %1$s</string>
-    <string name="ff_date_picker_no_selection_description">Nessuno</string>
-    <string name="ff_date_picker_scroll_to_earlier_years">Scorrere per mostrare gli anni precedenti</string>
-    <string name="ff_date_picker_scroll_to_later_years">Scorrere per mostrare gli anni successivi</string>
-    <string name="ff_date_picker_switch_to_calendar_mode">Passa alla modalità di input calendario</string>
-    <string name="ff_date_picker_switch_to_day_selection">
-        "Trascinare per selezionare un anno, oppure premere per tornare alla selezione del giorno"
-    </string>
-    <string name="ff_date_picker_switch_to_input_mode">Passa alla modalità di input testo</string>
-    <string name="ff_date_picker_switch_to_next_month">"Cambia al mese successivo"</string>
-    <string name="ff_date_picker_switch_to_previous_month">"Cambia al mese precedente"</string>
-    <string name="ff_date_picker_switch_to_year_selection">"Passa alla selezione dell\'anno"</string>
-    <string name="ff_date_picker_title">"Seleziona data"</string>
-    <string name="ff_date_picker_today_description">Oggi</string>
-    <string name="ff_date_picker_year_picker_pane_title">Selettore anno visibile</string>
-    <string name="ff_date_range_input_invalid_range_input">Input di intervallo di date non valido</string>
-    <string name="ff_date_range_input_title">Inserire le date</string>
-    <string name="ff_date_range_picker_day_in_range">Nell\'intervallo</string>
-    <string name="ff_date_range_picker_end_headline">Data di fine</string>
-    <string name="ff_date_range_picker_scroll_to_next_month">Scorrere per mostrare il mese successivo</string>
-    <string name="ff_date_range_picker_scroll_to_previous_month">Scorrere per mostrare il mese precedente</string>
-    <string name="ff_date_range_picker_start_headline">Data di inizio</string>
-    <string name="ff_date_range_picker_title">Selezionare le date</string>
 
     <!-- Time Picker string values -->
     <string name="ff_time_picker_am">AM</string>
@@ -145,4 +110,56 @@
     <string name="tap_to_scan">Tocca per scansionare</string>
     <string name="unable_to_open_the_camera">Impossibile aprire la fotocamera</string>
     <string name="value_must_be_a_guid">Il valore deve essere un GUID valido</string>
+    <string name="delete_attachment_title">Eliminare l\'allegato?</string>
+    <string name="delete_attachment_confirmation">Eliminare questo allegato?</string>
+    <string name="download_failed">Impossibile scaricare questo file.</string>
+    <string name="file_size_exceeds_limit">Le dimensioni del file superano il limite</string>
+    <string name="unsupported_file_type">Tipo di file non supportato</string>
+    <string name="save">Salva</string>
+    <string name="discard">Conferma</string>
+    <string name="none_selected">Nessuno selezionato</string>
+    <string name="the_form_has_validation_errors">Il modulo ha errori di validazione</string>
+    <string name="the_form_has_edits">Il modulo ha modifiche</string>
+    <string name="do_you_want_to_save_your_changes">Salvare le modifiche?</string>
+    <string name="no_associations_found">Nessuna associazione da mostrare</string>
+    <string name="terminal">Terminale</string>
+    <string name="terminal_with_value">Terminale: %1$s</string>
+    <string name="content_visible">Contenuto visibile</string>
+    <string name="percent_along">Percentuale lungo</string>
+    <string name="from_element">Da elemento</string>
+    <string name="to_element">A elemento</string>
+    <string name="association_type">Tipo di associazione</string>
+    <string name="remove_association">Rimuovi associazione</string>
+    <string name="remove_association_tooltip">Rimuove solo l\'associazione. La feature rimane.</string>
+    <string name="remove">Rimuovi</string>
+    <string name="association_settings">Impostazioni associazione</string>
+    <string name="percent_along_edge">%1$d %%</string>
+    <string name="visible_content">Contenuto visibile</string>
+    <string name="content">Contenuto</string>
+    <string name="containment_visible_value">Visibile: %1$s</string>
+    <string name="from_network_data_source">Da origine dati rete</string>
+    <string name="on_map">Sulla mappa</string>
+    <string name="network_data_source">Origine dati rete</string>
+    <string name="available_asset_types">Tipi di risorsa disponibili</string>
+    <string name="count">Conteggio %1$d</string>
+    <string name="new_association">Nuova associazione</string>
+    <string name="add">Aggiungi</string>
+    <string name="failed_to_create_association">Impossibile creare l\'associazione. %1$s</string>
+    <string name="available_features">Feature disponibili %1$d</string>
+    <string name="loading2">Caricamento in corso...</string>
+    <plurals name="you_have_errors_that_must_be_fixed_before_saving">
+        <item quantity="zero">Si sono verificati %1$d errori che devono essere risolti prima di salvare.</item>
+        <item quantity="one">Si è verificato %1$d errore che deve essere risolto prima di salvare.</item>
+        <item quantity="two">Si sono verificati %1$d errori che devono essere risolti prima di salvare</item>
+        <item quantity="few">Si sono verificati %1$d errori che devono essere risolti prima di salvare</item>
+        <item quantity="many">Si sono verificati %1$d errori che devono essere risolti prima di salvare</item>
+        <item quantity="other">Si sono verificati %1$d errori che devono essere risolti prima di salvare</item>
+    </plurals>
+    <string name="search_features">Cerca feature</string>
+    <string name="choose_to_add">Scegliere di aggiungere</string>
+    <string name="no_features_found">Nessuna feature trovata</string>
+    <string name="refine_your_search_tip">Affina la ricerca o scegli un\'origine di rete diversa.</string>
+    <string name="select_terminal">Seleziona terminale</string>
+    <string name="show_on_map">Mostra sulla mappa</string>
+    <string name="more_information">Ulteriori informazioni</string>
 </resources>

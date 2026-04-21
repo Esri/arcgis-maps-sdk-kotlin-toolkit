@@ -24,4 +24,24 @@
     <string name="other">Muu</string>
     <string name="close">Takaisin</string>
     <string name="attachment_thumbnail">liitteen pikkukuva</string>
+    <string name="terminal">Pääte</string>
+    <string name="no_associations_found">Liitoksia ei löytynyt</string>
+    <string name="visible_content">Näkyvä sisältö</string>
+    <string name="content">Sisältö</string>
+    <string name="containment_visible">Sisältyvyys näkyvillä</string>
+    <string name="fraction_along_edge">Osuus reunaa pitkin</string>
+    <string name="percent_along_edge">%1$d %%</string>
+    <string name="from_element">Elementistä</string>
+    <string name="to_element">Elementtiin</string>
+    <string name="association_type">Liitoksen tyyppi</string>
+    <string name="remove_association">Poista liitos</string>
+    <string name="remove_association_tooltip">Poistaa vain liitoksen. Kohde pysyy.</string>
+    <string name="remove">Poista</string>
+    <string name="cancel">Peruuta</string>
+    <string name="none_selected">Ei mitään valittuna</string>
+    <string name="association_settings">Liitosasetukset</string>
+    <string name="show_all">Näytä kaikki</string>
+    <string name="filter_by_feature_title">Suodata kohteen otsikon mukaan</string>
+    <string name="containment_visible_value">Näkyvä: %1$s</string>
+    <string name="associations">Liitokset</string>
 </resources>

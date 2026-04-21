@@ -17,6 +17,7 @@
 
 package com.arcgismaps.toolkit.geoviewcompose
 
+import android.graphics.RectF
 import android.util.DisplayMetrics
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.AnimationVector2D
@@ -24,12 +25,15 @@ import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.TwoWayConverter
 import androidx.compose.animation.core.animateValueAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.focusGroup
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.State
@@ -40,6 +44,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
@@ -48,12 +53,13 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.SubcomposeLayout
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.data.Feature
 import com.arcgismaps.geometry.AngularUnit
@@ -76,12 +82,14 @@ import com.arcgismaps.mapping.view.DrawStatus
 import com.arcgismaps.mapping.view.GeoView
 import com.arcgismaps.mapping.view.Graphic
 import com.arcgismaps.mapping.view.GraphicsRenderingMode
+import com.arcgismaps.mapping.view.LocalSceneView
 import com.arcgismaps.mapping.view.MapView
 import com.arcgismaps.mapping.view.SceneLocationVisibility
 import com.arcgismaps.mapping.view.SceneView
 import com.arcgismaps.mapping.view.ScreenCoordinate
 import com.arcgismaps.mapping.view.zero
 import com.arcgismaps.realtime.DynamicEntity
+import com.arcgismaps.toolkit.geoviewcompose.internal.GeoViewA11yCoordinator
 import com.arcgismaps.toolkit.geoviewcompose.theme.CalloutColors
 import com.arcgismaps.toolkit.geoviewcompose.theme.CalloutDefaults
 import com.arcgismaps.toolkit.geoviewcompose.theme.CalloutShapes
@@ -92,11 +100,18 @@ import kotlin.math.roundToInt
 import kotlin.math.sin
 
 /**
- * The receiver class of the MapView/SceneView content lambda.
+ * The receiver class of the MapView/SceneView/LocalSceneView content lambda.
  *
  * @since 200.5.0
  */
-public sealed class GeoViewScope protected constructor(private val geoView: GeoView) {
+public sealed class GeoViewScope protected constructor(private val geoView: GeoView, canFocus: Boolean) {
+
+    /**
+     * Coordinator for managing mutually exclusive accessibility focus from GeoView and its trailing lambda content.
+     * Initialized with null for backwards compatibility with the top level constructor.
+     * @since 300.0.0
+     */
+    internal val a11yCoordinator: GeoViewA11yCoordinator = GeoViewA11yCoordinator(geoView, canFocus)
 
     /**
      * Displays a Callout at the specified geographical location on the GeoView. The Callout is a composable
@@ -118,6 +133,10 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
      * @param shapes the styling options for the Callout's container shape
      * @since 200.5.0
      */
+    @Deprecated(
+        message = "Use the Callout function with `leaderPosition` instead. This deprecated function remains to maintain binary compatibility",
+        level = DeprecationLevel.HIDDEN,
+    )
     @Composable
     public fun Callout(
         location: Point,
@@ -128,8 +147,96 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
         shapes: CalloutShapes = CalloutDefaults.shapes(),
         content: @Composable BoxScope.() -> Unit
     ) {
+        Callout(
+            location = location,
+            modifier = modifier,
+            offset = offset,
+            leaderPosition = LeaderPosition.LowerMiddle,
+            rotateOffsetWithGeoView = rotateOffsetWithGeoView,
+            colorScheme = colorScheme,
+            shapes = shapes,
+            content = content
+        )
+    }
+
+    /**
+     * Creates a Callout at the specified [geoElement] or the [tapLocation] location on the MapView. The Callout is a composable
+     * that can be used to display additional information about a location on the map. The additional information is
+     * passed as a [content] composable that contains text and/or other content. It has a leader that points to
+     * the location that Callout refers to. The body of the Callout is a rectangular area with curved corners
+     * that contains the [content] lambda provided by the application. A thin border line is drawn around the entire Callout.
+     *
+     * If the given geoelement is a DynamicEntity then the Callout automatically updates its location everytime the
+     * DynamicEntity changes. The content of the Callout however will not be automatically updated.
+     *
+     * Note: Only one Callout can be displayed at a time on the MapView.
+     *
+     * @param geoElement the GeoElement for which to display the Callout
+     * @param modifier Modifier to be applied to the composable Callout
+     * @param tapLocation a Point the user has tapped, or null if the Callout is not associated with a tap
+     * @param colorScheme the styling options for the Callout's shape and color properties
+     * @param shapes the styling options for the Callout's container shape
+     * @param content the content of the Callout
+     * @since 200.5.0
+     */
+    @Deprecated(
+        message = "Use the Callout function with `leaderPosition` instead. This deprecated function remains to maintain binary compatibility",
+        level = DeprecationLevel.HIDDEN,
+    )
+    @Composable
+    public fun Callout(
+        geoElement: GeoElement,
+        modifier: Modifier = Modifier,
+        tapLocation: Point? = null,
+        colorScheme: CalloutColors = CalloutDefaults.colors(),
+        shapes: CalloutShapes = CalloutDefaults.shapes(),
+        content: @Composable BoxScope.() -> Unit
+    ) {
+        Callout(
+            geoElement = geoElement,
+            modifier = modifier,
+            tapLocation = tapLocation,
+            leaderPosition = LeaderPosition.LowerMiddle,
+            colorScheme = colorScheme,
+            shapes = shapes,
+            content = content
+        )
+    }
+
+    /**
+     * Displays a Callout at the specified geographical location on the GeoView. The Callout is a composable
+     * that can be used to display additional information about a location on the map. The additional information is
+     * passed as a content composable that contains text and/or other content. It has a leader that points to
+     * the location that Callout refers to. The body of the Callout is a rectangular area with curved corners
+     * that contains the content lambda provided by the application. A thin border line is drawn around the entire Callout.
+     *
+     * Note: Only one Callout can be displayed at a time on the GeoView.
+     *
+     * @param location the geographical location at which to display the Callout
+     * @param modifier Modifier to be applied to the composable Callout
+     * @param content the content of the Callout
+     * @param offset the offset in screen coordinates from the geographical location at which to place the callout
+     * @param leaderPosition the current position of the leader relative to the body of the Callout
+     * @param rotateOffsetWithGeoView specifies whether the screen offset is rotated with the [GeoView]. The Screen offset
+     *        will be rotated with the [GeoView] when true, false otherwise.
+     *        This is useful if you are showing the callout for elements with symbology that does rotate with the [GeoView]
+     * @param colorScheme the styling options for the Callout's color properties
+     * @param shapes the styling options for the Callout's container shape
+     * @since 300.0.0
+     */
+    @Composable
+    public fun Callout(
+        location: Point,
+        modifier: Modifier = Modifier,
+        offset: Offset = Offset.Zero,
+        leaderPosition: LeaderPosition = LeaderPosition.LowerMiddle,
+        rotateOffsetWithGeoView: Boolean = false,
+        colorScheme: CalloutColors = CalloutDefaults.colors(),
+        shapes: CalloutShapes = CalloutDefaults.shapes(),
+        content: @Composable BoxScope.() -> Unit
+    ) {
         if (this.isCalloutBeingDisplayed.compareAndSet(false, true)) {
-            this.CalloutInternal(location, modifier, offset, rotateOffsetWithGeoView, colorScheme, shapes, content)
+            this.CalloutInternal(location, modifier, offset, rotateOffsetWithGeoView, leaderPosition, colorScheme, shapes, content)
 
             SideEffect {
                 // The SideEffect is executed after every successful (re)composition. This means that it runs at the
@@ -156,22 +263,24 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
      * @param geoElement the GeoElement for which to display the Callout
      * @param modifier Modifier to be applied to the composable Callout
      * @param tapLocation a Point the user has tapped, or null if the Callout is not associated with a tap
+     * @param leaderPosition the current position of the leader relative to the body of the Callout
      * @param colorScheme the styling options for the Callout's shape and color properties
      * @param shapes the styling options for the Callout's container shape
      * @param content the content of the Callout
-     * @since 200.5.0
+     * @since 300.0.0
      */
     @Composable
     public fun Callout(
         geoElement: GeoElement,
         modifier: Modifier = Modifier,
         tapLocation: Point? = null,
+        leaderPosition: LeaderPosition = LeaderPosition.LowerMiddle,
         colorScheme: CalloutColors = CalloutDefaults.colors(),
         shapes: CalloutShapes = CalloutDefaults.shapes(),
         content: @Composable BoxScope.() -> Unit
     ) {
         if (this.isCalloutBeingDisplayed.compareAndSet(false, true)) {
-            this.CalloutInternal(geoElement, modifier, tapLocation, colorScheme, shapes, content)
+            this.CalloutInternal(geoElement, modifier, tapLocation, leaderPosition, colorScheme, shapes, content)
 
             SideEffect {
                 // The SideEffect is executed after every successful (re)composition. This means that it runs at the
@@ -218,6 +327,7 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
         geoElement: GeoElement,
         modifier: Modifier = Modifier,
         tapLocation: Point? = null,
+        leaderPosition: LeaderPosition,
         colorScheme: CalloutColors,
         shapes: CalloutShapes,
         content: @Composable BoxScope.() -> Unit
@@ -241,6 +351,7 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
                 modifier,
                 it.offset,
                 it.rotateOffsetWithGeoView,
+                leaderPosition,
                 colorScheme,
                 shapes,
                 content
@@ -259,10 +370,15 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
         modifier: Modifier,
         offset: Offset,
         rotateOffsetWithGeoView: Boolean,
+        leaderPosition: LeaderPosition,
         colorScheme: CalloutColors,
         shapes: CalloutShapes,
         content: (@Composable BoxScope.() -> Unit)
     ) {
+        // Remember the actual leader position, for non-Automatic is the requested leaderPosition
+        var actualLeaderPosition by remember(leaderPosition) {
+            mutableStateOf(if (leaderPosition == LeaderPosition.Automatic) LeaderPosition.LowerMiddle else leaderPosition)
+        }
 
         // Convert the given location to a screen coordinate
         var leaderScreenCoordinate: ScreenCoordinate? by remember {
@@ -285,10 +401,10 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
             }
         }
 
-        leaderScreenCoordinate?.let {
+        leaderScreenCoordinate?.let { leaderScreenCoordinate ->
             val animateToPoint by animateValueAsState(
                 typeConverter = screenCoordinateToVector,
-                targetValue = it,
+                targetValue = leaderScreenCoordinate,
                 label = "AnimateScreenCoordinate",
                 animationSpec = tween(
                     easing = FastOutSlowInEasing,
@@ -298,10 +414,14 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
 
             CalloutSubComposeLayout(
                 leaderScreenCoordinate = animateToPoint,
+                geoView = geoView,
+                leaderPosition = leaderPosition,
+                actualLeaderPosition = actualLeaderPosition,
+                onActualLeaderPositionChanged = { actualLeaderPosition = it },
                 maxSize = calloutContentMaxSize(
                     geoView = geoView,
                     density = LocalDensity.current,
-                    displayMetrics = LocalContext.current.resources.displayMetrics
+                    displayMetrics = LocalResources.current.displayMetrics
                 )) {
                 with(LocalDensity.current) {
                     Box(
@@ -312,17 +432,74 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
                                 strokeColor = colorScheme.borderColor,
                                 backgroundColor = colorScheme.backgroundColor,
                                 calloutContentPadding = shapes.calloutContentPadding,
+                                actualLeaderPosition = actualLeaderPosition,
                                 leaderWidth = shapes.leaderSize.width.toPx(),
                                 leaderHeight = shapes.leaderSize.height.toPx(),
                                 minSize = shapes.minSize
                             )
                             .animateContentSize()
-                            .semantics { contentDescription = "CalloutContainerLayout" },
+                            .optionalA11yFocusable(a11yCoordinator)
+                            .semantics {
+                                testTag = "CalloutContainerLayout"
+                            }
                     ) {
                         content.invoke(this)
+                        DisposableEffect(Unit) {
+                            a11yCoordinator.onContentComposed()
+                            onDispose {
+                                a11yCoordinator.onContentDisposed()
+                            }
+                        }
                     }
                 }
             }
+        }
+    }
+
+    /**
+     * Marks a composable inside the GeoView trailing lambda content as the preferred initial focus
+     * target when toolkit accessibility focus handoff moves focus from the GeoView into the
+     * content. This is useful for content such as a Callout where initial focus should land on the
+     * first meaningful child rather than the underlying GeoView.
+     *
+     * If no preferred content focus target is provided, focus falls back to the Callout container.
+     * This modifier only has an effect when the GeoView composable's `canFocus` parameter is true.
+     *
+     * Example:
+     * ```kotlin
+     * MapView(arcGISMap = map){
+     *     Callout(location = point) {
+     *         Text(
+     *             modifier = Modifier.preferredContentFocusTarget(),
+     *             text = "Location: ${point.x}, ${point.y}"
+     *         )
+     *     }
+     * }
+     * ```
+     *
+     * @since 300.0.0
+     */
+    public fun Modifier.preferredContentFocusTarget(): Modifier {
+        return if (a11yCoordinator.canFocus) {
+            this
+                .focusRequester(a11yCoordinator.preferredTargetFocusRequester)
+                .focusable()
+        } else {
+            this
+        }
+    }
+    /**
+     * Optional accessibility focus modifier configurations applied to the Callout container
+     * using the [a11yCoordinator].
+     */
+    private fun Modifier.optionalA11yFocusable(coordinator: GeoViewA11yCoordinator): Modifier {
+        return if (coordinator.canFocus) {
+            this
+                .focusRequester(coordinator.contentFocusRequester)
+                .focusable()
+                .focusGroup()
+        } else {
+            this
         }
     }
 
@@ -343,12 +520,21 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
         offset: Offset,
         rotateOffsetWithGeoView: Boolean
     ): ScreenCoordinate? {
+        if (location.isEmpty) {
+            return null
+        }
+
         val geoViewRotation = geoView.rotation()
         val locationToScreen = when (geoView) {
             is MapView -> geoView.locationToScreen(location).takeIf {
                 !it.x.isNaN() && !it.y.isNaN()
             }
+
             is SceneView -> geoView.locationToScreen(location)?.takeIf {
+                it.visibility == SceneLocationVisibility.Visible
+            }?.screenPoint
+
+            is LocalSceneView -> geoView.locationToScreen(location)?.takeIf {
                 it.visibility == SceneLocationVisibility.Visible
             }?.screenPoint
         }
@@ -370,6 +556,10 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
      * location before drawing the Callout on the screen.
      *
      * @param leaderScreenCoordinate Represents the x,y coordinate for the location on GeoView
+     * @param geoView The instance of the current GeoView for measuring inset bounds
+     * @param leaderPosition the user provided current position of the leader relative to the body of the Callout
+     * @param actualLeaderPosition the true position of the leader relative to the body of the Callout
+     * @param onActualLeaderPositionChanged Lambda function to provide position updates for the actual leader position when user provides an [LeaderPosition.Automatic].
      * @param maxSize The calculated maximum size of the callout container
      * @since 200.5.0
      */
@@ -377,7 +567,11 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
     private fun CalloutSubComposeLayout(
         modifier: Modifier = Modifier,
         leaderScreenCoordinate: ScreenCoordinate,
+        geoView: GeoView,
         maxSize: DpSize,
+        leaderPosition: LeaderPosition,
+        actualLeaderPosition: LeaderPosition,
+        onActualLeaderPositionChanged: (LeaderPosition) -> Unit,
         calloutContainer: @Composable () -> Unit
     ) {
         val maxWidthInPx = with(LocalDensity.current) {
@@ -401,17 +595,102 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
                     maxHeight = layoutHeight
                 )
             )
-            // The default (0,0) value is on the top-left edge of the callout container.
-            // This moves the anchor to the bottom-middle point using X,Y offsets,
-            // and ensures that the leader's anchor point always represents the tapped location,
-            // in this case the bottom-middle leader position.
-            val calloutOffsetX =
-                leaderScreenCoordinate.x.toInt() - (calloutContainerPlaceable.width / 2)
-            val calloutOffsetY =
-                leaderScreenCoordinate.y.toInt() - calloutContainerPlaceable.height
+
+            // If Automatic, adjust measured bounds
+            if (leaderPosition == LeaderPosition.Automatic) {
+                val bounds = boundsRelativeToAnchor(calloutContainerPlaceable.width, calloutContainerPlaceable.height, actualLeaderPosition)
+                val viewInsetRight = if (geoView is MapView) { with(density) { geoView.viewInsetRight.dp.toPx() }.toInt() } else 0
+                val viewInsetLeft = if (geoView is MapView) { with(density) { geoView.viewInsetLeft.dp.toPx() }.toInt() } else 0
+                val viewInsetTop = if (geoView is MapView) { with(density) { geoView.viewInsetTop.dp.toPx() }.toInt() } else 0
+                val viewInsetBottom = if (geoView is MapView) { with(density) { geoView.viewInsetBottom.dp.toPx() }.toInt() } else 0
+                val insetsX = if (geoView is MapView && geoView.isViewInsetsValid) {viewInsetLeft + viewInsetRight} else 0
+                val insetsY = if (geoView is MapView && geoView.isViewInsetsValid) {viewInsetTop + viewInsetBottom} else 0
+                val geoViewSize = IntSize(geoView.width, geoView.height)
+                val anchor = DoubleXY(leaderScreenCoordinate.x, leaderScreenCoordinate.y)
+
+                val direction = when {
+                    // If Right overflow:
+                    anchor.x + bounds.right > geoViewSize.width - (if (insetsX > 0) viewInsetRight else 0) -> LeaderMoveDirection.Right
+                    // If Left overflow:
+                    anchor.x + bounds.left < if (insetsX > 0) viewInsetLeft else 0 -> LeaderMoveDirection.Left
+                    // If Bottom overflow:
+                    anchor.y + bounds.bottom > geoViewSize.height - (if (insetsY > 0) viewInsetBottom else 0) -> LeaderMoveDirection.Down
+                    // If Top overflow:
+                    anchor.y + bounds.top < if (insetsY > 0) viewInsetTop else 0 -> LeaderMoveDirection.Up
+                    else -> null
+                }
+
+                direction?.let {
+                    // Nudge the leader according to the computed direction
+                    moveLeader(it, actualLeaderPosition, geoViewSize, bounds, anchor)?.let { newPosition ->
+                        onActualLeaderPositionChanged(newPosition)
+                    }
+                }
+            }
+
+            // Compute the calloutContainerPlaceable coords such that the leader tip coincides with leaderScreenCoordinate:
+            val (xCoords, yCoords) = when (actualLeaderPosition) {
+                LeaderPosition.LowerMiddle -> {
+                    Pair(
+                        leaderScreenCoordinate.x.toInt() - (calloutContainerPlaceable.width / 2),
+                        leaderScreenCoordinate.y.toInt() - calloutContainerPlaceable.height
+                    )
+                }
+
+                LeaderPosition.UpperMiddle -> {
+                    Pair(
+                        leaderScreenCoordinate.x.toInt() - (calloutContainerPlaceable.width / 2),
+                        leaderScreenCoordinate.y.toInt()
+                    )
+                }
+
+                LeaderPosition.RightMiddle -> {
+                    Pair(
+                        leaderScreenCoordinate.x.toInt() - calloutContainerPlaceable.width,
+                        leaderScreenCoordinate.y.toInt() - (calloutContainerPlaceable.height / 2)
+                    )
+                }
+
+                LeaderPosition.LeftMiddle -> {
+                    Pair(
+                        leaderScreenCoordinate.x.toInt(),
+                        leaderScreenCoordinate.y.toInt() - (calloutContainerPlaceable.height / 2)
+                    )
+                }
+
+                LeaderPosition.UpperLeftCorner -> {
+                    Pair(
+                        leaderScreenCoordinate.x.toInt(),
+                        leaderScreenCoordinate.y.toInt()
+                    )
+                }
+
+                LeaderPosition.UpperRightCorner -> {
+                    Pair(
+                        leaderScreenCoordinate.x.toInt() - calloutContainerPlaceable.width,
+                        leaderScreenCoordinate.y.toInt()
+                    )
+                }
+
+                LeaderPosition.LowerLeftCorner -> {
+                    Pair(
+                        leaderScreenCoordinate.x.toInt(),
+                        leaderScreenCoordinate.y.toInt() - calloutContainerPlaceable.height
+                    )
+                }
+
+                LeaderPosition.LowerRightCorner -> {
+                    Pair(
+                        leaderScreenCoordinate.x.toInt() - calloutContainerPlaceable.width,
+                        leaderScreenCoordinate.y.toInt() - calloutContainerPlaceable.height
+                    )
+                }
+
+                LeaderPosition.Automatic -> error("Actual leader position must never be Automatic")
+            }
             // place the callout in the layout
             layout(layoutWidth, layoutHeight) {
-                calloutContainerPlaceable.place(calloutOffsetX, calloutOffsetY)
+                calloutContainerPlaceable.place(xCoords, yCoords)
             }
         }
     }
@@ -567,7 +846,9 @@ internal class LeaderPointOffset internal constructor(
 }
 
 private fun GeoView.rotation(): Double = when (this) {
-    is SceneView -> getCurrentViewpoint(ViewpointType.CenterAndScale)?.rotation ?: 0.0
+    is SceneView, is LocalSceneView -> getCurrentViewpoint(ViewpointType.CenterAndScale)?.rotation
+        ?: 0.0
+
     is MapView -> mapRotation.value
 }
 
@@ -708,6 +989,7 @@ private fun calloutContentMaxSize(
  * @param strokeColor Color used to define the outline stroke.
  * @param backgroundColor Color used to define the fill color of the Callout shape.
  * @param calloutContentPadding PaddingValues for the content placed inside the Callout.
+ * @param actualLeaderPosition the current position of the leader relative to the body of the Callout
  * @param leaderWidth Width of the Callout leader in px.
  * @param leaderHeight Height of the Callout leader in px.
  * @param minSize Minimum size the of the Callout shape.
@@ -720,17 +1002,32 @@ private fun Modifier.drawCalloutContainer(
     strokeColor: Color,
     backgroundColor: Color,
     calloutContentPadding: PaddingValues,
+    actualLeaderPosition: LeaderPosition,
     leaderWidth: Float,
     leaderHeight: Float,
     minSize: DpSize
 ) = this
     .sizeIn(minWidth = minSize.width, minHeight = minSize.height)
-    // Set bottom padding to ensure the leader is visible
-    .padding(bottom = with(LocalDensity.current) { leaderHeight.toDp() })
+    // Set padding to ensure the leader is visible
+    .padding(with(LocalDensity.current) {
+        val half = (leaderHeight / 2f).toDp()
+        val full = leaderHeight.toDp()
+        when (actualLeaderPosition) {
+            LeaderPosition.LowerMiddle -> PaddingValues(bottom = full)
+            LeaderPosition.UpperMiddle -> PaddingValues(top = full)
+            LeaderPosition.LeftMiddle -> PaddingValues(start = full)
+            LeaderPosition.RightMiddle -> PaddingValues(end = full)
+            LeaderPosition.UpperLeftCorner -> PaddingValues(top = half, start = half)
+            LeaderPosition.UpperRightCorner -> PaddingValues(top = half, end = half)
+            LeaderPosition.LowerLeftCorner -> PaddingValues(bottom = half, start = half)
+            LeaderPosition.LowerRightCorner -> PaddingValues(bottom = half, end = half)
+            LeaderPosition.Automatic -> PaddingValues(bottom = full) // Use a safe default
+        }
+    })
     .drawWithCache {
         onDrawBehind {
             // Define the Path of the callout
-            val path = calloutPath(size, cornerRadius, leaderWidth, leaderHeight)
+            val path = calloutPath(size, cornerRadius, actualLeaderPosition, leaderWidth, leaderHeight)
             // Fill the path's shape with the Callout's background color
             drawPath(
                 path = path,
@@ -759,107 +1056,399 @@ private fun Modifier.drawCalloutContainer(
 private fun calloutPath(
     size: Size,
     cornerRadius: Float,
+    leaderPosition: LeaderPosition,
     leaderWidth: Float,
     leaderHeight: Float
 ): Path {
     return Path().apply {
         reset()
-        // Create a default rectangle using the given size
+        // Rectangle inside the padding area
         val rect = Rect(left = 0f, top = 0f, right = size.width, bottom = size.height)
-        // Move to the top-left corner of the shape
+
+        // Utility to draw rounded rect corners consistently
+        fun arcAt(rect: Rect, startAngle: Float, sweep: Float) {
+            arcTo(rect, startAngle, sweep, false)
+        }
+
+        // Corner rects
+        val topLeft = Rect(rect.left, rect.top, rect.left + 2 * cornerRadius, rect.top + 2 * cornerRadius)
+        val topRight = Rect(rect.right - 2 * cornerRadius, rect.top, rect.right, rect.top + 2 * cornerRadius)
+        val bottomRight = Rect(rect.right - 2 * cornerRadius, rect.bottom - 2 * cornerRadius, rect.right, rect.bottom)
+        val bottomLeft = Rect(rect.left, rect.bottom - 2 * cornerRadius, rect.left + 2 * cornerRadius, rect.bottom)
+
+        // Compute the corner sweep angle
+        fun cornerSweepAngle(): Float {
+            val arcLength = (Math.PI.toFloat() * cornerRadius) / 2f
+            val leaderAngle = 90f * cornerRadius / arcLength
+            return (90f - leaderAngle) / 2f
+        }
+
+        // Start from top-left moving clockwise:
         moveTo(x = rect.left + cornerRadius, y = rect.top)
-        // Draw a line from 0,0 to the top-right start of the corner
-        lineTo(x = rect.right - cornerRadius, y = rect.top)
-        // Create the top-right corner rectangle
-        val topRightCorner = Rect(
-            left = rect.right - 2 * cornerRadius,
-            top = rect.top,
-            right = rect.right,
-            bottom = rect.top + 2 * cornerRadius
-        )
-        // Draw an arc representing the top-right corner
-        arcTo(
-            rect = topRightCorner,
-            startAngleDegrees = -90f,
-            sweepAngleDegrees = 90f,
-            forceMoveTo = false
-        )
-        // Draw a line from the end of the arc to the bottom-right start of the corner
-        lineTo(
-            x = rect.right,
-            y = rect.bottom - cornerRadius
-        )
-        // Create the bottom-right corner rectangle
-        val bottomRightCorner = Rect(
-            left = rect.right - 2 * cornerRadius,
-            top = rect.bottom - 2 * cornerRadius,
-            right = rect.right,
-            bottom = rect.bottom
-        )
-        // Draw an arc representing the bottom-right corner
-        arcTo(
-            rect = bottomRightCorner,
-            startAngleDegrees = 0f,
-            sweepAngleDegrees = 90f,
-            forceMoveTo = false
-        )
-        // Draw a line from the end of the arc to the start of the bottom leader
-        lineTo(
-            x = (size.width / 2) + (leaderWidth / 2),
-            y = rect.bottom
-        )
-        // Draw a line from start of the leader bottom to the leader tip
-        lineTo(
-            x = (size.width / 2),
-            y = rect.bottom + leaderHeight
-        )
-        // Draw a line from the leader tip to the bottom leader
-        lineTo(
-            x = (size.width / 2) - (leaderWidth / 2),
-            y = rect.bottom
-        )
-        // Draw a line from the bottom leader to the start of the bottom-left corner
-        lineTo(
-            x = rect.left + cornerRadius,
-            y = rect.bottom
-        )
-        // Create the bottom-left corner rectangle
-        val bottomLeftCorner = Rect(
-            left = rect.left,
-            top = rect.bottom - 2 * cornerRadius,
-            right = rect.left + 2 * cornerRadius,
-            bottom = rect.bottom
-        )
-        // Draw an arc representing the bottom-left corner
-        arcTo(
-            rect = bottomLeftCorner,
-            startAngleDegrees = 90f,
-            sweepAngleDegrees = 90f,
-            forceMoveTo = false
-        )
-        // Draw a line from the end of the arc to the top-left start of the corner
-        lineTo(
-            x = rect.left,
-            y = rect.top + cornerRadius
-        )
-        // Create the top-left corner rectangle
-        val topLeftCorner = Rect(
-            left = rect.left,
-            top = rect.top,
-            right = rect.left + 2 * cornerRadius,
-            bottom = rect.top + 2 * cornerRadius
-        )
-        // Draw an arc representing the top-left corner
-        arcTo(
-            rect = topLeftCorner,
-            startAngleDegrees = 180f,
-            sweepAngleDegrees = 90f,
-            forceMoveTo = false
-        )
-        // Close the path to complete the shape
+
+        when (leaderPosition) {
+            // Top side & corners:
+            LeaderPosition.UpperMiddle -> {
+                lineTo(x = (rect.width / 2f) - (leaderWidth / 2f), y = rect.top)
+                lineTo(x = (rect.width / 2f), y = rect.top - leaderHeight)
+                lineTo(x = (rect.width / 2f) + (leaderWidth / 2f), y = rect.top)
+                lineTo(x = rect.right - cornerRadius, y = rect.top)
+                arcAt(topRight, -90f, 90f)
+                lineTo(x = rect.right, y = rect.bottom - cornerRadius)
+                arcAt(bottomRight, 0f, 90f)
+                lineTo(x = rect.left + cornerRadius, y = rect.bottom)
+                arcAt(bottomLeft, 90f, 90f)
+                lineTo(x = rect.left, y = rect.top + cornerRadius)
+                arcAt(topLeft, 180f, 90f)
+            }
+
+            // Bottom
+            LeaderPosition.LowerMiddle -> {
+                lineTo(x = rect.right - cornerRadius, y = rect.top)
+                arcAt(topRight, -90f, 90f)
+                lineTo(x = rect.right, y = rect.bottom - cornerRadius)
+                arcAt(bottomRight, 0f, 90f)
+                // Bottom leader
+                lineTo(x = (size.width / 2f) + (leaderWidth / 2f), y = rect.bottom)
+                lineTo(x = (size.width / 2f), y = rect.bottom + leaderHeight)
+                lineTo(x = (size.width / 2f) - (leaderWidth / 2f), y = rect.bottom)
+                lineTo(x = rect.left + cornerRadius, y = rect.bottom)
+                arcAt(bottomLeft, 90f, 90f)
+                lineTo(x = rect.left, y = rect.top + cornerRadius)
+                arcAt(topLeft, 180f, 90f)
+            }
+
+            // Left / Right sides
+            LeaderPosition.LeftMiddle -> {
+                // Top edge and top-right corner
+                lineTo(rect.right - cornerRadius, rect.top)
+                arcAt(topRight, -90f, 90f)
+                // Right edge
+                lineTo(rect.right, rect.bottom - cornerRadius)
+                arcAt(bottomRight, 0f, 90f)
+                // Bottom edge
+                lineTo(rect.left + cornerRadius, rect.bottom)
+                arcAt(bottomLeft, 90f, 90f)
+                // Left edge leader centered
+                lineTo(x = rect.left, y = (rect.height / 2f) + (leaderWidth / 2f))
+                lineTo(x = rect.left - leaderHeight, y = (rect.height / 2f))
+                lineTo(x = rect.left, y = (rect.height / 2f) - (leaderWidth / 2f))
+                lineTo(x = rect.left, y = rect.top + cornerRadius)
+                arcAt(topLeft, 180f, 90f)
+            }
+
+            LeaderPosition.RightMiddle -> {
+                // Top edge
+                lineTo(rect.right - cornerRadius, rect.top)
+                arcAt(topRight, -90f, 90f)
+                // Right edge with leader
+                lineTo(x = rect.right, y = (rect.height / 2f) - (leaderWidth / 2f))
+                lineTo(x = rect.right + leaderHeight, y = (rect.height / 2f))
+                lineTo(x = rect.right, y = (rect.height / 2f) + (leaderWidth / 2f))
+                lineTo(x = rect.right, y = rect.bottom - cornerRadius)
+                arcAt(bottomRight, 0f, 90f)
+                // Bottom + left edges
+                lineTo(rect.left + cornerRadius, rect.bottom)
+                arcAt(bottomLeft, 90f, 90f)
+                lineTo(rect.left, rect.top + cornerRadius)
+                arcAt(topLeft, 180f, 90f)
+            }
+
+            // Corner leaders
+            LeaderPosition.UpperLeftCorner,
+            LeaderPosition.UpperRightCorner,
+            LeaderPosition.LowerRightCorner,
+            LeaderPosition.LowerLeftCorner -> {
+                val sweep = cornerSweepAngle()
+                // Draw the whole rounded-rect, at the corner, draw arcs split by the leader tip
+                when (leaderPosition) {
+                    LeaderPosition.UpperLeftCorner -> {
+                        lineTo(rect.right - cornerRadius, rect.top)
+                        arcAt(topRight, -90f, 90f)
+                        lineTo(rect.right, rect.bottom - cornerRadius)
+                        arcAt(bottomRight, 0f, 90f)
+                        lineTo(rect.left + cornerRadius, rect.bottom)
+                        arcAt(bottomLeft, 90f, 90f)
+                        lineTo(rect.left, rect.top + cornerRadius)
+                        // Draw corner with leader
+                        arcAt(topLeft, 180f, sweep)
+                        lineTo(
+                            x = rect.left - (leaderHeight / 2f),
+                            y = rect.top - (leaderHeight / 2f)
+                        )
+                        arcAt(topLeft, 180f + 90f - sweep, sweep)
+                    }
+
+                    LeaderPosition.UpperRightCorner -> {
+                        lineTo(rect.right - cornerRadius, rect.top)
+                        // Draw corner with leader
+                        arcAt(topRight, -90f, sweep)
+                        lineTo(
+                            x = rect.right + (leaderHeight / 2f),
+                            y = rect.top - (leaderHeight / 2f)
+                        )
+                        arcAt(topRight, -90f + 90f - sweep, sweep)
+                        lineTo(rect.right, rect.bottom - cornerRadius)
+                        arcAt(bottomRight, 0f, 90f)
+                        lineTo(rect.left + cornerRadius, rect.bottom)
+                        arcAt(bottomLeft, 90f, 90f)
+                        lineTo(rect.left, rect.top + cornerRadius)
+                        arcAt(topLeft, 180f, 90f)
+                    }
+
+                    LeaderPosition.LowerRightCorner -> {
+                        lineTo(rect.right - cornerRadius, rect.top)
+                        arcAt(topRight, -90f, 90f)
+                        lineTo(rect.right, rect.bottom - cornerRadius)
+                        // Draw corner with leader
+                        arcAt(bottomRight, 0f, sweep)
+                        lineTo(
+                            x = rect.right + (leaderHeight / 2f),
+                            y = rect.bottom + (leaderHeight / 2f)
+                        )
+                        arcAt(bottomRight, 0f + 90f - sweep, sweep)
+                        lineTo(rect.left + cornerRadius, rect.bottom)
+                        arcAt(bottomLeft, 90f, 90f)
+                        lineTo(rect.left, rect.top + cornerRadius)
+                        arcAt(topLeft, 180f, 90f)
+                    }
+
+                    LeaderPosition.LowerLeftCorner -> {
+                        lineTo(rect.right - cornerRadius, rect.top)
+                        arcAt(topRight, -90f, 90f)
+                        lineTo(rect.right, rect.bottom - cornerRadius)
+                        arcAt(bottomRight, 0f, 90f)
+                        lineTo(rect.left + cornerRadius, rect.bottom)
+                        // Draw corner with leader
+                        arcAt(bottomLeft, 90f, sweep)
+                        lineTo(
+                            x = rect.left - (leaderHeight / 2f),
+                            y = rect.bottom + (leaderHeight / 2f)
+                        )
+                        arcAt(bottomLeft, 90f + 90f - sweep, sweep)
+                        lineTo(rect.left, rect.top + cornerRadius)
+                        arcAt(topLeft, 180f, 90f)
+                    }
+
+                    else -> {}
+                }
+            }
+
+            LeaderPosition.Automatic -> {}
+        }
         close()
     }
 }
+
+
+/**
+ * Bounds of the callout container relative to the anchor point.
+ * @since 300.0.0
+ */
+private fun boundsRelativeToAnchor(
+    width: Int,
+    height: Int,
+    pos: LeaderPosition
+): RectF {
+    return when (pos) {
+        LeaderPosition.UpperLeftCorner -> RectF(0f, 0f, width.toFloat(), height.toFloat())
+        LeaderPosition.LeftMiddle -> RectF(0f, -height / 2f, width.toFloat(), height / 2f)
+        LeaderPosition.LowerLeftCorner -> RectF(0f, -height.toFloat(), width.toFloat(), 0f)
+        LeaderPosition.UpperMiddle -> RectF(-width / 2f, 0f, width / 2f, height.toFloat())
+        LeaderPosition.LowerMiddle -> RectF(-width / 2f, -height.toFloat(), width / 2f, 0f)
+        LeaderPosition.UpperRightCorner -> RectF(-width.toFloat(), 0f, 0f, height.toFloat())
+        LeaderPosition.RightMiddle -> RectF(-width.toFloat(), -height / 2f, 0f, height / 2f)
+        LeaderPosition.LowerRightCorner -> RectF(-width.toFloat(), -height.toFloat(), 0f, 0f)
+        LeaderPosition.Automatic -> error("Actual leader position must never be Automatic")
+    }
+}
+
+/**
+ * Moves the leader position following one of 4 directions: Down, Up, Left or Right
+ * using [LeaderMoveDirection] types.
+ *
+ * @param direction one of the 4 directions
+ * @param bounds current bounds of the CalloutWindow
+ * @param anchorPoint screen coordinates of the anchor point
+ * @param actualLeaderPosition the true position of the leader relative to the body of the Callout
+ * @return [LeaderPosition] if the callout leader position needs to be refreshed
+ * @since 300.0.0
+ */
+private fun moveLeader(
+    direction: LeaderMoveDirection,
+    actualLeaderPosition: LeaderPosition,
+    geoViewSize: IntSize,
+    bounds: RectF,
+    anchorPoint: DoubleXY
+): LeaderPosition? {
+    val geoViewWidthF = geoViewSize.width.toFloat()
+    val geoViewHeightF = geoViewSize.height.toFloat()
+    val x = anchorPoint.x.toFloat()
+    val y = anchorPoint.y.toFloat()
+
+    // Callout is 'narrow' if it's less than half the width of the GeoView
+    val narrowCallout = bounds.width() <= geoViewWidthF / 2f
+    // Callout is 'short' if it's less than half the height of the GeoView
+    val shortCallout = bounds.height() <= geoViewHeightF / 2f
+
+    val oneThirdWidth = geoViewWidthF / 3f
+    val halfWidth = geoViewWidthF / 2f
+    val twoThirdWidth = geoViewWidthF * 2f / 3f
+
+    val oneThirdHeight = geoViewHeightF / 3f
+    val halfHeight = geoViewHeightF / 2f
+    val twoThirdHeight = geoViewHeightF * 2f / 3f
+
+    return when (direction) {
+        // Bottom edge of callout is below bottom edge of map.
+        is LeaderMoveDirection.Down -> when (actualLeaderPosition) {
+            LeaderPosition.UpperLeftCorner -> if (shortCallout || y > oneThirdHeight) LeaderPosition.LeftMiddle else null
+            LeaderPosition.LeftMiddle -> if (shortCallout || y > twoThirdHeight) LeaderPosition.LowerLeftCorner else null
+            LeaderPosition.UpperMiddle -> if (shortCallout || y > halfHeight) LeaderPosition.LowerMiddle else null
+            LeaderPosition.UpperRightCorner -> if (shortCallout || y > oneThirdHeight) LeaderPosition.RightMiddle else null
+            LeaderPosition.RightMiddle -> if (shortCallout || y > twoThirdHeight) LeaderPosition.LowerRightCorner else null
+            else -> null
+        }
+
+        // Top edge of callout is above top edge of map.
+        is LeaderMoveDirection.Up -> when (actualLeaderPosition) {
+            LeaderPosition.LowerLeftCorner -> if (shortCallout || y < twoThirdHeight) LeaderPosition.LeftMiddle else null
+            LeaderPosition.LeftMiddle -> if (shortCallout || y < oneThirdHeight) LeaderPosition.UpperLeftCorner else null
+            LeaderPosition.LowerMiddle -> if (shortCallout || y < halfHeight) LeaderPosition.UpperMiddle else null
+            LeaderPosition.LowerRightCorner -> if (shortCallout || y < twoThirdHeight) LeaderPosition.RightMiddle else null
+            LeaderPosition.RightMiddle -> if (shortCallout || y < oneThirdHeight) LeaderPosition.UpperRightCorner else null
+            else -> null
+        }
+
+        // Left edge of callout is left of left edge of map.
+        is LeaderMoveDirection.Left -> when (actualLeaderPosition) {
+            LeaderPosition.UpperRightCorner -> if (narrowCallout || x < twoThirdWidth) LeaderPosition.UpperMiddle else null
+            LeaderPosition.RightMiddle -> if (narrowCallout || x < halfWidth) LeaderPosition.LeftMiddle else null
+            LeaderPosition.LowerRightCorner -> if (narrowCallout || x < twoThirdWidth) LeaderPosition.LowerMiddle else null
+            LeaderPosition.UpperMiddle -> if (narrowCallout || x < oneThirdWidth) LeaderPosition.UpperLeftCorner else null
+            LeaderPosition.LowerMiddle -> if (narrowCallout || x < oneThirdWidth) LeaderPosition.LowerLeftCorner else null
+            else -> null
+        }
+
+        // Right edge of callout is right of right edge of map.
+        is LeaderMoveDirection.Right -> when (actualLeaderPosition) {
+            LeaderPosition.UpperLeftCorner -> if (narrowCallout || x > oneThirdWidth) LeaderPosition.UpperMiddle else null
+            LeaderPosition.LeftMiddle -> if (narrowCallout || x > halfWidth) LeaderPosition.RightMiddle else null
+            LeaderPosition.LowerLeftCorner -> if (narrowCallout || x > oneThirdWidth) LeaderPosition.LowerMiddle else null
+            LeaderPosition.UpperMiddle -> if (narrowCallout || x > twoThirdWidth) LeaderPosition.UpperRightCorner else null
+            LeaderPosition.LowerMiddle -> if (narrowCallout || x > twoThirdWidth) LeaderPosition.LowerRightCorner else null
+            else -> null
+        }
+    }
+}
+
+/**
+ * Indicates the side or corner of a callout on which the leader is drawn.
+ *
+ * @since 300.0.0
+ */
+public sealed class LeaderPosition(internal val position: Int) {
+
+    /**
+     * Positions the leader at the top left corner of the callout.
+     *
+     * @since 300.0.0
+     */
+    public data object UpperLeftCorner : LeaderPosition(0)
+
+    /**
+     * Positions the leader at the top center of the callout.
+     *
+     * @since 300.0.0
+     */
+    public data object UpperMiddle : LeaderPosition(1)
+
+    /**
+     * Positions the leader at the top right corner of the callout.
+     *
+     * @since 300.0.0
+     */
+    public data object UpperRightCorner : LeaderPosition(2)
+
+    /**
+     * Positions the leader at the right center of the callout.
+     *
+     * @since 300.0.0
+     */
+    public data object RightMiddle : LeaderPosition(3)
+
+    /**
+     * Positions the leader at the bottom right corner of the callout.
+     *
+     * @since 300.0.0
+     */
+    public data object LowerRightCorner : LeaderPosition(4)
+
+    /**
+     * Positions the leader at the bottom center of the callout.
+     *
+     * @since 300.0.0
+     */
+    public data object LowerMiddle : LeaderPosition(5)
+
+    /**
+     * Positions the leader at the bottom left corner of the callout.
+     *
+     * @since 300.0.0
+     */
+    public data object LowerLeftCorner : LeaderPosition(6)
+
+    /**
+     * Positions the leader at the left center of the callout.
+     *
+     * @since 300.0.0
+     */
+    public data object LeftMiddle : LeaderPosition(7)
+
+    /**
+     * Dynamically positions the leader to keep the callout as much as possible within the bounds of the [GeoView].
+     *
+     * @since 300.0.0
+     */
+    public data object Automatic : LeaderPosition(8)
+
+}
+
+/**
+ * Specifies the direction in which the leader needs to be moved when adjusting its position automatically.
+ *
+ * @since 300.0.0
+ */
+private sealed class LeaderMoveDirection() {
+    /**
+     * Move the leader downwards e.g. from [LeaderPosition.LeftMiddle] to [LeaderPosition.LowerLeftCorner]
+     *
+     * @since 300.0.0
+     */
+    object Down : LeaderMoveDirection()
+
+    /**
+     * Move the leader upwards e.g. from [LeaderPosition.LeftMiddle] to [LeaderPosition.UpperLeftCorner]
+     *
+     * @since 300.0.0
+     */
+    object Up : LeaderMoveDirection()
+
+    /**
+     * Move the leader to the left e.g. from [LeaderPosition.UpperRightCorner] to [LeaderPosition.UpperMiddle]
+     *
+     * @since 300.0.0
+     */
+    object Left : LeaderMoveDirection()
+
+    /**
+     * Move the leader to the right e.g. from [LeaderPosition.LowerLeftCorner] to [LeaderPosition.LowerMiddle]
+     *
+     * @since 300.0.0
+     */
+    object Right : LeaderMoveDirection()
+}
+
 
 /**
  * This function is used to wait for the GeoView to be ready to return positive values

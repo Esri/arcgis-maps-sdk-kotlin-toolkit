@@ -28,6 +28,10 @@ secrets {
     defaultPropertiesFileName = "secrets.defaults.properties"
 }
 
+kotlin {
+    jvmToolchain(17)
+}
+
 android {
     namespace = "com.arcgismaps.toolkit.sceneviewcameracontrollerapp"
     compileSdk = libs.versions.compileSdk.get().toInt()
@@ -50,13 +54,6 @@ android {
             isMinifyEnabled = false
             //proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"),("proguard-rules.pro"
         }
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
-    }
-    kotlinOptions {
-        jvmTarget = "1.8"
     }
     @Suppress("UnstableApiUsage")
     buildFeatures {
@@ -82,6 +79,7 @@ dependencies {
     implementation(project(":microapps-lib"))
     implementation(arcgis.mapsSdk)
     implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.material.icons.core)
     implementation(libs.bundles.composeCore)
     implementation(libs.bundles.core)
     implementation(libs.androidx.activity.compose)

@@ -84,9 +84,7 @@ public abstract interface class com/arcgismaps/toolkit/indoors/FloorFilterState 
 
 public final class com/arcgismaps/toolkit/indoors/FloorFilterStateKt {
 	public static final fun FloorFilterState (Lcom/arcgismaps/mapping/GeoModel;Lcom/arcgismaps/toolkit/indoors/UIProperties;Lkotlin/jvm/functions/Function1;)Lcom/arcgismaps/toolkit/indoors/FloorFilterState;
-	public static final fun FloorFilterState (Lcom/arcgismaps/mapping/GeoModel;Lkotlinx/coroutines/CoroutineScope;Lcom/arcgismaps/toolkit/indoors/UIProperties;Lkotlin/jvm/functions/Function1;)Lcom/arcgismaps/toolkit/indoors/FloorFilterState;
 	public static synthetic fun FloorFilterState$default (Lcom/arcgismaps/mapping/GeoModel;Lcom/arcgismaps/toolkit/indoors/UIProperties;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lcom/arcgismaps/toolkit/indoors/FloorFilterState;
-	public static synthetic fun FloorFilterState$default (Lcom/arcgismaps/mapping/GeoModel;Lkotlinx/coroutines/CoroutineScope;Lcom/arcgismaps/toolkit/indoors/UIProperties;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lcom/arcgismaps/toolkit/indoors/FloorFilterState;
 }
 
 public abstract class com/arcgismaps/toolkit/indoors/InitializationStatus {

@@ -73,41 +73,6 @@
     <string name="max_datetime_helper_text">Das Datum muss auf oder vor folgendem Datum liegen: %1$s</string>
 
     <!-- Date Picker string values -->
-    <string name="ff_date_input_headline">Eingegebenes Datum</string>
-    <string name="ff_date_input_headline_description">Eingegebenes Datum: %1$s</string>
-    <string name="ff_date_input_invalid_for_pattern">Datum stimmt nicht mit erwartetem Muster überein: %1$s</string>
-    <string name="ff_date_input_invalid_not_allowed">Datum nicht zulässig: %1$s</string>
-    <string name="ff_date_input_invalid_year_range">
-        Datum liegt außerhalb des erwarteten Jahresbereichs %1$s–%2$s.
-    </string>
-    <string name="ff_date_input_label">Datum</string>
-    <string name="ff_date_input_no_input_description">Keine</string>
-    <string name="ff_date_input_title">Datum auswählen</string>
-    <string name="ff_date_picker_headline">"Ausgewähltes Datum"</string>
-    <string name="ff_date_picker_headline_description">Aktuelle Auswahl: %1$s</string>
-    <string name="ff_date_picker_navigate_to_year_description">Zum Jahr %1$s navigieren</string>
-    <string name="ff_date_picker_no_selection_description">Keine</string>
-    <string name="ff_date_picker_scroll_to_earlier_years">Zum Anzeigen früherer Jahre scrollen</string>
-    <string name="ff_date_picker_scroll_to_later_years">Zum Anzeigen späterer Jahre scrollen</string>
-    <string name="ff_date_picker_switch_to_calendar_mode">Zum Eingabemodus für Kalender wechseln</string>
-    <string name="ff_date_picker_switch_to_day_selection">
-        "Zum Auswählen eines Jahres streichen oder zum Zurückgehen zur Auswahl eines Tages tippen"
-    </string>
-    <string name="ff_date_picker_switch_to_input_mode">Zum Eingabemodus für Text wechseln</string>
-    <string name="ff_date_picker_switch_to_next_month">"In nächsten Monat ändern"</string>
-    <string name="ff_date_picker_switch_to_previous_month">"In vorherigen Monat ändern"</string>
-    <string name="ff_date_picker_switch_to_year_selection">"Zur Auswahl eines Jahres wechseln"</string>
-    <string name="ff_date_picker_title">"Datum auswählen"</string>
-    <string name="ff_date_picker_today_description">Heute</string>
-    <string name="ff_date_picker_year_picker_pane_title">Jahresauswahl sichtbar</string>
-    <string name="ff_date_range_input_invalid_range_input">Ungültige Datumsbereichseingabe</string>
-    <string name="ff_date_range_input_title">Daten eingeben</string>
-    <string name="ff_date_range_picker_day_in_range">Im Bereich</string>
-    <string name="ff_date_range_picker_end_headline">Enddatum</string>
-    <string name="ff_date_range_picker_scroll_to_next_month">Zum Anzeigen des nächsten Monats scrollen</string>
-    <string name="ff_date_range_picker_scroll_to_previous_month">Zum Anzeigen des vorherigen Monats scrollen</string>
-    <string name="ff_date_range_picker_start_headline">Startdatum</string>
-    <string name="ff_date_range_picker_title">Daten auswählen</string>
 
     <!-- Time Picker string values -->
     <string name="ff_time_picker_am">AM</string>
@@ -145,4 +110,56 @@
     <string name="tap_to_scan">Zum Scannen tippen</string>
     <string name="unable_to_open_the_camera">Die Kamera kann nicht geöffnet werden.</string>
     <string name="value_must_be_a_guid">Der Wert muss eine gültige GUID sein.</string>
+    <string name="delete_attachment_title">Anlage löschen?</string>
+    <string name="delete_attachment_confirmation">Möchten Sie diese Anlage wirklich löschen?</string>
+    <string name="download_failed">Die Datei kann nicht heruntergeladen werden.</string>
+    <string name="file_size_exceeds_limit">Die Datei überschreitet die maximal zulässige Größe.</string>
+    <string name="unsupported_file_type">Nicht unterstützter Dateityp</string>
+    <string name="save">Speichern</string>
+    <string name="discard">Verwerfen</string>
+    <string name="none_selected">Keine ausgewählt</string>
+    <string name="the_form_has_validation_errors">Das Formular enthält Validierungsfehler.</string>
+    <string name="the_form_has_edits">Das Formular enthält Änderungen.</string>
+    <string name="do_you_want_to_save_your_changes">Möchten Sie die Änderungen speichern?</string>
+    <string name="no_associations_found">Keine anzuzeigenden Zuordnungen</string>
+    <string name="terminal">Anschlusspunkt</string>
+    <string name="terminal_with_value">Anschlusspunkt: %1$s</string>
+    <string name="content_visible">Sichtbarer Inhalt</string>
+    <string name="percent_along">Prozent längs</string>
+    <string name="from_element">Von Element</string>
+    <string name="to_element">Bis Element</string>
+    <string name="association_type">Zuordnungstyp</string>
+    <string name="remove_association">Zuordnung entfernen</string>
+    <string name="remove_association_tooltip">Entfernt nur die Zuordnung. Das Feature bleibt erhalten.</string>
+    <string name="remove">Entfernen</string>
+    <string name="association_settings">Zuordnungseinstellungen</string>
+    <string name="percent_along_edge">%1$d %%</string>
+    <string name="visible_content">Sichtbarer Inhalt</string>
+    <string name="content">Inhalt</string>
+    <string name="containment_visible_value">Sichtbar: %1$s</string>
+    <string name="from_network_data_source">Von Netzwerkdatenquelle</string>
+    <string name="on_map">Auf Karte</string>
+    <string name="network_data_source">Netzwerkdatenquelle</string>
+    <string name="available_asset_types">Verfügbare Objekttypen</string>
+    <string name="count">Anzahl: %1$d</string>
+    <string name="new_association">Neue Zuordnung</string>
+    <string name="add">Hinzufügen</string>
+    <string name="failed_to_create_association">Fehler beim Erstellen der Zuordnung. %1$s</string>
+    <string name="available_features">%1$d verfügbare Features</string>
+    <string name="loading2">Wird geladen...</string>
+    <plurals name="you_have_errors_that_must_be_fixed_before_saving">
+        <item quantity="zero">Es sind %1$d Fehler vorhanden, die vor dem Speichern behoben werden müssen.</item>
+        <item quantity="one">Es ist %1$d Fehler vorhanden, der vor dem Speichern behoben werden muss.</item>
+        <item quantity="two">Es sind %1$d Fehler vorhanden, die vor dem Speichern behoben werden müssen.</item>
+        <item quantity="few">Es sind %1$d Fehler vorhanden, die vor dem Speichern behoben werden müssen.</item>
+        <item quantity="many">Es sind %1$d Fehler vorhanden, die vor dem Speichern behoben werden müssen.</item>
+        <item quantity="other">Es sind %1$d Fehler vorhanden, die vor dem Speichern behoben werden müssen.</item>
+    </plurals>
+    <string name="search_features">Features suchen</string>
+    <string name="choose_to_add">Zum Hinzufügen auswählen</string>
+    <string name="no_features_found">Keine Features gefunden.</string>
+    <string name="refine_your_search_tip">Grenzen Sie die Suche ein, oder wählen Sie eine andere Netzwerkquelle aus.</string>
+    <string name="select_terminal">Anschlusspunkt auswählen</string>
+    <string name="show_on_map">Auf Karte anzeigen</string>
+    <string name="more_information">Weitere Informationen</string>
 </resources>

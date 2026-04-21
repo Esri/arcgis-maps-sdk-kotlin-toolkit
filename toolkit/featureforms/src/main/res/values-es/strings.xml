@@ -73,41 +73,6 @@
     <string name="max_datetime_helper_text">La fecha debe ser el %1$s o antes</string>
 
     <!-- Date Picker string values -->
-    <string name="ff_date_input_headline">Fecha introducida</string>
-    <string name="ff_date_input_headline_description">Fecha introducida: %1$s</string>
-    <string name="ff_date_input_invalid_for_pattern">La fecha no tiene el patrón previsto: %1$s</string>
-    <string name="ff_date_input_invalid_not_allowed">Fecha no permitida: %1$s</string>
-    <string name="ff_date_input_invalid_year_range">
-        Fecha fuera del intervalo de años previsto %1$s - %2$s
-    </string>
-    <string name="ff_date_input_label">Fecha</string>
-    <string name="ff_date_input_no_input_description">Ninguno</string>
-    <string name="ff_date_input_title">Seleccionar fecha</string>
-    <string name="ff_date_picker_headline">"Fecha seleccionada"</string>
-    <string name="ff_date_picker_headline_description">Selección actual: %1$s</string>
-    <string name="ff_date_picker_navigate_to_year_description">Ir al año %1$s</string>
-    <string name="ff_date_picker_no_selection_description">Ninguno</string>
-    <string name="ff_date_picker_scroll_to_earlier_years">Desplazarse para mostrar años anteriores</string>
-    <string name="ff_date_picker_scroll_to_later_years">Desplazarse para mostrar años posteriores</string>
-    <string name="ff_date_picker_switch_to_calendar_mode">Cambiar al modo de entrada de calendario</string>
-    <string name="ff_date_picker_switch_to_day_selection">
-        "Deslice para seleccionar un año o toque para volver y seleccionar un día"
-    </string>
-    <string name="ff_date_picker_switch_to_input_mode">Cambiar al modo de entrada de texto</string>
-    <string name="ff_date_picker_switch_to_next_month">"Cambiar al mes siguiente"</string>
-    <string name="ff_date_picker_switch_to_previous_month">"Cambiar para seleccionar un año"</string>
-    <string name="ff_date_picker_switch_to_year_selection">"Cambiar para seleccionar un año"</string>
-    <string name="ff_date_picker_title">"Seleccionar fecha"</string>
-    <string name="ff_date_picker_today_description">Hoy</string>
-    <string name="ff_date_picker_year_picker_pane_title">Selector de años visible</string>
-    <string name="ff_date_range_input_invalid_range_input">Entrada de rango de fechas no válido</string>
-    <string name="ff_date_range_input_title">Introducir fechas</string>
-    <string name="ff_date_range_picker_day_in_range">En rango</string>
-    <string name="ff_date_range_picker_end_headline">Fecha de finalización</string>
-    <string name="ff_date_range_picker_scroll_to_next_month">Desplazarse para mostrar el mes siguiente</string>
-    <string name="ff_date_range_picker_scroll_to_previous_month">Desplazarse para mostrar el mes anterior</string>
-    <string name="ff_date_range_picker_start_headline">Fecha de inicio</string>
-    <string name="ff_date_range_picker_title">Seleccionar fechas</string>
 
     <!-- Time Picker string values -->
     <string name="ff_time_picker_am">a.m.</string>
@@ -145,4 +110,56 @@
     <string name="tap_to_scan">Tocar para escanear</string>
     <string name="unable_to_open_the_camera">No se puede abrir la cámara</string>
     <string name="value_must_be_a_guid">El valor tiene que ser un GUID válido</string>
+    <string name="delete_attachment_title">¿Desea eliminar el adjunto?</string>
+    <string name="delete_attachment_confirmation">¿Seguro que desea eliminar este adjunto?</string>
+    <string name="download_failed">No se puede descargar este archivo.</string>
+    <string name="file_size_exceeds_limit">El tamaño de archivo rebasa el límite</string>
+    <string name="unsupported_file_type">Tipo de archivo no admitido</string>
+    <string name="save">Guardar</string>
+    <string name="discard">Descartar</string>
+    <string name="none_selected">Nada seleccionado</string>
+    <string name="the_form_has_validation_errors">El formulario tiene errores de validación</string>
+    <string name="the_form_has_edits">El formulario tiene ediciones</string>
+    <string name="do_you_want_to_save_your_changes">¿Desea guardar los cambios?</string>
+    <string name="no_associations_found">No hay asociaciones para mostrar</string>
+    <string name="terminal">Terminal</string>
+    <string name="terminal_with_value">Terminal: %1$s</string>
+    <string name="content_visible">Contenido visible</string>
+    <string name="percent_along">Porcentaje a lo largo</string>
+    <string name="from_element">Elemento de origen</string>
+    <string name="to_element">Elemento de destino</string>
+    <string name="association_type">Tipo de asociación</string>
+    <string name="remove_association">Eliminar asociación</string>
+    <string name="remove_association_tooltip">Solo se elimina la asociación. La entidad se conserva.</string>
+    <string name="remove">Eliminar</string>
+    <string name="association_settings">Configuración de asociación</string>
+    <string name="percent_along_edge">%1$d %%</string>
+    <string name="visible_content">Contenido visible</string>
+    <string name="content">Contenido</string>
+    <string name="containment_visible_value">Visible: %1$s</string>
+    <string name="from_network_data_source">Desde fuente de datos de red</string>
+    <string name="on_map">En mapa</string>
+    <string name="network_data_source">Fuente de datos de red</string>
+    <string name="available_asset_types">Tipos de activos disponibles</string>
+    <string name="count">Recuento %1$d</string>
+    <string name="new_association">Nueva asociación</string>
+    <string name="add">Agregar</string>
+    <string name="failed_to_create_association">No se ha podido crear la asociación. %1$s</string>
+    <string name="available_features">%1$d Entidades disponibles</string>
+    <string name="loading2">Cargando...</string>
+    <plurals name="you_have_errors_that_must_be_fixed_before_saving">
+        <item quantity="zero">Tiene %1$d errores que deben corregirse antes de guardar.</item>
+        <item quantity="one">Tiene %1$d error que debe corregirse antes de guardar.</item>
+        <item quantity="two">Tiene %1$d errores que deben corregirse antes de guardar</item>
+        <item quantity="few">Tiene %1$d errores que deben corregirse antes de guardar</item>
+        <item quantity="many">Tiene %1$d errores que deben corregirse antes de guardar</item>
+        <item quantity="other">Tiene %1$d errores que deben corregirse antes de guardar</item>
+    </plurals>
+    <string name="search_features">Buscar entidades</string>
+    <string name="choose_to_add">Elegir para agregar</string>
+    <string name="no_features_found">No se han encontrado entidades</string>
+    <string name="refine_your_search_tip">Acote su búsqueda o elija una fuente de red diferente.</string>
+    <string name="select_terminal">Seleccionar terminal</string>
+    <string name="show_on_map">Mostrar en mapa</string>
+    <string name="more_information">Más información</string>
 </resources>

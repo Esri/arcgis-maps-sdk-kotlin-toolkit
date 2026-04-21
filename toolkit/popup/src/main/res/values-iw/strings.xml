@@ -24,4 +24,24 @@
     <string name="other">אחר</string>
     <string name="close">חזור</string>
     <string name="attachment_thumbnail">תמונה ממוזערת של צורפה</string>
+    <string name="terminal">מסוף</string>
+    <string name="no_associations_found">לא נמצאו אסוסיאציות</string>
+    <string name="visible_content">תוכן נראה</string>
+    <string name="content">תוכן</string>
+    <string name="containment_visible">פוליגון מכיל גלוי</string>
+    <string name="fraction_along_edge">חתוך לאורך הקצה</string>
+    <string name="percent_along_edge">%1$d %%</string>
+    <string name="from_element">אלמנט מ-</string>
+    <string name="to_element">אלמנט ל-</string>
+    <string name="association_type">סוג אסוציאציה</string>
+    <string name="remove_association">הסר אסוסיאציה</string>
+    <string name="remove_association_tooltip">אסר את האסוסיציה בלבד היישות נותרת.</string>
+    <string name="remove">הסר</string>
+    <string name="cancel">ביטול</string>
+    <string name="none_selected">לא נבחר כלום</string>
+    <string name="association_settings">הגדרות אסוסיאציה</string>
+    <string name="show_all">הצג הכל</string>
+    <string name="filter_by_feature_title">סנן לפי כותרת ישות</string>
+    <string name="containment_visible_value">גלוי: %1$s</string>
+    <string name="associations">אסוסיאציות</string>
 </resources>

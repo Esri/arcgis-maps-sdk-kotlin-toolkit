@@ -234,7 +234,7 @@ internal class WorldTrackingCameraController(
  * Evaluates a location to determine if the camera should be updated.
  *
  * Returns false if the location timestamp is older than a threshold,
- * if the horizontal or vertical accuracy is negative,
+ * if the horizontal or vertical accuracy is negative or unavailable (`NaN`),
  * or if the distance between the location and the current camera is less than a threshold.
  * Otherwise, returns true.
  *

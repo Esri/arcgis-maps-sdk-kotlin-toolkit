@@ -73,41 +73,6 @@
     <string name="max_datetime_helper_text">Dátum musí byť v deň alebo pred %1$s</string>
 
     <!-- Date Picker string values -->
-    <string name="ff_date_input_headline">Zadaný dátum</string>
-    <string name="ff_date_input_headline_description">Zadaný dátum: %1$s</string>
-    <string name="ff_date_input_invalid_for_pattern">Dátum nezodpovedá očakávanému vzoru: %1$s</string>
-    <string name="ff_date_input_invalid_not_allowed">Dátum nie je povolený: %1$s</string>
-    <string name="ff_date_input_invalid_year_range">
-        Dátum mimo očakávaného rozsahu rokov %1$s - %2$s
-    </string>
-    <string name="ff_date_input_label">Dátum</string>
-    <string name="ff_date_input_no_input_description">Žiadne</string>
-    <string name="ff_date_input_title">Vybrať dátum</string>
-    <string name="ff_date_picker_headline">"Vybraný dátum"</string>
-    <string name="ff_date_picker_headline_description">Aktuálny výber: %1$s</string>
-    <string name="ff_date_picker_navigate_to_year_description">Prejsť na rok %1$s</string>
-    <string name="ff_date_picker_no_selection_description">Žiadne</string>
-    <string name="ff_date_picker_scroll_to_earlier_years">Posúvaním zobrazíte predchádzajúce roky</string>
-    <string name="ff_date_picker_scroll_to_later_years">Posúvaním zobrazíte neskoršie roky</string>
-    <string name="ff_date_picker_switch_to_calendar_mode">Prepnúť do režimu zadávania kalendára</string>
-    <string name="ff_date_picker_switch_to_day_selection">
-        "Potiahnutím vyberte rok alebo ťuknutím na prepnite späť na výber dňa"
-    </string>
-    <string name="ff_date_picker_switch_to_input_mode">Prepnúť na režim zadávania textu</string>
-    <string name="ff_date_picker_switch_to_next_month">"Zmeniť na budúci mesiac"</string>
-    <string name="ff_date_picker_switch_to_previous_month">"Zmeniť na predchádzajúci mesiac"</string>
-    <string name="ff_date_picker_switch_to_year_selection">"Prepnúť na výber roka"</string>
-    <string name="ff_date_picker_title">"Vybrať dátum"</string>
-    <string name="ff_date_picker_today_description">Dnes</string>
-    <string name="ff_date_picker_year_picker_pane_title">Výber roka viditeľný</string>
-    <string name="ff_date_range_input_invalid_range_input">Neplatný vstup rozsahu dátumu</string>
-    <string name="ff_date_range_input_title">Zadať dátumy</string>
-    <string name="ff_date_range_picker_day_in_range">V rozsahu</string>
-    <string name="ff_date_range_picker_end_headline">Dátum ukončenia</string>
-    <string name="ff_date_range_picker_scroll_to_next_month">Posúvaním zobrazíte nasledujúci mesiac</string>
-    <string name="ff_date_range_picker_scroll_to_previous_month">Posúvaním zobrazíte predchádzajúci mesiac</string>
-    <string name="ff_date_range_picker_start_headline">Dátum začiatku</string>
-    <string name="ff_date_range_picker_title">Vybrať dátumy</string>
 
     <!-- Time Picker string values -->
     <string name="ff_time_picker_am">Dopoludnia</string>
@@ -145,4 +110,56 @@
     <string name="tap_to_scan">Ťuknutím naskenujte</string>
     <string name="unable_to_open_the_camera">Kameru nie je možné otvoriť</string>
     <string name="value_must_be_a_guid">Hodnota musí byť platný GUID</string>
+    <string name="delete_attachment_title">Odstrániť prílohu?</string>
+    <string name="delete_attachment_confirmation">Naozaj chcete odstrániť túto prílohu?</string>
+    <string name="download_failed">Nedá sa stiahnuť tento súbor.</string>
+    <string name="file_size_exceeds_limit">Veľkosť súboru presahuje limit</string>
+    <string name="unsupported_file_type">Nepodporovaný typ súboru</string>
+    <string name="save">Uložiť</string>
+    <string name="discard">Zahodiť</string>
+    <string name="none_selected">Žiadne vybraté</string>
+    <string name="the_form_has_validation_errors">Formulár má validačné chyby</string>
+    <string name="the_form_has_edits">Formulár má úpravy</string>
+    <string name="do_you_want_to_save_your_changes">Chcete uložiť svoje zmeny?</string>
+    <string name="no_associations_found">Žiadne asociácie na zobrazenie</string>
+    <string name="terminal">Terminál</string>
+    <string name="terminal_with_value">Terminál: %1$s</string>
+    <string name="content_visible">Viditeľný obsah</string>
+    <string name="percent_along">Percento pozdĺž</string>
+    <string name="from_element">Z element</string>
+    <string name="to_element">Do element</string>
+    <string name="association_type">Typ asociácie</string>
+    <string name="remove_association">Odstrániť asociáciu</string>
+    <string name="remove_association_tooltip">Odstráni iba asociáciu. Prvok zostane.</string>
+    <string name="remove">Odstrániť</string>
+    <string name="association_settings">Nastavenia asociácie</string>
+    <string name="percent_along_edge">%1$d %%</string>
+    <string name="visible_content">Viditeľný obsah</string>
+    <string name="content">Obsah</string>
+    <string name="containment_visible_value">Viditeľné: %1$s</string>
+    <string name="from_network_data_source">Zo sieťového dátového zdroja</string>
+    <string name="on_map">V mape</string>
+    <string name="network_data_source">Sieťový dátový zdroj</string>
+    <string name="available_asset_types">Dostupné typy prostriedkov</string>
+    <string name="count">Počet %1$d</string>
+    <string name="new_association">Nová asociácia</string>
+    <string name="add">Pridať</string>
+    <string name="failed_to_create_association">Nepodarilo sa vytvoriť asociáciu. %1$s</string>
+    <string name="available_features">%1$d Dostupné prvky</string>
+    <string name="loading2">Načítava sa...</string>
+    <plurals name="you_have_errors_that_must_be_fixed_before_saving">
+        <item quantity="zero">Máte %1$d chýb, ktoré musia byť pred uložením opravené.</item>
+        <item quantity="one">Máte %1$d chybu, ktorá musí byť pred uložením opravená.</item>
+        <item quantity="two">Máte %1$d chýb, ktoré musia byť pred uložením opravené</item>
+        <item quantity="few">Máte %1$d chýb, ktoré musia byť pred uložením opravené</item>
+        <item quantity="many">Máte %1$d chýb, ktoré musia byť pred uložením opravené</item>
+        <item quantity="other">Máte %1$d chýb, ktoré musia byť pred uložením opravené</item>
+    </plurals>
+    <string name="search_features">Vyhľadať prvky</string>
+    <string name="choose_to_add">Vybrať na pridanie</string>
+    <string name="no_features_found">Neboli nájdené žiadne prvky</string>
+    <string name="refine_your_search_tip">Spresnite vyhľadávanie alebo vyberte iný sieťový zdroj.</string>
+    <string name="select_terminal">Vybrať terminál</string>
+    <string name="show_on_map">Zobraziť na mape</string>
+    <string name="more_information">Viac informácií</string>
 </resources>

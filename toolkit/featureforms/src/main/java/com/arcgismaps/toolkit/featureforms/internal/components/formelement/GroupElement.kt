@@ -101,7 +101,9 @@ private fun GroupElement(
 ) {
     val colors = LocalColorScheme.current.groupElementColors
     Card(
-        modifier = modifier,
+        modifier = modifier.semantics(mergeDescendants = true) {
+            toggleableState = if (expanded) ToggleableState.On else ToggleableState.Off
+        },
         shape = GroupElementDefaults.containerShape,
         colors = CardDefaults.cardColors(
             containerColor = colors.containerColor
@@ -109,11 +111,7 @@ private fun GroupElement(
         border = BorderStroke(GroupElementDefaults.borderThickness, colors.outlineColor)
     ) {
         GroupElementHeader(
-            modifier = Modifier
-                .fillMaxWidth()
-                .semantics {
-                    toggleableState = if (expanded) ToggleableState.On else ToggleableState.Off
-                },
+            modifier = Modifier.fillMaxWidth(),
             title = label,
             description = description,
             isExpanded = expanded,
@@ -195,7 +193,7 @@ private fun GroupElementHeader(
 
 internal object GroupElementDefaults {
     val borderThickness = 1.dp
-    val containerShape = RoundedCornerShape(5.dp)
+    val containerShape = RoundedCornerShape(15.dp)
 }
 
 @Preview(showBackground = true, backgroundColor = 0xFFFFFF)

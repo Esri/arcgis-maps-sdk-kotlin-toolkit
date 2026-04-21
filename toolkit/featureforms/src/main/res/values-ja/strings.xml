@@ -73,41 +73,6 @@
     <string name="max_datetime_helper_text">日付は %1$s かそれ以前にする必要があります</string>
 
     <!-- Date Picker string values -->
-    <string name="ff_date_input_headline">入力された日付</string>
-    <string name="ff_date_input_headline_description">入力された日付: %1$s</string>
-    <string name="ff_date_input_invalid_for_pattern">日付は予測されるパターンに一致しません: %1$s</string>
-    <string name="ff_date_input_invalid_not_allowed">日付は許可されていません: %1$s</string>
-    <string name="ff_date_input_invalid_year_range">
-        日付は予測される年の範囲 %1$s ～ %2$s を超えています
-    </string>
-    <string name="ff_date_input_label">日付</string>
-    <string name="ff_date_input_no_input_description">なし</string>
-    <string name="ff_date_input_title">日付の選択</string>
-    <string name="ff_date_picker_headline">"選択した日付"</string>
-    <string name="ff_date_picker_headline_description">現在の選択: %1$s</string>
-    <string name="ff_date_picker_navigate_to_year_description">%1$s 年に移動</string>
-    <string name="ff_date_picker_no_selection_description">なし</string>
-    <string name="ff_date_picker_scroll_to_earlier_years">スクロールして前の年を表示</string>
-    <string name="ff_date_picker_scroll_to_later_years">スクロールして次の年を表示</string>
-    <string name="ff_date_picker_switch_to_calendar_mode">カレンダー入力モードに切り替え</string>
-    <string name="ff_date_picker_switch_to_day_selection">
-        "スワイプして年を選択するか、タップして日付の選択に戻る"
-    </string>
-    <string name="ff_date_picker_switch_to_input_mode">テキスト入力モードに切り替え</string>
-    <string name="ff_date_picker_switch_to_next_month">"次月に変更"</string>
-    <string name="ff_date_picker_switch_to_previous_month">"前月に変更"</string>
-    <string name="ff_date_picker_switch_to_year_selection">"年の選択に切り替え"</string>
-    <string name="ff_date_picker_title">"日付の選択"</string>
-    <string name="ff_date_picker_today_description">今日</string>
-    <string name="ff_date_picker_year_picker_pane_title">年選択を表示</string>
-    <string name="ff_date_range_input_invalid_range_input">日付範囲の入力が無効です</string>
-    <string name="ff_date_range_input_title">日付の入力</string>
-    <string name="ff_date_range_picker_day_in_range">範囲内</string>
-    <string name="ff_date_range_picker_end_headline">終了日</string>
-    <string name="ff_date_range_picker_scroll_to_next_month">スクロールして次月を表示</string>
-    <string name="ff_date_range_picker_scroll_to_previous_month">スクロールして前月を表示</string>
-    <string name="ff_date_range_picker_start_headline">開始日</string>
-    <string name="ff_date_range_picker_title">日付の選択</string>
 
     <!-- Time Picker string values -->
     <string name="ff_time_picker_am">AM</string>
@@ -145,4 +110,56 @@
     <string name="tap_to_scan">タップしてスキャン</string>
     <string name="unable_to_open_the_camera">カメラを開けません</string>
     <string name="value_must_be_a_guid">値は有効な GUID である必要があります</string>
+    <string name="delete_attachment_title">添付ファイルを削除しますか？</string>
+    <string name="delete_attachment_confirmation">この添付ファイルを削除しますか？</string>
+    <string name="download_failed">このファイルをダウンロードできません。</string>
+    <string name="file_size_exceeds_limit">ファイル サイズが制限を超えています</string>
+    <string name="unsupported_file_type">サポートされていないファイル タイプ</string>
+    <string name="save">保存</string>
+    <string name="discard">破棄</string>
+    <string name="none_selected">選択されていません</string>
+    <string name="the_form_has_validation_errors">フォームには検証エラーがあります</string>
+    <string name="the_form_has_edits">フォームは編集されています</string>
+    <string name="do_you_want_to_save_your_changes">変更を保存しますか？</string>
+    <string name="no_associations_found">関連付けはありません。</string>
+    <string name="terminal">ターミナル</string>
+    <string name="terminal_with_value">ターミナル: %1$s</string>
+    <string name="content_visible">コンテンツ表示</string>
+    <string name="percent_along">割合</string>
+    <string name="from_element">始点エレメント</string>
+    <string name="to_element">終点エレメント</string>
+    <string name="association_type">関連付けタイプ</string>
+    <string name="remove_association">関連付けの削除</string>
+    <string name="remove_association_tooltip">関連付けのみを削除します。 フィーチャは維持されます。</string>
+    <string name="remove">削除</string>
+    <string name="association_settings">関連付け設定</string>
+    <string name="percent_along_edge">%1$d %%</string>
+    <string name="visible_content">表示コンテンツ</string>
+    <string name="content">コンテンツ</string>
+    <string name="containment_visible_value">表示: %1$s</string>
+    <string name="from_network_data_source">ネットワーク データ ソースから</string>
+    <string name="on_map">マップ上</string>
+    <string name="network_data_source">ネットワーク データ ソース</string>
+    <string name="available_asset_types">利用可能なアセット タイプ</string>
+    <string name="count">数 %1$d</string>
+    <string name="new_association">新しい関連付け</string>
+    <string name="add">追加</string>
+    <string name="failed_to_create_association">関連付けの作成に失敗しました。 %1$s</string>
+    <string name="available_features">%1$d 使用可能なフィーチャ</string>
+    <string name="loading2">読み込んでいます...</string>
+    <plurals name="you_have_errors_that_must_be_fixed_before_saving">
+        <item quantity="zero">保存する前に修正が必要な %1$d エラーがあります。</item>
+        <item quantity="one">保存する前に修正が必要な %1$d エラーがあります。</item>
+        <item quantity="two">保存する前に修正が必要な %1$d エラーがあります</item>
+        <item quantity="few">保存する前に修正が必要な %1$d エラーがあります</item>
+        <item quantity="many">保存する前に修正が必要な %1$d エラーがあります</item>
+        <item quantity="other">保存する前に修正が必要な %1$d エラーがあります</item>
+    </plurals>
+    <string name="search_features">フィーチャの検索</string>
+    <string name="choose_to_add">選択して追加</string>
+    <string name="no_features_found">フィーチャが見つかりません</string>
+    <string name="refine_your_search_tip">検索条件を絞り込むか、別のネットワーク ソースを選択してください。</string>
+    <string name="select_terminal">ターミナルの選択</string>
+    <string name="show_on_map">マップに表示</string>
+    <string name="more_information">追加情報</string>
 </resources>

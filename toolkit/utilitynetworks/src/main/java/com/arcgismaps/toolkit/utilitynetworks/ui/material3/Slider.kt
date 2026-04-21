@@ -70,7 +70,6 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.lerp
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.PointMode
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.drawscope.DrawScope
@@ -98,7 +97,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.offset
 import androidx.compose.ui.util.fastFirst
 import androidx.compose.ui.util.fastFirstOrNull
-import androidx.compose.ui.util.fastMap
 import androidx.compose.ui.util.lerp
 import androidx.compose.ui.util.packFloats
 import androidx.compose.ui.util.unpackFloat1
@@ -1029,86 +1027,6 @@ internal object SliderDefaults {
     }
 
     /**
-     * The Default track for [Slider] and [RangeSlider]
-     *
-     * @param sliderPositions [SliderPositions] which is used to obtain the current active track
-     * and the tick positions if the slider is discrete.
-     * @param modifier the [Modifier] to be applied to the track.
-     * @param colors [SliderColors] that will be used to resolve the colors used for this track in
-     * different states. See [SliderDefaults.colors].
-     * @param enabled controls the enabled state of this slider. When `false`, this component will
-     * not respond to user input, and it will appear visually disabled and disabled to
-     * accessibility services.
-     */
-    @Suppress("DEPRECATION")
-    @Composable
-    @Deprecated("Use version that supports slider state")
-    internal fun Track(
-        sliderPositions: SliderPositions,
-        modifier: Modifier = Modifier,
-        colors: SliderColors = colors(),
-        enabled: Boolean = true,
-    ) {
-        val inactiveTrackColor = colors.trackColor(enabled, active = false)
-        val activeTrackColor = colors.trackColor(enabled, active = true)
-        val inactiveTickColor = colors.tickColor(enabled, active = false)
-        val activeTickColor = colors.tickColor(enabled, active = true)
-        Canvas(
-            modifier
-                .fillMaxWidth()
-                .height(TrackHeight)
-        ) {
-            val isRtl = layoutDirection == LayoutDirection.Rtl
-            val sliderLeft = Offset(0f, center.y)
-            val sliderRight = Offset(size.width, center.y)
-            val sliderStart = if (isRtl) sliderRight else sliderLeft
-            val sliderEnd = if (isRtl) sliderLeft else sliderRight
-            val tickSize = TickSize.toPx()
-            val trackStrokeWidth = TrackHeight.toPx()
-            drawLine(
-                inactiveTrackColor,
-                sliderStart,
-                sliderEnd,
-                trackStrokeWidth,
-                StrokeCap.Round
-            )
-            val sliderValueEnd = Offset(
-                sliderStart.x +
-                        (sliderEnd.x - sliderStart.x) * sliderPositions.activeRange.endInclusive,
-                center.y
-            )
-
-            val sliderValueStart = Offset(
-                sliderStart.x +
-                        (sliderEnd.x - sliderStart.x) * sliderPositions.activeRange.start,
-                center.y
-            )
-
-            drawLine(
-                activeTrackColor,
-                sliderValueStart,
-                sliderValueEnd,
-                trackStrokeWidth,
-                StrokeCap.Round
-            )
-            sliderPositions.tickFractions.groupBy {
-                it > sliderPositions.activeRange.endInclusive ||
-                        it < sliderPositions.activeRange.start
-            }.forEach { (outsideFraction, list) ->
-                drawPoints(
-                    list.fastMap {
-                        Offset(lerp(sliderStart, sliderEnd, it).x, center.y)
-                    },
-                    PointMode.Points,
-                    (if (outsideFraction) inactiveTickColor else activeTickColor),
-                    tickSize,
-                    StrokeCap.Round
-                )
-            }
-        }
-    }
-
-    /**
      * The Default track for [Slider]
      *
      * @param sliderState [SliderState] which is used to obtain the current active track.
@@ -1720,49 +1638,6 @@ private enum class RangeSliderComponents {
     ENDTHUMB,
     STARTTHUMB,
     TRACK
-}
-
-/**
- * Class that holds information about [Slider]'s and [RangeSlider]'s active track
- * and fractional positions where the discrete ticks should be drawn on the track.
- */
-@Suppress("DEPRECATION")
-@Deprecated("Not necessary with the introduction of Slider state")
-@Stable
-internal class SliderPositions(
-    initialActiveRange: ClosedFloatingPointRange<Float> = 0f..1f,
-    initialTickFractions: FloatArray = floatArrayOf()
-) {
-    /**
-     * [ClosedFloatingPointRange] that indicates the current active range for the
-     * start to thumb for a [Slider] and start thumb to end thumb for a [RangeSlider].
-     */
-    internal var activeRange: ClosedFloatingPointRange<Float> by mutableStateOf(initialActiveRange)
-        internal set
-
-    /**
-     * The discrete points where a tick should be drawn on the track.
-     * Each value of tickFractions should be within the range [0f, 1f]. If
-     * the track is continuous, then tickFractions will be an empty [FloatArray].
-     */
-    internal var tickFractions: FloatArray by mutableStateOf(initialTickFractions)
-        internal set
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other !is SliderPositions) return false
-
-        if (activeRange != other.activeRange) return false
-        if (!tickFractions.contentEquals(other.tickFractions)) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = activeRange.hashCode()
-        result = 31 * result + tickFractions.contentHashCode()
-        return result
-    }
 }
 
 /**

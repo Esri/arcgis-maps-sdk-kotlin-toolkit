@@ -73,41 +73,6 @@
     <string name="max_datetime_helper_text">날짜는 %1$s 또는 그 이전이어야 함</string>
 
     <!-- Date Picker string values -->
-    <string name="ff_date_input_headline">입력한 날짜</string>
-    <string name="ff_date_input_headline_description">입력한 날짜: %1$s</string>
-    <string name="ff_date_input_invalid_for_pattern">날짜가 예상 패턴과 일치하지 않음: %1$s</string>
-    <string name="ff_date_input_invalid_not_allowed">날짜가 허용되지 않음: %1$s</string>
-    <string name="ff_date_input_invalid_year_range">
-        날짜가 예상 연도 범위(%1$s - %2$s)를 벗어남
-    </string>
-    <string name="ff_date_input_label">날짜</string>
-    <string name="ff_date_input_no_input_description">없음</string>
-    <string name="ff_date_input_title">날짜 선택</string>
-    <string name="ff_date_picker_headline">"선택한 날짜"</string>
-    <string name="ff_date_picker_headline_description">현재 선택 항목: %1$s</string>
-    <string name="ff_date_picker_navigate_to_year_description">연도(%1$s)로 이동</string>
-    <string name="ff_date_picker_no_selection_description">없음</string>
-    <string name="ff_date_picker_scroll_to_earlier_years">스크롤하여 이전 연도 표시</string>
-    <string name="ff_date_picker_scroll_to_later_years">스크롤하여 이후 연도 표시</string>
-    <string name="ff_date_picker_switch_to_calendar_mode">캘린더 입력 모드로 전환</string>
-    <string name="ff_date_picker_switch_to_day_selection">
-        "스와이프하여 연도를 선택하거나 눌러서 다시 날짜 선택으로 전환"
-    </string>
-    <string name="ff_date_picker_switch_to_input_mode">텍스트 입력 모드로 전환</string>
-    <string name="ff_date_picker_switch_to_next_month">"다음 달로 변경"</string>
-    <string name="ff_date_picker_switch_to_previous_month">"이전 달로 변경"</string>
-    <string name="ff_date_picker_switch_to_year_selection">"연도 선택으로 전환"</string>
-    <string name="ff_date_picker_title">"날짜 선택"</string>
-    <string name="ff_date_picker_today_description">오늘</string>
-    <string name="ff_date_picker_year_picker_pane_title">연도 선택기 표시</string>
-    <string name="ff_date_range_input_invalid_range_input">잘못된 날짜 범위 입력</string>
-    <string name="ff_date_range_input_title">날짜 입력</string>
-    <string name="ff_date_range_picker_day_in_range">범위 내</string>
-    <string name="ff_date_range_picker_end_headline">종료일</string>
-    <string name="ff_date_range_picker_scroll_to_next_month">스크롤하여 다음 달 표시</string>
-    <string name="ff_date_range_picker_scroll_to_previous_month">스크롤하여 이전 달 표시</string>
-    <string name="ff_date_range_picker_start_headline">시작일</string>
-    <string name="ff_date_range_picker_title">날짜 선택</string>
 
     <!-- Time Picker string values -->
     <string name="ff_time_picker_am">오전</string>
@@ -145,4 +110,56 @@
     <string name="tap_to_scan">탭하여 스캔</string>
     <string name="unable_to_open_the_camera">카메라를 열 수 없음</string>
     <string name="value_must_be_a_guid">값은 유효한 GUID여야 함</string>
+    <string name="delete_attachment_title">첨부 파일을 삭제하시겠습니까?</string>
+    <string name="delete_attachment_confirmation">이 첨부 파일을 삭제하시겠습니까?</string>
+    <string name="download_failed">이 파일을 다운로드할 수 없습니다.</string>
+    <string name="file_size_exceeds_limit">파일 크기 한도 초과</string>
+    <string name="unsupported_file_type">지원되지 않는 파일 유형</string>
+    <string name="save">저장</string>
+    <string name="discard">취소</string>
+    <string name="none_selected">선택 항목 없음</string>
+    <string name="the_form_has_validation_errors">양식에 유효성 검사 오류가 있음</string>
+    <string name="the_form_has_edits">양식에 편집 사항이 있음</string>
+    <string name="do_you_want_to_save_your_changes">변경 사항을 저장하시겠습니까?</string>
+    <string name="no_associations_found">표시할 연관 없음</string>
+    <string name="terminal">터미널</string>
+    <string name="terminal_with_value">터미널: %1$s</string>
+    <string name="content_visible">콘텐츠 표시</string>
+    <string name="percent_along">다음에 따른 퍼센트</string>
+    <string name="from_element">출발 요소</string>
+    <string name="to_element">도착 요소</string>
+    <string name="association_type">연관 유형</string>
+    <string name="remove_association">연관 제거</string>
+    <string name="remove_association_tooltip">연관만 제거합니다. 피처는 남아 있습니다.</string>
+    <string name="remove">제거</string>
+    <string name="association_settings">연관 설정</string>
+    <string name="percent_along_edge">%1$d %%</string>
+    <string name="visible_content">표시 콘텐츠</string>
+    <string name="content">콘텐츠</string>
+    <string name="containment_visible_value">표시: %1$s</string>
+    <string name="from_network_data_source">시작 네트워크 데이터 소스</string>
+    <string name="on_map">On Map</string>
+    <string name="network_data_source">네트워크 데이터 소스</string>
+    <string name="available_asset_types">사용할 수 있는 자산 유형</string>
+    <string name="count">개수 %1$d개</string>
+    <string name="new_association">새 연관</string>
+    <string name="add">추가</string>
+    <string name="failed_to_create_association">연관 생성에 실패했습니다. %1$s</string>
+    <string name="available_features">사용 가능한 피처 %1$d개</string>
+    <string name="loading2">불러오는 중...</string>
+    <plurals name="you_have_errors_that_must_be_fixed_before_saving">
+        <item quantity="zero">저장하기 전에 %1$d개 오류를 수정해야 합니다.</item>
+        <item quantity="one">저장하기 전에 %1$d개 오류를 수정해야 합니다.</item>
+        <item quantity="two">저장하기 전에 %1$d개 오류를 수정해야 함</item>
+        <item quantity="few">저장하기 전에 %1$d개 오류를 수정해야 함</item>
+        <item quantity="many">저장하기 전에 %1$d개 오류를 수정해야 함</item>
+        <item quantity="other">저장하기 전에 %1$d개 오류를 수정해야 함</item>
+    </plurals>
+    <string name="search_features">피처 검색</string>
+    <string name="choose_to_add">추가하려면 선택</string>
+    <string name="no_features_found">피처를 찾을 수 없음</string>
+    <string name="refine_your_search_tip">검색을 구체화하거나 다른 네트워크 원본을 선택하세요.</string>
+    <string name="select_terminal">터미널 선택</string>
+    <string name="show_on_map">맵에 표시</string>
+    <string name="more_information">추가 정보</string>
 </resources>

@@ -1,6 +1,6 @@
 # GeoView-Compose
 
-The GeoView-Compose module provides `@Composable` implementations of the `MapView` and `SceneView` with a Compose-idiomatic API.
+The GeoView-Compose module provides `@Composable` implementations of the `MapView`, `SceneView` and `LocalSceneView` with a Compose-idiomatic API.
 
 ![image](screenshot.png)
 
@@ -22,7 +22,7 @@ MapView(
 
 ### Respond to User Input
 
-The composable `MapView` and `SceneView` expose gesture events as lambda callback parameters:
+The composable `MapView`, `SceneView`, and `LocalSceneView` exposes gesture events as lambda callback parameters:
 
 ```kotlin
 val arcGISMap = remember { ArcGISMap(BasemapStyle.ArcGISImagery) }
@@ -118,7 +118,7 @@ An example of how to identify features and graphics is available in the [MapView
 
 ### Display a Callout
 
-To display a Callout, use the `content` lambda parameter of the `MapView` or `SceneView` to call the [Callout](./src/main/java/com/arcgismaps/toolkit/geoviewcompose/GeoViewScope.kt#L120) composable function: 
+To display a Callout, use the `content` lambda parameter of the `MapView`, `SceneView`, or `LocalSceneView` to call the [Callout](./src/main/java/com/arcgismaps/toolkit/geoviewcompose/GeoViewScope.kt#L216) composable function: 
 
 ```kotlin
 MapView(
@@ -136,7 +136,8 @@ MapView(
                 colorScheme = CalloutDefaults.colors(
                     borderColor = MaterialTheme.colorScheme.outlineVariant,
                     backgroundColor = MaterialTheme.colorScheme.background
-                )
+                ),
+                leaderPosition = LeaderPosition.Automatic,
                 geoElement = selectedGeoElement,
                 tapLocation = tapLocation
             ) {
@@ -149,25 +150,24 @@ MapView(
 )
 ```
 
-An example of how to use the Callout on a point or geo-element is available in the [MapView Callout App](../../microapps/MapViewCalloutApp/README.md).
+An example of how to use the Callout on a point or geo-element is available in the [Callout App](../../microapps/CalloutApp/README.md).
 
 ### Display an OverviewMap
 
 The Overview Map is a small, secondary Map View (sometimes called an "inset map"), that can be
-superimposed on an existing Map View or Scene View, which shows a representation of the main view's
-current viewpoint.
+superimposed on an existing `MapView`, `SceneView`, or `LocalSceneView`, which shows a representation of the main view's current viewpoint.
 
 ![Screenshot](mapview_screenshot.png) ![Screenshot](sceneview_screenshot.png)
 
 #### Basic usage for displaying an Overview Map
 
-A simple workflow is to display the Overview Map on top of a Map View and use the viewpoint and
+A simple workflow is to display the Overview Map on top of a `MapView` and use the viewpoint and
 visible area callbacks to update the overview.
 
-There are two overloads of the Overview Map - one to use when creating an overview of a Map View and
-the other to use when creating an overview of a Scene View.
+There are two overloads of the Overview Map - one to use when creating an overview of a `MapView` and
+the other to use when creating an overview of a `SceneView` or `LocalSceneView`.
 
-Use the following code to create the UI for a Map View overview
+Use the following code to create the UI for a `MapView` overview
 
 ```kotlin
 val viewpoint: MutableState<Viewpoint?> = remember { mutableStateOf(null) }
@@ -197,7 +197,7 @@ Box {
 }
 ```
 
-or, for a Scene View overview
+or, for a `SceneView` or `LocalSceneView` overview
 
 ```kotlin
 val viewpoint: MutableState<Viewpoint?> = remember { mutableStateOf(null) }
@@ -224,8 +224,8 @@ Box {
 
 Note that the overloads for `OverviewMap` can take a `Symbol` that defines how the parent view's
 visible map is symbolized in the overview. Any symbol provided must be suitable for a polygon
-geometry if the overview is for a Map View and suitable for a point geometry if the overview is for
-a Scene View.
+geometry if the overview is for a `MapView` and suitable for a point geometry if the overview is for
+a `SceneView` or `LocalSceneView`.
 
 #### Example
 
@@ -235,14 +235,14 @@ in the project.
 
 ### Other Examples:
 
-Other microapps that demonstrate various workflows with the composable `MapView` and `SceneView` are available:
+Other microapps that demonstrate various workflows with the composable `MapView`,`SceneView`, and `LocalSceneView` are available:
 
 - [MapView Geometry Editor App](../../microapps/MapViewGeometryEditorApp/README.md) demonstrates the use of `GeometryEditor` and `GraphicsOverlay`
 - [MapView Insets App](../../microapps/MapViewInsetsApp/README.md) demonstrates the use of `Insets`
 - [SceneView Analysis Overlay App](../../microapps/SceneViewAnalysisOverlayApp/README.md) demonstrates the use of `AnalysisOverlay`
 - [SceneView Camera Controller App](../../microapps/SceneViewCameraControllerApp/README.md) demonstrates the use of the `CameraController`
 - [SceneView Lighting Options App](../../microapps/SceneViewLightingOptionsApp/README.md) demonstrates the use of various lighting options with the `SceneView`
-- [MapView CalloutApp](../../microapps/MapViewCalloutApp/README.md) demonstrates the use of Callout with the `MapView`
-- [SceneView CalloutApp](../../microapps/SceneViewCalloutApp/README.md) demonstrates the use of Callout with the `SceneView`
+- [CalloutApp](../../microapps/CalloutApp/README.md) demonstrates the use of Callout with the composable `MapView` or `SceneView`
+- [LocalSceneView App](../../microapps/LocalSceneViewApp/README.md) demonstrates the use of the composable `LocalSceneView`
 
 

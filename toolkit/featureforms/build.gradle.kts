@@ -23,12 +23,20 @@ plugins {
     id("artifact-deploy")
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
     id("kotlin-parcelize")
+    id("android-integration-testing")
     alias(libs.plugins.binary.compatibility.validator) apply true
     alias(libs.plugins.kotlin.serialization) apply true
 }
 
 secrets {
     defaultPropertiesFileName = "secrets.defaults.properties"
+}
+
+kotlin {
+    jvmToolchain(17)
+    compilerOptions {
+        freeCompilerArgs.add("-Xconsistent-data-class-copy-visibility")
+    }
 }
 
 android {
@@ -42,29 +50,19 @@ android {
         disable.add("SuspiciousModifierThen")
         // remove these disables when strings.xml lint is fixed via localization
         disable += "MissingTranslation"
-        disable += "MissingQuantity"
     }
-    
+
     defaultConfig {
         minSdk = libs.versions.minSdk.get().toInt()
-        
+        testApplicationId = "com.arcgismaps.toolkit.featureforms.test"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
     }
-    
+
     buildTypes {
         release {
             isMinifyEnabled = false
         }
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
-    }
-    kotlinOptions {
-        jvmTarget = "1.8"
-        // This flag is the same as applying '@ConsistentCopyVisibility' annotation to all data classes in the module.
-        freeCompilerArgs = freeCompilerArgs + listOf("-Xconsistent-data-class-copy-visibility")
     }
     buildFeatures {
         compose = true
@@ -97,6 +95,20 @@ android {
             // This is the default variant.
         }
     }
+
+    val toolkitTests = project.findProperty("toolkitTestDir") as String
+    sourceSets.getByName("androidTest") {
+        var file = file("$toolkitTests/${project.name}/androidTest")
+        if (file.exists()) {
+            java.setSrcDirs(java.srcDirs.plus(file))
+        }
+    }
+    sourceSets.getByName("test") {
+        var file = file("$toolkitTests/${project.name}/test")
+        if (file.exists()) {
+            java.setSrcDirs(java.srcDirs.plus(file))
+        }
+    }
 }
 
 apiValidation {
@@ -123,18 +135,26 @@ apiValidation {
         "com.arcgismaps.toolkit.featureforms.internal.components.barcode.ComposableSingletons\$BarcodeScannerKt",
         "com.arcgismaps.toolkit.featureforms.internal.components.barcode.ComposableSingletons\$BarcodeTextFieldKt",
         "com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.ComposableSingletons\$UtilityAssociationsElementKt",
-        "com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.ComposableSingletons\$UtilityAssociationsKt",
+        "com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.ComposableSingletons\$UtilityAssociationsFilterResultKt",
+        "com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.ComposableSingletons\$UtilityAssociationGroupResultKt",
         "com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.ComposableSingletons\$UtilityAssociationDetailsKt",
         "com.arcgismaps.toolkit.featureforms.internal.components.dialogs.ComposableSingletons\$ConfirmationDialogsKt",
-        "com.arcgismaps.toolkit.featureforms.internal.screens.ComposableSingletons\$ContentAwareTopBarKt",
         "com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationAction\$NavigateToFeature\$Creator",
         "com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationAction\$NavigateToAssociation\$Creator",
         "com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationAction\$Dismiss\$Creator",
         "com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationAction\$NavigateBack\$Creator",
         "com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationAction\$None\$Creator",
-        "com.arcgismaps.toolkit.featureforms.internal.components.dialogs.ComposableSingletons\$ConfirmationDialogsKt"
+        "com.arcgismaps.toolkit.featureforms.internal.components.material3.ComposableSingletons\$ModalBottomSheetKt",
+        "com.arcgismaps.toolkit.featureforms.internal.screens.ComposableSingletons\$ContentAwareTopBarKt",
+        "com.arcgismaps.toolkit.featureforms.internal.screens.ComposableSingletons\$UNAssociationGroupResultScreenKt",
+        "com.arcgismaps.toolkit.featureforms.internal.screens.ComposableSingletons\$UNAssociationsFilterResultScreenKt",
+        "com.arcgismaps.toolkit.featureforms.internal.screens.ComposableSingletons\$CreateAssociationScreenKt",
+        "com.arcgismaps.toolkit.featureforms.internal.screens.ComposableSingletons\$SelectAssociatedFeatureScreenKt",
+        "com.arcgismaps.toolkit.featureforms.internal.screens.ComposableSingletons\$SelectNetworkSourceScreenKt",
+        "com.arcgismaps.toolkit.featureforms.internal.screens.ComposableSingletons\$UtilityAssociationDetailsScreenKt",
+        "com.arcgismaps.toolkit.featureforms.internal.screens.ComposableSingletons\$FeaturesFilterScreenKt",
+        "com.arcgismaps.toolkit.featureforms.internal.utils.ComposableSingletons\$SearchBarKt"
     )
-    
     ignoredClasses.addAll(composableSingletons)
 }
 
@@ -142,8 +162,7 @@ apiValidation {
 dependencies {
     api(arcgis.mapsSdk)
     implementation(libs.bundles.commonmark)
-    implementation(platform(libs.coil.bom))
-    implementation(libs.coil.compose)
+    implementation(libs.coil3.compose)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.foundation)
     implementation(libs.androidx.window)
@@ -152,15 +171,22 @@ dependencies {
     implementation(libs.androidx.compose.ui.util)
     implementation(libs.bundles.core)
     implementation(libs.androidx.activity.compose)
-    implementation(libs.androidx.material.icons)
+    implementation(libs.bundles.icons)
     implementation(libs.bundles.camerax)
     implementation(libs.mlkit.barcode.scanning)
     implementation(libs.androidx.compose.navigation)
     implementation(libs.kotlinx.serialization.json)
     testImplementation(libs.bundles.unitTest)
+    testImplementation(libs.mockk.android)
     androidTestImplementation(libs.truth)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.bundles.composeTest)
     androidTestImplementation(libs.bundles.androidXTest)
     debugImplementation(libs.bundles.debug)
+
+    // Include only if internal tests are required
+    if (file(project.findProperty("toolkitTestDir") as String).exists()) {
+        androidTestImplementation(libs.mockingjay)
+        androidTestImplementation(arcgis.mapsSdkTestFixtures)
+    }
 }

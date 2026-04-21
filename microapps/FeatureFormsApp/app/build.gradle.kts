@@ -23,10 +23,18 @@ plugins {
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
     id("com.google.dagger.hilt.android")
     id("com.google.devtools.ksp")
+    alias(libs.plugins.kotlin.serialization) apply true
 }
 
 secrets {
     defaultPropertiesFileName = "secrets.defaults.properties"
+}
+
+kotlin {
+    jvmToolchain(17)
+    compilerOptions {
+        freeCompilerArgs.add("-Xannotation-default-target=param-property")
+    }
 }
 
 android {
@@ -51,13 +59,6 @@ android {
             //proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"),("proguard-rules.pro"
         }
     }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
-    }
-    kotlinOptions {
-        jvmTarget = "1.8"
-    }
     buildFeatures {
         compose = true
         buildConfig = true
@@ -80,6 +81,7 @@ dependencies {
     implementation(project(":authentication"))
     implementation(project(":featureforms"))
     implementation(project(":geoview-compose"))
+    implementation(project(":offline"))
     // sdk
     implementation(arcgis.mapsSdk)
     // hilt
@@ -88,14 +90,20 @@ dependencies {
     ksp(libs.hilt.compiler)
     // room
     implementation(libs.room.runtime)
-    annotationProcessor(libs.room.compiler)
     implementation(libs.room.ext)
     ksp(libs.room.compiler)
     // jetpack window manager
     implementation(libs.androidx.window)
     implementation(libs.androidx.window.core)
+    // kotlinx serialization
+    implementation(libs.kotlinx.serialization.json)
+    // datastore
+    implementation(libs.androidx.datastore.preferences)
+    // coil
+    implementation(libs.coil3.compose)
     // compose
     implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.material.icons.core)
     implementation(libs.bundles.composeCore)
     implementation(libs.bundles.core)
     implementation(libs.androidx.activity.compose)

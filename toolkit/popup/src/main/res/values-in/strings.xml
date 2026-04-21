@@ -24,4 +24,24 @@
     <string name="other">Lainnya</string>
     <string name="close">Kembali</string>
     <string name="attachment_thumbnail">thumbnail lampiran</string>
+    <string name="terminal">Terminal</string>
+    <string name="no_associations_found">Tidak ditemukan asosiasi</string>
+    <string name="visible_content">Konten yang Terlihat</string>
+    <string name="content">Konten</string>
+    <string name="containment_visible">Penahanan Terlihat</string>
+    <string name="fraction_along_edge">Fraksi Sepanjang Tepi</string>
+    <string name="percent_along_edge">%1$d %%</string>
+    <string name="from_element">Dari Elemen</string>
+    <string name="to_element">Ke Elemen</string>
+    <string name="association_type">Jenis Asosiasi</string>
+    <string name="remove_association">Hapus Asosiasi</string>
+    <string name="remove_association_tooltip">Hanya hapus asosiasi Fitur tetap ada.</string>
+    <string name="remove">Hapus</string>
+    <string name="cancel">Batalkan</string>
+    <string name="none_selected">Tidak Ada yang Dipilih</string>
+    <string name="association_settings">Pengaturan Asosiasi</string>
+    <string name="show_all">Tampilkan semua</string>
+    <string name="filter_by_feature_title">Filter berdasarkan judul fitur</string>
+    <string name="containment_visible_value">Terlihat: %1$s</string>
+    <string name="associations">Asosiasi</string>
 </resources>

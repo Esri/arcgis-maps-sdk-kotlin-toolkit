@@ -73,41 +73,6 @@
     <string name="max_datetime_helper_text">Datoen må være den eller før %1$s</string>
 
     <!-- Date Picker string values -->
-    <string name="ff_date_input_headline">Angitt dato</string>
-    <string name="ff_date_input_headline_description">Angitt dato: %1$s</string>
-    <string name="ff_date_input_invalid_for_pattern">Datoen matcher ikke det forventede mønsteret: %1$s</string>
-    <string name="ff_date_input_invalid_not_allowed">Dato ikke tillatt: %1$s</string>
-    <string name="ff_date_input_invalid_year_range">
-        Datoen er utenfor det forventede årsområdet %1$s – %2$s
-    </string>
-    <string name="ff_date_input_label">Dato</string>
-    <string name="ff_date_input_no_input_description">Ingen</string>
-    <string name="ff_date_input_title">Velg dato</string>
-    <string name="ff_date_picker_headline">"Valgt dato"</string>
-    <string name="ff_date_picker_headline_description">Gjeldende utvalg: %1$s</string>
-    <string name="ff_date_picker_navigate_to_year_description">Naviger til år %1$s</string>
-    <string name="ff_date_picker_no_selection_description">Ingen</string>
-    <string name="ff_date_picker_scroll_to_earlier_years">Rull for å vise tidligere år</string>
-    <string name="ff_date_picker_scroll_to_later_years">Rull for å vise senere år</string>
-    <string name="ff_date_picker_switch_to_calendar_mode">Bytt til kalenderinnsettingsmodus</string>
-    <string name="ff_date_picker_switch_to_day_selection">
-        "Sveip for å velge et år eller trykk for å gå tilbake til å velge en dag"
-    </string>
-    <string name="ff_date_picker_switch_to_input_mode">Bytt til tekstinnsettingsmodus</string>
-    <string name="ff_date_picker_switch_to_next_month">"Endre til neste måned"</string>
-    <string name="ff_date_picker_switch_to_previous_month">"Endre til tidligere måned"</string>
-    <string name="ff_date_picker_switch_to_year_selection">"Bytt til å velge et år"</string>
-    <string name="ff_date_picker_title">"Velg dato"</string>
-    <string name="ff_date_picker_today_description">I dag</string>
-    <string name="ff_date_picker_year_picker_pane_title">Årsvelgeren er synlig</string>
-    <string name="ff_date_range_input_invalid_range_input">Ugyldige inndata for datoområde</string>
-    <string name="ff_date_range_input_title">Angi datoer</string>
-    <string name="ff_date_range_picker_day_in_range">Innenfor området</string>
-    <string name="ff_date_range_picker_end_headline">Sluttdato</string>
-    <string name="ff_date_range_picker_scroll_to_next_month">Rull ned for å vise neste måned</string>
-    <string name="ff_date_range_picker_scroll_to_previous_month">Bla ned for å vise forrige måned</string>
-    <string name="ff_date_range_picker_start_headline">Startdato</string>
-    <string name="ff_date_range_picker_title">Velg datoer</string>
 
     <!-- Time Picker string values -->
     <string name="ff_time_picker_am">AM</string>
@@ -145,4 +110,56 @@
     <string name="tap_to_scan">Trykk for å skanne</string>
     <string name="unable_to_open_the_camera">Kan ikke åpne kameraet</string>
     <string name="value_must_be_a_guid">Verdien må være en gyldig GUID</string>
+    <string name="delete_attachment_title">Slett vedlegg?</string>
+    <string name="delete_attachment_confirmation">Er du sikker på at du vil slette dette vedlegget?</string>
+    <string name="download_failed">Kan ikke laste ned denne filen.</string>
+    <string name="file_size_exceeds_limit">Filstørrelsen overskrider grensen</string>
+    <string name="unsupported_file_type">Filtypen støttes ikke</string>
+    <string name="save">Lagre</string>
+    <string name="discard">Forkast</string>
+    <string name="none_selected">Ingen valgte</string>
+    <string name="the_form_has_validation_errors">Skjemaet har valideringsfeil</string>
+    <string name="the_form_has_edits">Skjemaet har redigeringer</string>
+    <string name="do_you_want_to_save_your_changes">Vil du lagre endringene?</string>
+    <string name="no_associations_found">Ingen tilknytninger å vise</string>
+    <string name="terminal">Terminal</string>
+    <string name="terminal_with_value">Terminal: %1$s</string>
+    <string name="content_visible">Innhold synlig</string>
+    <string name="percent_along">Prosent langs</string>
+    <string name="from_element">Fra element</string>
+    <string name="to_element">Til element</string>
+    <string name="association_type">Tilknytningstype</string>
+    <string name="remove_association">Fjern tilknytning</string>
+    <string name="remove_association_tooltip">Fjerner bare tilknytningen. Geoobjektet blir værende.</string>
+    <string name="remove">Fjern</string>
+    <string name="association_settings">Tilknytningsinnstillinger</string>
+    <string name="percent_along_edge">%1$d %%</string>
+    <string name="visible_content">Synlig innhold</string>
+    <string name="content">Innhold</string>
+    <string name="containment_visible_value">Synlig: %1$s</string>
+    <string name="from_network_data_source">Fra nettverksdatakilde</string>
+    <string name="on_map">På kart</string>
+    <string name="network_data_source">Nettverksdatakilde</string>
+    <string name="available_asset_types">Tilgjengelige ressurstyper</string>
+    <string name="count">Antall %1$d</string>
+    <string name="new_association">Ny tilknytning</string>
+    <string name="add">Legg til</string>
+    <string name="failed_to_create_association">Kan ikke opprette tilknytning. %1$s</string>
+    <string name="available_features">%1$d tilgjengelige geoobjekter</string>
+    <string name="loading2">Laster inn …</string>
+    <plurals name="you_have_errors_that_must_be_fixed_before_saving">
+        <item quantity="zero">Du har %1$d feil som må utbedres før lagring.</item>
+        <item quantity="one">Du har %1$d feil som må utbedres før lagring.</item>
+        <item quantity="two">Du har %1$d feil som må utbedres før lagring.</item>
+        <item quantity="few">Du har %1$d feil som må utbedres før lagring.</item>
+        <item quantity="many">Du har %1$d feil som må utbedres før lagring.</item>
+        <item quantity="other">Du har %1$d feil som må utbedres før lagring.</item>
+    </plurals>
+    <string name="search_features">Søk i geoobjektene</string>
+    <string name="choose_to_add">Velg for å legge til</string>
+    <string name="no_features_found">Finner ingen geoobjekter</string>
+    <string name="refine_your_search_tip">Avgrens søket eller velg en annen nettverkskilde.</string>
+    <string name="select_terminal">Velg terminal</string>
+    <string name="show_on_map">Vis på kart</string>
+    <string name="more_information">Mer informasjon</string>
 </resources>

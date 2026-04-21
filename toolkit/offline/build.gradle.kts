@@ -26,6 +26,14 @@ plugins {
     alias(libs.plugins.kotlin.serialization) apply true
     alias(libs.plugins.binary.compatibility.validator) apply true
 }
+
+kotlin {
+    jvmToolchain(17)
+    compilerOptions {
+        freeCompilerArgs.add("-Xannotation-default-target=param-property")
+    }
+}
+
 android {
     namespace = "com.arcgismaps.toolkit.offline"
     compileSdk = libs.versions.compileSdk.get().toInt()
@@ -42,13 +50,6 @@ android {
             isMinifyEnabled = false
         }
     }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
-    }
-    kotlinOptions {
-        jvmTarget = "1.8"
-    }
     buildFeatures {
         compose = true
     }
@@ -61,9 +62,6 @@ android {
                 freeCompilerArgs.add("-Xexplicit-api=strict")
             }
         }
-    }
-    lint {
-        disable += "MissingTranslation"
     }
 
     /**
@@ -106,9 +104,9 @@ dependencies {
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.composeCore)
     implementation(libs.bundles.core)
+    implementation(libs.bundles.icons)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.work.runtime.ktx)
-    implementation(libs.androidx.material.icons)
     implementation(libs.kotlinx.serialization.json)
     testImplementation(libs.bundles.unitTest)
     androidTestImplementation(libs.bundles.composeTest)

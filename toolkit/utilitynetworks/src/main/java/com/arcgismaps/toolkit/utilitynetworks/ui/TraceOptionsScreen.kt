@@ -22,7 +22,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -97,13 +96,13 @@ internal fun TraceOptionsScreen(
     onColorChanged: (Color) -> Unit,
     onZoomRequested: (Boolean) -> Unit
 ) {
-    Column {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         var currentSelectedColor by remember { mutableStateOf(selectedColor) }
 
         LazyColumn(
-            modifier = Modifier
-                .weight(1f),
-            horizontalAlignment = Alignment.CenterHorizontally
+            modifier = Modifier.weight(weight = 1f, fill = false),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             item {
                 TraceConfigurations(
@@ -255,18 +254,10 @@ private fun StartingPoints(
     onStartingPointRemoved: (StartingPoint) -> Unit,
     onStartingPointSelected: (StartingPoint) -> Unit
 ) {
-    Column(
-        modifier = Modifier
-            .padding(bottom = 20.dp)
-    ) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         AddStartingPointButton {
             showAddStartingPointScreen()
         }
-        Spacer(
-            modifier = Modifier
-                .height(4.dp)
-                .fillMaxWidth()
-        )
         ExpandableCard(
             title = "${stringResource(id = R.string.starting_points)} (${startingPoints.size})",
             padding = PaddingValues()

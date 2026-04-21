@@ -73,41 +73,6 @@
     <string name="max_datetime_helper_text">Dato skal være på eller før %1$s</string>
 
     <!-- Date Picker string values -->
-    <string name="ff_date_input_headline">Indtastet dato</string>
-    <string name="ff_date_input_headline_description">Indtastet dato: %1$s</string>
-    <string name="ff_date_input_invalid_for_pattern">Date stemmer ikke overens med forventet mønster: %1$s</string>
-    <string name="ff_date_input_invalid_not_allowed">Dato ikke tilladt: %1$s</string>
-    <string name="ff_date_input_invalid_year_range">
-        Dato ligger uden for det forventede årsinterval %1$s - %2$s
-    </string>
-    <string name="ff_date_input_label">Dato</string>
-    <string name="ff_date_input_no_input_description">Ingen</string>
-    <string name="ff_date_input_title">Vælg dato</string>
-    <string name="ff_date_picker_headline">"Valg dato"</string>
-    <string name="ff_date_picker_headline_description">Aktuel markering: %1$s</string>
-    <string name="ff_date_picker_navigate_to_year_description">Naviger til år %1$s</string>
-    <string name="ff_date_picker_no_selection_description">Ingen</string>
-    <string name="ff_date_picker_scroll_to_earlier_years">Rul for at vise tidligere år</string>
-    <string name="ff_date_picker_scroll_to_later_years">Rul for at vise senere år</string>
-    <string name="ff_date_picker_switch_to_calendar_mode">Skift til kalenderinputtilstand</string>
-    <string name="ff_date_picker_switch_to_day_selection">
-        "Stryg for at vælge et år, eller tryk for at skifte tilbage til at vælge en dato"
-    </string>
-    <string name="ff_date_picker_switch_to_input_mode">Skift til tekstinputtilstand</string>
-    <string name="ff_date_picker_switch_to_next_month">"Skift til næste måned"</string>
-    <string name="ff_date_picker_switch_to_previous_month">"Skift til forrige måned"</string>
-    <string name="ff_date_picker_switch_to_year_selection">"Skift til at vælge et år"</string>
-    <string name="ff_date_picker_title">"Vælg dato"</string>
-    <string name="ff_date_picker_today_description">I dag</string>
-    <string name="ff_date_picker_year_picker_pane_title">Årvælger er synlig</string>
-    <string name="ff_date_range_input_invalid_range_input">Ugyldigt input af datointerval</string>
-    <string name="ff_date_range_input_title">Angiv datoer</string>
-    <string name="ff_date_range_picker_day_in_range">Inden for interval</string>
-    <string name="ff_date_range_picker_end_headline">Slutdato</string>
-    <string name="ff_date_range_picker_scroll_to_next_month">Rul for at vise næste måned</string>
-    <string name="ff_date_range_picker_scroll_to_previous_month">Rul for at vise forrige måned</string>
-    <string name="ff_date_range_picker_start_headline">Startdato</string>
-    <string name="ff_date_range_picker_title">Vælg datoer</string>
 
     <!-- Time Picker string values -->
     <string name="ff_time_picker_am">AM</string>
@@ -145,4 +110,56 @@
     <string name="tap_to_scan">Tryk for at scanne</string>
     <string name="unable_to_open_the_camera">Kan ikke åbne kameraet</string>
     <string name="value_must_be_a_guid">Værdi skal være en gyldig GUID</string>
+    <string name="delete_attachment_title">Slet vedhæftning?</string>
+    <string name="delete_attachment_confirmation">Er du sikker på, at du vil slette denne vedhæftning?</string>
+    <string name="download_failed">Kan ikke downloade denne fil.</string>
+    <string name="file_size_exceeds_limit">Filstørrelse overskrider maksimumgrænse</string>
+    <string name="unsupported_file_type">Ikke-understøttet filtype</string>
+    <string name="save">Gem</string>
+    <string name="discard">Slet</string>
+    <string name="none_selected">Ingen er valgt</string>
+    <string name="the_form_has_validation_errors">Formularen indeholder valideringsfejl</string>
+    <string name="the_form_has_edits">Formularen indeholder redigeringer</string>
+    <string name="do_you_want_to_save_your_changes">Vil du gemme ændringerne?</string>
+    <string name="no_associations_found">Der er ingen associeringer at vise</string>
+    <string name="terminal">Terminal</string>
+    <string name="terminal_with_value">Terminal: %1$s</string>
+    <string name="content_visible">Indhold synligt</string>
+    <string name="percent_along">Procent langs med</string>
+    <string name="from_element">Fra element</string>
+    <string name="to_element">Til element</string>
+    <string name="association_type">Associeringstype</string>
+    <string name="remove_association">Fjern associering</string>
+    <string name="remove_association_tooltip">Fjerner kun tilknytningen. Objektet forbliver.</string>
+    <string name="remove">Fjern</string>
+    <string name="association_settings">Associeringsindstillinger</string>
+    <string name="percent_along_edge">%1$d %%</string>
+    <string name="visible_content">Synligt indhold</string>
+    <string name="content">Indhold</string>
+    <string name="containment_visible_value">Synlig: %1$s</string>
+    <string name="from_network_data_source">Fra netværksdatakilde</string>
+    <string name="on_map">På kort</string>
+    <string name="network_data_source">Netværksdatakilde</string>
+    <string name="available_asset_types">Tilgængelige aktivtyper</string>
+    <string name="count">Antal %1$d</string>
+    <string name="new_association">Ny associering</string>
+    <string name="add">Tilføj</string>
+    <string name="failed_to_create_association">Kunne ikke oprette associering. %1$s</string>
+    <string name="available_features">%1$d Tilgængelige objekter</string>
+    <string name="loading2">Indlæser..</string>
+    <plurals name="you_have_errors_that_must_be_fixed_before_saving">
+        <item quantity="zero">Du har %1$d fejl, der skal rettes, før du gemmer.</item>
+        <item quantity="one">Du har %1$d fejl, der skal rettes, før du gemmer.</item>
+        <item quantity="two">Du har %1$d fejl, der skal rettes, før du gemmer</item>
+        <item quantity="few">Du har %1$d fejl, der skal rettes, før du gemmer</item>
+        <item quantity="many">Du har %1$d fejl, der skal rettes, før du gemmer</item>
+        <item quantity="other">Du har %1$d fejl, der skal rettes, før du gemmer</item>
+    </plurals>
+    <string name="search_features">Søgefunktioner</string>
+    <string name="choose_to_add">Vælg at tilføje</string>
+    <string name="no_features_found">Ingen objekter fundet</string>
+    <string name="refine_your_search_tip">Omdefiner din søgning eller vælg en anden netværkskilde.</string>
+    <string name="select_terminal">Vælg terminal</string>
+    <string name="show_on_map">Vis på kort</string>
+    <string name="more_information">Flere oplysninger</string>
 </resources>

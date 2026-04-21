@@ -21,22 +21,30 @@
 package com.arcgismaps.toolkit.popupapp.screens.mapscreen
 
 import android.widget.Toast
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arcgismaps.data.Feature
 import com.arcgismaps.mapping.GeoElement
 import com.arcgismaps.mapping.layers.FeatureLayer
@@ -56,7 +64,7 @@ private fun unselectFeature(feature: GeoElement?, layer: Layer?) {
 }
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreen(viewModel: MapViewModel) {
+fun MainScreen(viewModel: MapViewModel = viewModel()) {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
 
@@ -66,25 +74,50 @@ fun MainScreen(viewModel: MapViewModel) {
             skipHiddenState = false
         )
     )
+    LaunchedEffect(scaffoldState.bottomSheetState.currentValue) {
+        if (scaffoldState.bottomSheetState.currentValue == SheetValue.Hidden) {
+            resetSelection(viewModel)
+        }
+    }
+
+    val navBarHeight = with(LocalDensity.current) {
+        WindowInsets.navigationBars.getBottom(this).toDp()
+    }
+    // ensure a minimum bottom inset of 48.dp when there is no navigation bar
+    // this ensures that the peek height is always at least 96.dp
+    val bottomInset = maxOf(navBarHeight, 48.dp)
+
+    val statusBarHeightDp = with(LocalDensity.current) {
+        WindowInsets.statusBars.getTop(this).toDp()
+    }
+
+    val maxPopupHeight = with(LocalDensity.current) {
+        LocalWindowInfo.current.containerSize.height.toDp() - (statusBarHeightDp + bottomInset)
+    }
+
     BottomSheetScaffold(
         sheetContent = {
-            AnimatedVisibility(
-                visible = viewModel.popup != null,
-                enter = slideInVertically { h -> h },
-                exit = slideOutVertically { h -> h },
-                label = "popup",
-                modifier = Modifier.heightIn(min = 0.dp, max = 400.dp)
-            ) {
-                if (viewModel.popup != null) {
-                    Popup(
-                        viewModel.popup!!,
-                        modifier = Modifier.fillMaxSize()
-                    )
-                }
+            val state = viewModel.popupState
+            if (state != null) {
+                Popup(
+                    state,
+                    Modifier
+                        .animateContentSize()
+                        .heightIn(max = maxPopupHeight),
+                    onDismiss = {
+                        scope.launch {
+                            resetSelection(viewModel)
+                            scaffoldState.bottomSheetState.hide()
+                        }
+                    }
+                )
             }
         },
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(WindowInsets.safeDrawing.asPaddingValues()),
         scaffoldState = scaffoldState,
+        sheetPeekHeight = bottomInset.times(2),
         sheetSwipeEnabled = true,
         topBar = null
     ) { padding ->
@@ -93,9 +126,10 @@ fun MainScreen(viewModel: MapViewModel) {
             arcGISMap = viewModel.map,
             mapViewProxy = viewModel.proxy,
             modifier = Modifier
-                .padding(padding)
+                .consumeWindowInsets(padding)
                 .fillMaxSize(),
             onSingleTapConfirmed = {
+                resetSelection(viewModel)
                 scope.launch {
                     viewModel.proxy.identifyLayers(
                         screenCoordinate = it.screenCoordinate,
@@ -103,10 +137,7 @@ fun MainScreen(viewModel: MapViewModel) {
                         returnPopupsOnly = true
                     ).onSuccess { results ->
                         if (results.isEmpty()) {
-                            unselectFeature(viewModel.geoElement, viewModel.layer)
-                            viewModel.setPopup(null)
                             viewModel.setLayer(null)
-                            viewModel.setGeoElement(null)
                             if (scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded) {
                                 scaffoldState.bottomSheetState.hide()
                             }
@@ -147,11 +178,6 @@ fun MainScreen(viewModel: MapViewModel) {
                                         ).show()
                                     }
                                 } else {
-                                    unselectFeature(
-                                        viewModel.geoElement,
-                                        viewModel.layer
-                                    )
-
                                     when (newLayer) {
                                         is FeatureLayer -> {
                                             // the Popup exists on a FeatureLayer
@@ -178,7 +204,7 @@ fun MainScreen(viewModel: MapViewModel) {
                                             throw IllegalStateException("popups on sublayers are not supported by the PopupApp")
                                         }
                                     }
-                                    viewModel.setPopup(popup)
+                                    viewModel.updatePopupState(popup)
                                     scaffoldState.bottomSheetState.expand()
                                 }
                             } catch (e: Exception) {
@@ -197,6 +223,12 @@ fun MainScreen(viewModel: MapViewModel) {
             }
         )
     }
+}
+
+private fun resetSelection(viewModel: MapViewModel) {
+    viewModel.updatePopupState(null)
+    unselectFeature(viewModel.geoElement, viewModel.layer)
+    viewModel.setGeoElement(null)
 }
 
 private fun GeoElement?.sameSelection(other: GeoElement): Boolean =

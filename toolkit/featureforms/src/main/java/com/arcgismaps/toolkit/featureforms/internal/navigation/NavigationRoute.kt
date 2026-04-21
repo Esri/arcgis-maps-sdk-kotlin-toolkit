@@ -18,8 +18,8 @@ package com.arcgismaps.toolkit.featureforms.internal.navigation
 
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationsElementState
 import com.arcgismaps.toolkit.featureforms.internal.screens.FeatureFormScreen
-import com.arcgismaps.toolkit.featureforms.internal.screens.UNAssociationsFilterScreen
-import com.arcgismaps.toolkit.featureforms.internal.screens.UNAssociationsScreen
+import com.arcgismaps.toolkit.featureforms.internal.screens.UNAssociationGroupResultScreen
+import com.arcgismaps.toolkit.featureforms.internal.screens.UNAssociationsFilterResultScreen
 import kotlinx.serialization.Serializable
 
 /**
@@ -29,41 +29,90 @@ import kotlinx.serialization.Serializable
 internal sealed class NavigationRoute {
 
     /**
-     * Represents the [FeatureFormScreen].
+     * Represents a route for the [FeatureFormScreen].
      */
     @Serializable
-    data object FormView : NavigationRoute()
+    data object Form : NavigationRoute()
 
     /**
-     * Represents a view for the [UNAssociationsFilterScreen].
+     * Represents a route for the [UNAssociationsFilterResultScreen].
      *
      * @param stateId The state ID of the [UtilityAssociationsElementState] which contains the
      * selected filter.
      */
     @Serializable
-    data class UNFilterView(
+    data class UNAssociationsFilterResult(
         val stateId: Int
     ) : NavigationRoute()
 
     /**
-     * Represents a view for the [UNAssociationsScreen].
+     * Represents a route for the [UNAssociationGroupResultScreen].
      *
      * @param stateId The state ID of the [UtilityAssociationsElementState] which contains the
      * selected group of associations.
      */
     @Serializable
-    data class UNAssociationsView(
+    data class UNAssociationGroupResult(
         val stateId: Int
     ) : NavigationRoute()
 
     /**
-     * Represents a view for the details of a specific association.
+     * Represents a route for adding an association from a source feature. This is represented as
+     * a nested navigation graph. See [AddFromSourceNavRoute] for the routes in this nested graph.
+     *
+     * @param stateId The state ID of the [UtilityAssociationsElementState] which contains the
+     * selected association to add from source.
+     */
+    @Serializable
+    data class AddUNAssociationFromSource(
+        val stateId: Int
+    ) : NavigationRoute()
+
+    /**
+     * Represents a route for navigating to a specific association's details.
      *
      * @param stateId The state ID of the [UtilityAssociationsElementState] which contains the
      * selected association.
      */
     @Serializable
-    data class UNAssociationDetailView(
+    data class UNAssociationDetails(
         val stateId: Int
     ) : NavigationRoute()
+}
+
+/**
+ * Navigation routes for the "Add from Source" nested navigation graph.
+ */
+@Serializable
+internal sealed class AddFromSourceNavRoute {
+
+    /**
+     * Represents the screen to select a source.
+     */
+    @Serializable
+    data object SelectSource : AddFromSourceNavRoute()
+
+    /**
+     * Represents the screen to select an asset group.
+     */
+    @Serializable
+    data object SelectAssetType : AddFromSourceNavRoute()
+
+    /**
+     * Represents the screen to select a feature from the source.
+     */
+    @Serializable
+    data object SelectAssociatedFeature : AddFromSourceNavRoute()
+
+    /**
+     * Represents the attribute filter screen for features.
+     */
+    @Serializable
+    data object FeatureAttributesFilter : AddFromSourceNavRoute()
+
+    /**
+     * Represents the review screen before adding the association.
+     */
+    @Serializable
+    data object CreateAssociation : AddFromSourceNavRoute()
 }

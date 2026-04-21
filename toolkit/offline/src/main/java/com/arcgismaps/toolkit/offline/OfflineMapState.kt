@@ -216,9 +216,9 @@ public class OfflineMapState {
             if (_mode == OfflineMapMode.Unknown)
                 _mode = OfflineMapMode.OnDemand
         }
+        _initializationStatus.value = InitializationStatus.Initialized
         // reset the selected map on initialize
         onSelectionChanged(null)
-        _initializationStatus.value = InitializationStatus.Initialized
     }
 
     /**
@@ -250,6 +250,7 @@ public class OfflineMapState {
                             preplannedMapArea = mapArea,
                             offlineMapTask = offlineMapTask,
                             item = portalItem,
+                            portalItemID = portalItem.itemId,
                             onSelectionChanged = onSelectionChanged
                         )
                         preplannedMapAreaState.initialize()
@@ -342,13 +343,12 @@ public class OfflineMapState {
         val mmpk = MobileMapPackage(areaDir.absolutePath).apply {
             load().getOrElse { return null }
         }
-        val item = (mmpk.item as? LocalItem)?.apply {
-            itemId = portalItem.itemId
-        } ?: return null
+        val item = (mmpk.item as? LocalItem) ?: return null
 
         val preplannedMapAreaState = PreplannedMapAreaState(
             context = context,
             item = item,
+            portalItemID = portalItem.itemId,
             onSelectionChanged = onSelectionChanged
         )
         val preplannedPath = OfflineRepository.isPrePlannedAreaDownloaded(
@@ -389,13 +389,12 @@ public class OfflineMapState {
         val mmpk = MobileMapPackage(areaDir.absolutePath).apply {
             load().getOrElse { return null }
         }
-        val item = (mmpk.item as? LocalItem)?.apply {
-            itemId = portalItem.itemId
-        } ?: return null
+        val item = (mmpk.item as? LocalItem) ?: return null
 
         val onDemandMapAreasState = OnDemandMapAreasState(
             context = context,
             item = item,
+            portalItemID = portalItem.itemId,
             onSelectionChanged = onSelectionChanged
         )
         val onDemandPath = OfflineRepository.isOnDemandAreaDownloaded(
@@ -426,6 +425,7 @@ public class OfflineMapState {
         val onDemandMapAreasState = OnDemandMapAreasState(
             context = context,
             item = portalItem,
+            portalItemID = portalItem.itemId,
             configuration = configuration,
             offlineMapTask = offlineMapTask,
             onSelectionChanged = onSelectionChanged
@@ -500,6 +500,7 @@ public class OfflineMapState {
                     val restoredState = OnDemandMapAreasState(
                         context = context,
                         item = portalItem,
+                        portalItemID = portalItem.itemId,
                         onSelectionChanged = onSelectionChanged
                     ).apply { restoreOfflineMapJobState(workerUuid, mapAreaMetadata) }
                     // add the in-progress job states after loading on-demand map areas

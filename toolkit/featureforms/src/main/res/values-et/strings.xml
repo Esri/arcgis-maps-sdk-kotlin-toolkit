@@ -73,41 +73,6 @@
     <string name="max_datetime_helper_text">Kuupäev peab olema %1$s või varasem</string>
 
     <!-- Date Picker string values -->
-    <string name="ff_date_input_headline">Sisestatud kuupäev</string>
-    <string name="ff_date_input_headline_description">Sisestatud kuupäev: %1$s</string>
-    <string name="ff_date_input_invalid_for_pattern">Kuupäev ei vasta eeldatud mustrile: %1$s</string>
-    <string name="ff_date_input_invalid_not_allowed">Kuupäev pole lubatud: %1$s</string>
-    <string name="ff_date_input_invalid_year_range">
-        Kuupäev on väljaspool eeldatud aastavahemikku: %1$s–%2$s
-    </string>
-    <string name="ff_date_input_label">Kuupäev</string>
-    <string name="ff_date_input_no_input_description">Puudub</string>
-    <string name="ff_date_input_title">Valige kuupäev</string>
-    <string name="ff_date_picker_headline">"Valitud kuupäev"</string>
-    <string name="ff_date_picker_headline_description">Praegune valik: %1$s</string>
-    <string name="ff_date_picker_navigate_to_year_description">Liikuge aastasse %1$s</string>
-    <string name="ff_date_picker_no_selection_description">Puudub</string>
-    <string name="ff_date_picker_scroll_to_earlier_years">Kerige varasemate aastate kuvamiseks</string>
-    <string name="ff_date_picker_scroll_to_later_years">Kerige hilisemate aastate kuvamiseks</string>
-    <string name="ff_date_picker_switch_to_calendar_mode">Aktiveerige kalendrisisestusrežiim</string>
-    <string name="ff_date_picker_switch_to_day_selection">
-        "Nipsake aasta valimiseks või puudutage, et aktiveerida uuesti päeva valimine"
-    </string>
-    <string name="ff_date_picker_switch_to_input_mode">Aktiveerige tekstisisestusrežiim</string>
-    <string name="ff_date_picker_switch_to_next_month">"Vali järgmine kuu"</string>
-    <string name="ff_date_picker_switch_to_previous_month">"Vali eelmine kuu"</string>
-    <string name="ff_date_picker_switch_to_year_selection">"Aktiveeri aasta valimine"</string>
-    <string name="ff_date_picker_title">"Vali kuupäev"</string>
-    <string name="ff_date_picker_today_description">Täna</string>
-    <string name="ff_date_picker_year_picker_pane_title">Aastavalija on nähtav</string>
-    <string name="ff_date_range_input_invalid_range_input">Sobimatu kuupäevavahemiku sisend</string>
-    <string name="ff_date_range_input_title">Sisestage kuupäevad</string>
-    <string name="ff_date_range_picker_day_in_range">Vahemikus</string>
-    <string name="ff_date_range_picker_end_headline">Lõppkuupäev</string>
-    <string name="ff_date_range_picker_scroll_to_next_month">Kerige järgmise kuu kuvamiseks</string>
-    <string name="ff_date_range_picker_scroll_to_previous_month">Kerige eelmise kuu kuvamiseks</string>
-    <string name="ff_date_range_picker_start_headline">Alguskuupäev</string>
-    <string name="ff_date_range_picker_title">Valige kuupäevad</string>
 
     <!-- Time Picker string values -->
     <string name="ff_time_picker_am">e.l.</string>
@@ -145,4 +110,56 @@
     <string name="tap_to_scan">Skannimiseks puudutage</string>
     <string name="unable_to_open_the_camera">Kaamerat ei saa avada</string>
     <string name="value_must_be_a_guid">Väärtus peab olema sobiv GUID</string>
+    <string name="delete_attachment_title">Kas kustutada manus?</string>
+    <string name="delete_attachment_confirmation">Kas olete kindel, et soovite selle manuse kustutada?</string>
+    <string name="download_failed">Seda faili ei saa alla laadida.</string>
+    <string name="file_size_exceeds_limit">Faili suurus ületab piirväärtust</string>
+    <string name="unsupported_file_type">Toetuseta failitüüp</string>
+    <string name="save">Salvesta</string>
+    <string name="discard">Loobu</string>
+    <string name="none_selected">Pole valitud</string>
+    <string name="the_form_has_validation_errors">Vormil on valideerimise vigu</string>
+    <string name="the_form_has_edits">Vormil on muudatusi</string>
+    <string name="do_you_want_to_save_your_changes">Kas soovite oma muudatused salvestada?</string>
+    <string name="no_associations_found">Kuvatavaid seoseid pole</string>
+    <string name="terminal">Terminal</string>
+    <string name="terminal_with_value">Terminal: %1$s</string>
+    <string name="content_visible">Sisu on nähtav</string>
+    <string name="percent_along">Protsent (joonest või marsruudist)</string>
+    <string name="from_element">Elemendist</string>
+    <string name="to_element">Elemendini</string>
+    <string name="association_type">Seose tüüp</string>
+    <string name="remove_association">Eemalda seos</string>
+    <string name="remove_association_tooltip">Eemaldab ainult seose. Objekt jääb.</string>
+    <string name="remove">Eemalda</string>
+    <string name="association_settings">Seose seaded</string>
+    <string name="percent_along_edge">%1$d %%</string>
+    <string name="visible_content">Nähtav sisu</string>
+    <string name="content">Sisu</string>
+    <string name="containment_visible_value">Nähtav: %1$s</string>
+    <string name="from_network_data_source">Võrgu andmeallikast</string>
+    <string name="on_map">Kaardil</string>
+    <string name="network_data_source">Võrgu andmeallikas</string>
+    <string name="available_asset_types">Saadaolevad varatüübid</string>
+    <string name="count">Arv: %1$d</string>
+    <string name="new_association">Uue seos</string>
+    <string name="add">Lisa</string>
+    <string name="failed_to_create_association">Seose loomine ebaõnnestus. %1$s</string>
+    <string name="available_features">%1$d Saadaolevad objektid</string>
+    <string name="loading2">Laadimine…</string>
+    <plurals name="you_have_errors_that_must_be_fixed_before_saving">
+        <item quantity="zero">Teil on %1$d viga, mis tuleb enne salvestamist parandada.</item>
+        <item quantity="one">Teil on %1$d viga, mis tuleb enne salvestamist parandada.</item>
+        <item quantity="two">Teil on %1$d viga, mis tuleb enne salvestamist parandada</item>
+        <item quantity="few">Teil on %1$d viga, mis tuleb enne salvestamist parandada</item>
+        <item quantity="many">Teil on %1$d viga, mis tuleb enne salvestamist parandada</item>
+        <item quantity="other">Teil on %1$d viga, mis tuleb enne salvestamist parandada</item>
+    </plurals>
+    <string name="search_features">Otsi objektidest</string>
+    <string name="choose_to_add">Vali, et lisada</string>
+    <string name="no_features_found">Objekte ei leitud</string>
+    <string name="refine_your_search_tip">Täpsustage otsingut või valige mõni muu võrguallikas.</string>
+    <string name="select_terminal">Vali terminal</string>
+    <string name="show_on_map">Kuva kaardil</string>
+    <string name="more_information">Lisateave</string>
 </resources>

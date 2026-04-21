@@ -73,41 +73,6 @@
     <string name="max_datetime_helper_text">A dátumnak a következő időpontra vagy azelőttre kell esnie: %1$s</string>
 
     <!-- Date Picker string values -->
-    <string name="ff_date_input_headline">Megadott dátum</string>
-    <string name="ff_date_input_headline_description">Megadott dátum: %1$s</string>
-    <string name="ff_date_input_invalid_for_pattern">Nem egyezik az elvárt mintával: %1$s</string>
-    <string name="ff_date_input_invalid_not_allowed">Nem megengedett dátum: %1$s</string>
-    <string name="ff_date_input_invalid_year_range">
-        A dátum nincs az elvárt %1$s–%2$s évtartományban
-    </string>
-    <string name="ff_date_input_label">Dátum</string>
-    <string name="ff_date_input_no_input_description">Egyik sem</string>
-    <string name="ff_date_input_title">Dátum kiválasztása</string>
-    <string name="ff_date_picker_headline">"Kiválasztott dátum"</string>
-    <string name="ff_date_picker_headline_description">Aktuális választás: %1$s</string>
-    <string name="ff_date_picker_navigate_to_year_description">Navigáljon a(z) %1$s évre</string>
-    <string name="ff_date_picker_no_selection_description">Egyik sem</string>
-    <string name="ff_date_picker_scroll_to_earlier_years">Görgessen a korábbi évek megjelenítéséhez</string>
-    <string name="ff_date_picker_scroll_to_later_years">Görgessen a későbbi évek megjelenítéséhez</string>
-    <string name="ff_date_picker_switch_to_calendar_mode">Váltás naptárbeviteli módra</string>
-    <string name="ff_date_picker_switch_to_day_selection">
-        "Legyintsen az év kiválasztásához, vagy koppintson, hogy visszaváltson a nap kiválasztására"
-    </string>
-    <string name="ff_date_picker_switch_to_input_mode">Váltás szövegbeviteli módra</string>
-    <string name="ff_date_picker_switch_to_next_month">"Váltás a következő hónapra"</string>
-    <string name="ff_date_picker_switch_to_previous_month">"Váltás az előző hónapra"</string>
-    <string name="ff_date_picker_switch_to_year_selection">"Váltás évkiválasztásra"</string>
-    <string name="ff_date_picker_title">"Dátum kiválasztása"</string>
-    <string name="ff_date_picker_today_description">Ma</string>
-    <string name="ff_date_picker_year_picker_pane_title">Látható évválasztó</string>
-    <string name="ff_date_range_input_invalid_range_input">A megadott dátumtartomány érvénytelen</string>
-    <string name="ff_date_range_input_title">Adjon meg dátumot</string>
-    <string name="ff_date_range_picker_day_in_range">Tartományban</string>
-    <string name="ff_date_range_picker_end_headline">Befejező dátum</string>
-    <string name="ff_date_range_picker_scroll_to_next_month">Görgessen a következő hónap megjelenítéséhez</string>
-    <string name="ff_date_range_picker_scroll_to_previous_month">Görgessen az előző hónap megjelenítéséhez</string>
-    <string name="ff_date_range_picker_start_headline">Kezdő dátum</string>
-    <string name="ff_date_range_picker_title">Dátum kiválasztása</string>
 
     <!-- Time Picker string values -->
     <string name="ff_time_picker_am">DE</string>
@@ -145,4 +110,56 @@
     <string name="tap_to_scan">Koppintson a beolvasáshoz</string>
     <string name="unable_to_open_the_camera">Nem sikerült megnyitni a kamerát</string>
     <string name="value_must_be_a_guid">Az értéknek érvényes GUID-nak kell lennie</string>
+    <string name="delete_attachment_title">Törli a csatolmányt?</string>
+    <string name="delete_attachment_confirmation">Biztosan törli a csatolmányt?</string>
+    <string name="download_failed">A fájl letöltése nem sikerült.</string>
+    <string name="file_size_exceeds_limit">A fájl mérete meghaladja a határértéket</string>
+    <string name="unsupported_file_type">Nem támogatott fájltípus</string>
+    <string name="save">Mentés</string>
+    <string name="discard">Elvetés</string>
+    <string name="none_selected">Egy sincs kijelölve</string>
+    <string name="the_form_has_validation_errors">Az űrlapon érvényesítési hibák találhatók</string>
+    <string name="the_form_has_edits">Az űrlap módosításokat tartalmaz</string>
+    <string name="do_you_want_to_save_your_changes">Menti a módosításait?</string>
+    <string name="no_associations_found">Nincsenek megjeleníthető társítások</string>
+    <string name="terminal">Terminál</string>
+    <string name="terminal_with_value">Terminál: %1$s</string>
+    <string name="content_visible">Látható tartalom</string>
+    <string name="percent_along">Százalékos távolság</string>
+    <string name="from_element">Az elemtől</string>
+    <string name="to_element">Az elemhez</string>
+    <string name="association_type">Társítás típusa</string>
+    <string name="remove_association">Társítás eltávolítása</string>
+    <string name="remove_association_tooltip">Csak a társítást távolítja el. A vektoros elem megmarad.</string>
+    <string name="remove">Eltávolítás</string>
+    <string name="association_settings">Társítási beállítások</string>
+    <string name="percent_along_edge">%1$d %%</string>
+    <string name="visible_content">Látható tartalom</string>
+    <string name="content">Tartalom</string>
+    <string name="containment_visible_value">Látható: %1$s</string>
+    <string name="from_network_data_source">A hálózati adatforrásból</string>
+    <string name="on_map">A térképen</string>
+    <string name="network_data_source">Hálózati adatforrás</string>
+    <string name="available_asset_types">Elérhető eszköztípusok</string>
+    <string name="count">Darabszám: %1$d</string>
+    <string name="new_association">Új társítás</string>
+    <string name="add">Hozzáadás</string>
+    <string name="failed_to_create_association">Nem sikerült létrehozni a társítást. %1$s</string>
+    <string name="available_features">%1$d rendelkezésre álló vektoros elem</string>
+    <string name="loading2">Betöltés…</string>
+    <plurals name="you_have_errors_that_must_be_fixed_before_saving">
+        <item quantity="zero">%1$d hiba áll fenn, amelyeket mentés előtt ki kell javítani.</item>
+        <item quantity="one">%1$d hiba áll fenn, amelyet mentés előtt ki kell javítani.</item>
+        <item quantity="two">%1$d hiba áll fenn, amelyeket mentés előtt ki kell javítani.</item>
+        <item quantity="few">%1$d hiba áll fenn, amelyeket mentés előtt ki kell javítani.</item>
+        <item quantity="many">%1$d hiba áll fenn, amelyeket mentés előtt ki kell javítani.</item>
+        <item quantity="other">%1$d hiba áll fenn, amelyeket mentés előtt ki kell javítani.</item>
+    </plurals>
+    <string name="search_features">Vektoros elemek keresése</string>
+    <string name="choose_to_add">Kiválasztás a hozzáadáshoz</string>
+    <string name="no_features_found">Nem találhatók vektoros elemek</string>
+    <string name="refine_your_search_tip">Pontosítsa a keresést, vagy válasszon másik hálózati forrást.</string>
+    <string name="select_terminal">Terminál kiválasztása</string>
+    <string name="show_on_map">Megjelenítés a térképen</string>
+    <string name="more_information">További információ</string>
 </resources>

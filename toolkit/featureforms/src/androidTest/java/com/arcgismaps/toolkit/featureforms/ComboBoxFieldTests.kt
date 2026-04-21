@@ -59,9 +59,13 @@ class ComboBoxFieldTests : FeatureFormTestRunner(
     @Before
     fun setContent() {
         featureForm.discardEdits()
+        val featureFormState = FeatureFormState(
+            featureForm = featureForm,
+            coroutineScope = scope
+        )
         composeTestRule.setContent {
             errorTextColor = MaterialTheme.colorScheme.error
-            FeatureForm(featureForm = featureForm)
+            FeatureForm(featureFormState = featureFormState)
         }
     }
 

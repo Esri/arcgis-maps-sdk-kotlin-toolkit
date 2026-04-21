@@ -55,6 +55,7 @@
     <string name="maximum_n_chars">Maximum %1$d characters</string>
     <string name="no_value">No value</string>
     <string name="enter_value">Enter Value</string>
+    <string name="enter_a_value">Enter a Value</string>
     <string name="required">Required</string>
     <string name="today">Today</string>
     <string name="now">Now</string>
@@ -75,41 +76,6 @@
     <string name="max_datetime_helper_text">Date must be on or before %1$s</string>
 
     <!-- Date Picker string values -->
-    <string name="ff_date_input_headline">Entered date</string>
-    <string name="ff_date_input_headline_description">Entered date: %1$s</string>
-    <string name="ff_date_input_invalid_for_pattern">Date does not match expected pattern: %1$s</string>
-    <string name="ff_date_input_invalid_not_allowed">Date not allowed: %1$s</string>
-    <string name="ff_date_input_invalid_year_range">
-        Date out of expected year range %1$s - %2$s
-    </string>
-    <string name="ff_date_input_label">Date</string>
-    <string name="ff_date_input_no_input_description">None</string>
-    <string name="ff_date_input_title">Select date</string>
-    <string name="ff_date_picker_headline">"Selected date"</string>
-    <string name="ff_date_picker_headline_description">Current selection: %1$s</string>
-    <string name="ff_date_picker_navigate_to_year_description">Navigate to year %1$s</string>
-    <string name="ff_date_picker_no_selection_description">None</string>
-    <string name="ff_date_picker_scroll_to_earlier_years">Scroll to show earlier years</string>
-    <string name="ff_date_picker_scroll_to_later_years">Scroll to show later years</string>
-    <string name="ff_date_picker_switch_to_calendar_mode">Switch to calendar input mode</string>
-    <string name="ff_date_picker_switch_to_day_selection">
-        "Swipe to select a year, or tap to switch back to selecting a day"
-    </string>
-    <string name="ff_date_picker_switch_to_input_mode">Switch to text input mode</string>
-    <string name="ff_date_picker_switch_to_next_month">"Change to next month"</string>
-    <string name="ff_date_picker_switch_to_previous_month">"Change to previous month"</string>
-    <string name="ff_date_picker_switch_to_year_selection">"Switch to selecting a year"</string>
-    <string name="ff_date_picker_title">"Select date"</string>
-    <string name="ff_date_picker_today_description">Today</string>
-    <string name="ff_date_picker_year_picker_pane_title">Year picker visible</string>
-    <string name="ff_date_range_input_invalid_range_input">Invalid date range input</string>
-    <string name="ff_date_range_input_title">Enter dates</string>
-    <string name="ff_date_range_picker_day_in_range">In range</string>
-    <string name="ff_date_range_picker_end_headline">End date</string>
-    <string name="ff_date_range_picker_scroll_to_next_month">Scroll to show the next month</string>
-    <string name="ff_date_range_picker_scroll_to_previous_month">Scroll to show the previous month</string>
-    <string name="ff_date_range_picker_start_headline">Start date</string>
-    <string name="ff_date_range_picker_title">Select dates</string>
 
     <!-- Time Picker string values -->
     <string name="ff_time_picker_am">AM</string>
@@ -158,11 +124,11 @@
     <string name="the_form_has_validation_errors">The form has validation errors</string>
     <string name="the_form_has_edits">The form has edits</string>
     <string name="do_you_want_to_save_your_changes">Do you want to save your changes?</string>
-    <string name="no_associations_found">No associations found</string>
+    <string name="no_associations_found">No associations to show</string>
     <string name="terminal">Terminal</string>
     <string name="terminal_with_value">Terminal : %1$s</string>
-    <string name="containment_visible">Containment Visible</string>
-    <string name="fraction_along_edge">Fraction Along Edge</string>
+    <string name="content_visible">Content Visible</string>
+    <string name="percent_along">Percent Along</string>
     <string name="from_element">From Element</string>
     <string name="to_element">To Element</string>
     <string name="association_type">Association Type</string>
@@ -173,6 +139,17 @@
     <string name="percent_along_edge">%1$d %%</string>
     <string name="visible_content">Visible Content</string>
     <string name="content">Content</string>
+    <string name="containment_visible_value">Visible: %1$s</string>
+    <string name="from_network_data_source">From Network Data Source</string>
+    <string name="on_map">On Map</string>
+    <string name="network_data_source">Network Data Source</string>
+    <string name="available_asset_types">Available Asset Types</string>
+    <string name="count">Count %1$d</string>
+    <string name="new_association">New Association</string>
+    <string name="add">Add</string>
+    <string name="failed_to_create_association">Failed to create association. %1$s</string>
+    <string name="available_features">%1$d Available Features</string>
+    <string name="loading2">Loading..</string>
     <plurals name="you_have_errors_that_must_be_fixed_before_saving">
         <item quantity="zero">You have %1$d errors that must be fixed before saving.</item>
         <item quantity="one">You have %1$d error that must be fixed before saving.</item>
@@ -181,4 +158,25 @@
         <item quantity="many">You have %1$d errors that must be fixed before saving</item>
         <item quantity="other">You have %1$d errors that must be fixed before saving</item>
     </plurals>
+    <string name="search_features">Search features</string>
+    <string name="choose_to_add">Choose to add</string>
+    <string name="no_features_found">No features found</string>
+    <string name="refine_your_search_tip">Refine your search or choose a different Network Source.</string>
+    <string name="select_terminal">Select Terminal</string>
+    <string name="show_on_map">Show on Map</string>
+    <string name="more_information">More Information</string>
+    <string name="add_associations">Add Associations</string>
+    <string name="filter_features">Filter Features</string>
+    <string name="apply">Apply</string>
+    <string name="add_condition">Add Condition</string>
+    <string name="no_conditions_added">No conditions added.</string>
+    <string name="show_features_that_meet_all_the_conditions">Show features that meet all the conditions.</string>
+    <string name="condition">Condition</string>
+    <string name="condition_numbered">Condition %1$d</string>
+    <string name="duplicate">Duplicate</string>
+    <string name="field">Field</string>
+    <string name="not_set">Not Set</string>
+    <string name="value">Value</string>
+    <string name="filters_not_applied">Filters have not been applied</string>
+    <string name="discard_changes_confirmation">Are you sure you want to discard the changes?</string>
 </resources>

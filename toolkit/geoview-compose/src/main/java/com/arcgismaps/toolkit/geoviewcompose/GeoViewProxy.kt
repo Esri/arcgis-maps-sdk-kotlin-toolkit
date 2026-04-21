@@ -20,9 +20,11 @@ package com.arcgismaps.toolkit.geoviewcompose
 import android.graphics.drawable.BitmapDrawable
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.unit.Dp
+import com.arcgismaps.analysis.interactive.Analysis
 import com.arcgismaps.mapping.Bookmark
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.mapping.layers.Layer
+import com.arcgismaps.mapping.view.AnalysisViewStatus
 import com.arcgismaps.mapping.view.GeoView
 import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.mapping.view.IdentifyGraphicsOverlayResult
@@ -34,7 +36,7 @@ import kotlin.time.Duration.Companion.seconds
 import kotlin.time.DurationUnit
 
 /**
- * Used to perform operations on a composable MapView or SceneView.
+ * Used to perform operations on a composable MapView, SceneView, or LocalSceneView.
  *
  * @since 200.4.0
  */
@@ -50,6 +52,30 @@ public sealed class GeoViewProxy(className: String) {
      */
     private var geoView: GeoView? = null
 
+    protected val nullGeoViewErrorMessage: String =
+        "$className must be part of the composition when this member is called."
+
+    /**
+     * True if continuous panning across the international date line is enabled, false otherwise.
+     * By default, a `GeoView` attempts to wrap the `ArcGISMap` or `ArcGISScene` across the international date line for
+     * a continuous panning user experience.
+     * The eastern and western hemispheres wrap to form a continuous map, giving the impression that the map is endless.
+     *
+     * Wraparound display is always enabled for a `SceneView`. It is always disabled for a `LocalSceneView`.
+     *
+     * To disable wraparound behavior for a composable `MapView` (or to re-enable it), you can set the composable `MapView`'s parameter
+     * `wrapAroundMode` to the appropriate value. Wraparound can only be applied to a `MapView` if certain conditions are met, as
+     * described in [WrapAroundMode.EnabledWhenSupported](https://developers.arcgis.com/kotlin/api-reference/arcgis-maps-kotlin/com.arcgismaps.mapping.view/-wrap-around-mode/-enabled-when-supported/index.html).
+     *
+     * If wraparound is enabled, geometries returned from the callback `MapView.onVisibleAreaChanged` may have coordinates outside
+     * the domain of the spatial reference of the map. Before using such geometries to perform spatial queries,
+     * address finding, or as feature geometries in a geodatabase, you must normalize them to lie within the
+     * spatial reference domain using [GeometryEngine.normalizeCentralMeridian](https://developers.arcgis.com/kotlin/api-reference/arcgis-maps-kotlin/com.arcgismaps.geometry/-geometry-engine/normalize-central-meridian.html).
+     * @since 200.4.0
+     */
+    public val isWrapAroundEnabled: Boolean?
+        get() = geoView?.isWrapAroundEnabled
+
     /**
      * Sets the [geoView] parameter on this operator. This should be called by the composable component
      * when it enters the composition and set to null when it is disposed.
@@ -59,18 +85,6 @@ public sealed class GeoViewProxy(className: String) {
     protected fun setGeoView(geoView: GeoView?) {
         this.geoView = geoView
     }
-
-    protected val nullGeoViewErrorMessage: String =
-        "$className must be part of the composition when this member is called."
-
-    /**
-     * True if continuous panning across the international date line is enabled in the GeoView, false otherwise.
-     * A null value represents that it is currently undetermined.
-     *
-     * @since 200.4.0
-     */
-    public val isWrapAroundEnabled: Boolean?
-        get() = geoView?.isWrapAroundEnabled
 
     /**
      * Exports an image snapshot of the current composable MapView or SceneView.
@@ -146,7 +160,7 @@ public sealed class GeoViewProxy(className: String) {
      * @param returnPopupsOnly whether the graphics property of the results are populated
      * @param maximumResults maximum size of the result set of graphics to return. A null value indicates unlimited results
      * @return A [Result] containing a [List] of [IdentifyGraphicsOverlayResult] containing one entry for each
-     * overlay in the view, or failure. Each entry holds a [GraphicsOverlay] and a [List] of [com.arcgismaps.mapview.Graphic]s
+     * overlay in the view, or failure. Each entry holds a [GraphicsOverlay] and a [List] of [Graphics](https://developers.arcgis.com/kotlin/api-reference/arcgis-maps-kotlin/com.arcgismaps.mapping.view/-graphic/index.html)
      * @since 200.4.0
      */
     public suspend fun identifyGraphicsOverlays(
@@ -298,11 +312,23 @@ public sealed class GeoViewProxy(className: String) {
      * Retrieve the layer's [LayerViewState].
      *
      * @param layer the layer to retrieve the view state from
-     * @return the [LayerViewState] of the provided layer, or null if this proxy's GeoView is not
-     * part of the composition
+     * @return the [LayerViewState] of the provided layer, or null if the view doesn't contain the
+     * given layer or this proxy's GeoView is not part of the composition
      * @since 200.4.0
      */
     public fun getLayerViewState(layer: Layer): LayerViewState? {
         return geoView?.getLayerViewState(layer)
+    }
+
+    /**
+     * Retrieves the analysis' status in the view.
+     *
+     * @param analysis An analysis object to get the view status for.
+     * @return a valid [AnalysisViewStatus] or null if the view doesn't contain the given analysis
+     * or this proxy's GeoView is not part of the composition
+     * @since 300.0.0
+     */
+    public fun getAnalysisViewStatus(analysis: Analysis): AnalysisViewStatus? {
+        return geoView?.getAnalysisViewStatus(analysis)
     }
 }

@@ -73,41 +73,6 @@
     <string name="max_datetime_helper_text">La data ha de ser el dia %1$s o anterior</string>
 
     <!-- Date Picker string values -->
-    <string name="ff_date_input_headline">Data introduïda</string>
-    <string name="ff_date_input_headline_description">Data introduïda: %1$s</string>
-    <string name="ff_date_input_invalid_for_pattern">La data no coincideix amb el patró esperat: %1$s</string>
-    <string name="ff_date_input_invalid_not_allowed">Data no permesa: %1$s</string>
-    <string name="ff_date_input_invalid_year_range">
-        La data està fora de l\'interval d\'anys esperat %1$s-%2$s
-    </string>
-    <string name="ff_date_input_label">Data</string>
-    <string name="ff_date_input_no_input_description">Cap</string>
-    <string name="ff_date_input_title">Seleccioneu la data</string>
-    <string name="ff_date_picker_headline">"Data seleccionada"</string>
-    <string name="ff_date_picker_headline_description">Selecció actual: %1$s</string>
-    <string name="ff_date_picker_navigate_to_year_description">Ves a l\'any %1$s</string>
-    <string name="ff_date_picker_no_selection_description">Cap</string>
-    <string name="ff_date_picker_scroll_to_earlier_years">Desplaceu-vos per veure els anys anteriors</string>
-    <string name="ff_date_picker_scroll_to_later_years">Desplaceu-vos per veure els anys posteriors</string>
-    <string name="ff_date_picker_switch_to_calendar_mode">Canvia al mode d\'entrada de calendari</string>
-    <string name="ff_date_picker_switch_to_day_selection">
-        "Feu lliscar el dit per seleccionar un any o toqueu per canviar a la selecció d\'un dia"
-    </string>
-    <string name="ff_date_picker_switch_to_input_mode">Canvia al mode d\'entrada de text</string>
-    <string name="ff_date_picker_switch_to_next_month">"Canvia al mes següent"</string>
-    <string name="ff_date_picker_switch_to_previous_month">"Canvia al mes anterior"</string>
-    <string name="ff_date_picker_switch_to_year_selection">"Canvia a la selecció d\'un any"</string>
-    <string name="ff_date_picker_title">"Seleccioneu una data"</string>
-    <string name="ff_date_picker_today_description">Avui</string>
-    <string name="ff_date_picker_year_picker_pane_title">Selector d\'any visible</string>
-    <string name="ff_date_range_input_invalid_range_input">Entrada d\'interval de dates no vàlida</string>
-    <string name="ff_date_range_input_title">Introduïu les dates</string>
-    <string name="ff_date_range_picker_day_in_range">A l\'interval</string>
-    <string name="ff_date_range_picker_end_headline">Data de finalització</string>
-    <string name="ff_date_range_picker_scroll_to_next_month">Desplaceu-vos per mostrar el mes següent</string>
-    <string name="ff_date_range_picker_scroll_to_previous_month">Desplaceu-vos per mostrar el mes anterior</string>
-    <string name="ff_date_range_picker_start_headline">Data d\'inici</string>
-    <string name="ff_date_range_picker_title">Seleccioneu les dates</string>
 
     <!-- Time Picker string values -->
     <string name="ff_time_picker_am">AM</string>
@@ -145,4 +110,56 @@
     <string name="tap_to_scan">Toqueu per escanejar</string>
     <string name="unable_to_open_the_camera">No es pot obrir la càmera</string>
     <string name="value_must_be_a_guid">El valor ha de ser un GUID vàlid</string>
+    <string name="delete_attachment_title">Voleu suprimir el fitxer adjunt?</string>
+    <string name="delete_attachment_confirmation">Segur que voleu suprimir aquest fitxer adjunt?</string>
+    <string name="download_failed">No es pot baixar aquest fitxer.</string>
+    <string name="file_size_exceeds_limit">La mida del fitxer supera el límit</string>
+    <string name="unsupported_file_type">Tipus de fitxer no compatible</string>
+    <string name="save">Desa</string>
+    <string name="discard">Descarta</string>
+    <string name="none_selected">Cap opció seleccionada</string>
+    <string name="the_form_has_validation_errors">El formulari té errors de validació</string>
+    <string name="the_form_has_edits">El formulari té edicions</string>
+    <string name="do_you_want_to_save_your_changes">Voleu desar els canvis?</string>
+    <string name="no_associations_found">No hi ha cap associació per mostrar</string>
+    <string name="terminal">Terminal</string>
+    <string name="terminal_with_value">Terminal: %1$s</string>
+    <string name="content_visible">Contingut visible</string>
+    <string name="percent_along">Percentatge al llarg de la vora</string>
+    <string name="from_element">Element d\'origen</string>
+    <string name="to_element">Element de destinació</string>
+    <string name="association_type">Tipus d\'associació</string>
+    <string name="remove_association">Elimina l\'associació</string>
+    <string name="remove_association_tooltip">Només s\'elimina l\'associació. L\'entitat es conserva.</string>
+    <string name="remove">Elimina</string>
+    <string name="association_settings">Configuració de l\'associació</string>
+    <string name="percent_along_edge">%1$d %%</string>
+    <string name="visible_content">Contingut visible</string>
+    <string name="content">Contingut</string>
+    <string name="containment_visible_value">Visible: %1$s</string>
+    <string name="from_network_data_source">Font de dades de la xarxa d\'origen</string>
+    <string name="on_map">Al mapa</string>
+    <string name="network_data_source">Font de dades de la xarxa</string>
+    <string name="available_asset_types">Tipus d\'actius disponibles</string>
+    <string name="count">Recompte: %1$d</string>
+    <string name="new_association">Associació nova</string>
+    <string name="add">Afegeix</string>
+    <string name="failed_to_create_association">No s\'ha pogut crear l\'associació. %1$s</string>
+    <string name="available_features">%1$d entitats disponibles</string>
+    <string name="loading2">S\'està carregant...</string>
+    <plurals name="you_have_errors_that_must_be_fixed_before_saving">
+        <item quantity="zero">Teniu %1$d errors que cal corregir abans de desar.</item>
+        <item quantity="one">Teniu %1$d error que cal corregir abans de desar.</item>
+        <item quantity="two">Teniu %1$d errors que cal corregir abans de desar</item>
+        <item quantity="few">Teniu %1$d errors que cal corregir abans de desar</item>
+        <item quantity="many">Teniu %1$d errors que cal corregir abans de desar</item>
+        <item quantity="other">Teniu %1$d errors que cal corregir abans de desar</item>
+    </plurals>
+    <string name="search_features">Cerca entitats</string>
+    <string name="choose_to_add">Trieu per afegir</string>
+    <string name="no_features_found">No s\'ha trobat cap entitat</string>
+    <string name="refine_your_search_tip">Delimiteu la vostra cerca o seleccioneu una altra font de dades de xarxa.</string>
+    <string name="select_terminal">Seleccioneu un terminal</string>
+    <string name="show_on_map">Mostra al mapa</string>
+    <string name="more_information">Més informació</string>
 </resources>

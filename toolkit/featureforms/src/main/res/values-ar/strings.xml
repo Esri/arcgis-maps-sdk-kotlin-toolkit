@@ -73,41 +73,6 @@
     <string name="max_datetime_helper_text">يجب أن يكون التاريخ في %1$s أو قبله</string>
 
     <!-- Date Picker string values -->
-    <string name="ff_date_input_headline">التاريخ الذي تم إدخاله</string>
-    <string name="ff_date_input_headline_description">التاريخ الذي تم إدخاله: %1$s</string>
-    <string name="ff_date_input_invalid_for_pattern">التاريخ لا يتطابق مع النمط المتوقع: %1$s</string>
-    <string name="ff_date_input_invalid_not_allowed">التاريخ غير مسموح به: %1$s</string>
-    <string name="ff_date_input_invalid_year_range">
-        التاريخ خارج نطاق السنة المتوقعة %1$s -%2$s
-    </string>
-    <string name="ff_date_input_label">التاريخ</string>
-    <string name="ff_date_input_no_input_description">لا شيء</string>
-    <string name="ff_date_input_title">تحديد التاريخ</string>
-    <string name="ff_date_picker_headline">"التاريخ المحدد"</string>
-    <string name="ff_date_picker_headline_description">التحديد الحالي: %1$s</string>
-    <string name="ff_date_picker_navigate_to_year_description">انتقال إلى السنة %1$s</string>
-    <string name="ff_date_picker_no_selection_description">لا شيء</string>
-    <string name="ff_date_picker_scroll_to_earlier_years">التمرير لإظهار السنوات السابقة</string>
-    <string name="ff_date_picker_scroll_to_later_years">التمرير لإظهار السنوات اللاحقة</string>
-    <string name="ff_date_picker_switch_to_calendar_mode">التبديل إلى وضع إدخال التقويم</string>
-    <string name="ff_date_picker_switch_to_day_selection">
-        "اسحب لتحديد سنة، أو اضغط للتبديل مرة أخرى إلى تحديد يوم"
-    </string>
-    <string name="ff_date_picker_switch_to_input_mode">التبديل إلى وضع إدخال النص</string>
-    <string name="ff_date_picker_switch_to_next_month">"التغيير إلى الشهر القادم"</string>
-    <string name="ff_date_picker_switch_to_previous_month">"التغيير إلى الشهر السابق"</string>
-    <string name="ff_date_picker_switch_to_year_selection">"التبديل إلى اختيار سنة"</string>
-    <string name="ff_date_picker_title">"تحديد تاريخ"</string>
-    <string name="ff_date_picker_today_description">اليوم</string>
-    <string name="ff_date_picker_year_picker_pane_title">منتقي السنة مرئي</string>
-    <string name="ff_date_range_input_invalid_range_input">إدخال النطاق الزمني غير صالح</string>
-    <string name="ff_date_range_input_title">إدخال تواريخ</string>
-    <string name="ff_date_range_picker_day_in_range">ضمن النطاق</string>
-    <string name="ff_date_range_picker_end_headline">تاريخ الانتهاء</string>
-    <string name="ff_date_range_picker_scroll_to_next_month">التمرير لإظهار الشهر التالي</string>
-    <string name="ff_date_range_picker_scroll_to_previous_month">التمرير لإظهار الشهر السابق</string>
-    <string name="ff_date_range_picker_start_headline">تاريخ البدء</string>
-    <string name="ff_date_range_picker_title">تحديد التواريخ</string>
 
     <!-- Time Picker string values -->
     <string name="ff_time_picker_am">صباحًا</string>
@@ -145,4 +110,56 @@
     <string name="tap_to_scan">انقر للمسح الضوئي</string>
     <string name="unable_to_open_the_camera">يتعذر فتح الكاميرا</string>
     <string name="value_must_be_a_guid">يجب أن تكون القيمة GUID صالحًا</string>
+    <string name="delete_attachment_title">هل تريد حذف المرفق؟</string>
+    <string name="delete_attachment_confirmation">هل أنت متأكد أنك تريد حذف هذا المرفق؟</string>
+    <string name="download_failed">يتعذر تنزيل هذا الملف.</string>
+    <string name="file_size_exceeds_limit">حجم الملف يتجاوز الحد الأقصى</string>
+    <string name="unsupported_file_type">نوع ملف غير مدعوم</string>
+    <string name="save">حفظ</string>
+    <string name="discard">تجاهل</string>
+    <string name="none_selected">لم يتم تحديد أي شيء</string>
+    <string name="the_form_has_validation_errors">النموذج يحتوي على أخطاء التحقق من الصحة</string>
+    <string name="the_form_has_edits">النموذج يحتوي على تعديلات</string>
+    <string name="do_you_want_to_save_your_changes">هل تريد حفظ التغييرات؟</string>
+    <string name="no_associations_found">لا توجد ارتباطات لعرضها</string>
+    <string name="terminal">محطة طرفية</string>
+    <string name="terminal_with_value">النقطة الطرفية: %1$s</string>
+    <string name="content_visible">المحتوى مرئي</string>
+    <string name="percent_along">النسبة المئوية على طول</string>
+    <string name="from_element">من العنصر</string>
+    <string name="to_element">إلى العنصر</string>
+    <string name="association_type">نوع الاقتران</string>
+    <string name="remove_association">إزالة الاقتران</string>
+    <string name="remove_association_tooltip">يزيل الاقتران فقط. يبقى المعلم.</string>
+    <string name="remove">إزالة</string>
+    <string name="association_settings">إعدادات الاقتران</string>
+    <string name="percent_along_edge">%1$d %%</string>
+    <string name="visible_content">المحتوى المرئي</string>
+    <string name="content">المحتوى</string>
+    <string name="containment_visible_value">المرئي: %1$s</string>
+    <string name="from_network_data_source">من مصدر بيانات الشبكة</string>
+    <string name="on_map">على الخريطة</string>
+    <string name="network_data_source">مصدر بيانات الشبكة</string>
+    <string name="available_asset_types">أنواع الأصول المتاحة</string>
+    <string name="count">عدد: %1$d</string>
+    <string name="new_association">اقتران جديد</string>
+    <string name="add">إضافة</string>
+    <string name="failed_to_create_association">فشل إنشاء الارتباط. %1$s</string>
+    <string name="available_features">المعالم المتاحة %1$d</string>
+    <string name="loading2">جارِ التحميل..</string>
+    <plurals name="you_have_errors_that_must_be_fixed_before_saving">
+        <item quantity="zero">لديك أخطاء %1$d يجب تصحيحها قبل الحفظ.</item>
+        <item quantity="one">لديك خطأ %1$d يجب إصلاحه قبل الحفظ.</item>
+        <item quantity="two">لديك أخطاء %1$d يجب تصحيحها قبل الحفظ.</item>
+        <item quantity="few">لديك أخطاء %1$d يجب تصحيحها قبل الحفظ.</item>
+        <item quantity="many">لديك أخطاء %1$d يجب تصحيحها قبل الحفظ.</item>
+        <item quantity="other">لديك أخطاء %1$d يجب تصحيحها قبل الحفظ.</item>
+    </plurals>
+    <string name="search_features">البحث عن المعالم</string>
+    <string name="choose_to_add">اختر للإضافة</string>
+    <string name="no_features_found">لم يتم العثور على أي معالم</string>
+    <string name="refine_your_search_tip">قم بتحسين عملية البحث أو اختر مصدر شبكة مختلف.</string>
+    <string name="select_terminal">حدد المحطة الطرفية</string>
+    <string name="show_on_map">إظهار على الخريطة</string>
+    <string name="more_information">المزيد من المعلومات</string>
 </resources>

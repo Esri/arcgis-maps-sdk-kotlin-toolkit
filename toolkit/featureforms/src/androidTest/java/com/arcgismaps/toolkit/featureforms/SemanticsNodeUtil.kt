@@ -162,6 +162,14 @@ internal fun SemanticsNodeInteraction.assertEditableTextEquals(
     assert(hasEditableText(value))
 
 /**
+ * Checks if the node is enabled.
+ */
+internal fun SemanticsNodeInteraction.isEnabled(): Boolean {
+    val node = fetchSemanticsNode()
+    return (SemanticsProperties.Disabled in node.config).not()
+}
+
+/**
  * Creates a semantic matcher to match equality with the editable text
  *
  * @param textValue the text to match

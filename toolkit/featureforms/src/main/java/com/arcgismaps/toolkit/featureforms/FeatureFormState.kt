@@ -21,6 +21,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavDestination.Companion.hasRoute
@@ -172,11 +173,35 @@ public class FeatureFormState private constructor(
         val formData = getActiveFormStateData()
         formData.featureForm.discardEdits()
         formData.stateCollection.forEach {
-            if (it.state is AttachmentElementState) {
-                (it.state as AttachmentElementState).refreshAttachments()
+            when(it.state) {
+                is AttachmentElementState -> {
+                    (it.state as AttachmentElementState).refreshAttachments()
+                }
+
+                is UtilityAssociationsElementState -> {
+                    (it.state as UtilityAssociationsElementState).refreshResults()
+                }
             }
         }
         return formData.evaluateExpressions()
+    }
+
+    /**
+     * Saves all the edits made to the [activeFeatureForm] and refreshes the associations.
+     *
+     * @return the result of the save operation.
+     */
+    internal suspend fun saveEdits(): Result<Unit> {
+        val formData = getActiveFormStateData()
+        val result = formData.featureForm.finishEditing().onSuccess {
+            // After a successful save, refresh the associations
+            formData.stateCollection.forEach { entry ->
+                if (entry.state is UtilityAssociationsElementState) {
+                    (entry.state as UtilityAssociationsElementState).refreshResults()
+                }
+            }
+        }
+        return result
     }
 
     /**
@@ -209,7 +234,7 @@ public class FeatureFormState private constructor(
             _activeFeatureForm.value = formStateData.featureForm
             // refresh the feature to ensure the latest data is loaded.
             formStateData.featureForm.feature.refresh()
-            if (formStateData.initialEvaluation.value.not()) {
+            if (formStateData.initialEvaluation.not()) {
                 formStateData.evaluateExpressions()
             }
         }
@@ -237,7 +262,7 @@ public class FeatureFormState private constructor(
         // Add the new form to the stack.
         store.addLast(FormStateData(form, states))
         // Navigate to the form view.
-        navigateTo(NavigationRoute.FormView)
+        navigateTo(NavigationRoute.Form)
         return true
     }
 
@@ -260,7 +285,7 @@ public class FeatureFormState private constructor(
         if (backStackEntry.lifecycleIsResumed().not()) return false
         // Check the current destination and pop the stack accordingly.
         return when {
-            backStackEntry.destination.hasRoute<NavigationRoute.FormView>() -> {
+            backStackEntry.destination.hasRoute<NavigationRoute.Form>() -> {
                 // Check if the stack has more than one form.
                 if (store.size <= 1) {
                     false
@@ -322,13 +347,13 @@ internal data class FormStateData(
     /**
      * Indicates if the expressions for the [featureForm] have been evaluated at least once.
      */
-    var initialEvaluation : MutableState<Boolean> = mutableStateOf(false)
+    var initialEvaluation : Boolean by mutableStateOf(false)
         private set
 
     /**
      * Indicates if the expressions for the [featureForm] are currently being evaluated.
      */
-    var isEvaluatingExpressions: MutableState<Boolean> = mutableStateOf(false)
+    var isEvaluatingExpressions: Boolean by mutableStateOf(false)
         private set
 
     /**
@@ -338,13 +363,13 @@ internal data class FormStateData(
      */
     suspend fun evaluateExpressions() : Result<List<FormExpressionEvaluationError>> {
         try {
-            isEvaluatingExpressions.value = true
+            isEvaluatingExpressions = true
             return featureForm.evaluateExpressions().onSuccess {
                 // Set the initial evaluation to true after the first successful evaluation.
-                initialEvaluation.value = true
+                initialEvaluation = true
             }
         } finally {
-            isEvaluatingExpressions.value = false
+            isEvaluatingExpressions = false
         }
     }
 }
@@ -420,6 +445,7 @@ internal fun createStates(
 
             is UtilityAssociationsFormElement -> {
                 val state = UtilityAssociationsElementState(
+                    featureForm = form,
                     element = element,
                     scope = scope
                 )
@@ -520,7 +546,7 @@ internal fun createFieldState(
                     required = element.isRequired,
                     visible = element.isVisible,
                     minEpochMillis = input.min,
-                    maxEpochMillis = input.min,
+                    maxEpochMillis = input.max,
                     shouldShowTime = input.includeTime,
                     fieldType = element.fieldType
                 ),

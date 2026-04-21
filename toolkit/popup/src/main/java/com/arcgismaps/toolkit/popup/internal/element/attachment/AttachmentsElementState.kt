@@ -26,12 +26,9 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.Saver
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.arcgismaps.LoadStatus
 import com.arcgismaps.mapping.popup.AttachmentsPopupElement
-import com.arcgismaps.mapping.popup.Popup
 import com.arcgismaps.mapping.popup.PopupAttachment
 import com.arcgismaps.mapping.popup.PopupAttachmentType
 import com.arcgismaps.toolkit.popup.internal.element.state.PopupElementState
@@ -55,39 +52,6 @@ internal class AttachmentsElementState(
         title = attachmentPopupElement.title,
         attachments = attachments.map { PopupAttachmentState(it) }
     )
-
-    companion object {
-        fun Saver(
-            element: AttachmentsPopupElement,
-            attachments: List<PopupAttachment>
-        ): Saver<AttachmentsElementState, Any> = Saver(
-            save = { null },
-            restore = {
-                AttachmentsElementState(
-                    element,
-                    attachments
-                )
-            }
-        )
-
-    }
-}
-
-@Composable
-internal fun rememberAttachmentsElementState(
-    element: AttachmentsPopupElement,
-    popup: Popup,
-    attachments: List<PopupAttachment>
-): AttachmentsElementState {
-    return rememberSaveable(
-        inputs = arrayOf(popup, element),
-        saver = AttachmentsElementState.Saver(element, attachments)
-    ) {
-        AttachmentsElementState(
-            element,
-            attachments
-        )
-    }
 }
 
 /**

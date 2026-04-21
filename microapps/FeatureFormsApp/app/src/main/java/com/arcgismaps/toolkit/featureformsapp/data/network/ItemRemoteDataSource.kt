@@ -19,67 +19,98 @@
 package com.arcgismaps.toolkit.featureformsapp.data.network
 
 import android.util.Log
-import com.arcgismaps.portal.Portal
+import com.arcgismaps.mapping.PortalItem
+import com.arcgismaps.portal.PortalFolder
 import com.arcgismaps.portal.PortalItemType
-import com.arcgismaps.toolkit.featureformsapp.data.local.ItemApi
-import com.arcgismaps.toolkit.featureformsapp.data.local.ItemData
+import com.arcgismaps.portal.PortalQueryParameters
+import com.arcgismaps.portal.PortalQueryResultSet
+import com.arcgismaps.portal.PortalUser
+import com.arcgismaps.toolkit.featureformsapp.data.PortalSettings
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+
+/**
+ * Data class to hold the user content fetched from the portal.
+ */
+class UserContent(
+    val items: List<PortalItem>,
+    val folders: List<PortalFolder>
+)
 
 /**
  * Main data source for accessing the portal item data from the network.
  */
 class ItemRemoteDataSource(
     private val dispatcher: CoroutineDispatcher,
-    private val itemApi: ItemApi = object : ItemApi {
-        override suspend fun fetchItems(
-            portalUri: String,
-            connection: Portal.Connection
-        ): List<ItemData> {
-            // create a Portal
-            val portal = Portal(
-                portalUri,
-                connection = connection
-            )
-            // log an exception and return if the portal loading fails
-            portal.load().onFailure {
-                Log.e("ItemRemoteDataSource", "error in fetchItems: ${it.message}")
-                return emptyList()
-            }
-            val user = portal.user ?: return emptyList()
-            // fetch the users content
-            val portalUserContent = user.fetchContent().getOrElse { return emptyList() }
-            // get the specified folder under the users content
-            val folder = portalUserContent.folders.firstOrNull {
-                it.title == portalFolder
-            }
-            return if (folder != null) {
-                // fetch and return content within the specified folder
-                user.fetchContentInFolder(folder.folderId).getOrDefault(emptyList()).filter {
-                    // filter the content by WebMaps only
-                    it.type == PortalItemType.WebMap
-                }.map {
-                    ItemData(it.url)
-                }
-            } else {
-                portalUserContent.items.filter {
-                    it.type == PortalItemType.WebMap
-                }.map {
-                    ItemData(it.url)
-                }
+    private val portalSettings: PortalSettings,
+    coroutineScope: CoroutineScope
+) {
+    private var portalUser : PortalUser? = null
+
+    init {
+        coroutineScope.launch {
+            portalSettings.user.collectLatest { user ->
+                portalUser = user
             }
         }
-    }
-) {
-    companion object {
-        /**
-         * Folder under the portal to fetch the portal items from.
-         */
-        const val portalFolder = "Apollo"
     }
 
-    suspend fun fetchItemData(portalUri: String, connection: Portal.Connection): List<ItemData> =
+    suspend fun fetchContent(): UserContent = withContext(dispatcher) {
+        portalUser?.let { user ->
+            // log an exception and return if the portal user loading fails
+            user.load().onFailure {
+                Log.e("ItemRemoteDataSource", "unable to load the portal user: ${it.message}", it)
+                return@withContext emptyUserContent()
+            }
+            // fetch the users content
+            val portalUserContent =
+                user.fetchContent().getOrElse { return@withContext emptyUserContent() }
+            val items = portalUserContent.items.filter {
+                it.type == PortalItemType.WebMap
+            }
+            return@withContext UserContent(
+                items = items,
+                folders = portalUserContent.folders
+            )
+        } ?: return@withContext emptyUserContent()
+    }
+
+    suspend fun fetchItemsInFolder(folderId: String): List<PortalItem> = withContext(dispatcher) {
+        portalUser?.let { user ->
+            // log an exception and return if the portal user loading fails
+            user.load().onFailure {
+                Log.e("ItemRemoteDataSource", "unable to load the portal user: ${it.message}", it)
+                return@withContext emptyList()
+            }
+            // fetch the users content
+            val items = user.fetchContentInFolder(folderId).getOrDefault(emptyList()).filter {
+                it.type == PortalItemType.WebMap
+            }
+            return@withContext items
+        } ?: return@withContext emptyList()
+    }
+
+    suspend fun searchContent(query: PortalQueryParameters): Result<PortalQueryResultSet<PortalItem>> =
         withContext(dispatcher) {
-            itemApi.fetchItems(portalUri, connection)
+            portalUser?.let { user ->
+                // log an exception and return if the portal user loading fails
+                user.load().onFailure {
+                    Log.e("ItemRemoteDataSource", "unable to load the portal user: ${it.message}", it)
+                    return@withContext Result.failure(it)
+                }
+                return@withContext user.portal.findItems(query)
+            } ?: return@withContext Result.failure(
+                IllegalStateException("Portal User is not initialized")
+            )
         }
+
+    private fun emptyUserContent(): UserContent {
+        return UserContent(
+            items = emptyList(),
+            folders = emptyList()
+        )
+    }
 }

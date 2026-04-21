@@ -73,41 +73,6 @@
     <string name="max_datetime_helper_text">日期必須等於或早於 %1$s</string>
 
     <!-- Date Picker string values -->
-    <string name="ff_date_input_headline">輸入日期</string>
-    <string name="ff_date_input_headline_description">輸入日期: %1$s</string>
-    <string name="ff_date_input_invalid_for_pattern">日期與預期模式不符: %1$s</string>
-    <string name="ff_date_input_invalid_not_allowed">不允許: %1$s</string>
-    <string name="ff_date_input_invalid_year_range">
-        日期超出預期年份範圍 %1$s - %2$s
-    </string>
-    <string name="ff_date_input_label">日期</string>
-    <string name="ff_date_input_no_input_description">無</string>
-    <string name="ff_date_input_title">選擇日期</string>
-    <string name="ff_date_picker_headline">"選擇的日期"</string>
-    <string name="ff_date_picker_headline_description">目前選擇: %1$s</string>
-    <string name="ff_date_picker_navigate_to_year_description">導覽至 %1$s 年</string>
-    <string name="ff_date_picker_no_selection_description">無</string>
-    <string name="ff_date_picker_scroll_to_earlier_years">捲動以顯示較早年份</string>
-    <string name="ff_date_picker_scroll_to_later_years">捲動以顯示較晚年份</string>
-    <string name="ff_date_picker_switch_to_calendar_mode">切換到行事曆輸入模式</string>
-    <string name="ff_date_picker_switch_to_day_selection">
-        "切換以選擇年份，或點選以切換回選擇日期"
-    </string>
-    <string name="ff_date_picker_switch_to_input_mode">切換到文字輸入模式</string>
-    <string name="ff_date_picker_switch_to_next_month">"變改為下個月"</string>
-    <string name="ff_date_picker_switch_to_previous_month">"變改為上個月"</string>
-    <string name="ff_date_picker_switch_to_year_selection">"切換以選擇某年"</string>
-    <string name="ff_date_picker_title">"選擇日期"</string>
-    <string name="ff_date_picker_today_description">今天</string>
-    <string name="ff_date_picker_year_picker_pane_title">年份選取器可見</string>
-    <string name="ff_date_range_input_invalid_range_input">日期範圍輸入無效</string>
-    <string name="ff_date_range_input_title">輸入日期</string>
-    <string name="ff_date_range_picker_day_in_range">範圍中</string>
-    <string name="ff_date_range_picker_end_headline">結束日期</string>
-    <string name="ff_date_range_picker_scroll_to_next_month">捲動以顯示下個月</string>
-    <string name="ff_date_range_picker_scroll_to_previous_month">捲動以顯示上個月</string>
-    <string name="ff_date_range_picker_start_headline">開始日期</string>
-    <string name="ff_date_range_picker_title">選擇日期</string>
 
     <!-- Time Picker string values -->
     <string name="ff_time_picker_am">上午</string>
@@ -145,4 +110,56 @@
     <string name="tap_to_scan">點選以掃描</string>
     <string name="unable_to_open_the_camera">無法開啟相機</string>
     <string name="value_must_be_a_guid">值必須是有效的 GUID</string>
+    <string name="delete_attachment_title">刪除附件?</string>
+    <string name="delete_attachment_confirmation">確定要刪除此附件?</string>
+    <string name="download_failed">無法下載此檔案。</string>
+    <string name="file_size_exceeds_limit">檔案大小超過限制</string>
+    <string name="unsupported_file_type">不支援的檔案類型</string>
+    <string name="save">儲存</string>
+    <string name="discard">放棄</string>
+    <string name="none_selected">未選擇任何內容</string>
+    <string name="the_form_has_validation_errors">表格發生驗證錯誤</string>
+    <string name="the_form_has_edits">表格具有編輯內容</string>
+    <string name="do_you_want_to_save_your_changes">是否要儲存變更?</string>
+    <string name="no_associations_found">沒有關聯可供顯示</string>
+    <string name="terminal">終端機</string>
+    <string name="terminal_with_value">終端機 : %1$s</string>
+    <string name="content_visible">可見內容</string>
+    <string name="percent_along">沿線百分比</string>
+    <string name="from_element">從元素</string>
+    <string name="to_element">至元素</string>
+    <string name="association_type">關聯類型</string>
+    <string name="remove_association">移除關聯</string>
+    <string name="remove_association_tooltip">僅移除關聯。 功能仍然存在。</string>
+    <string name="remove">移除</string>
+    <string name="association_settings">關聯設定</string>
+    <string name="percent_along_edge">%1$d %%</string>
+    <string name="visible_content">可見內容</string>
+    <string name="content">內容</string>
+    <string name="containment_visible_value">可見: %1$s</string>
+    <string name="from_network_data_source">從網路資料來源</string>
+    <string name="on_map">地圖上</string>
+    <string name="network_data_source">網路資料來源</string>
+    <string name="available_asset_types">可用資產類型</string>
+    <string name="count">計數 %1$d</string>
+    <string name="new_association">新建關聯</string>
+    <string name="add">新增</string>
+    <string name="failed_to_create_association">建立關聯失敗。%1$s</string>
+    <string name="available_features">%1$d 個可用圖徵</string>
+    <string name="loading2">正在載入...</string>
+    <plurals name="you_have_errors_that_must_be_fixed_before_saving">
+        <item quantity="zero">您有 %1$d 個錯誤必須在儲存前修正。</item>
+        <item quantity="one">您有 %1$d 個錯誤必須在儲存前修正。</item>
+        <item quantity="two">您有 %1$d 個錯誤必須在儲存前修正</item>
+        <item quantity="few">您有 %1$d 個錯誤必須在儲存前修正</item>
+        <item quantity="many">您有 %1$d 個錯誤必須在儲存前修正</item>
+        <item quantity="other">您有 %1$d 個錯誤必須在儲存前修正</item>
+    </plurals>
+    <string name="search_features">搜尋圖徵</string>
+    <string name="choose_to_add">選擇以新增</string>
+    <string name="no_features_found">找不到圖徵</string>
+    <string name="refine_your_search_tip">縮小您的搜尋範圍或選擇不同的網路來源。</string>
+    <string name="select_terminal">選擇終端機</string>
+    <string name="show_on_map">在地圖上顯示</string>
+    <string name="more_information">更多資訊</string>
 </resources>

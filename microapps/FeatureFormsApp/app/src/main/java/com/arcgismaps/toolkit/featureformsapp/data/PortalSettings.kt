@@ -17,60 +17,134 @@
 package com.arcgismaps.toolkit.featureformsapp.data
 
 import android.content.Context
-import android.content.SharedPreferences
-import com.arcgismaps.ArcGISEnvironment
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.preferencesDataStore
 import com.arcgismaps.portal.Portal
-import com.arcgismaps.toolkit.authentication.signOut
+import com.arcgismaps.portal.PortalUser
+import com.arcgismaps.toolkit.authentication.AuthenticatorState
 import com.arcgismaps.toolkit.featureformsapp.R
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+private val Context.portalPreferences: DataStore<Preferences> by preferencesDataStore(name = "portal_settings")
+private val URL_KEY = stringPreferencesKey("url")
+private val PORTAL_USER_KEY = stringPreferencesKey("portal_user")
+private val PORTAL_CONNECTION_KEY = intPreferencesKey("portal_connection")
+
 class PortalSettings(
-    context: Context
+    context: Context,
+    scope: CoroutineScope
 ) {
-    private val preferences: SharedPreferences =
-        context.getSharedPreferences("portal_settings", Context.MODE_PRIVATE)
+    private val preferences = context.portalPreferences
+
+    private val _user: MutableStateFlow<PortalUser?> = MutableStateFlow(null)
+
+    /**
+     * The current portal user, or null if not logged in. Observe this to get updates when the user changes.
+     *
+     * See [getPortalUser] for how to retrieve the user directly.
+     */
+    val user: StateFlow<PortalUser?> = _user.asStateFlow()
 
     val defaultPortalUrl: String = context.getString(R.string.agol_portal_url)
 
-    private val urlKey = "url"
-    private val connectionKey = "connection"
+    private val authenticatorState = AuthenticatorState()
 
-    fun getPortalConnection() : Portal.Connection {
-        val connection = preferences.getInt(connectionKey, 0)
-        return if (connection == 0) {
+    init {
+        scope.launch(start = CoroutineStart.UNDISPATCHED) {
+            // Load the initial portal user from preferences, if available
+            _user.value = getPortalUser()
+        }
+    }
+
+    /**
+     * Retrieves the current portal connection state.
+     */
+    suspend fun getPortalConnection(): Portal.Connection? = withContext(Dispatchers.IO) {
+        val connection = preferences.data.first()[PORTAL_CONNECTION_KEY] ?: return@withContext null
+        return@withContext if (connection == 0) {
             Portal.Connection.Authenticated
         } else {
             Portal.Connection.Anonymous
         }
     }
 
-    suspend fun setPortalConnection(connection: Portal.Connection) = withContext(Dispatchers.IO) {
-        with(preferences.edit()) {
-            val value = if (connection is Portal.Connection.Authenticated) {
-                0
-            } else {
-                1
+    /**
+     * Sets the portal connection state.
+     */
+    suspend fun setPortalConnection(connection: Portal.Connection) =
+        withContext(Dispatchers.IO) {
+            preferences.edit { settings ->
+                settings[PORTAL_CONNECTION_KEY] =
+                    if (connection is Portal.Connection.Authenticated) {
+                        0
+                    } else {
+                        1
+                    }
             }
-            putInt(connectionKey, value)
-            commit()
+        }
+
+    /**
+     * Retrieves the current portal user, or null if not logged in. See [user] for a flow that emits
+     * updates to the user state.
+     */
+    suspend fun getPortalUser(): PortalUser? = withContext(Dispatchers.IO) {
+        preferences.data.firstOrNull()?.let { settings ->
+            val portalUrl = settings[URL_KEY] ?: return@withContext null
+            val connection = settings[PORTAL_CONNECTION_KEY] ?: return@withContext null
+            val userJson = settings[PORTAL_USER_KEY] ?: return@withContext null
+            val portal = Portal(
+                portalUrl,
+                if (connection == 0) {
+                    Portal.Connection.Authenticated
+                } else {
+                    Portal.Connection.Anonymous
+                }
+            )
+            PortalUser.fromJsonOrNull(userJson, portal)
         }
     }
 
-    fun getPortalUrl(): String {
-        return preferences.getString(urlKey, "") ?: ""
-    }
-
-    suspend fun setPortalUrl(url: String) = withContext(Dispatchers.IO) {
-        with(preferences.edit()) {
-            putString(urlKey, url)
-            commit()
+    /**
+     * Sets the current portal user and updates the preferences.
+     */
+    suspend fun setPortalUser(user: PortalUser) = withContext(Dispatchers.IO) {
+        preferences.edit { settings ->
+            settings[PORTAL_USER_KEY] = user.toJson()
+            settings[URL_KEY] = user.portal.url
+            settings[PORTAL_CONNECTION_KEY] =
+                if (user.portal.connection is Portal.Connection.Authenticated) {
+                    0 // Authenticated
+                } else {
+                    1 // Anonymous
+                }
         }
+        _user.value = user
     }
 
+    /**
+     * Signs out the current user and clears the stored portal settings.
+     */
     suspend fun signOut() = withContext(Dispatchers.IO) {
-        setPortalConnection(Portal.Connection.Authenticated)
-        ArcGISEnvironment.authenticationManager.signOut()
+        preferences.edit { settings ->
+            settings.remove(URL_KEY)
+            settings.remove(PORTAL_USER_KEY)
+            settings.remove(PORTAL_CONNECTION_KEY)
+        }
+        _user.value = null
+
+        authenticatorState.signOut()
     }
 }

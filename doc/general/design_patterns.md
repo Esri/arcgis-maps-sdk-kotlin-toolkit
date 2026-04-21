@@ -135,10 +135,10 @@ fun MyScreen(modifier: Modifier = Modifier, onBackPressed: () -> Unit) {
 ```
 
 
-## MapView and SceneView
+## MapView, SceneView, and LocalSceneView
 
-The `MapView` and `SceneView` components in the `geoview-compose` module offer Composable versions of the `MapView` and `SceneView`.
-These components should be used for displaying maps and scenes in Compose UIs.
+The `MapView`, `SceneView`, and `LocalSceneView` components in the `geoview-compose` module provide composable equivalents of those views.
+Use these components to display maps, scenes, and local scenes in Compose UIs.
 
 ## More Recommendations
 

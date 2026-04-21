@@ -93,17 +93,17 @@ public class SceneViewProxy : GeoViewProxy("SceneView") {
         sceneView?.locationToScreen(point)
 
     /**
-     * Asynchronously converts a screen coordinate relative to the upper-left corner of the scene view to a location in map coordinates.
+     * Converts a screen coordinate to a location in scene coordinates, considering both the scene's
+     * base surface and other scene content.
      *
-     * This is a high performance calculation executed on the GPU using a triangular mesh. Note that elevation
-     * values are approximated, and as the distance between the camera and the surface increases, the precision of
-     * the elevation value decreases.
+     * Note that elevation values are approximated, and as the distance between the camera and the
+     * surface increases, the precision of the elevation value decreases.
      *
      * To call this method, assign a scene to the scene view, ensure that it is loaded and the draw status is
      * [DrawStatus.Completed].
      *
      * @param screenCoordinate a pixel coordinate relative to the upper-left corner of the screen.
-     * @return A [Result] containing a [Point] or an exception.
+     * @return A [Result] containing a [Point] on the scene or an exception.
      * @since 200.4.0
      */
     public suspend fun screenToLocation(screenCoordinate: ScreenCoordinate): Result<Point> =
@@ -114,7 +114,8 @@ public class SceneViewProxy : GeoViewProxy("SceneView") {
         )
 
     /**
-     * Converts a screen coordinate (in pixels) to a point on the base surface of the scene within the scene view's spatial reference.
+     * Converts a screen coordinate to a location on the base surface in scene coordinates,
+     * considering only the scene's base surface and ignoring other scene content.
      *
      * To call this method, assign a scene to the scene view, ensure that it is loaded and the draw status is
      * [DrawStatus.Completed].

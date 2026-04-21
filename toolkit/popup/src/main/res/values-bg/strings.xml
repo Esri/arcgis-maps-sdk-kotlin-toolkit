@@ -24,4 +24,24 @@
     <string name="other">Друго</string>
     <string name="close">Назад</string>
     <string name="attachment_thumbnail">Миниатюра на прикачен файл</string>
+    <string name="terminal">Терминал</string>
+    <string name="no_associations_found">Няма намерени асоциации</string>
+    <string name="visible_content">Видимо съдържание</string>
+    <string name="content">Съдържание</string>
+    <string name="containment_visible">Ограничение видимо</string>
+    <string name="fraction_along_edge">Фракция на ръба</string>
+    <string name="percent_along_edge">%1$d %%</string>
+    <string name="from_element">От елемент</string>
+    <string name="to_element">Към елемент</string>
+    <string name="association_type">Тип свързване</string>
+    <string name="remove_association">Премахване на свързване</string>
+    <string name="remove_association_tooltip">Премахва само свързването. Характеристиката остава.</string>
+    <string name="remove">Премахване</string>
+    <string name="cancel">Отказ</string>
+    <string name="none_selected">Няма селектирани</string>
+    <string name="association_settings">Настройки на свързване</string>
+    <string name="show_all">Показване на всички</string>
+    <string name="filter_by_feature_title">Филтриране по заглавие на обект</string>
+    <string name="containment_visible_value">Видим: %1$s</string>
+    <string name="associations">Асоциации</string>
 </resources>

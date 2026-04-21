@@ -28,7 +28,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.application
+import androidx.lifecycle.viewModelScope
 import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.data.ArcGISFeatureTable
 import com.arcgismaps.data.FeatureEditResult
@@ -41,21 +42,60 @@ import com.arcgismaps.mapping.PortalItem
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.layers.FeatureLayer
+import com.arcgismaps.mapping.layers.GroupLayer
+import com.arcgismaps.mapping.layers.Layer
 import com.arcgismaps.mapping.layers.SubtypeFeatureLayer
+import com.arcgismaps.mapping.view.AnimationCurve
 import com.arcgismaps.mapping.view.IdentifyLayerResult
 import com.arcgismaps.mapping.view.ScreenCoordinate
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
+import com.arcgismaps.tasks.geodatabase.SyncDirection
+import com.arcgismaps.tasks.offlinemaptask.OfflineMapSyncTask
+import com.arcgismaps.tasks.offlinemaptask.PreplannedScheduledUpdatesOption
 import com.arcgismaps.toolkit.featureforms.FeatureFormState
+import com.arcgismaps.toolkit.featureformsapp.R
 import com.arcgismaps.toolkit.featureformsapp.data.PortalItemRepository
 import com.arcgismaps.toolkit.featureformsapp.di.ApplicationScope
 import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
+import com.arcgismaps.toolkit.offline.OfflineMapState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.seconds
+
+/**
+ * A class to hold an [ArcGISMap] as state and provide functions to set and restore the map.
+ */
+class MapState(
+    private val initialMap: ArcGISMap
+) {
+    private val _map = mutableStateOf(initialMap)
+
+    val map: ArcGISMap
+        get() = _map.value
+
+    /**
+     * Sets the map to the given [newMap]. This is used to temporarily set the map to a different map
+     * such as the offline map when viewing offline map areas.
+     *
+     * The [restoreMap] function can be called to set the map back to the original map.
+     */
+    fun setMap(newMap: ArcGISMap) {
+        _map.value = newMap
+    }
+
+    /**
+     * Restores the map to the original map.
+     */
+    fun restoreMap() {
+        _map.value = initialMap
+    }
+}
 
 /**
  * A UI state class that indicates the current editing state for a feature form.
@@ -88,8 +128,18 @@ sealed class UIState {
         val featureCount: Int
     ) : UIState()
 
+    /**
+     * State to add a new feature with the given [layerTemplates].
+     */
     data class AddFeature(
         val layerTemplates: List<LayerTemplates>
+    ) : UIState()
+
+    /**
+     * State to show the offline map areas with the given [offlineMapState].
+     */
+    data class OfflineMapAreas(
+        val offlineMapState: OfflineMapState
     ) : UIState()
 }
 
@@ -112,11 +162,19 @@ data class DefaultFeatureRow(
 /**
  * Indicates an error state with the given [error].
  */
-data class Error(
+data class UIMessage(
+    val kind: Kind,
     val title: String,
     val details: String,
     val subTitle: String = ""
-)
+) {
+    enum class Kind {
+        Error,
+        Warning,
+        Info,
+        Success
+    }
+}
 
 /**
  * Base class for context aware AndroidViewModel. This class must have only a single application
@@ -130,19 +188,26 @@ open class BaseMapViewModel(application: Application) : AndroidViewModel(applica
  */
 @HiltViewModel
 class MapViewModel @Inject constructor(
-    savedStateHandle: SavedStateHandle,
     portalItemRepository: PortalItemRepository,
     application: Application,
     @ApplicationScope private val scope: CoroutineScope
 ) : BaseMapViewModel(application) {
-    private val itemId: String = savedStateHandle["uri"]!!
 
     val proxy: MapViewProxy = MapViewProxy()
 
-    var portalItem: PortalItem = portalItemRepository(itemId)
-        ?: throw IllegalStateException("portal item not found with id $itemId")
+    var portalItem: PortalItem = portalItemRepository.activePortalItem
+        ?: throw IllegalStateException("No portal item selected")
 
-    val map: ArcGISMap = ArcGISMap(portalItem)
+    private val mapState = MapState(
+        ArcGISMap(portalItem)
+    )
+
+    /**
+     * The current map to be displayed in the MapView. This may be the original map from the portal
+     * item or it may be a temporary offline map if the user is viewing offline map areas.
+     */
+    val map: ArcGISMap
+        get() = mapState.map
 
     private val _uiState: MutableState<UIState> = mutableStateOf(UIState.Loading)
 
@@ -160,13 +225,13 @@ class MapViewModel @Inject constructor(
     val isBusy: State<Boolean>
         get() = _isBusy
 
-    private val _error: MutableState<Error?> = mutableStateOf(null)
+    private val _uiMessage: MutableState<UIMessage?> = mutableStateOf(null)
 
     /**
      * Observe this state to get the current error state, if any.
      */
-    val error: State<Error?>
-        get() = _error
+    val uiMessage: State<UIMessage?>
+        get() = _uiMessage
 
     private val _identifyTaskLocation: MutableState<Point?> = mutableStateOf(null)
 
@@ -174,7 +239,7 @@ class MapViewModel @Inject constructor(
      * The current location of the identify task. This is used to indicate if there is an
      * identify task in progress for the given location.
      */
-    val identifyTaskLocation : State<Point?>
+    val identifyTaskLocation: State<Point?>
         get() = _identifyTaskLocation
 
     /**
@@ -196,7 +261,43 @@ class MapViewModel @Inject constructor(
         (_uiState.value as? UIState.Editing)?.featureFormState?.activeFeatureForm
     }
 
+    /**
+     * The current offline map state for the map.
+     */
+    private val offlineMapState = OfflineMapState(
+        arcGISMap = mapState.map,
+        onSelectionChanged = { offlineMap ->
+            if (offlineMap != null) {
+                mapState.setMap(offlineMap)
+                _isConnected.value = false
+            } else {
+                mapState.restoreMap()
+                viewModelScope.launch {
+                    mapState.map.retryLoad().onSuccess {
+                        _isConnected.value = true
+                    }.onFailure {
+                        _isConnected.value = false
+                        _uiMessage.value = UIMessage(
+                            kind = UIMessage.Kind.Error,
+                            title = application.getString(R.string.failed_to_load_the_map),
+                            details = it.message ?: application.getString(R.string.unknown_error)
+                        )
+                    }
+                }
+            }
+        }
+    )
+
+    private val _isConnected = mutableStateOf(true)
+
+    /**
+     * Indicates if the map is currently connected to the service.
+     */
+    val isConnected: Boolean
+        get() = _isConnected.value
+
     init {
+        val map = mapState.map
         scope.launch {
             // load the map and set the UI state to not editing
             map.load()
@@ -210,7 +311,7 @@ class MapViewModel @Inject constructor(
                 map.clearSelection()
                 // if there is an active feature form then select the feature
                 if (featureForm != null) {
-                    featureForm.selectFeature()
+                    featureForm.feature.selectFeature()
                     featureForm.feature.geometry?.let { geometry ->
                         // set the viewpoint to the feature geometry
                         proxy.setViewpointAnimated(
@@ -230,15 +331,16 @@ class MapViewModel @Inject constructor(
      * Sets the UI state to not editing.
      */
     fun setDefaultState() {
-        clearErrors()
+        mapState.map.clearSelection()
+        clearMessages()
         _uiState.value = UIState.NotEditing
     }
 
     /**
      * Clears the current errors.
      */
-    fun clearErrors() {
-        _error.value = null
+    fun clearMessages() {
+        _uiMessage.value = null
     }
 
     /**
@@ -325,24 +427,49 @@ class MapViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Toggles the navigation enabled state. When navigation is enabled, the user can navigate between
+     * features in the feature form.
+     */
     fun toggleNavigationEnabled() {
         _isNavigationEnabled.value = !_isNavigationEnabled.value
     }
 
     /**
-     * Apply attribute edits to the Geodatabase backing
-     * the ServiceFeatureTable and refresh the local feature.
-     *
-     * Persisting changes to attributes is not part of the FeatureForm API.
-     *
-     * @param featureForm the FeatureForm to commit edits from
+     * Sets the UI state to show the offline map areas screen for the current map.
      */
-    suspend fun commitEdits(featureForm: FeatureForm) {
-        // set the busy state to true
-        _isBusy.value = true
-        applyEditsToService(featureForm)
-        // clear the busy state
-        _isBusy.value = false
+    fun viewOfflineMapAreas() {
+        _uiState.value = UIState.OfflineMapAreas(
+            offlineMapState
+        )
+    }
+
+    /**
+     * Sets the map back to the original online map and resets the offline map state. [isConnected]
+     * will be set to true after the map is successfully loaded.
+     */
+    fun goOnline() {
+        offlineMapState.resetSelectedMapArea()
+    }
+
+    /**
+     * Apply any local edits to the service. This will apply edits if the current map is
+     * connected. If the map is offline and has local edits, then this will attempt to sync
+     * the local edits with the service.
+     */
+    fun commitEdits() {
+        viewModelScope.launch {
+            // set the busy state to true
+            _isBusy.value = true
+            val map = mapState.map
+            if (isConnected) {
+                applyEditsToService(map)
+            } else {
+                syncMapWithService(map)
+            }
+            // clear the busy state
+            _isBusy.value = false
+        }
     }
 
     /**
@@ -350,6 +477,7 @@ class MapViewModel @Inject constructor(
      * feature.
      */
     suspend fun addNewFeature() {
+        val map = mapState.map
         val layers = map.operationalLayers.filterIsInstance<FeatureLayer>()
         val layerTemplates = mutableListOf<LayerTemplates>()
         layers.forEach { layer ->
@@ -427,23 +555,60 @@ class MapViewModel @Inject constructor(
     }
 
     /**
-     * Applies the edits in the [featureForm]'s table to the service and sets the UI state to error
+     * Locates the given [feature] on the map by setting the viewpoint to the feature geometry
+     * and flashing the feature.
+     *
+     * @param feature the feature to locate
+     */
+    suspend fun highlightFeature(feature: ArcGISFeature) {
+        feature.geometry?.let { geometry ->
+            // set the viewpoint to the feature geometry extent
+            proxy.setViewpointAnimated(
+                Viewpoint(geometry.extent),
+                1.seconds,
+                AnimationCurve.EaseInOutCubic
+            ).onSuccess {
+                // flash the feature to highlight it
+                feature.flashFeature()
+            }
+        }
+    }
+
+    /**
+     * Applies the local edits in the [MapState.map]'s table to the service and sets the UI state to error
      * if there are any errors.
      *
      * If there are no errors, the feature is refreshed and the UI state is set to not editing.
      */
-    private suspend fun applyEditsToService(featureForm: FeatureForm) {
-        val serviceFeatureTable = featureForm.feature.featureTable as? ServiceFeatureTable ?: run {
-            _error.value = Error(
-                title = "Failed to sync edits with the service",
-                details = "Cannot save edits without a ServiceFeatureTable"
+    private suspend fun applyEditsToService(map: ArcGISMap) = withContext(Dispatchers.IO) {
+        val layer = map.operationalLayers.firstOrNull {
+            when (it) {
+                is FeatureLayer -> it.featureTable is ServiceFeatureTable
+                is GroupLayer -> it.layers.any { subLayer ->
+                    subLayer is FeatureLayer && subLayer.featureTable is ServiceFeatureTable
+                }
+
+                else -> false
+            }
+        }
+        val table = (layer as? FeatureLayer)?.featureTable as? ServiceFeatureTable
+        val serviceFeatureTable = table ?: run {
+            _uiMessage.value = UIMessage(
+                kind = UIMessage.Kind.Error,
+                title = application.getString(R.string.failed_to_apply_edits),
+                details = application.getString(R.string.no_servicefeaturetable)
             )
-            return
+            return@withContext
         }
         if (serviceFeatureTable.serviceGeodatabase?.hasLocalEdits() == false) {
+            _uiMessage.value = UIMessage(
+                kind = UIMessage.Kind.Success,
+                title = application.getString(R.string.already_up_to_date),
+                details = application.getString(R.string.no_local_edits)
+            )
             // if there are no local edits across all the tables in the service geodatabase
             // then return as there is nothing to sync
-            return
+            return@withContext
         }
         // check if the service supports applyEdits using the service geodatabase
         val canUseServiceGeodatabaseApplyEdits =
@@ -469,10 +634,78 @@ class MapViewModel @Inject constructor(
         }
         // if there are errors then set the UI state to error
         if (errors.isNotEmpty()) {
-            val errorText = errors.joinToString(separator = "\n") { it.message ?: "Unknown error" }
-            _error.value = Error(
-                title = "Failed to sync edits with the service",
+            val errorText = errors.joinToString(separator = "\n") {
+                it.message ?: application.getString(R.string.unknown_error)
+            }
+            _uiMessage.value = UIMessage(
+                kind = UIMessage.Kind.Error,
+                title = application.getString(R.string.failed_to_apply_edits),
                 details = errorText
+            )
+        } else {
+            _uiMessage.value = UIMessage(
+                kind = UIMessage.Kind.Success,
+                title = application.getString(R.string.success),
+                details = application.getString(R.string.edits_applied_to_the_service)
+            )
+        }
+    }
+
+    /**
+     * Sync any local edits in the current offline map with the service.
+     */
+    private suspend fun syncMapWithService(map: ArcGISMap) = withContext(Dispatchers.IO) {
+        val syncTask = OfflineMapSyncTask(map)
+        syncTask.load()
+        val createParametersResult = syncTask.createDefaultOfflineMapSyncParameters()
+        val params = createParametersResult.getOrNull() ?: run {
+            val details = createParametersResult.exceptionOrNull()?.message
+                ?: application.getString(R.string.unknown_error)
+            _uiMessage.value = UIMessage(
+                kind = UIMessage.Kind.Error,
+                title = application.getString(R.string.failed_to_sync_with_the_service),
+                details = application.getString(R.string.failed_to_create_sync_parameters),
+                subTitle = details
+            )
+            return@withContext
+        }
+        val syncJob = syncTask.createOfflineMapSyncJob(params.apply {
+            syncDirection = SyncDirection.Bidirectional
+            keepGeodatabaseDeltas = false
+            preplannedScheduledUpdatesOption = PreplannedScheduledUpdatesOption.DownloadAllUpdates
+            reconcileBranchVersion = true
+        })
+        val errors = mutableListOf<Throwable>()
+        syncJob.start()
+        syncJob.result().onSuccess { result ->
+            result.layerResults.forEach { layerResults ->
+                layerResults.value.error?.let {
+                    errors.add(it)
+                }
+            }
+            result.tableResults.forEach { tableResult ->
+                tableResult.value.error?.let {
+                    errors.add(it)
+                }
+            }
+        }.onFailure {
+            errors.add(it)
+        }
+        // if there are errors then set the UI state to error
+        if (errors.isNotEmpty()) {
+            val errorText = errors.joinToString(separator = "\n") {
+                it.message ?: application.getString(R.string.unknown_error)
+            }
+            _uiMessage.value = UIMessage(
+                kind = UIMessage.Kind.Error,
+                title = application.getString(R.string.failed_to_sync_with_the_service),
+                details = errorText
+            )
+        } else {
+            _uiMessage.value = UIMessage(
+                kind = UIMessage.Kind.Success,
+                title = application.getString(R.string.success),
+                details = application.getString(R.string.map_is_in_sync_with_service)
             )
         }
     }
@@ -525,25 +758,54 @@ val List<FeatureEditResult>.errors: List<Throwable>
  */
 fun ArcGISMap.clearSelection() {
     operationalLayers.forEach { layer ->
-        when (layer) {
-            is FeatureLayer -> {
-                layer.clearSelection()
-            }
+        layer.clearSelection()
+    }
+}
 
-            else -> {}
+/**
+ * Clears any previously selected features in this [Layer] by clearing the selection on all
+ * sub layers if this is a [GroupLayer].
+ */
+fun Layer.clearSelection() {
+    if (this is FeatureLayer) {
+        this.clearSelection()
+    } else if (this is GroupLayer) {
+        this.layers.forEach { subLayer ->
+            subLayer.clearSelection()
         }
     }
 }
 
 /**
- * Selects the [FeatureForm.feature] on its corresponding layer.
+ * Returns the [FeatureLayer] associated with this [ArcGISFeature], or null if the feature's
+ * table is not associated with a [FeatureLayer].
  */
-fun FeatureForm.selectFeature() {
-    val table = feature.featureTable as? ArcGISFeatureTable ?: return
-    val layer = when (table.layer) {
-        is SubtypeFeatureLayer -> table.layer as SubtypeFeatureLayer
-        is FeatureLayer -> table.layer as FeatureLayer
-        else -> return
+val ArcGISFeature.layer: FeatureLayer?
+    get() {
+        val table = featureTable as? ArcGISFeatureTable ?: return null
+        return when (table.layer) {
+            is SubtypeFeatureLayer -> table.layer as SubtypeFeatureLayer
+            is FeatureLayer -> table.layer as FeatureLayer
+            else -> null
+        }
     }
-    layer.selectFeature(feature)
+
+/**
+ * Selects this feature in its associated layer, if any.
+ */
+fun ArcGISFeature.selectFeature() = layer?.selectFeature(this)
+
+/**
+ * Flashes this feature in its associated layer, if any, by selecting and unselecting it
+ * a given number of [times] with a delay of [delayMs] milliseconds between each selection
+ * and unselection.
+ */
+suspend fun ArcGISFeature.flashFeature(times: Int = 4, delayMs: Long = 500) {
+    val layer = layer ?: return
+    repeat(times) {
+        layer.selectFeature(this)
+        delay(delayMs)
+        layer.unselectFeature(this)
+        delay(delayMs)
+    }
 }

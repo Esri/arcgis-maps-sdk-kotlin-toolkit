@@ -73,41 +73,6 @@
     <string name="max_datetime_helper_text">La date doit être le ou avant le %1$s</string>
 
     <!-- Date Picker string values -->
-    <string name="ff_date_input_headline">Date saisie</string>
-    <string name="ff_date_input_headline_description">Date saisie : %1$s</string>
-    <string name="ff_date_input_invalid_for_pattern">La date ne correspond pas au modèle attendu : %1$s</string>
-    <string name="ff_date_input_invalid_not_allowed">Date non autorisée : %1$s</string>
-    <string name="ff_date_input_invalid_year_range">
-        Date hors de la plage d’années attendue %1$s – %2$s
-    </string>
-    <string name="ff_date_input_label">Date</string>
-    <string name="ff_date_input_no_input_description">Aucune</string>
-    <string name="ff_date_input_title">Sélectionner une date</string>
-    <string name="ff_date_picker_headline">"Date sélectionnée"</string>
-    <string name="ff_date_picker_headline_description">Sélection actuelle : %1$s</string>
-    <string name="ff_date_picker_navigate_to_year_description">Accéder à l’année %1$s</string>
-    <string name="ff_date_picker_no_selection_description">Aucune</string>
-    <string name="ff_date_picker_scroll_to_earlier_years">Faire défiler pour afficher les années précédentes</string>
-    <string name="ff_date_picker_scroll_to_later_years">Faire défiler pour afficher les années suivantes</string>
-    <string name="ff_date_picker_switch_to_calendar_mode">Basculer en mode de saisie Calendrier</string>
-    <string name="ff_date_picker_switch_to_day_selection">
-        "Balayer pour sélectionner une année ou appuyer pour revenir à la sélection d’un jour"
-    </string>
-    <string name="ff_date_picker_switch_to_input_mode">Basculer en mode de saisie Texte</string>
-    <string name="ff_date_picker_switch_to_next_month">"Passer au mois suivant"</string>
-    <string name="ff_date_picker_switch_to_previous_month">"Passer au mois précédent"</string>
-    <string name="ff_date_picker_switch_to_year_selection">"Passer à la sélection d’une année"</string>
-    <string name="ff_date_picker_title">"Sélectionner une date"</string>
-    <string name="ff_date_picker_today_description">Aujourd’hui</string>
-    <string name="ff_date_picker_year_picker_pane_title">Sélecteur d’année visible</string>
-    <string name="ff_date_range_input_invalid_range_input">Plage de dates saisie non valide</string>
-    <string name="ff_date_range_input_title">Saisir des dates</string>
-    <string name="ff_date_range_picker_day_in_range">Dans la plage</string>
-    <string name="ff_date_range_picker_end_headline">Date de fin</string>
-    <string name="ff_date_range_picker_scroll_to_next_month">Faire défiler pour afficher le mois suivant</string>
-    <string name="ff_date_range_picker_scroll_to_previous_month">Faire défiler pour afficher le mois précédent</string>
-    <string name="ff_date_range_picker_start_headline">Date de début</string>
-    <string name="ff_date_range_picker_title">Sélectionner des dates</string>
 
     <!-- Time Picker string values -->
     <string name="ff_time_picker_am">AM</string>
@@ -145,4 +110,56 @@
     <string name="tap_to_scan">Appuyer pour scanner</string>
     <string name="unable_to_open_the_camera">Impossible d’ouvrir l’appareil photo</string>
     <string name="value_must_be_a_guid">La valeur doit être un GUID valide</string>
+    <string name="delete_attachment_title">Supprimer la pièce jointe ?</string>
+    <string name="delete_attachment_confirmation">Voulez-vous vraiment supprimer cette pièce jointe ?</string>
+    <string name="download_failed">Impossible de télécharger ce fichier.</string>
+    <string name="file_size_exceeds_limit">La taille du fichier dépasse la limite</string>
+    <string name="unsupported_file_type">Type de fichier non pris en charge</string>
+    <string name="save">Enregistrer</string>
+    <string name="discard">Ignorer</string>
+    <string name="none_selected">Aucune sélection</string>
+    <string name="the_form_has_validation_errors">Le formulaire comporte des erreurs de validation</string>
+    <string name="the_form_has_edits">Le formulaire comporte des modifications</string>
+    <string name="do_you_want_to_save_your_changes">Voulez-vous enregistrer les modifications ?</string>
+    <string name="no_associations_found">Aucune association à afficher</string>
+    <string name="terminal">Borne</string>
+    <string name="terminal_with_value">Borne : %1$s</string>
+    <string name="content_visible">Contenu visible</string>
+    <string name="percent_along">Pourcentage de positionnement</string>
+    <string name="from_element">Élément d’origine</string>
+    <string name="to_element">Élément de destination</string>
+    <string name="association_type">Type d’association</string>
+    <string name="remove_association">Supprimer l’association</string>
+    <string name="remove_association_tooltip">Seule l’association est supprimée. L’entité est conservée.</string>
+    <string name="remove">Supprimer</string>
+    <string name="association_settings">Paramètres d’association</string>
+    <string name="percent_along_edge">%1$d %%</string>
+    <string name="visible_content">Contenu visible</string>
+    <string name="content">Contenu</string>
+    <string name="containment_visible_value">Visible : %1$s</string>
+    <string name="from_network_data_source">À partir d’une source de données réseau</string>
+    <string name="on_map">Sur la carte</string>
+    <string name="network_data_source">Source de données réseau</string>
+    <string name="available_asset_types">Types de ressource disponibles</string>
+    <string name="count">Total : %1$d</string>
+    <string name="new_association">Nouvelle association</string>
+    <string name="add">Ajouter</string>
+    <string name="failed_to_create_association">Échec de la création de l’association. %1$s</string>
+    <string name="available_features">%1$d entités disponibles</string>
+    <string name="loading2">Chargement en cours...</string>
+    <plurals name="you_have_errors_that_must_be_fixed_before_saving">
+        <item quantity="zero">Vous devez corriger %1$d erreur avant de pouvoir procéder à l’enregistrement.</item>
+        <item quantity="one">Vous devez corriger %1$d erreur avant de pouvoir procéder à l’enregistrement.</item>
+        <item quantity="two">Vous devez corriger %1$d erreurs avant de pouvoir procéder à l’enregistrement.</item>
+        <item quantity="few">Vous devez corriger %1$d erreurs avant de pouvoir procéder à l’enregistrement.</item>
+        <item quantity="many">Vous devez corriger %1$d erreurs avant de pouvoir procéder à l’enregistrement.</item>
+        <item quantity="other">Vous devez corriger %1$d erreur(s) avant de pouvoir procéder à l’enregistrement.</item>
+    </plurals>
+    <string name="search_features">Rechercher des entités</string>
+    <string name="choose_to_add">Sélectionner l’entité à ajouter</string>
+    <string name="no_features_found">Aucune entité trouvée</string>
+    <string name="refine_your_search_tip">Affinez la recherche ou sélectionnez une autre source de données réseau.</string>
+    <string name="select_terminal">Sélectionner une borne</string>
+    <string name="show_on_map">Afficher sur la carte</string>
+    <string name="more_information">Plus d’informations</string>
 </resources>

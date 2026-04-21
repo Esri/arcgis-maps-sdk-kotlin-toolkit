@@ -72,6 +72,7 @@ internal data class OnDemandMapAreaConfiguration(
 internal class OnDemandMapAreasState(
     private val context: Context,
     private val item: Item,
+    private val portalItemID: String,
     internal val configuration: OnDemandMapAreaConfiguration? = null,
     private val offlineMapTask: OfflineMapTask? = null,
     private val onSelectionChanged: (ArcGISMap) -> Unit
@@ -192,7 +193,7 @@ internal class OnDemandMapAreasState(
         // Define the path where the map will be saved
         val onDemandMapAreaDownloadDirectory = OfflineRepository.createPendingOnDemandJobPath(
             context = context,
-            portalItemID = item.itemId,
+            portalItemID = portalItemID,
             onDemandMapAreaID = onDemandMapAreaID
         )
 
@@ -229,7 +230,7 @@ internal class OnDemandMapAreasState(
 
         workerUUID = OfflineRepository.createOnDemandMapAreaRequestAndQueueDownload(
             context = context,
-            portalItemId = item.itemId,
+            portalItemId = portalItemID,
             mapAreaItemId = onDemandMapAreaId,
             jsonJobPath = jsonJobFile.path,
             onDemandMapAreaTitle = configuration?.title ?: item.title
@@ -257,7 +258,7 @@ internal class OnDemandMapAreasState(
             if (shouldRemoveOfflineMapInfo()) {
                 OfflineRepository.removeOfflineMapInfo(
                     context = context,
-                    portalItemID = item.itemId
+                    portalItemID = portalItemID
                 )
             }
         } else {
@@ -279,7 +280,7 @@ internal class OnDemandMapAreasState(
         if (shouldRemoveOfflineMapInfo()) {
             OfflineRepository.removeOfflineMapInfo(
                 context = context,
-                portalItemID = item.itemId
+                portalItemID = portalItemID
             )
         }
     }

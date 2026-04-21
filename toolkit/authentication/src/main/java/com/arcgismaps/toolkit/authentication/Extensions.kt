@@ -22,53 +22,7 @@ import android.app.Activity
 import android.content.Context
 import androidx.browser.customtabs.CustomTabsClient
 import androidx.browser.customtabs.CustomTabsIntent
-import com.arcgismaps.httpcore.authentication.AuthenticationManager
-import com.arcgismaps.httpcore.authentication.OAuthUserCredential
-import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
 import androidx.core.net.toUri
-
-/**
- * Revokes OAuth tokens and removes all credentials from the [AuthenticationManager.arcGISCredentialStore]
- * and [AuthenticationManager.networkCredentialStore].
- *
- * @since 200.2.0
- */
-@Deprecated(
-    message = "since 200.8.0. Use AuthenticatorState.signOut() instead as it provides support for IAP sign out.",
-    replaceWith = ReplaceWith("AuthenticatorState.signOut()")
-)
-public suspend fun AuthenticationManager.signOut() {
-    arcGISCredentialStore.getCredentials().forEach {
-        if (it is OAuthUserCredential) {
-            it.revokeToken()
-        }
-    }
-    arcGISCredentialStore.removeAll()
-    networkCredentialStore.removeAll()
-}
-
-/**
- * Launches the custom tabs activity with the provided authorize URL. The resulting intent will
- * launch using a private web browser session if the [pendingSignIn]'s [OAuthUserConfiguration.preferPrivateWebBrowserSession]
- * is true.
- *
- * @receiver an [Activity] used to launch the [CustomTabsIntent].
- * @param pendingSignIn the [OAuthUserSignIn] that requires completion, or a null value if there is no
- * longer a pending sign in.
- *
- * @since 200.2.0
- */
-@Deprecated(
-    message = "since 200.8.0. Use Activity.launchCustomTabs(BrowserAuthenticationChallenge) " +
-            "instead as it provides support for IAP sign-in/sign-out.",
-    replaceWith = ReplaceWith("Activity.launchCustomTabs(BrowserAuthenticationChallenge)")
-)
-public fun Activity.launchCustomTabs(pendingSignIn: OAuthUserSignIn?): Unit {
-    launchCustomTabs(
-        pendingSignIn?.authorizeUrl ?: return,
-        pendingSignIn.oAuthUserConfiguration.preferPrivateWebBrowserSession
-    )
-}
 
 /**
  * Launches the custom tabs activity with the provided browser authentication challenge.

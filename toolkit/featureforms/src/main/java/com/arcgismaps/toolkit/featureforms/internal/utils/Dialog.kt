@@ -13,13 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+@file:Suppress("DEPRECATION")
 
 package com.arcgismaps.toolkit.featureforms.internal.utils
 
 import android.content.Context
-import android.net.Uri
-import android.provider.OpenableColumns
-import android.webkit.MimeTypeMap
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
@@ -33,23 +31,18 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.core.database.getLongOrNull
-import androidx.core.database.getStringOrNull
 import androidx.window.core.layout.WindowSizeClass
 import androidx.window.layout.WindowMetricsCalculator
 import com.arcgismaps.mapping.featureforms.FormAttachment
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.AttachmentElementState
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.AttachmentErrorDialog
-import com.arcgismaps.toolkit.featureforms.internal.components.attachment.AttachmentSizeLimitExceededException
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.DeleteAttachmentDialog
-import com.arcgismaps.toolkit.featureforms.internal.components.attachment.EmptyAttachmentException
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.FilePicker
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.GalleryPicker
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.ImageCapture
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.RenameAttachmentDialog
-import com.arcgismaps.toolkit.featureforms.internal.components.attachment.getNewAttachmentNameForContentType
-import com.arcgismaps.toolkit.featureforms.internal.components.attachment.maxAttachmentUploadSize
+import com.arcgismaps.toolkit.featureforms.internal.components.attachment.addAttachmentFromUri
 import com.arcgismaps.toolkit.featureforms.internal.components.barcode.BarcodeScanner
 import com.arcgismaps.toolkit.featureforms.internal.components.barcode.BarcodeTextFieldState
 import com.arcgismaps.toolkit.featureforms.internal.components.base.FormStateCollection
@@ -61,16 +54,11 @@ import com.arcgismaps.toolkit.featureforms.internal.components.datetime.picker.D
 import com.arcgismaps.toolkit.featureforms.internal.components.datetime.picker.DateTimePickerStyle
 import com.arcgismaps.toolkit.featureforms.internal.components.datetime.picker.rememberDateTimePickerState
 import com.arcgismaps.toolkit.featureforms.internal.components.dialogs.ErrorDialog
-import com.arcgismaps.toolkit.featureforms.internal.components.dialogs.SaveEditsDialog
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.io.FileNotFoundException
 import java.time.Instant
-import kotlin.math.max
 
 /**
  * Local containing the default [DialogRequester] for providing the same instance in the
@@ -425,21 +413,6 @@ internal fun FeatureFormDialog(states: FormStateCollection) {
     }
 }
 
-internal suspend fun Context.readBytes(uri: Uri): Result<ByteArray> = withContext(Dispatchers.IO) {
-    return@withContext try {
-        val bytes = contentResolver.openInputStream(uri)?.use { it.buffered().readBytes() }
-        if (bytes == null) {
-            Result.failure(Exception("Failed to read data from file: $uri"))
-        } else {
-            Result.success(bytes)
-        }
-    } catch (e: FileNotFoundException) {
-        Result.failure(Exception("File not found: $uri"))
-    } catch (e: OutOfMemoryError) {
-        Result.failure(Exception("File too large: $uri"))
-    }
-}
-
 /**
  * Computes the [WindowSizeClass] of the device.
  */
@@ -461,63 +434,4 @@ internal fun computeWindowSizeClasses(context: Context): WindowSizeClass {
 
 internal fun showError(context: Context, message: String) {
     Toast.makeText(context, message, Toast.LENGTH_LONG).show()
-}
-
-/**
- * Adds an attachment to the [AttachmentElementState] from the specified [uri]. Since the data from
- * the uri is read into memory, there is a limit of 50 MB for the size of the attachment.
- *
- * @param uri The uri of the attachment.
- * @param context The context.
- * @param useDefaultName Whether to use the default name from the uri. If false, a new name will be generated
- * based on the content type of the attachment.
- */
-private suspend fun AttachmentElementState.addAttachmentFromUri(
-    uri: Uri,
-    context: Context,
-    useDefaultName: Boolean
-): Result<Unit> = withContext(Dispatchers.IO) {
-    // get the content type of the uri
-    val contentType = context.contentResolver.getType(uri) ?: run {
-        return@withContext Result.failure(Exception(context.getString(R.string.attachment_error)))
-    }
-    // get the file extension from the content type
-    val extension = MimeTypeMap.getSingleton().getExtensionFromMimeType(contentType) ?: run {
-        return@withContext Result.failure(Exception(context.getString(R.string.attachment_error)))
-    }
-    // generate a name for the attachment
-    var name = getNewAttachmentNameForContentType(contentType, extension)
-    // size of the attachment
-    var size = 0L
-    // get the name and size of the attachment
-    context.contentResolver.query(uri, null, null, null, null)?.use { cursor ->
-        cursor.moveToFirst()
-        val nameIndex =
-            cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-        val sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE)
-        // use the default file name from the uri if available
-        if (useDefaultName) {
-            cursor.getStringOrNull(nameIndex)?.let {
-                name = it
-            }
-        }
-        // update the size
-        cursor.getLongOrNull(sizeIndex)?.let {
-            size = it
-        }
-    }
-    // check if the size is within the limits
-    return@withContext if (size == 0L) {
-        Result.failure(EmptyAttachmentException())
-    } else if (size > maxAttachmentUploadSize) {
-        Result.failure(AttachmentSizeLimitExceededException(maxAttachmentUploadSize))
-    } else {
-        var result = Result.success(Unit)
-        context.readBytes(uri).onFailure {
-            result = Result.failure(it)
-        }.onSuccess { data ->
-            result = addAttachment(name, contentType, data)
-        }
-        result
-    }
 }

@@ -17,7 +17,60 @@
  */
 
 pluginManagement {
+    // Set toolkitTestDir here because pluginManagement is evaluated before the rest of the
+    // settings.gradle.kts and build.gradle.kts files, so the variables defined in those files are not accessible here.
+    val toolkitTestDir = settingsDir.absolutePath.removeSuffix("arcgis-maps-sdk-kotlin-toolkit") + "/kotlin/toolkit-tests"
+
+    gradle.beforeProject {
+        extra.set("toolkitTestDir", toolkitTestDir)
+    }
+
+    // Include build-logic-internal for internal developers. It must be included before
+    // build-logic because build-logic contains placeholder plugins that are replaced by
+    // the real implementations in build-logic-internal. If build-logic is included first,
+    // the placeholder plugins will be used and the real implementations won’t be applied.
+    if (file(toolkitTestDir).exists()){
+        // This should only be included for internal developers because it depends on
+        // internally published plugins that are not accessible to external developers.
+        includeBuild("build-logic-internal")
+    }
+    includeBuild("build-logic")
     repositories {
+        // the variables are duplicated here because the pluginManagement block is evaluated before
+        // the rest of the settings.gradle.kts, so it can't access the variables defined in the
+        // dependencyResolutionManagement block below.
+        // This is a known limitation of Gradle's settings script evaluation order.
+        val localProperties = java.util.Properties().apply {
+            val localPropertiesFile = file("local.properties")
+            if (localPropertiesFile.exists()) {
+                load(localPropertiesFile.inputStream())
+            }
+        }
+
+        val artifactoryUrl: String =
+            providers.gradleProperty("artifactoryUrl").orNull
+                ?: localProperties.getProperty("artifactoryUrl")
+                ?: ""
+
+        val artifactoryUsername: String =
+            providers.gradleProperty("artifactoryUsername").orNull
+                ?: localProperties.getProperty("artifactoryUsername")
+                ?: ""
+
+        val artifactoryPassword: String =
+            providers.gradleProperty("artifactoryPassword").orNull
+                ?: localProperties.getProperty("artifactoryPassword")
+                ?: ""
+
+        if (!artifactoryUrl.isBlank()) {
+            maven {
+                url = java.net.URI(artifactoryUrl)
+                credentials {
+                    username = artifactoryUsername
+                    password = artifactoryPassword
+                }
+            }
+        }
         gradlePluginPortal()
         google()
         mavenCentral()
@@ -114,6 +167,8 @@ dependencyResolutionManagement {
 
             version("mapsSdk", versionAndBuild)
             library("mapsSdk", "com.esri", "arcgis-maps-kotlin").versionRef("mapsSdk")
+            library("mapsSdkTestFixtures", "com.esri", "arcgis-maps-kotlin-test-fixtures")
+                .versionRef("mapsSdk")
         }
     }
 }
@@ -143,36 +198,32 @@ include(":template-app")
 project(":template-app").projectDir = File(rootDir, "microapps/TemplateApp/app")
 include(":template")
 project(":template").projectDir = File(rootDir, "toolkit/template")
-include(":composable-map")
-project(":composable-map").projectDir = File(rootDir, "toolkit/composable-map")
 include(":indoors")
 project(":indoors").projectDir = File(rootDir, "toolkit/indoors")
 include(":floor-filter-app")
 project(":floor-filter-app").projectDir = File(rootDir, "microapps/FloorFilterApp/app")
 include(":geoview-compose")
 project(":geoview-compose").projectDir = File(rootDir, "toolkit/geoview-compose")
-include(":map-view-callout-app")
-project(":map-view-callout-app").projectDir = File(rootDir, "microapps/MapViewCalloutApp/app")
+include(":callout-app")
+project(":callout-app").projectDir = File(rootDir, "microapps/CalloutApp/app")
 include(":map-view-location-display-app")
-project(":map-view-location-display-app").projectDir = File(rootDir, "microapps/mapviewlocationdisplayapp/app")
+project(":map-view-location-display-app").projectDir = File(rootDir, "microapps/MapViewLocationDisplayApp/app")
 include(":map-view-insets-app")
-project(":map-view-insets-app").projectDir = File(rootDir, "microapps/mapviewinsetsapp/app")
+project(":map-view-insets-app").projectDir = File(rootDir, "microapps/MapViewInsetsApp/app")
 include(":map-view-geometry-editor-app")
-project(":map-view-geometry-editor-app").projectDir = File(rootDir, "microapps/mapviewgeometryeditorapp/app")
+project(":map-view-geometry-editor-app").projectDir = File(rootDir, "microapps/MapViewGeometryEditorApp/app")
 include(":map-view-set-viewpoint-app")
-project(":map-view-set-viewpoint-app").projectDir = File(rootDir, "microapps/mapviewsetviewpointapp/app")
+project(":map-view-set-viewpoint-app").projectDir = File(rootDir, "microapps/MapViewSetViewpointApp/app")
 include(":map-view-identify-app")
-project(":map-view-identify-app").projectDir = File(rootDir, "microapps/mapviewidentifyapp/app")
-include(":scene-view-callout-app")
-project(":scene-view-callout-app").projectDir = File(rootDir, "microapps/SceneViewCalloutApp/app")
+project(":map-view-identify-app").projectDir = File(rootDir, "microapps/MapViewIdentifyApp/app")
 include(":scene-view-analysis-overlay-app")
-project(":scene-view-analysis-overlay-app").projectDir = File(rootDir, "microapps/sceneviewanalysisoverlayapp/app")
+project(":scene-view-analysis-overlay-app").projectDir = File(rootDir, "microapps/SceneViewAnalysisOverlayApp/app")
 include(":scene-view-set-viewpoint-app")
-project(":scene-view-set-viewpoint-app").projectDir = File(rootDir, "microapps/sceneviewsetviewpointapp/app")
+project(":scene-view-set-viewpoint-app").projectDir = File(rootDir, "microapps/SceneViewSetViewpointApp/app")
 include(":scene-view-camera-controller-app")
-project(":scene-view-camera-controller-app").projectDir = File(rootDir, "microapps/sceneviewcameracontrollerapp/app")
+project(":scene-view-camera-controller-app").projectDir = File(rootDir, "microapps/SceneViewCameraControllerApp/app")
 include(":scene-view-lighting-options-app")
-project(":scene-view-lighting-options-app").projectDir = File(rootDir, "microapps/sceneviewlightingoptionsapp/app")
+project(":scene-view-lighting-options-app").projectDir = File(rootDir, "microapps/SceneViewLightingOptionsApp/app")
 include(":popup")
 project(":popup").projectDir = File(rootDir, "toolkit/popup")
 include(":popup-app")
@@ -207,4 +258,5 @@ include(":offlinemapareas-app")
 project(":offlinemapareas-app").projectDir = File(rootDir, "microapps/OfflineMapAreasApp/app")
 include(":ar-flyover-app")
 project(":ar-flyover-app").projectDir = File(rootDir, "microapps/ArFlyoverApp/app")
-
+include(":localsceneview-app")
+project(":localsceneview-app").projectDir = File(rootDir, "microapps/LocalSceneViewApp/app")

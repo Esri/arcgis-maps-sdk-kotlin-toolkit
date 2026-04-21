@@ -24,4 +24,24 @@
     <string name="other">Andere</string>
     <string name="close">Zurück</string>
     <string name="attachment_thumbnail">Miniaturansicht der Anlage</string>
+    <string name="terminal">Anschlusspunkt</string>
+    <string name="no_associations_found">Keine Zuordnungen gefunden</string>
+    <string name="visible_content">Sichtbarer Inhalt</string>
+    <string name="content">Inhalt</string>
+    <string name="containment_visible">Containment sichtbar</string>
+    <string name="fraction_along_edge">Bruch entlang der Kante</string>
+    <string name="percent_along_edge">%1$d %%</string>
+    <string name="from_element">Von Element</string>
+    <string name="to_element">Bis Element</string>
+    <string name="association_type">Zuordnungstyp</string>
+    <string name="remove_association">Zuordnung entfernen</string>
+    <string name="remove_association_tooltip">Entfernt nur die Zuordnung. Das Feature bleibt erhalten.</string>
+    <string name="remove">Entfernen</string>
+    <string name="cancel">Abbrechen</string>
+    <string name="none_selected">Keine ausgewählt</string>
+    <string name="association_settings">Zuordnungseinstellungen</string>
+    <string name="show_all">Alle anzeigen</string>
+    <string name="filter_by_feature_title">Nach Feature-Titel filtern</string>
+    <string name="containment_visible_value">Sichtbar: %1$s</string>
+    <string name="associations">Zuordnungen</string>
 </resources>

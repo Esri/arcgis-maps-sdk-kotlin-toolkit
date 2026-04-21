@@ -73,41 +73,6 @@
     <string name="max_datetime_helper_text">Data musi równa %1$s lub wcześniejsza</string>
 
     <!-- Date Picker string values -->
-    <string name="ff_date_input_headline">Wprowadzona data</string>
-    <string name="ff_date_input_headline_description">Wprowadzona data: %1$s</string>
-    <string name="ff_date_input_invalid_for_pattern">Data nie pasuje do oczekiwanego wzorca: %1$s</string>
-    <string name="ff_date_input_invalid_not_allowed">Niedozwolona data: %1$s</string>
-    <string name="ff_date_input_invalid_year_range">
-        Data poza oczekiwanym zakresem lat %1$s - %2$s
-    </string>
-    <string name="ff_date_input_label">Data</string>
-    <string name="ff_date_input_no_input_description">Brak</string>
-    <string name="ff_date_input_title">Wybierz datę</string>
-    <string name="ff_date_picker_headline">"Wybrana data"</string>
-    <string name="ff_date_picker_headline_description">Bieżący wybór: %1$s</string>
-    <string name="ff_date_picker_navigate_to_year_description">Przejdź do roku %1$s</string>
-    <string name="ff_date_picker_no_selection_description">Brak</string>
-    <string name="ff_date_picker_scroll_to_earlier_years">Przewiń, aby wyświetlić wcześniejsze lata</string>
-    <string name="ff_date_picker_scroll_to_later_years">Przewiń, aby wyświetlić późniejsze lata</string>
-    <string name="ff_date_picker_switch_to_calendar_mode">Przełącz do trybu wprowadzania w kalendarzu</string>
-    <string name="ff_date_picker_switch_to_day_selection">
-        "Przesuń palcem, aby wybrać rok, lub dotknij, aby powrócić do wyboru dnia"
-    </string>
-    <string name="ff_date_picker_switch_to_input_mode">Przełącz do trybu wprowadzania tekstu</string>
-    <string name="ff_date_picker_switch_to_next_month">"Zmień na następny miesiąc"</string>
-    <string name="ff_date_picker_switch_to_previous_month">"Zmień na poprzedni miesiąc"</string>
-    <string name="ff_date_picker_switch_to_year_selection">"Przełącz na wybór roku"</string>
-    <string name="ff_date_picker_title">"Wybierz datę"</string>
-    <string name="ff_date_picker_today_description">Dzisiaj</string>
-    <string name="ff_date_picker_year_picker_pane_title">Okno wyboru roku jest widoczne</string>
-    <string name="ff_date_range_input_invalid_range_input">Wprowadzono nieprawidłowy zakres dat</string>
-    <string name="ff_date_range_input_title">Wprowadź daty</string>
-    <string name="ff_date_range_picker_day_in_range">W zakresie</string>
-    <string name="ff_date_range_picker_end_headline">Data końcowa</string>
-    <string name="ff_date_range_picker_scroll_to_next_month">Przewiń, aby wyświetlić następny miesiąc</string>
-    <string name="ff_date_range_picker_scroll_to_previous_month">Przewiń, aby wyświetlić poprzedni miesiąc</string>
-    <string name="ff_date_range_picker_start_headline">Data początkowa</string>
-    <string name="ff_date_range_picker_title">Wybierz daty</string>
 
     <!-- Time Picker string values -->
     <string name="ff_time_picker_am">przed południem</string>
@@ -145,4 +110,56 @@
     <string name="tap_to_scan">Naciśnij, aby zeskanować</string>
     <string name="unable_to_open_the_camera">Nie można otworzyć kamery</string>
     <string name="value_must_be_a_guid">Wartość musi być prawidłowym identyfikatorem GUID</string>
+    <string name="delete_attachment_title">Usunąć załącznik?</string>
+    <string name="delete_attachment_confirmation">Czy na pewno chcesz usunąć ten załącznik?</string>
+    <string name="download_failed">Nie można pobrać tego pliku.</string>
+    <string name="file_size_exceeds_limit">Rozmiar pliku przekracza limit</string>
+    <string name="unsupported_file_type">Nieobsługiwany typ pliku</string>
+    <string name="save">Zapisz</string>
+    <string name="discard">Odrzuć</string>
+    <string name="none_selected">Brak wyboru</string>
+    <string name="the_form_has_validation_errors">Formularz zawiera błędy weryfikacji</string>
+    <string name="the_form_has_edits">Formularz zawiera zmiany</string>
+    <string name="do_you_want_to_save_your_changes">Czy chcesz zapisać zmiany?</string>
+    <string name="no_associations_found">Brak powiązań do wyświetlenia</string>
+    <string name="terminal">Terminal</string>
+    <string name="terminal_with_value">Terminal: %1$s</string>
+    <string name="content_visible">Widoczna treść</string>
+    <string name="percent_along">Procent wzdłuż</string>
+    <string name="from_element">Z elementu</string>
+    <string name="to_element">Do elementu</string>
+    <string name="association_type">Typ powiązania</string>
+    <string name="remove_association">Usuń powiązanie</string>
+    <string name="remove_association_tooltip">Usuwa tylko powiązanie. Obiekt pozostaje.</string>
+    <string name="remove">Usuń</string>
+    <string name="association_settings">Ustawienia powiązania</string>
+    <string name="percent_along_edge">%1$d %%</string>
+    <string name="visible_content">Widoczne zasoby</string>
+    <string name="content">Zasoby</string>
+    <string name="containment_visible_value">Widoczne: %1$s</string>
+    <string name="from_network_data_source">Ze źródła danych sieciowych</string>
+    <string name="on_map">Na mapie</string>
+    <string name="network_data_source">Źródło danych sieciowych</string>
+    <string name="available_asset_types">Dostępne typy zasobów</string>
+    <string name="count">Licznik %1$d</string>
+    <string name="new_association">Nowe powiązanie</string>
+    <string name="add">Dodaj</string>
+    <string name="failed_to_create_association">Nie udało się utworzyć powiązania. %1$s</string>
+    <string name="available_features">%1$d Dostępne obiekty</string>
+    <string name="loading2">Wczytywanie..</string>
+    <plurals name="you_have_errors_that_must_be_fixed_before_saving">
+        <item quantity="zero">Występuje następująca liczba błędów: %1$d, które trzeba poprawić przed zapisaniem.</item>
+        <item quantity="one">Występuje następująca liczba błędów: %1$d, które trzeba poprawić przed zapisaniem.</item>
+        <item quantity="two">Występuje następująca liczba błędów: %1$d, które trzeba poprawić przed zapisaniem.</item>
+        <item quantity="few">Występuje następująca liczba błędów: %1$d, które trzeba poprawić przed zapisaniem.</item>
+        <item quantity="many">Występuje następująca liczba błędów: %1$d, które trzeba poprawić przed zapisaniem.</item>
+        <item quantity="other">Występuje następująca liczba błędów: %1$d, które trzeba poprawić przed zapisaniem.</item>
+    </plurals>
+    <string name="search_features">Wyszukaj obiekty</string>
+    <string name="choose_to_add">Wybierz do dodania</string>
+    <string name="no_features_found">Nie znaleziono żadnych obiektów</string>
+    <string name="refine_your_search_tip">Doprecyzuj wyszukiwanie lub wybierz inne źródło sieciowe.</string>
+    <string name="select_terminal">Wybierz terminal</string>
+    <string name="show_on_map">Pokaż na mapie</string>
+    <string name="more_information">Więcej informacji</string>
 </resources>
