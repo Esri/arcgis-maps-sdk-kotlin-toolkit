@@ -91,7 +91,6 @@ dependencies {
     implementation(arcgis.mapsSdk)
     "buildWithSourceCodeImplementation"(project(mapOf("path" to ":offline")))
     "buildWithMavenArtifactsImplementation"(arcgis.offline)
-    implementation(project(":microapps-lib"))
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.material.icons.core)
     implementation(libs.bundles.composeCore)
