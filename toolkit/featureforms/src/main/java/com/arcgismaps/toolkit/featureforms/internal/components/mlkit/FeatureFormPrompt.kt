@@ -17,11 +17,8 @@
 package com.arcgismaps.toolkit.featureforms.internal.components.mlkit
 
 import android.util.Log
-import androidx.compose.runtime.Stable
-import com.arcgismaps.data.CodedValueDomain
 import com.arcgismaps.data.FieldType
 import com.arcgismaps.mapping.featureforms.ComboBoxFormInput
-import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.mapping.featureforms.FormElement
 import com.arcgismaps.mapping.featureforms.GroupFormElement
@@ -29,58 +26,58 @@ import com.arcgismaps.mapping.featureforms.RadioButtonsFormInput
 import com.arcgismaps.mapping.featureforms.SwitchFormInput
 import com.arcgismaps.toolkit.featureforms.FormStateData
 import com.arcgismaps.toolkit.featureforms.internal.components.base.BaseFieldState
-import com.arcgismaps.toolkit.featureforms.internal.components.base.BaseGroupState
 import com.arcgismaps.toolkit.featureforms.internal.components.codedvalue.CodedValueFieldState
 import com.arcgismaps.toolkit.featureforms.internal.components.datetime.DateTimeFieldState
 import com.arcgismaps.toolkit.featureforms.internal.components.text.FormTextFieldState
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import java.time.ZoneId
+import kotlin.time.Clock
 import kotlin.time.Instant
 import kotlin.time.toJavaInstant
 
+/**
+ * A class to build a prompt for a generative model based on the current state of a the [formStateData].
+ * The prompt is updated when the state of the form changes. See [FeatureFormObserver] for details on
+ * which changes to the form will trigger an update to the prompt.
+ *
+ * @param formStateData The state data of the form to build the prompt from.
+ * @param scope The [CoroutineScope] used to observe changes to the form. The observer will be active
+ * as long as this scope is active, and will stop observing when the scope is cancelled.
+ */
 internal class FeatureFormPrompt(
     private val formStateData: FormStateData,
-    private val scope: CoroutineScope
+    scope: CoroutineScope
 ) {
-    /**
-     * Backing property for [prompt].
-     */
-    private var _prompt: String = ""
 
     /**
-     * The prompt to send to the generative model. This is built lazily and cached, so it will only
-     * be built once per instance of [FeatureFormPrompt].
+     * The observer for the form state.
      */
-    val prompt: String
-        get() = _prompt.ifEmpty {
-            _prompt = buildPrompt()
-            Log.e("TAG", "$_prompt: ")
-            _prompt
-        }
-
-    init {
-        formStateData.stateCollection.forEach { entry ->
-            val state = entry.state
-            if (state is BaseFieldState<*>) {
-                scope.launch {
-                    combine(state.isVisible, state.isEditable) { isVisible, isEditable ->
-                        Pair(isVisible, isEditable)
-                    }.collect { (isVisible, isEditable) ->
-
-                    }
-                }
-            }
-        }
-    }
+    private val formObserver = FeatureFormObserver(
+        featureForm = formStateData.featureForm,
+    )
 
     /**
-     * Builds the prompt based on the current state of the [featureForm].
+     * The prompt to send to the generative model. This represents the current state of the form and
+     * is updated whenever a relevant change occurs in the form.
      */
-    private fun buildPrompt(): String {
+    val prompt: StateFlow<String> = formObserver.changes.map {
+        buildPrompt()
+    }.stateIn(
+        scope = scope,
+        started = SharingStarted.Eagerly,
+        initialValue = buildPrompt()
+    )
+
+    /**
+     * Builds the prompt based on the current state of the form.
+     */
+    private fun buildPrompt() : String {
         val formInfo = buildString {
             appendLine("Title: ${formStateData.featureForm.title.value}")
             formStateData.stateCollection.forEach { state ->
@@ -94,7 +91,10 @@ internal class FeatureFormPrompt(
                     is GroupFormElement -> {
                         element.elements.forEach {
                             it.toPromptString()?.let { fieldElementPrompt ->
-                                appendLine(fieldElementPrompt)
+                                // Only include if the group is visible
+                                if (element.isVisible.value) {
+                                    appendLine(fieldElementPrompt)
+                                }
                             }
                         }
                     }
@@ -120,7 +120,9 @@ internal class FeatureFormPrompt(
             |its field type. The value should always be a string. If the field is a DateOnly or Date field, 
             |the value should be an ISO 8601 string that represents an instant (for example, 2020-08-30T18:43:00Z).
             |The user's current time zone is ${ZoneId.systemDefault().id} and should be taken into 
-            |account when determining the value for date fields.
+            |account when determining the value for date fields. The current date and time is ${Clock.System.now()}. 
+            |Use this context to determine the value for date fields if the user response includes 
+            |relative date information (for example, "next Tuesday" or "in 3 days").
             |</instructions>
             |##
             |<output_format>
@@ -139,43 +141,11 @@ internal class FeatureFormPrompt(
     }
 
     fun processResponse(response: FeatureFormPromptResponse) {
-        formStateData.stateCollection.asSequence()
-            .flatMap { entry ->
-                when (val state = entry.state) {
-                    is BaseFieldState<*> -> sequenceOf(state)
-                    is BaseGroupState -> state.fieldStates.asSequence()
-                        .filterIsInstance<BaseFieldState<*>>()
-
-                    else -> emptySequence()
-                }
-            }.mapNotNull { state ->
-                val element = state as FieldFormElement
-            }
-
-        formStateData.stateCollection.forEach { entry ->
-            when (val state = entry.state) {
-                is BaseFieldState<*> -> {
-                    val element = entry.formElement as FieldFormElement
-                    val value = response.fieldValues[element.fieldName]
-                    Log.e("TAG", "processResponse: $value")
-                    if (value != null) {
-                        processFieldValue(state, value)
-                    }
-                }
-
-                is BaseGroupState -> {
-                    state.fieldStates.forEach { fieldState ->
-                        if (fieldState is BaseFieldState<*>) {
-                            val element = fieldState.formElement as FieldFormElement
-                            val value = response.fieldValues[element.fieldName]
-                            Log.e("TAG", "processResponse: $value")
-                            if (value != null) {
-                                processFieldValue(fieldState, value)
-                            }
-                        }
-                    }
-                }
-            }
+        response.fieldValues.forEach { entry ->
+            Log.e("TAG", "processResponse: ${entry.key}-${entry.value}")
+            formStateData.stateCollection[entry.key]?.let { state ->
+                processFieldValue(state, entry.value)
+            } ?: Log.e("TAG", "No state found for fieldName: ${entry.key}")
         }
     }
 
@@ -195,7 +165,6 @@ internal class FeatureFormPrompt(
                 }
             }
         }
-
     }
 }
 

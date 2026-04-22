@@ -117,6 +117,7 @@ private fun ComboBoxPreview() {
             required = MutableStateFlow(false),
             visible = MutableStateFlow(true),
             fieldType = FieldType.Text,
+            fieldName = "types",
             codedValues = emptyMap(),
             showNoValueOption = FormInputNoValueOption.Show,
             noValueLabel = "No value"

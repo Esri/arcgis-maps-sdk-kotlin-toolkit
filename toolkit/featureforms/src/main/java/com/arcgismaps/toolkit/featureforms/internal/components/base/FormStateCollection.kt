@@ -42,6 +42,14 @@ internal interface FormStateCollection : Iterable<FormStateCollection.Entry> {
      */
     operator fun get(id: Int): FormElementState?
 
+    /**
+     * Provides the bracket operator to the collection.
+     *
+     * @param fieldName the search for in the collection.
+     * @return the [BaseFieldState] associated with the fieldName, or null if none.
+     */
+    operator fun get(fieldName: String): BaseFieldState<*>?
+
     interface Entry {
         val formElement: FormElement
         val state: FormElementState
@@ -105,6 +113,25 @@ private class MutableFormStateCollectionImpl : MutableFormStateCollection {
                 else -> if (entry.state.id == id) {
                     return entry.state
                 }
+            }
+        }
+        return null
+    }
+
+    override fun get(fieldName: String): BaseFieldState<*>? {
+        entries.forEach { entry ->
+            when (val state = entry.state) {
+                is BaseFieldState<*> -> {
+                    if (state.fieldName == fieldName) {
+                        return state
+                    }
+                }
+
+                is BaseGroupState -> {
+                    state.fieldStates[fieldName]?.let { return it }
+                }
+
+                else -> {}
             }
         }
         return null

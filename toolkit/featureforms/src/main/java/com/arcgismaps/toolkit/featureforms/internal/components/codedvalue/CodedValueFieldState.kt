@@ -37,20 +37,22 @@ internal open class CodedValueFieldProperties(
     editable: StateFlow<Boolean>,
     visible: StateFlow<Boolean>,
     fieldType: FieldType,
+    fieldName: String,
     val codedValues: Map<Any?, String>,
     val showNoValueOption: FormInputNoValueOption,
     val noValueLabel: String
 ) : FieldProperties<Any?>(
-    label,
-    placeholder,
-    description,
-    value,
-    validationErrors,
-    required,
-    editable,
-    visible,
-    fieldType,
-    null
+    label = label,
+    placeholder = placeholder,
+    description = description,
+    value = value,
+    validationErrors = validationErrors,
+    required = required,
+    editable = editable,
+    visible = visible,
+    fieldType = fieldType,
+    fieldName = fieldName,
+    domain = null
 )
 
 /**

@@ -17,7 +17,6 @@
 package com.arcgismaps.toolkit.featureforms.internal.components.mlkit
 
 import android.util.Log
-import com.arcgismaps.toolkit.featureforms.FormStateData
 import com.google.mlkit.genai.common.DownloadStatus
 import com.google.mlkit.genai.common.FeatureStatus
 import com.google.mlkit.genai.prompt.Generation
@@ -30,11 +29,8 @@ import com.google.mlkit.genai.prompt.modelConfig
 import kotlinx.coroutines.flow.takeWhile
 
 internal class FeatureFormGenerativeModel(
-    formStateData: FormStateData
+    private val prompt: FeatureFormPrompt
 ) {
-
-    private val prompt = FeatureFormPrompt(formStateData)
-
     private val generativeModel by lazy {
         val config = generationConfig {
             modelConfig = modelConfig {
@@ -44,17 +40,28 @@ internal class FeatureFormGenerativeModel(
         Generation.getClient(config)
     }
 
-    private val promptPrefix by lazy {
-        PromptPrefix(prompt.prompt)
-    }
-
-    suspend fun initialize() : Result<Unit> {
-        return when (val status = generativeModel.checkStatus()) {
+    suspend fun initialize(): Result<Unit> {
+        val status = generativeModel.checkStatus()
+        Log.e("TAG", "initialize prompt model: $status", )
+        return when (status) {
             FeatureStatus.AVAILABLE -> Result.success(Unit)
             FeatureStatus.DOWNLOADABLE -> {
                 generativeModel.download().takeWhile {
                     it !is DownloadStatus.DownloadCompleted
-                }.collect {}
+                }.collect { status ->
+                    when(status) {
+                        DownloadStatus.DownloadCompleted -> Log.e("TAG", "download completed")
+                        is DownloadStatus.DownloadFailed -> {
+                            Log.e("TAG", "download failed: ${status.e}")
+                        }
+                        is DownloadStatus.DownloadProgress -> {
+                            Log.e("TAG", "progress: ${status.totalBytesDownloaded}")
+                        }
+                        is DownloadStatus.DownloadStarted -> {
+                            Log.e("TAG", "initialize: started", )
+                        }
+                    }
+                }
                 val postDownloadStatus = generativeModel.checkStatus()
                 if (postDownloadStatus == FeatureStatus.AVAILABLE) {
                     Result.success(Unit)
@@ -62,6 +69,7 @@ internal class FeatureFormGenerativeModel(
                     Result.failure(Exception("Model is not available after download, status: $postDownloadStatus"))
                 }
             }
+
             FeatureStatus.UNAVAILABLE -> Result.failure(Exception("Model is unavailable"))
             else -> Result.failure(Exception("Unknown model status: $status"))
         }
@@ -71,11 +79,11 @@ internal class FeatureFormGenerativeModel(
         return try {
             val response = generativeModel.generateContent(
                 generateContentRequest(TextPart(userPrompt)) {
-                    promptPrefix = this@FeatureFormGenerativeModel.promptPrefix
+                    promptPrefix = PromptPrefix(prompt.prompt.value)
                 }
             )
             val content = response.candidates.firstOrNull()?.text ?: ""
-            Log.e("TAG", "getResponse: $content", )
+            Log.e("TAG", "getResponse: $content")
             val cleanJson = content.extractJsonObject()
             FeatureFormPromptResponse.fromJsonOrNull(cleanJson)?.let {
                 prompt.processResponse(it)

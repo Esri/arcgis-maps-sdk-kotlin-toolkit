@@ -36,6 +36,7 @@ internal class SwitchFieldProperties(
     required: StateFlow<Boolean>,
     visible: StateFlow<Boolean>,
     fieldType: FieldType,
+    fieldName: String,
     val onValue: CodedValue,
     val offValue: CodedValue,
     val fallback: Boolean,
@@ -51,6 +52,7 @@ internal class SwitchFieldProperties(
     editable,
     visible,
     fieldType,
+    fieldName,
     mapOf(
         onValue.code to onValue.name,
         offValue.code to offValue.name

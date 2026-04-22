@@ -38,20 +38,22 @@ internal class DateTimeFieldProperties(
     editable: StateFlow<Boolean>,
     visible: StateFlow<Boolean>,
     fieldType: FieldType,
+    fieldName: String,
     val minEpochMillis: Instant?,
     val maxEpochMillis: Instant?,
     val shouldShowTime: Boolean
 ) : FieldProperties<Instant?>(
-    label,
-    placeholder,
-    description,
-    value,
-    validationErrors,
-    required,
-    editable,
-    visible,
-    fieldType,
-    null
+    label = label,
+    placeholder = placeholder,
+    description = description,
+    value = value,
+    validationErrors = validationErrors,
+    required = required,
+    editable = editable,
+    visible = visible,
+    fieldType = fieldType,
+    fieldName = fieldName,
+    domain = null
 )
 
 /**

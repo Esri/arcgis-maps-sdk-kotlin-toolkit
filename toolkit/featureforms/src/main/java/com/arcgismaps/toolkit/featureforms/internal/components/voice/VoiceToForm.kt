@@ -25,18 +25,22 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Done
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -54,8 +58,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.DialogProperties
+import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.internal.components.mlkit.FeatureFormGenerativeModel
 import com.arcgismaps.toolkit.featureforms.internal.components.mlkit.SpeechRecognizer
 import kotlinx.coroutines.launch
@@ -63,18 +71,22 @@ import kotlinx.coroutines.launch
 @RequiresApi(Build.VERSION_CODES.S)
 @Composable
 internal fun VoiceToForm(
+    speechRecognizer: SpeechRecognizer,
     model: FeatureFormGenerativeModel,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val speechRecognizer = remember {
-        SpeechRecognizer()
-    }
     val scope = rememberCoroutineScope()
     var isProcessing by remember {
         mutableStateOf(false)
     }
     var showDialog by remember {
+        mutableStateOf(false)
+    }
+    var isSpeechReady by remember {
+        mutableStateOf(false)
+    }
+    var isModelReady by remember {
         mutableStateOf(false)
     }
     Surface(
@@ -139,12 +151,24 @@ internal fun VoiceToForm(
             onDiscard = onDismiss
         )
     }
+    if (isSpeechReady.not() || isModelReady.not()) {
+        InitializingDialog(onDismissRequest = onDismiss)
+    }
     LaunchedEffect(speechRecognizer) {
         speechRecognizer.initialize().onSuccess {
+            isSpeechReady = true
             speechRecognizer.startVoiceRecognition()
-            Log.e("TAG", "VoiceToForm: ready")
+            Log.e("TAG", "VoiceToForm: speech ready")
         }.onFailure {
             Log.e("TAG", "VoiceToForm: failed to initialize speech recognizer")
+        }
+    }
+    LaunchedEffect(model) {
+        model.initialize().onSuccess {
+            isModelReady = true
+            Log.e("TAG", "VoiceToForm: model ready")
+        }.onFailure {
+            Log.e("TAG", "VoiceToForm: failed to initialize model")
         }
     }
 }
@@ -211,4 +235,46 @@ private fun EqBar(
             .clip(RoundedCornerShape(2.dp))
             .background(color)
     )
+}
+
+@Composable
+private fun InitializingDialog(
+    onDismissRequest: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    AlertDialog(
+        onDismissRequest = onDismissRequest,
+        confirmButton = {},
+        icon = {
+            Image(
+                painterResource(R.drawable.gemini),
+                contentDescription = "Voice recognition logo",
+                modifier = Modifier.size(32.dp)
+            )
+        },
+        title = {
+            Text("Initializing Gemini")
+        },
+        text = {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(30.dp),
+                    strokeWidth = 5.dp
+                )
+            }
+        },
+        properties = DialogProperties(
+            dismissOnBackPress = false,
+            dismissOnClickOutside = false
+        )
+    )
+}
+
+@Preview
+@Composable
+private fun InitializingDialogPreview() {
+    InitializingDialog({})
 }

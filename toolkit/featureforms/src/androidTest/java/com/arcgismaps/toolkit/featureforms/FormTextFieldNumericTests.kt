@@ -92,6 +92,8 @@ class FormTextFieldNumericTests : FeatureFormTestRunner(
                         visible = integerField.isVisible,
                         singleLine = integerField.input is TextBoxFormInput,
                         fieldType = integerField.fieldType,
+                        fieldName = integerField.fieldName,
+                        domain = integerField.domain as? RangeDomain,
                         minLength = (integerField.input as TextBoxFormInput).minLength.toInt(),
                         maxLength = (integerField.input as TextBoxFormInput).maxLength.toInt()
                     ),
@@ -141,6 +143,7 @@ class FormTextFieldNumericTests : FeatureFormTestRunner(
                         visible = floatingPointField.isVisible,
                         singleLine = floatingPointField.input is TextBoxFormInput,
                         fieldType = floatingPointField.fieldType,
+                        fieldName = floatingPointField.fieldName,
                         domain = floatingPointField.domain as? RangeDomain,
                         minLength = (floatingPointField.input as TextBoxFormInput).minLength.toInt(),
                         maxLength = (floatingPointField.input as TextBoxFormInput).maxLength.toInt()

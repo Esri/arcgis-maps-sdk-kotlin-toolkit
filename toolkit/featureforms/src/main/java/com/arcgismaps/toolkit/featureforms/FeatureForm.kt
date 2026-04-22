@@ -32,6 +32,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -62,6 +63,8 @@ import com.arcgismaps.mapping.featureforms.UtilityAssociationsFormElement
 import com.arcgismaps.mapping.featureforms.UtilityAssociationFeatureCandidate
 import com.arcgismaps.mapping.featureforms.UtilityAssociationFeatureSource
 import com.arcgismaps.toolkit.featureforms.internal.components.mlkit.FeatureFormGenerativeModel
+import com.arcgismaps.toolkit.featureforms.internal.components.mlkit.FeatureFormPrompt
+import com.arcgismaps.toolkit.featureforms.internal.components.mlkit.SpeechRecognizer
 import com.arcgismaps.toolkit.featureforms.internal.components.text.TextFormElement
 import com.arcgismaps.toolkit.featureforms.internal.components.voice.VoiceToForm
 import com.arcgismaps.toolkit.featureforms.internal.navigation.FeatureFormNavHost
@@ -195,7 +198,7 @@ public sealed class FeatureFormNavigationRoute {
      */
     public data class SelectAssociationFeatureSource(
         val element: UtilityAssociationsFormElement,
-        val filter : UtilityAssociationsFilter
+        val filter: UtilityAssociationsFilter
     ) : FeatureFormNavigationRoute()
 
     /**
@@ -210,7 +213,7 @@ public sealed class FeatureFormNavigationRoute {
      */
     public data class SelectUtilityAssetType(
         val element: UtilityAssociationsFormElement,
-        val filter : UtilityAssociationsFilter,
+        val filter: UtilityAssociationsFilter,
         val featureSource: UtilityAssociationFeatureSource
     ) : FeatureFormNavigationRoute()
 
@@ -227,7 +230,7 @@ public sealed class FeatureFormNavigationRoute {
      */
     public data class SelectAssociationFeatureCandidate(
         val element: UtilityAssociationsFormElement,
-        val filter : UtilityAssociationsFilter,
+        val filter: UtilityAssociationsFilter,
         val featureSource: UtilityAssociationFeatureSource,
         val assetType: UtilityAssetType
     ) : FeatureFormNavigationRoute()
@@ -245,7 +248,7 @@ public sealed class FeatureFormNavigationRoute {
      */
     public data class CreateAssociation(
         val element: UtilityAssociationsFormElement,
-        val filter : UtilityAssociationsFilter,
+        val filter: UtilityAssociationsFilter,
         val featureSource: UtilityAssociationFeatureSource,
         val candidate: UtilityAssociationFeatureCandidate
     ) : FeatureFormNavigationRoute()
@@ -354,10 +357,10 @@ public fun FeatureForm(
     modifier: Modifier = Modifier,
     showCloseIcon: Boolean = true,
     showFormActions: Boolean = true,
-    isNavigationEnabled : Boolean = true,
+    isNavigationEnabled: Boolean = true,
     validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.Automatic,
     onBarcodeButtonClick: ((FieldFormElement) -> Unit)? = null,
-    onShowOnMapRequest : (ArcGISFeature) -> Unit = {},
+    onShowOnMapRequest: (ArcGISFeature) -> Unit = {},
     onDismiss: () -> Unit = {},
     onEditingEvent: (FeatureFormEditingEvent) -> Unit = {},
     onNavigationEvent: (FeatureFormNavigationRoute) -> Unit = {},
@@ -422,6 +425,23 @@ public fun FeatureForm(
     val backStackEntry by navController.currentBackStackEntryAsState()
     // Get the form data for the active entry (destination) in the back stack
     val formData = remember(backStackEntry) { state.getActiveFormStateData() }
+    val prompt = remember(formData, scope) {
+        FeatureFormPrompt(formData, scope)
+    }
+    val model = remember(prompt) {
+        FeatureFormGenerativeModel(prompt).apply {
+            scope.launch {
+                initialize()
+            }
+        }
+    }
+    val speechRecognizer = remember {
+        SpeechRecognizer().apply {
+            scope.launch {
+                initialize()
+            }
+        }
+    }
     FeatureFormLayout(
         topBar = {
             // Track if there is a back stack entry
@@ -429,9 +449,6 @@ public fun FeatureForm(
                 navController.previousBackStackEntry != null
             }
             var showVoiceInput by rememberSaveable { mutableStateOf(false) }
-            val model = remember(formData) {
-                FeatureFormGenerativeModel(formData)
-            }
             backStackEntry?.let { entry ->
                 Column(modifier = Modifier.fillMaxWidth()) {
                     ContentAwareTopBar(
@@ -459,9 +476,12 @@ public fun FeatureForm(
                     )
                     AnimatedVisibility(showVoiceInput) {
                         VoiceToForm(
+                            speechRecognizer = speechRecognizer,
                             model = model,
                             onDismiss = { showVoiceInput = false },
-                            modifier = Modifier.padding(16.dp).fillMaxWidth()
+                            modifier = Modifier
+                                .padding(16.dp)
+                                .fillMaxWidth()
                         )
                     }
                 }
@@ -483,19 +503,6 @@ public fun FeatureForm(
                 modifier = Modifier.fillMaxSize()
             )
         },
-        overlay = {
-//            var showVoiceInput by rememberSaveable { mutableStateOf(false) }
-//            FloatingActionButton(
-//                onClick = {
-//                    showVoiceInput = true
-//                }
-//            ) {
-//                Icon(Icons.Default.Mic, contentDescription = "Voice input")
-//            }
-//            if (showVoiceInput) {
-//                VoiceToForm()
-//            }
-        },
         modifier = modifier,
         colorScheme = colorScheme,
         typography = typography
@@ -514,7 +521,6 @@ public fun FeatureForm(
 internal fun FeatureFormLayout(
     topBar: @Composable ColumnScope.() -> Unit,
     content: @Composable ColumnScope.() -> Unit,
-    overlay: @Composable BoxScope.() -> Unit = {},
     modifier: Modifier = Modifier,
     colorScheme: FeatureFormColorScheme,
     typography: FeatureFormTypography
@@ -523,12 +529,9 @@ internal fun FeatureFormLayout(
         colorScheme = colorScheme,
         typography = typography
     ) {
-        Box(modifier = modifier) {
-            Column(modifier = Modifier.fillMaxSize()) {
-                topBar()
-                content()
-            }
-            overlay()
+        Column(modifier = Modifier.fillMaxSize()) {
+            topBar()
+            content()
         }
     }
 }

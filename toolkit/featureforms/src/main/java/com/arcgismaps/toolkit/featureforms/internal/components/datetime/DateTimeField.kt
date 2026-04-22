@@ -126,7 +126,8 @@ private fun DateTimeFieldPreview() {
                 minEpochMillis = null,
                 maxEpochMillis = null,
                 shouldShowTime = true,
-                fieldType = FieldType.Date
+                fieldType = FieldType.Date,
+                fieldName = "launch_date_time"
             ),
             hasValueExpression = false,
             scope = scope,

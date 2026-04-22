@@ -40,7 +40,7 @@ internal class SpeechRecognizer {
         SpeechRecognition.getClient(
             speechRecognizerOptions {
                 locale = Locale.US
-                preferredMode = SpeechRecognizerOptions.Mode.MODE_ADVANCED
+                preferredMode = SpeechRecognizerOptions.Mode.MODE_BASIC
             }
         )
     }

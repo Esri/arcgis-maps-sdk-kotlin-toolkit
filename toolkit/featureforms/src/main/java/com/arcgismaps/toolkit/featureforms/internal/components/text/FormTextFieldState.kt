@@ -37,20 +37,23 @@ internal class TextFieldProperties(
     visible: StateFlow<Boolean>,
     validationErrors: StateFlow<List<ValidationErrorState>>,
     fieldType: FieldType,
+    fieldName: String,
+    domain: Domain?,
     val singleLine: Boolean,
     val minLength: Int,
     val maxLength: Int,
 ) : FieldProperties<String>(
-    label,
-    placeholder,
-    description,
-    value,
-    validationErrors,
-    required,
-    editable,
-    visible,
-    fieldType,
-    domain
+    label = label,
+    placeholder = placeholder,
+    description = description,
+    value = value,
+    validationErrors = validationErrors,
+    required = required,
+    editable = editable,
+    visible = visible,
+    fieldType = fieldType,
+    fieldName = fieldName,
+    domain = domain
 )
 
 /**

@@ -495,8 +495,9 @@ internal fun createFieldState(
                     required = element.isRequired,
                     editable = element.isEditable,
                     visible = element.isVisible,
-                    domain = element.domain as? RangeDomain,
                     fieldType = element.fieldType,
+                    fieldName = element.fieldName,
+                    domain = element.domain as? RangeDomain,
                     singleLine = element.input is TextBoxFormInput,
                     minLength = minLength,
                     maxLength = maxLength
@@ -521,6 +522,7 @@ internal fun createFieldState(
                     visible = element.isVisible,
                     validationErrors = element.mapValidationErrors(scope),
                     fieldType = element.fieldType,
+                    fieldName = element.fieldName,
                     domain = element.domain,
                     minLength = (element.input as BarcodeScannerFormInput).minLength.toInt(),
                     maxLength = (element.input as BarcodeScannerFormInput).maxLength.toInt()
@@ -548,7 +550,8 @@ internal fun createFieldState(
                     minEpochMillis = input.min,
                     maxEpochMillis = input.max,
                     shouldShowTime = input.includeTime,
-                    fieldType = element.fieldType
+                    fieldType = element.fieldType,
+                    fieldName = element.fieldName
                 ),
                 hasValueExpression = element.hasValueExpression,
                 scope = scope,
@@ -570,6 +573,7 @@ internal fun createFieldState(
                     editable = element.isEditable,
                     required = element.isRequired,
                     visible = element.isVisible,
+                    fieldName = element.fieldName,
                     codedValues = input.codedValues.toMap(),
                     showNoValueOption = input.noValueOption,
                     noValueLabel = input.noValueLabel,
@@ -599,6 +603,7 @@ internal fun createFieldState(
                     required = element.isRequired,
                     visible = element.isVisible,
                     fieldType = element.fieldType,
+                    fieldName = element.fieldName,
                     onValue = input.onValue,
                     offValue = input.offValue,
                     fallback = fallback,
@@ -629,6 +634,7 @@ internal fun createFieldState(
                     required = element.isRequired,
                     visible = element.isVisible,
                     fieldType = element.fieldType,
+                    fieldName = element.fieldName,
                     codedValues = input.codedValues.toMap(),
                     showNoValueOption = input.noValueOption,
                     noValueLabel = input.noValueLabel
