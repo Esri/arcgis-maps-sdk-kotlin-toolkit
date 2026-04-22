@@ -49,6 +49,7 @@ internal open class FieldProperties<T>(
     val editable: StateFlow<Boolean>,
     val visible: StateFlow<Boolean>,
     val fieldType: FieldType,
+    val fieldName: String,
     val domain: Domain?
 )
 
@@ -142,6 +143,11 @@ internal abstract class BaseFieldState<T>(
      * The [FieldType] of the field.
      */
     val fieldType = properties.fieldType
+
+    /**
+     * The field name for this field.
+     */
+    val fieldName = properties.fieldName
 
     /**
      * The domain for this field, if any.
