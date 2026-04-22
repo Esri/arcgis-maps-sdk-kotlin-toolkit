@@ -49,6 +49,18 @@ android {
         }
     }
 
+    flavorDimensions += "toolkitDependencies"
+
+    productFlavors {
+        create("buildWithSourceCode") {
+            dimension = "toolkitDependencies"
+            isDefault = true
+        }
+        create("buildWithMavenArtifacts") {
+            dimension = "toolkitDependencies"
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -75,9 +87,11 @@ android {
 }
 
 dependencies {
-    implementation(project(":legend"))
-    implementation(project(":geoview-compose"))
+    "buildWithSourceCodeImplementation"(project(mapOf("path" to ":geoview-compose")))
+    "buildWithMavenArtifactsImplementation"(arcgis.geoview.compose)
     implementation(project(":microapps-lib"))
+    "buildWithSourceCodeImplementation"(project(mapOf("path" to ":legend")))
+    "buildWithMavenArtifactsImplementation"(arcgis.legend)
     implementation(arcgis.mapsSdk)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.composeCore)

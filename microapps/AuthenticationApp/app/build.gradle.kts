@@ -48,6 +48,18 @@ android {
         }
     }
 
+    flavorDimensions += "toolkitDependencies"
+
+    productFlavors {
+        create("buildWithSourceCode") {
+            dimension = "toolkitDependencies"
+            isDefault = true
+        }
+        create("buildWithMavenArtifacts") {
+            dimension = "toolkitDependencies"
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -73,7 +85,8 @@ android {
 }
 
 dependencies {
-    implementation(project(":authentication"))
+    "buildWithSourceCodeImplementation"(project(mapOf("path" to ":authentication")))
+    "buildWithMavenArtifactsImplementation"(arcgis.authentication)
     implementation(project(":microapps-lib"))
     implementation(arcgis.mapsSdk)
     implementation(platform(libs.androidx.compose.bom))

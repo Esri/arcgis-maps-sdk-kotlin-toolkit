@@ -169,6 +169,18 @@ dependencyResolutionManagement {
             library("mapsSdk", "com.esri", "arcgis-maps-kotlin").versionRef("mapsSdk")
             library("mapsSdkTestFixtures", "com.esri", "arcgis-maps-kotlin-test-fixtures")
                 .versionRef("mapsSdk")
+            library("compass", "com.esri", "arcgis-maps-kotlin-toolkit-compass").versionRef("mapsSdk")
+            library("geoview-compose", "com.esri", "arcgis-maps-kotlin-toolkit-geoview-compose").versionRef("mapsSdk")
+            library("ar", "com.esri", "arcgis-maps-kotlin-toolkit-ar").versionRef("mapsSdk")
+            library("authentication", "com.esri", "arcgis-maps-kotlin-toolkit-authentication").versionRef("mapsSdk")
+            library("basemapgallery", "com.esri", "arcgis-maps-kotlin-toolkit-basemapgallery").versionRef("mapsSdk")
+            library("featureforms", "com.esri", "arcgis-maps-kotlin-toolkit-featureforms").versionRef("mapsSdk")
+            library("offline", "com.esri", "arcgis-maps-kotlin-toolkit-offline").versionRef("mapsSdk")
+            library("indoors", "com.esri", "arcgis-maps-kotlin-toolkit-indoors").versionRef("mapsSdk")
+            library("legend", "com.esri", "arcgis-maps-kotlin-toolkit-legend").versionRef("mapsSdk")
+            library("popup", "com.esri", "arcgis-maps-kotlin-toolkit-popup").versionRef("mapsSdk")
+            library("scalebar", "com.esri", "arcgis-maps-kotlin-toolkit-scalebar").versionRef("mapsSdk")
+            library("utilitynetworks", "com.esri", "arcgis-maps-kotlin-toolkit-utilitynetworks").versionRef("mapsSdk")
         }
     }
 }

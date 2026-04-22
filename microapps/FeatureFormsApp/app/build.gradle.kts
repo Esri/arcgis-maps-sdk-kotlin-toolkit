@@ -53,6 +53,19 @@ android {
             useSupportLibrary = true
         }
     }
+
+    flavorDimensions += "toolkitDependencies"
+
+    productFlavors {
+        create("buildWithSourceCode") {
+            dimension = "toolkitDependencies"
+            isDefault = true
+        }
+        create("buildWithMavenArtifacts") {
+            dimension = "toolkitDependencies"
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -78,10 +91,15 @@ android {
 }
 
 dependencies {
-    implementation(project(":authentication"))
-    implementation(project(":featureforms"))
-    implementation(project(":geoview-compose"))
-    implementation(project(":offline"))
+    "buildWithSourceCodeImplementation"(project(mapOf("path" to ":geoview-compose")))
+    "buildWithMavenArtifactsImplementation"(arcgis.geoview.compose)
+    "buildWithSourceCodeImplementation"(project(mapOf("path" to ":authentication")))
+    "buildWithMavenArtifactsImplementation"(arcgis.authentication)
+    "buildWithSourceCodeImplementation"(project(mapOf("path" to ":featureforms")))
+    "buildWithMavenArtifactsImplementation"(arcgis.featureforms)
+    "buildWithSourceCodeImplementation"(project(mapOf("path" to ":offline")))
+    "buildWithMavenArtifactsImplementation"(arcgis.offline)
+
     // sdk
     implementation(arcgis.mapsSdk)
     // hilt
