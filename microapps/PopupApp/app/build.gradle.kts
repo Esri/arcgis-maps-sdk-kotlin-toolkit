@@ -97,7 +97,6 @@ dependencies {
     implementation(arcgis.mapsSdk)
     "buildWithSourceCodeImplementation"(project(mapOf("path" to ":popup")))
     "buildWithMavenArtifactsImplementation"(arcgis.popup)
-    implementation(project(":microapps-lib"))
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.composeCore)
     implementation(libs.bundles.core)

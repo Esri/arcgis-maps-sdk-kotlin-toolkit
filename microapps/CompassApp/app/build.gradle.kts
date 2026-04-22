@@ -89,8 +89,6 @@ dependencies {
     "buildWithMavenArtifactsImplementation"(arcgis.compass)
     "buildWithSourceCodeImplementation"(project(mapOf("path" to ":geoview-compose")))
     "buildWithMavenArtifactsImplementation"(arcgis.geoview.compose)
-
-    //implementation(project(":geoview-compose"))
     implementation(project(":microapps-lib"))
     implementation(arcgis.mapsSdk)
     implementation(platform(libs.androidx.compose.bom))
