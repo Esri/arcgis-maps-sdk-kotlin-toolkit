@@ -17,8 +17,12 @@
 package com.arcgismaps.toolkit.featureforms.internal.components.mlkit
 
 import android.util.Log
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.rememberSaveable
 import com.arcgismaps.data.FieldType
 import com.arcgismaps.mapping.featureforms.ComboBoxFormInput
+import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.mapping.featureforms.FormElement
 import com.arcgismaps.mapping.featureforms.GroupFormElement
@@ -29,11 +33,6 @@ import com.arcgismaps.toolkit.featureforms.internal.components.base.BaseFieldSta
 import com.arcgismaps.toolkit.featureforms.internal.components.codedvalue.CodedValueFieldState
 import com.arcgismaps.toolkit.featureforms.internal.components.datetime.DateTimeFieldState
 import com.arcgismaps.toolkit.featureforms.internal.components.text.FormTextFieldState
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import java.time.ZoneId
@@ -42,42 +41,31 @@ import kotlin.time.Instant
 import kotlin.time.toJavaInstant
 
 /**
- * A class to build a prompt for a generative model based on the current state of a the [formStateData].
- * The prompt is updated when the state of the form changes. See [FeatureFormObserver] for details on
- * which changes to the form will trigger an update to the prompt.
+ * A class to build a prompt for a generative model for a [FeatureForm].
  *
  * @param formStateData The state data of the form to build the prompt from.
- * @param scope The [CoroutineScope] used to observe changes to the form. The observer will be active
- * as long as this scope is active, and will stop observing when the scope is cancelled.
  */
 internal class FeatureFormPrompt(
-    private val formStateData: FormStateData,
-    scope: CoroutineScope
+    private val formStateData: FormStateData
 ) {
 
-    /**
-     * The observer for the form state.
-     */
-    private val formObserver = FeatureFormObserver(
-        featureForm = formStateData.featureForm,
-    )
+    private var _prompt: String = ""
 
     /**
-     * The prompt to send to the generative model. This represents the current state of the form and
-     * is updated whenever a relevant change occurs in the form.
+     * The prompt to send to the generative model.
      */
-    val prompt: StateFlow<String> = formObserver.changes.map {
-        buildPrompt()
-    }.stateIn(
-        scope = scope,
-        started = SharingStarted.Eagerly,
-        initialValue = buildPrompt()
-    )
+    val prompt: String
+        get() {
+            if (_prompt.isEmpty()) {
+                _prompt = buildPrompt()
+            }
+            return _prompt
+        }
 
     /**
      * Builds the prompt based on the current state of the form.
      */
-    private fun buildPrompt() : String {
+    private fun buildPrompt(): String {
         val formInfo = buildString {
             appendLine("Title: ${formStateData.featureForm.title.value}")
             formStateData.stateCollection.forEach { state ->
@@ -91,10 +79,7 @@ internal class FeatureFormPrompt(
                     is GroupFormElement -> {
                         element.elements.forEach {
                             it.toPromptString()?.let { fieldElementPrompt ->
-                                // Only include if the group is visible
-                                if (element.isVisible.value) {
-                                    appendLine(fieldElementPrompt)
-                                }
+                                appendLine(fieldElementPrompt)
                             }
                         }
                     }
@@ -113,16 +98,33 @@ internal class FeatureFormPrompt(
             |</background_information>
             |##
             |<instructions>
+            |The user's response may contain speech-to-text artifacts such as incorrect punctuation,
+            |split numbers, repeated fragments, or slightly malformed grammar. Normalize the text to 
+            |the most likely intended spoken meaning before extracting values.
+            |
+            |Examples:
+            |- "4, 14 PM" means "4:14 PM"
+            |- "11 30 AM" means "11:30 AM"
+            |- "April 18th. 4, 14 PM" means "April 18th, 4:14 PM"
+            |
+            |Prefer the most natural human interpretation of the spoken input, especially for date and time fields.
+            |
             |Only include fields that the user is trying to fill out. If you cannot determine any 
             |fields from the user response, do not include it in the answer. The user will name a
             |field only by its label. Use the label to determine the "fieldName". Only provide the 
-            |"fieldName" in the output. If a field has coded values, use the provided name ignoring 
-            |its field type. The value should always be a string. If the field is a DateOnly or Date field, 
-            |the value should be an ISO 8601 string that represents an instant (for example, 2020-08-30T18:43:00Z).
-            |The user's current time zone is ${ZoneId.systemDefault().id} and should be taken into 
-            |account when determining the value for date fields. The current date and time is ${Clock.System.now()}. 
-            |Use this context to determine the value for date fields if the user response includes 
-            |relative date information (for example, "next Tuesday" or "in 3 days").
+            |"fieldName" in the output. 
+            |
+            |If a field has coded values, use the provided name ignoring its field type. The value 
+            |should always be a string. 
+            |
+            |If the field is a DateOnly or Date field, the value should be an ISO 8601 string that 
+            |represents an instant (for example, 2026-04-22T14:34:00-07:00). The user's current time zone 
+            |is ${ZoneId.systemDefault().id} and should be taken into account when determining the 
+            |value for date fields. 
+            |
+            |The current date and time is ${Clock.System.now()}. Use this context to determine the 
+            |value for date fields if the user response includes relative date information 
+            |(for example, "next Tuesday" or "in 3 days").
             |</instructions>
             |##
             |<output_format>
@@ -140,16 +142,12 @@ internal class FeatureFormPrompt(
         """.trimMargin("|")
     }
 
-    fun processResponse(response: FeatureFormPromptResponse) {
-        response.fieldValues.forEach { entry ->
-            Log.e("TAG", "processResponse: ${entry.key}-${entry.value}")
-            formStateData.stateCollection[entry.key]?.let { state ->
-                processFieldValue(state, entry.value)
-            } ?: Log.e("TAG", "No state found for fieldName: ${entry.key}")
-        }
-    }
-
     private fun processFieldValue(state: BaseFieldState<*>, value: String) {
+        // If the field is not editable or not visible, do not attempt to update its value
+        if (state.isEditable.value.not() || state.isVisible.value.not()) {
+            Log.e("TAG", "Field ${state.fieldName} is not editable or not visible. Skipping value update.")
+            return
+        }
         when (state) {
             is CodedValueFieldState -> {
                 val codedValue = state.codedValues.entries.firstOrNull {
@@ -166,6 +164,45 @@ internal class FeatureFormPrompt(
             }
         }
     }
+
+    /**
+     * Processes the response from the generative model and updates the form state accordingly.
+     */
+    fun processResponse(response: String) {
+        FeatureFormPromptResponse.fromJsonOrNull(response)?.let { featureFormPromptResponse ->
+            featureFormPromptResponse.fieldValues.forEach { entry ->
+                Log.e("TAG", "processResponse: ${entry.key}-${entry.value}")
+                formStateData.stateCollection[entry.key]?.let { state ->
+                    processFieldValue(state, entry.value)
+                } ?: Log.e("TAG", "No state found for fieldName: ${entry.key}")
+            }
+        }
+    }
+
+    companion object {
+        fun Saver(
+            formStateData: FormStateData
+        ): Saver<FeatureFormPrompt, String> = Saver(
+            save = {
+                it.prompt
+            },
+            restore = {
+                FeatureFormPrompt(formStateData).apply {
+                    _prompt = it
+                }
+            }
+        )
+    }
+}
+
+@Composable
+internal fun rememberFeatureFormPrompt(
+    formStateData: FormStateData
+): FeatureFormPrompt = rememberSaveable(
+    inputs = arrayOf(formStateData),
+    saver = FeatureFormPrompt.Saver(formStateData)
+) {
+    FeatureFormPrompt(formStateData)
 }
 
 @Serializable
@@ -181,6 +218,20 @@ internal data class FeatureFormPromptResponse(
                 null
             }
         }
+    }
+}
+
+/**
+ * Extension function to convert a [FormElement] to a JSON string representation for the prompt.
+ * Only [FieldFormElement]s are included.
+ *
+ * @return A JSON string representation of the [FieldFormElement] or null if the element type is not
+ * supported.
+ */
+private fun FormElement.toPromptString(): String? {
+    return when (this) {
+        is FieldFormElement -> FieldFormElementPrompt.from(this).toString()
+        else -> null
     }
 }
 
@@ -247,19 +298,5 @@ private fun FieldType.name(): String {
         FieldType.TimeOnly -> "TimeOnly"
         FieldType.TimestampOffset -> "TimestampOffset"
         else -> "Unknown"
-    }
-}
-
-private fun FormElement.toPromptString(): String? {
-    return when (this) {
-        is FieldFormElement -> {
-            if (isEditable.value && isVisible.value) {
-                FieldFormElementPrompt.from(this).toString()
-            } else {
-                null
-            }
-        }
-
-        else -> null
     }
 }

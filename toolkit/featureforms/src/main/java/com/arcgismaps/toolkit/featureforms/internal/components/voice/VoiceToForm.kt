@@ -17,7 +17,6 @@
 package com.arcgismaps.toolkit.featureforms.internal.components.voice
 
 import android.os.Build
-import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
@@ -32,7 +31,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -81,12 +79,6 @@ internal fun VoiceToForm(
         mutableStateOf(false)
     }
     var showDialog by remember {
-        mutableStateOf(false)
-    }
-    var isSpeechReady by remember {
-        mutableStateOf(false)
-    }
-    var isModelReady by remember {
         mutableStateOf(false)
     }
     Surface(
@@ -145,30 +137,16 @@ internal fun VoiceToForm(
                     ${speechRecognizer.response.value}
                     """.trimIndent()
                     model.getResponse(userPrompt)
+                    speechRecognizer.resetResponse()
                     onDismiss()
                 }
             },
             onDiscard = onDismiss
         )
     }
-    if (isSpeechReady.not() || isModelReady.not()) {
-        InitializingDialog(onDismissRequest = onDismiss)
-    }
     LaunchedEffect(speechRecognizer) {
         speechRecognizer.initialize().onSuccess {
-            isSpeechReady = true
             speechRecognizer.startVoiceRecognition()
-            Log.e("TAG", "VoiceToForm: speech ready")
-        }.onFailure {
-            Log.e("TAG", "VoiceToForm: failed to initialize speech recognizer")
-        }
-    }
-    LaunchedEffect(model) {
-        model.initialize().onSuccess {
-            isModelReady = true
-            Log.e("TAG", "VoiceToForm: model ready")
-        }.onFailure {
-            Log.e("TAG", "VoiceToForm: failed to initialize model")
         }
     }
 }

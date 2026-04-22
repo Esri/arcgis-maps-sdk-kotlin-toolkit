@@ -20,9 +20,8 @@ package com.arcgismaps.toolkit.featureforms
 
 import android.Manifest
 import android.content.Context
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxSize
@@ -59,12 +58,12 @@ import com.arcgismaps.mapping.featureforms.FormElement
 import com.arcgismaps.mapping.featureforms.FormInput
 import com.arcgismaps.mapping.featureforms.GroupFormElement
 import com.arcgismaps.mapping.featureforms.TextFormElement
-import com.arcgismaps.mapping.featureforms.UtilityAssociationsFormElement
 import com.arcgismaps.mapping.featureforms.UtilityAssociationFeatureCandidate
 import com.arcgismaps.mapping.featureforms.UtilityAssociationFeatureSource
-import com.arcgismaps.toolkit.featureforms.internal.components.mlkit.FeatureFormGenerativeModel
-import com.arcgismaps.toolkit.featureforms.internal.components.mlkit.FeatureFormPrompt
+import com.arcgismaps.mapping.featureforms.UtilityAssociationsFormElement
 import com.arcgismaps.toolkit.featureforms.internal.components.mlkit.SpeechRecognizer
+import com.arcgismaps.toolkit.featureforms.internal.components.mlkit.rememberFeatureFormGenerativeModel
+import com.arcgismaps.toolkit.featureforms.internal.components.mlkit.rememberFeatureFormPrompt
 import com.arcgismaps.toolkit.featureforms.internal.components.text.TextFormElement
 import com.arcgismaps.toolkit.featureforms.internal.components.voice.VoiceToForm
 import com.arcgismaps.toolkit.featureforms.internal.navigation.FeatureFormNavHost
@@ -82,7 +81,6 @@ import com.arcgismaps.utilitynetworks.UtilityAssociationGroupResult
 import com.arcgismaps.utilitynetworks.UtilityAssociationResult
 import com.arcgismaps.utilitynetworks.UtilityAssociationsFilter
 import com.arcgismaps.utilitynetworks.UtilityAssociationsFilterResult
-import kotlinx.coroutines.launch
 
 /**
  * Defines the visibility behavior of validation errors in a [FeatureForm].
@@ -368,7 +366,6 @@ public fun FeatureForm(
     typography: FeatureFormTypography = FeatureFormDefaults.typography(),
 ) {
     val state by rememberUpdatedState(featureFormState)
-    val scope = rememberCoroutineScope()
     val navController = rememberNavController(state)
     state.setNavigationCallback { route ->
         navController.navigate(route)
@@ -425,22 +422,13 @@ public fun FeatureForm(
     val backStackEntry by navController.currentBackStackEntryAsState()
     // Get the form data for the active entry (destination) in the back stack
     val formData = remember(backStackEntry) { state.getActiveFormStateData() }
-    val prompt = remember(formData, scope) {
-        FeatureFormPrompt(formData, scope)
-    }
-    val model = remember(prompt) {
-        FeatureFormGenerativeModel(prompt).apply {
-            scope.launch {
-                initialize()
-            }
-        }
-    }
+    val prompt = rememberFeatureFormPrompt(formData)
+    val model = rememberFeatureFormGenerativeModel(
+        prefix = prompt.prompt,
+        onProcessedResponse = prompt::processResponse
+    )
     val speechRecognizer = remember {
-        SpeechRecognizer().apply {
-            scope.launch {
-                initialize()
-            }
-        }
+        SpeechRecognizer()
     }
     FeatureFormLayout(
         topBar = {
@@ -513,6 +501,25 @@ public fun FeatureForm(
             // Clear the navigation actions when the composition is disposed
             state.setNavigationCallback(null)
             state.setNavigateBack(null)
+        }
+    }
+    LaunchedEffect(model) {
+        Log.e("TAG", "Prompt: ${prompt.prompt}", )
+        model.load().onSuccess {
+            // Model loaded successfully
+            Log.e("TAG", "FeatureForm: Model loaded successfully", )
+        }.onFailure {
+                Log.e("TAG", "FeatureForm: Failed to load model", it)
+            // Handle model loading failure if necessary
+        }
+    }
+    LaunchedEffect(speechRecognizer) {
+        speechRecognizer.initialize().onSuccess {
+            // Speech recognizer initialized successfully
+            Log.e("TAG", "FeatureForm: Speech recognizer initialized successfully")
+        }.onFailure {
+            Log.e("TAG", "FeatureForm: Failed to initialize speech recognizer", it)
+            // Handle speech recognizer initialization failure if necessary
         }
     }
 }

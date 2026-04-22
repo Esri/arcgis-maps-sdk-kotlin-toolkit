@@ -49,9 +49,7 @@ internal class SpeechRecognizer {
     val response: StateFlow<String> = _response.asStateFlow()
 
     suspend fun initialize() : Result<Unit> {
-        val status = speechRecognizer.checkStatus()
-        Log.e("TAG", "status is ${status}: ")
-        when (status) {
+        when (val status = speechRecognizer.checkStatus()) {
             FeatureStatus.DOWNLOADABLE -> {
                 speechRecognizer.download().takeWhile {
                     it !is DownloadStatus.DownloadCompleted
@@ -90,30 +88,22 @@ internal class SpeechRecognizer {
             audioSource = AudioSource.fromMic()
         }
         speechRecognizer.startRecognition(request).collect { response ->
-            Log.e("TAG", "startVoiceRecognition: $response")
             when (response) {
-                is SpeechRecognizerResponse.ErrorResponse -> {
-                    Log.e("TAG", "startVoiceRecognition: ${response.e}")
-                }
-
-                SpeechRecognizerResponse.CompletedResponse -> {
-                    Log.e("TAG", "startVoiceRecognition: completed: $response")
-                }
-
                 is SpeechRecognizerResponse.FinalTextResponse -> {
                     val previous = _response.value
                     _response.emit("$previous ${response.text}")
-                    Log.d("TAG", "startVoiceRecognition: ${response.text}")
                 }
 
-                is SpeechRecognizerResponse.PartialTextResponse -> {
-                    Log.d("TAG", "startVoiceRecognition: ${response.text}")
-                }
+                else -> {}
             }
         }
     }
 
     suspend fun stopVoiceRecognition() {
         speechRecognizer.stopRecognition()
+    }
+
+    fun resetResponse() {
+        _response.value = ""
     }
 }

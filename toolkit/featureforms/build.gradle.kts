@@ -165,6 +165,7 @@ dependencies {
     implementation(libs.coil3.compose)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.foundation)
+    implementation("androidx.compose.runtime:runtime")
     implementation(libs.androidx.window)
     implementation(libs.androidx.window.core)
     implementation(libs.bundles.composeCore)
