@@ -1,0 +1,257 @@
+name: API Compatibility PR
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+
+permissions:
+  # Workflow only needs repository read access to run Gradle and collect artifacts.
+  contents: read
+
+concurrency:
+  # Prevents stale runs on the same PR from consuming runner time.
+  group: api-compat-pr-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  discover:
+    name: Discover apiCheck modules
+    # Draft PRs skip checks to avoid unnecessary CI churn while work is in progress.
+    if: github.event.pull_request.draft == false
+    runs-on:
+      - ubuntu-latest
+    outputs:
+      modules_json: ${{ steps.discover.outputs.modules_json }}
+      excluded_json: ${{ steps.discover.outputs.excluded_json }}
+      fallback_used: ${{ steps.discover.outputs.fallback_used }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Discover modules exposing apiCheck
+        id: discover
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          # Dry-run lists concrete task paths without executing module builds.
+          ./gradlew --dry-run apiCheck --console=plain --no-daemon | tee gradle-dry-run-api-check.log
+
+          python3 - <<'PY'
+          import glob
+          import json
+          import os
+          import re
+          import subprocess
+
+          dry_run_log_path = "gradle-dry-run-api-check.log"
+          with open(dry_run_log_path, "r", encoding="utf-8", errors="replace") as f:
+              lines = f.read().splitlines()
+
+          # Supports both flat and nested Gradle project paths, e.g. :auth:apiCheck and :toolkit:core:apiCheck.
+          # Boundary keeps us from matching tasks like apiCheckSomething.
+          pattern = re.compile(r"^:([A-Za-z0-9_.-]+(?::[A-Za-z0-9_.-]+)*):apiCheck(?:\s|$)")
+          discovered = []
+          seen = set()
+          for line in lines:
+              match = pattern.match(line.strip())
+              if not match:
+                  continue
+              module = match.group(1)
+              if module in seen:
+                  continue
+              seen.add(module)
+              discovered.append(module)
+
+          project_pattern = re.compile(r"Project '(:[^']+)'")
+          valid_projects = set()
+
+          # Build a set of real Gradle project paths so fallback candidates cannot
+          # produce ':<module>:apiCheck' invocations for non-existent projects.
+          projects_result = subprocess.run(
+              ["./gradlew", "-q", "projects", "--console=plain", "--no-daemon"],
+              stdout=subprocess.PIPE,
+              stderr=subprocess.STDOUT,
+              text=True,
+              check=False,
+          )
+          for match in project_pattern.finditer(projects_result.stdout):
+              valid_projects.add(match.group(1).lstrip(":"))
+
+          def resolve_project_path(candidate: str):
+              # Keep fallback mapping conservative: unresolved or ambiguous candidates
+              # are excluded instead of risking "Project not found" during matrix execution.
+              if not valid_projects:
+                  return candidate
+              if candidate in valid_projects:
+                  return candidate
+
+              tail = candidate.split(":")[-1]
+              possible = []
+              for value in (tail, f"toolkit:{tail}"):
+                  if value in valid_projects and value not in possible:
+                      possible.append(value)
+
+              suffix_matches = sorted(
+                  project
+                  for project in valid_projects
+                  if project.endswith(f":{tail}")
+              )
+              for value in suffix_matches:
+                  if value not in possible:
+                      possible.append(value)
+
+              if len(possible) == 1:
+                  return possible[0]
+              return None
+
+          excluded = []
+          include = []
+          excluded_exact = {
+              "bom": "known non-publishable module",
+              "buildSrc": "known non-publishable module",
+              "build-logic-internal": "known non-publishable module",
+              "kdoc": "known non-publishable module",
+              "microapps-lib": "known non-publishable module",
+          }
+
+          for module in sorted(discovered):
+              # Exclusions mirror non-releasable modules and app-style modules.
+              if module.endswith("-app"):
+                  excluded.append({"module": module, "reason": "app-style module (-app)"})
+                  continue
+              if module in excluded_exact:
+                  excluded.append({"module": module, "reason": excluded_exact[module]})
+                  continue
+              resolved = resolve_project_path(module)
+              if resolved is None:
+                  excluded.append({
+                      "module": module,
+                      "reason": "no matching Gradle project path for apiCheck",
+                  })
+                  continue
+              include.append(resolved)
+
+          fallback_used = False
+          fallback_reason = ""
+          if not include:
+              fallback_used = True
+              fallback_reason = "No ':...:apiCheck' entries were found in Gradle dry-run output."
+              # Fallback uses checked-in API files, then resolves each candidate against
+              # real Gradle project paths before emitting matrix entries.
+              fallback_modules = set()
+              for path in glob.glob("toolkit/*/api/*.api"):
+                  module_dir = os.path.dirname(os.path.dirname(path))
+                  candidate = module_dir.replace("/", ":")
+                  resolved = resolve_project_path(candidate)
+                  if resolved is None:
+                      tail = candidate.split(":")[-1]
+                      excluded.append({
+                          "module": tail,
+                          "reason": "fallback api file has no matching Gradle project path",
+                      })
+                      continue
+                  fallback_modules.add(resolved)
+
+              include = sorted(fallback_modules)
+
+          modules_json = json.dumps(include)
+          excluded_json = json.dumps(excluded)
+
+          github_output = os.environ["GITHUB_OUTPUT"]
+          # Export machine-readable discovery results for the matrix job.
+          with open(github_output, "a", encoding="utf-8") as output:
+              output.write(f"modules_json={modules_json}\n")
+              output.write(f"excluded_json={excluded_json}\n")
+              output.write(f"fallback_used={'true' if fallback_used else 'false'}\n")
+              output.write(f"fallback_reason={fallback_reason}\n")
+
+          summary_lines = [
+              "## API Check Discovery",
+              f"Discovered modules: `{modules_json}`",
+              f"Excluded modules: `{excluded_json}`",
+              f"Fallback used: `{str(fallback_used).lower()}`",
+              f"Fallback reason: `{fallback_reason}`",
+          ]
+          summary_path = os.environ.get("GITHUB_STEP_SUMMARY")
+          if summary_path:
+              with open(summary_path, "a", encoding="utf-8") as summary:
+                  summary.write("\n".join(summary_lines) + "\n")
+          PY
+
+      - name: Warn if fallback discovery path was used
+        # Fallback should be rare; warning makes it visible in PR checks.
+        if: steps.discover.outputs.fallback_used == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "::warning::Dynamic apiCheck discovery returned no modules. Falling back to toolkit/*/api/*.api module scan."
+
+      - name: Upload discovery log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-compat-discovery-log
+          path: gradle-dry-run-api-check.log
+          if-no-files-found: warn
+
+  run-api-check:
+    name: apiCheck (${{ matrix.module }})
+    # Skip if discover found no valid modules, rather than failing the entire workflow.
+    if: github.event.pull_request.draft == false && needs.discover.outputs.modules_json != '[]'
+    needs:
+      - discover
+    runs-on:
+      - ubuntu-latest
+    strategy:
+      # Keep all module results visible in one run, even if one module fails early.
+      fail-fast: false
+      matrix:
+        module: ${{ fromJson(needs.discover.outputs.modules_json) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Run apiCheck for module
+        shell: bash
+        run: |
+          set -euo pipefail
+          ./gradlew :${{ matrix.module }}:apiCheck --stacktrace --no-daemon
+
+      - name: Normalize module path for artifacts
+        id: module_path
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Convert Gradle path format (toolkit:core) to filesystem format (toolkit/core).
+          module_path="${{ matrix.module }}"
+          module_path="${module_path//:/\/}"
+          echo "module_path=${module_path}" >> "$GITHUB_OUTPUT"
+
+      - name: Upload module reports and API artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-compat-${{ matrix.module }}
+          path: |
+            ${{ steps.module_path.outputs.module_path }}/api
+            ${{ steps.module_path.outputs.module_path }}/build/reports
+            ${{ steps.module_path.outputs.module_path }}/build/api
+          if-no-files-found: warn
+
