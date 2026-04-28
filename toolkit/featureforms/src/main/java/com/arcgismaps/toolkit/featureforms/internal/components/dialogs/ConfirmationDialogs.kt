@@ -30,7 +30,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.window.DialogProperties
@@ -112,12 +112,12 @@ private fun SaveEditsDialogPreview() {
 @Preview
 @Composable
 private fun ValidationErrorsDialogPreview() {
-    val context = LocalContext.current
+    val formHasValidationErrors = stringResource(R.string.the_form_has_validation_errors)
+    val youHaveErrors =
+        pluralStringResource(R.plurals.you_have_errors_that_must_be_fixed_before_saving, 1, 1)
     ErrorDialog(
         onDismissRequest = {},
-        title = context.getString(R.string.the_form_has_validation_errors),
-        body = context.resources.getQuantityString(
-            R.plurals.you_have_errors_that_must_be_fixed_before_saving,
-            1, 1)
-        )
+        title = formHasValidationErrors,
+        body = youHaveErrors
+    )
 }

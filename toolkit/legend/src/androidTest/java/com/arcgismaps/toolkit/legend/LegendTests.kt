@@ -17,7 +17,7 @@
 package com.arcgismaps.toolkit.legend
 
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.test.platform.app.InstrumentationRegistry
 import com.arcgismaps.mapping.ArcGISMap
@@ -49,8 +49,8 @@ class LegendTests {
     @Before
     fun setContent() = runTest {
         val legendUsageScenarios = LegendUsageScenarios()
+        val basemap = map.basemap.value
         composeTestRule.setContent {
-            val basemap = map.basemap.value
             legendUsageScenarios.MapViewWithLegendInBottomSheet(
                 map
             ) {
