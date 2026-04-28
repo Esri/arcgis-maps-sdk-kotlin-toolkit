@@ -101,9 +101,10 @@ dokka-versioning = { group = "org.jetbrains.dokka", name = "versioning-plugin", 
 arcore = { group = "com.google.ar", name = "core", version.ref = "arcore" }
 play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
 androidx-espresso-intents = { group = "androidx.test.espresso", name = "espresso-intents", version.ref = "androidxEspresso" }
-# Dependencies of the included build-logic-internal
+# Dependencies of the included build-logic and build-loginc--internal
 android-gradle-plugin = { group = "com.android.tools.build", name = "gradle", version.ref = "androidGradlePlugin" }
 arcgismaps-testdata-sync-gradle-plugin = { group = "com.esri.gradle-plugins.testdata.sync", name = "com.esri.gradle-plugins.testdata.sync.gradle.plugin", version.ref = "arcgismapsTestdataSync" }
+kotlin-gradle = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin"}
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }
@@ -118,8 +119,10 @@ kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", versi
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 gmazzo-test-aggregation = { id = "io.github.gmazzo.test.aggregation.results", version.ref = "gmazzo" }
 arcgismaps-testdata-sync = { id = "com.esri.gradle-plugins.testdata.sync", version.ref = "arcgismapsTestdataSync" }
+
 # Plugins defined by the project build-logic
 android-integration-testing = { id = "android-integration-testing" }
+kotlin-conventions-plugin = { id = "kotlin-conventions-plugin" }
 
 [bundles]
 camerax = [
