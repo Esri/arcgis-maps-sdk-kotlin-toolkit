@@ -109,6 +109,14 @@ internal class AttachmentElementState(
     val isEditable = formElement.isEditable
 
     /**
+     * The input type for the attachment form element. This is determined based on the allowed
+     * attachment types specified by the form element.
+     */
+    val inputType = ImageAttachmentsFormInput (
+        inputMethod = ImageAttachmentsFormInput.InputMethod.Capture,
+    ) // formElement.input
+
+    /**
      * The state of the lazy list that displays the [attachments].
      */
     val lazyListState = LazyListState()

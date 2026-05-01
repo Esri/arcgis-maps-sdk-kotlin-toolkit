@@ -98,11 +98,13 @@ internal fun AttachmentFormElement(
 ) {
     val context = LocalContext.current
     val editable by state.isEditable.collectAsState()
+    val inputType: ImageAttachmentsFormInput = state.inputType
     AttachmentFormElement(
         label = state.label,
         description = state.description,
         editable = editable,
         captureOptions = CaptureOptions.Any,
+        inputType = inputType,
         stateId = state.id,
         attachments = state.attachments,
         lazyListState = state.lazyListState,
@@ -117,6 +119,7 @@ internal fun AttachmentFormElement(
     description: String,
     editable: Boolean,
     captureOptions: CaptureOptions,
+    inputType: ImageAttachmentsFormInput,
     stateId: Int,
     attachments: List<FormAttachmentState>,
     lazyListState: LazyListState,
@@ -147,6 +150,7 @@ internal fun AttachmentFormElement(
                     AddAttachment(
                         stateId = stateId,
                         captureOptions = captureOptions,
+                        inputType = inputType,
                         hasCameraPermission = hasCameraPermission
                     )
                 }
@@ -233,6 +237,7 @@ private fun Header(
 private fun AddAttachment(
     stateId: Int,
     captureOptions: CaptureOptions,
+    inputType: ImageAttachmentsFormInput,
     hasCameraPermission: Boolean,
 ) {
     var showMenu by remember { mutableStateOf(false) }
@@ -254,7 +259,7 @@ private fun AddAttachment(
             offset = DpOffset.Zero,
             onDismissRequest = { showMenu = false }
         ) {
-            if (hasCameraPermission && captureOptions.hasImageCapture()) {
+            if (hasCameraPermission && captureOptions.hasImageCapture() && inputType.inputMethod == ImageAttachmentsFormInput.InputMethod.Capture) {
                 DropdownMenuItem(
                     text = { Text(text = stringResource(R.string.take_photo)) },
                     trailingIcon = {
@@ -272,7 +277,7 @@ private fun AddAttachment(
                     }
                 )
             }
-            if (captureOptions.hasMediaCapture()) {
+            if (captureOptions.hasMediaCapture() && inputType.inputMethod == ImageAttachmentsFormInput.InputMethod.Upload) {
                 DropdownMenuItem(
                     text = { Text(text = stringResource(R.string.add_from_gallery)) },
                     trailingIcon = {
@@ -298,7 +303,7 @@ private fun AddAttachment(
                     }
                 )
             }
-            if (captureOptions.hasFileCapture()) {
+            if (captureOptions.hasFileCapture() && inputType.inputMethod == ImageAttachmentsFormInput.InputMethod.Upload) {
                 DropdownMenuItem(
                     text = { Text(text = stringResource(R.string.add_file)) },
                     trailingIcon = {
@@ -581,6 +586,9 @@ private fun AttachmentFormElementPreview() {
         description = "Add attachments",
         editable = true,
         captureOptions = CaptureOptions.Any,
+        inputType = ImageAttachmentsFormInput(
+            inputMethod = ImageAttachmentsFormInput.InputMethod.Capture
+        ),
         stateId = 1,
         attachments = list + list + list + list,
         lazyListState = LazyListState(),
