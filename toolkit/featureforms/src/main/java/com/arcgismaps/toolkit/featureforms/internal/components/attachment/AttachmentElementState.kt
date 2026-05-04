@@ -113,7 +113,7 @@ internal class AttachmentElementState(
      * attachment types specified by the form element.
      */
     val inputType = ImageAttachmentsFormInput (
-        inputMethod = ImageAttachmentsFormInput.InputMethod.Capture,
+        inputMethod = ImageAttachmentsFormInput.InputMethod.Capture
     ) // formElement.input
 
     /**

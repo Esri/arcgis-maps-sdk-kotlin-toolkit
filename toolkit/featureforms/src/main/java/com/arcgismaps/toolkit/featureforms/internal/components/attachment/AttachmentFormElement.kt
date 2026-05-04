@@ -244,6 +244,11 @@ private fun AddAttachment(
     val dialogRequester = LocalDialogRequester.current
     val scope = rememberCoroutineScope()
     val pickerStyle = remember { MutableSharedFlow<PickerStyle>() }
+    val supportsCapture = inputType.inputMethod == ImageAttachmentsFormInput.InputMethod.Capture ||
+            inputType.inputMethod == ImageAttachmentsFormInput.InputMethod.Any
+
+    val supportsUpload = inputType.inputMethod == ImageAttachmentsFormInput.InputMethod.Upload ||
+            inputType.inputMethod == ImageAttachmentsFormInput.InputMethod.Any
     Box {
         IconButton(
             onClick = { showMenu = true },
@@ -259,7 +264,7 @@ private fun AddAttachment(
             offset = DpOffset.Zero,
             onDismissRequest = { showMenu = false }
         ) {
-            if (hasCameraPermission && captureOptions.hasImageCapture() && inputType.inputMethod == ImageAttachmentsFormInput.InputMethod.Capture) {
+            if (hasCameraPermission && captureOptions.hasImageCapture() && supportsCapture) {
                 DropdownMenuItem(
                     text = { Text(text = stringResource(R.string.take_photo)) },
                     trailingIcon = {
@@ -277,7 +282,7 @@ private fun AddAttachment(
                     }
                 )
             }
-            if (captureOptions.hasMediaCapture() && inputType.inputMethod == ImageAttachmentsFormInput.InputMethod.Upload) {
+            if (captureOptions.hasMediaCapture() && supportsUpload) {
                 DropdownMenuItem(
                     text = { Text(text = stringResource(R.string.add_from_gallery)) },
                     trailingIcon = {
@@ -303,7 +308,7 @@ private fun AddAttachment(
                     }
                 )
             }
-            if (captureOptions.hasFileCapture() && inputType.inputMethod == ImageAttachmentsFormInput.InputMethod.Upload) {
+            if (captureOptions.hasFileCapture() && supportsUpload) {
                 DropdownMenuItem(
                     text = { Text(text = stringResource(R.string.add_file)) },
                     trailingIcon = {
