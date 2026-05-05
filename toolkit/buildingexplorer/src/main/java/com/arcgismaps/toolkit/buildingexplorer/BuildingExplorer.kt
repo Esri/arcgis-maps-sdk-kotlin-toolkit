@@ -40,6 +40,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -57,24 +58,41 @@ import com.arcgismaps.mapping.layers.buildingscene.BuildingSublayer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
+@Stable
 public class BuildingExplorerState(
     buildingSceneLayer: BuildingSceneLayer?,
     coroutineScope: CoroutineScope
 ) {
-    // The selected floor
+    internal var visible by mutableStateOf(true)
+    internal var showFullModel by mutableStateOf(false)
+
+    internal val buildingSceneLayer: BuildingSceneLayer? = buildingSceneLayer
+
+    // The selected level
     public var selectedLevel: String by mutableStateOf("All")
 
-    // The list of available floors
+    // The list of available levels
     public val levels: MutableList<String> = mutableStateListOf(selectedLevel)
 
     // The list of building sublayer categories
     public val categories: MutableList<BuildingSublayer> = mutableStateListOf()
+
+    internal var overviewSublayer: BuildingSublayer? = null
+    internal var fullModelSublayer: BuildingSublayer? = null
 
     init {
         coroutineScope.launch {
             buildingSceneLayer?.let { buildingSceneLayer ->
                 buildingSceneLayer.load().onFailure { throw it }
                     .onSuccess { Log.d("BuildingExplorer", "Loaded!!!!!!!!!!") }
+
+                val sublayers = buildingSceneLayer.sublayers
+                overviewSublayer = sublayers.first { it.modelName == "Overview" }
+                fullModelSublayer = sublayers.first { it.modelName == "FullModel" }
+                fullModelSublayer?.let {
+                    showFullModel = it.isVisible
+                }
+
                 // Get the floor listing from the statistics
                 buildingSceneLayer.fetchStatistics().onSuccess { statistics ->
                     statistics["BldgLevel"]?.mostFrequentValues?.let {
@@ -83,9 +101,9 @@ public class BuildingExplorerState(
                     }
 
                     // The top-level sublayer groups will be the categories
-                    buildingSceneLayer.sublayers.find { sublayer ->
-                        sublayer.modelName == "FullModel"
-                    }?.let { buildingSublayer ->
+                    //buildingSceneLayer.sublayers.find { sublayer ->
+                    //    sublayer.modelName == "FullModel"
+                    fullModelSublayer?.let { buildingSublayer ->
                         buildingSublayer as BuildingGroupSublayer
                         categories.addAll(buildingSublayer.sublayers.sortedBy { it.name })
                     }
@@ -93,7 +111,31 @@ public class BuildingExplorerState(
             }
         }
     }
+
+    internal fun onLevelSelected(index: Int) {
+        selectedLevel = levels[index]
+    }
+
+    internal fun toggleVisibility(visible: Boolean) {
+        this.visible = visible
+        buildingSceneLayer?.isVisible = this.visible
+    }
+
+    internal fun toggleFullModel(fullModel: Boolean) {
+        showFullModel = fullModel
+        fullModelSublayer?.isVisible = showFullModel
+        overviewSublayer?.isVisible = !showFullModel
+    }
+
+    internal fun zoomToBuilding() {}
 }
+
+//@Composable
+//public fun rememberBuildinExplorerState(buildingSceneLayer: BuildingSceneLayer?,
+//    coroutineScope: CoroutineScope
+//): BuildingExplorerState {
+//    return remember { BuildingExplorerState(buildingSceneLayer, coroutineScope) }
+//}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -106,18 +148,24 @@ public fun BuildingExplorer(
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(8.dp)) {
                 Text("Visible")
                 Spacer(modifier = Modifier.weight(1f))
-                Switch(checked = false, onCheckedChange = {})
+                Switch(
+                    checked = state.visible,
+                    onCheckedChange = state::toggleVisibility
+                )
             }
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(8.dp)) {
                 Text("Show full model")
                 Spacer(modifier = Modifier.weight(1f))
-                Switch(checked = false, onCheckedChange = {})
+                Switch(
+                    checked = state.showFullModel,
+                    onCheckedChange = state::toggleFullModel
+                )
             }
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(8.dp)) {
                 Text("Zoom to building")
                 Spacer(modifier = Modifier.weight(1f))
                 IconButton(
-                    onClick = {}
+                    onClick = state::zoomToBuilding
                 ) {
                     Icon(
                         painter = painterResource(R.drawable.zoom_in_map_24dp_e3e3e3_fill0_wght400_grad0_opsz24),
@@ -143,11 +191,11 @@ public fun BuildingExplorer(
                     expanded = expanded,
                     onDismissRequest = { expanded = false }
                 ) {
-                    state.levels.forEach { level ->
+                    state.levels.forEachIndexed { index, level ->
                         DropdownMenuItem(
                             text = { Text(level) },
                             onClick = {
-                                state.selectedLevel = level
+                                state.onLevelSelected(index)
                                 expanded = false
                             }
                         )
@@ -155,7 +203,7 @@ public fun BuildingExplorer(
                 }
             }
             HorizontalDivider()
-            CategorySelector(state)
+            CategorySelector(state.categories)
         }
     }
 }
@@ -164,14 +212,14 @@ public fun BuildingExplorer(
  * Check boxes to select building categories and sub-categories
  */
 @Composable
-private fun CategorySelector(buildingExplorerState: BuildingExplorerState) {
+private fun CategorySelector(categories: List<BuildingSublayer>) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(text = "Disciplines and Categories:", modifier = Modifier.padding(8.dp))
 
         Column {
-            buildingExplorerState.categories.forEach { buildingSublayer ->
+            categories.forEach { buildingSublayer ->
                 var categoryChecked by remember { mutableStateOf(buildingSublayer.isVisible) }
                 var showSubCategories by remember { mutableStateOf(false) }
 
