@@ -18,35 +18,32 @@
 
 package com.arcgismaps.toolkit.buildingexplorerapp.screens
 
+import androidx.compose.foundation.layout.Column
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
-import com.arcgismaps.mapping.layers.BuildingSceneLayer
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arcgismaps.toolkit.buildingexplorer.BuildingExplorer
-import com.arcgismaps.toolkit.buildingexplorer.BuildingExplorerState
+import com.arcgismaps.toolkit.buildingexplorerapp.ViewModel
+import com.arcgismaps.toolkit.geoviewcompose.LocalSceneView
 
 @Composable
 fun MainScreen() {
-//    val arcGISMap by remember {
-//        mutableStateOf(
-//            ArcGISMap(BasemapStyle.ArcGISTopographic).apply {
-//                initialViewpoint = Viewpoint(
-//                    latitude = 39.8,
-//                    longitude = -98.6,
-//                    scale = 10e7
-//                )
-//            }
-//        )
-//    }
-//    MapView(
-//        modifier = Modifier.fillMaxSize(),
-//        arcGISMap = arcGISMap
-//    )
-    val buildingSceneLayer =
-        BuildingSceneLayer("https://tiles.arcgis.com/tiles/V6ZHFr6zdgNZuVG0/arcgis/rest/services/BSL__4326__US_Redlands__EsriAdminBldg_PublicDemo/SceneServer")
-    BuildingExplorer(
-        BuildingExplorerState(
-            buildingSceneLayer = buildingSceneLayer,
-            coroutineScope = rememberCoroutineScope()
-        )
-    )
+    val viewModel: ViewModel = viewModel()
+
+    val showProgress by viewModel.showProgress.collectAsStateWithLifecycle()
+
+    if (showProgress) {
+        CircularProgressIndicator()
+    } else {
+        Column {
+            LocalSceneView(scene = viewModel.scene, modifier = Modifier.weight(0.5f))
+            BuildingExplorer(
+                state = viewModel.buildingExplorerState,
+                modifier = Modifier.weight(0.5f)
+            )
+        }
+    }
 }
