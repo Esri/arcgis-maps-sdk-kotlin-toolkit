@@ -138,9 +138,7 @@ class MainActivity : ComponentActivity() {
                 this@MainActivity,
                 PortalSettingsFactory::class.java
             )
-            ArcGISCredentialStore.createWithPersistence().onSuccess {
-                ArcGISEnvironment.authenticationManager.arcGISCredentialStore = it
-            }
+
             loadCredentials(factory.getPortalSettings(), this@MainActivity.datastore)
         }
         // check for permissions
