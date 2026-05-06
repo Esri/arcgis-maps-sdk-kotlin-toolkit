@@ -244,11 +244,17 @@ private fun AddAttachment(
     val dialogRequester = LocalDialogRequester.current
     val scope = rememberCoroutineScope()
     val pickerStyle = remember { MutableSharedFlow<PickerStyle>() }
-    val supportsCapture = inputType.inputMethod == ImageAttachmentsFormInput.InputMethod.Capture ||
-            inputType.inputMethod == ImageAttachmentsFormInput.InputMethod.Any
+    val inputMethod = inputType.inputMethod
+    val supportsCapture = remember(inputMethod) {
+        inputMethod == ImageAttachmentsFormInput.InputMethod.Capture ||
+                inputMethod == ImageAttachmentsFormInput.InputMethod.Any
+    }
 
-    val supportsUpload = inputType.inputMethod == ImageAttachmentsFormInput.InputMethod.Upload ||
-            inputType.inputMethod == ImageAttachmentsFormInput.InputMethod.Any
+    val supportsUpload = remember(inputMethod) {
+        inputMethod == ImageAttachmentsFormInput.InputMethod.Upload ||
+                inputMethod == ImageAttachmentsFormInput.InputMethod.Any
+    }
+
     Box {
         IconButton(
             onClick = { showMenu = true },
