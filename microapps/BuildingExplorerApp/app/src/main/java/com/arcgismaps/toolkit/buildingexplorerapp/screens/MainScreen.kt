@@ -18,10 +18,13 @@
 
 package com.arcgismaps.toolkit.buildingexplorerapp.screens
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -36,7 +39,13 @@ fun MainScreen() {
     val showProgress by viewModel.showProgress.collectAsStateWithLifecycle()
 
     if (showProgress) {
-        CircularProgressIndicator()
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        )
+        {
+            CircularProgressIndicator()
+        }
     } else {
         Column {
             LocalSceneView(scene = viewModel.scene, modifier = Modifier.weight(0.5f))

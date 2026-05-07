@@ -103,7 +103,7 @@ public class BuildingExplorerState(
     init {
         coroutineScope.launch {
             buildingSceneLayer?.let { buildingSceneLayer ->
-                // load the layer and extract the overview and full model sublayers if they are avaialble
+                // load the layer and extract the overview and full model sublayers if they are available
                 buildingSceneLayer.load().onFailure { throw it }
 
                 val sublayers = buildingSceneLayer.sublayers
