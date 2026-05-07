@@ -29,6 +29,7 @@ mlkitBarcodeScanning = "17.3.0"
 mockingjay = "2.0.0"
 kotlinxCoroutinesTest = "1.10.2"
 kotlinxSerializationJson = "1.9.0"
+kotlinxCollectionsImmutable = "0.4.0"
 mockkAndroid = "1.14.7"
 room = "2.8.4"
 truth = "1.4.5"
@@ -85,6 +86,7 @@ commonmark-strikethrough = { group = "org.commonmark", name = "commonmark-ext-gf
 hilt-android-core = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
 hilt-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hilt" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
+kotlinx-collections-immutable = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version.ref = "kotlinxCollectionsImmutable" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
 mockingjay = { module = "com.esri:mockingjay", version.ref = "mockingjay" }
