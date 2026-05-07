@@ -19,7 +19,6 @@
 package com.arcgismaps.toolkit.buildingexplorerapp
 
 import android.app.Application
-import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.arcgismaps.mapping.ArcGISScene
@@ -43,8 +42,6 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
             scene.load()
                 .onFailure { throw it }
                 .onSuccess {
-                    scene.operationalLayers.forEach { layer -> Log.d("LSV", "$layer") }
-
                     val buildingSceneLayer =
                         scene.operationalLayers.first { layer ->
                             layer is BuildingSceneLayer
