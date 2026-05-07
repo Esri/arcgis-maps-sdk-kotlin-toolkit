@@ -37,6 +37,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalResources
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.ComposeNavigator
@@ -252,12 +254,12 @@ public sealed class FeatureFormNavigationRoute {
  * - [AttachmentsFormElement]
  * - [FieldFormElement] with the following [FormInput] types -
  *     * [BarcodeScannerFormInput]
- *     * [ComboBoxFormInput]
- *     * [DateTimePickerFormInput]
- *     * [RadioButtonsFormInput]
- *     * [SwitchFormInput]
- *     * [TextAreaFormInput]
- *     * [TextBoxFormInput]
+ *     * [com.arcgismaps.mapping.featureforms.ComboBoxFormInput]
+ *     * [com.arcgismaps.mapping.featureforms.DateTimePickerFormInput]
+ *     * [com.arcgismaps.mapping.featureforms.RadioButtonsFormInput]
+ *     * [com.arcgismaps.mapping.featureforms.SwitchFormInput]
+ *     * [com.arcgismaps.mapping.featureforms.TextAreaFormInput]
+ *     * [com.arcgismaps.mapping.featureforms.TextBoxFormInput]
  * - [GroupFormElement]
  * - [TextFormElement]
  * - [UtilityAssociationsFormElement]
@@ -363,9 +365,11 @@ public fun FeatureForm(
     state.setNavigateBack {
         navController.navigateUp()
     }
-    val context = LocalContext.current
+
+    val res = LocalResources.current
     val dialogRequester = LocalDialogRequester.current
     val focusManager = LocalFocusManager.current
+    val validationErrorMessage = stringResource(R.string.the_form_has_validation_errors)
 
     // A function that provides the action to save edits on the form
     suspend fun saveForm(state: FeatureFormState, willNavigate: Boolean): Result<Unit> {
@@ -386,8 +390,8 @@ public fun FeatureForm(
                 onDismiss = {
                     state.validateAllFields()
                 },
-                title = context.getString(R.string.the_form_has_validation_errors),
-                body = context.resources.getQuantityString(
+                title = validationErrorMessage,
+                body = res.getQuantityString(
                     R.plurals.you_have_errors_that_must_be_fixed_before_saving,
                     errorCount,
                     errorCount

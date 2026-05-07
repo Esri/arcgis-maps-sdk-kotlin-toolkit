@@ -46,6 +46,7 @@ import java.util.Locale
  * - `com.android.library` is applied on the target module.
  * - Gradle property `syncTestDataBeforeInstrumentedTests` is defined (`true`/`false`).
  */
+@Suppress("UNUSED")
 class AndroidIntegrationTestingConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
@@ -65,8 +66,7 @@ class AndroidIntegrationTestingConventionPlugin : Plugin<Project> {
                             testVariant.name.replaceFirstChar {
                                 if (it.isLowerCase()) {
                                     it.titlecase(Locale.US)
-                                }
-                                else {
+                                } else {
                                     it.toString()
                                 }
                             }
@@ -75,19 +75,26 @@ class AndroidIntegrationTestingConventionPlugin : Plugin<Project> {
 
                             if (syncTestDataBeforeInstrumentedTests.toBoolean()) {
                                 // Uses adb to sync the test data to the test device.
-                                dependsOn(gradle.includedBuild("build-logic-internal").task(":syncTestData"))
+                                dependsOn(
+                                    gradle.includedBuild("build-logic-internal")
+                                        .task(":syncTestData")
+                                )
                             }
                             // Grants storage permissions requested by the test app.
                             dependsOn("grantDevicePermissions")
                             // Deletes ic-output folder before running connectedAndroidTests
-                            dependsOn(gradle.includedBuild("build-logic-internal").task(":deleteICOutput"))
+                            dependsOn(
+                                gradle.includedBuild("build-logic-internal").task(":deleteICOutput")
+                            )
                         }
 
                         // Make sure the permissions task only runs after the install task, otherwise the app
                         // may not be installed yet.
-                        tasks.named("grantDevicePermissions").dependsOn("install$capitalizedTestVariantName")
+                        tasks.named("grantDevicePermissions")
+                            .dependsOn("install$capitalizedTestVariantName")
                     }
                 }
             }
-    } }
+        }
+    }
 }

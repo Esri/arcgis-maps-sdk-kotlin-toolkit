@@ -28,7 +28,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.captureToImage
-import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.geometry.Point
@@ -93,14 +93,13 @@ class ScalebarTests {
      */
     @Test
     fun testGraduatedLineScalebarIsDisplayed() {
-        val maxWidth = 175.dp
         val displayLength = 139.3
         val tickMarks = listOf(
             ScalebarDivision(0.0, "0"),
             ScalebarDivision((displayLength / 4.0), "25"),
             ScalebarDivision(displayLength / 2.0, "50"),
             ScalebarDivision((displayLength / 4.0) * 3, "75"),
-            ScalebarDivision(displayLength.toDouble(), "100")
+            ScalebarDivision(displayLength, "100")
         )
         // Test the scalebar
         composeTestRule.setContent {
@@ -177,7 +176,6 @@ class ScalebarTests {
      */
     @Test
     fun testDualUnitLineScalebarIsDisplayed() {
-        val maxWidth = 175.dp
         val displayLength = 139.3
         val endScalebarDivision = ScalebarDivision(displayLength, "3000 mi")
         val alternateScalebarDivision = ScalebarDivision(0.75 * (displayLength),"3500 Km")
@@ -204,7 +202,6 @@ class ScalebarTests {
     @Test
     fun testAlternatingBarScaleBarIsDisplayed() {
         // Test the scalebar
-        val maxWidth = 175.dp
         val displayLength = 139.3
         val scalebarDivisions = listOf(
             ScalebarDivision(0.0, "0"),
