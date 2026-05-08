@@ -71,27 +71,31 @@ public class BuildingExplorerState(
 ) {
     // the visibility of the building layer
     internal var visible by mutableStateOf(true)
+        private set
 
-    // whether or not the full model is being shown
+    // whether the full model is being shown
     internal var showFullModel by mutableStateOf(false)
+        private set
 
     // The selected level
-    public var selectedLevel: String by mutableStateOf("All")
+    internal var selectedLevel: String by mutableStateOf("All")
+        private set
 
     // The list of available levels
-    public val levels: MutableList<String> = mutableStateListOf(selectedLevel)
+    internal val levels: MutableList<String> = mutableStateListOf(selectedLevel)
 
     // the index of the selected construction phase
     internal var selectedConstructionPhaseIndex by mutableIntStateOf(0)
+        private set
 
     // the list of construction phases
     internal val constructionPhases: MutableList<String> = mutableStateListOf()
 
     // construction phase elements should only show if there are more than 2 phases
-    internal val isShowConstructionState by derivedStateOf { constructionPhases.size > 2 }
+    internal val isShowConstructionPhases by derivedStateOf { constructionPhases.size > 2 }
 
     // The list of building sublayer categories
-    public val categories: MutableList<BuildingSublayer> = mutableStateListOf()
+    internal val categories: MutableList<BuildingSublayer> = mutableStateListOf()
 
     private var overviewSublayer: BuildingSublayer? = null
     private var fullModelSublayer: BuildingSublayer? = null
@@ -99,6 +103,7 @@ public class BuildingExplorerState(
     // the show full model switch should only appear if both the full model and overview sublayers
     // are available
     internal var isShowFullModelSwitch by mutableStateOf(false)
+        private set
 
     init {
         coroutineScope.launch {
@@ -162,7 +167,7 @@ public class BuildingExplorerState(
         var solidWhere = ""
         var xRayWhere = ""
 
-        if (isShowConstructionState) {
+        if (isShowConstructionPhases) {
             solidWhere = "CreatedPhase <= ${constructionPhases[selectedConstructionPhaseIndex]}"
             xRayWhere = "CreatedPhase <= ${constructionPhases[selectedConstructionPhaseIndex]}"
         }
@@ -268,8 +273,14 @@ public fun BuildingExplorer(
                                 value = state.selectedLevel,
                                 onValueChange = {},
                                 readOnly = true,
-                                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = levelsExpanded) },
-                                modifier = Modifier.menuAnchor(type = ExposedDropdownMenuAnchorType.PrimaryNotEditable)
+                                trailingIcon = {
+                                    ExposedDropdownMenuDefaults.TrailingIcon(
+                                        expanded = levelsExpanded
+                                    )
+                                },
+                                modifier = Modifier.menuAnchor(
+                                    type = ExposedDropdownMenuAnchorType.PrimaryNotEditable
+                                )
                             )
                             ExposedDropdownMenu(
                                 expanded = levelsExpanded,
@@ -288,7 +299,7 @@ public fun BuildingExplorer(
                         }
                     }
 
-                    if (state.isShowConstructionState) {
+                    if (state.isShowConstructionPhases) {
                         var constructionPhasesExpanded by remember { mutableStateOf(false) }
                         Row {
                             Text(
@@ -304,7 +315,7 @@ public fun BuildingExplorer(
                                 modifier = Modifier.padding(8.dp).weight(0.5f)
                             ) {
                                 TextField(
-                                    value = state.constructionPhases[state.selectedConstructionPhaseIndex],//state.selectedLevel,
+                                    value = state.constructionPhases[state.selectedConstructionPhaseIndex],
                                     onValueChange = {},
                                     readOnly = true,
                                     trailingIcon = {
@@ -312,7 +323,9 @@ public fun BuildingExplorer(
                                             expanded = constructionPhasesExpanded
                                         )
                                     },
-                                    modifier = Modifier.menuAnchor(type = ExposedDropdownMenuAnchorType.PrimaryNotEditable)
+                                    modifier = Modifier.menuAnchor(
+                                        type = ExposedDropdownMenuAnchorType.PrimaryNotEditable
+                                    )
                                 )
                                 ExposedDropdownMenu(
                                     expanded = constructionPhasesExpanded,
@@ -333,69 +346,174 @@ public fun BuildingExplorer(
                     }
 
                     HorizontalDivider()
-                    CategorySelector(state.categories)
-                }
-            }
-        }
-    }
-}
-
-/**
- * Check boxes to select building categories and sub-categories
- */
-@Composable
-private fun CategorySelector(categories: List<BuildingSublayer>) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(text = "Disciplines and Categories:", modifier = Modifier.padding(8.dp))
-
-        Column {
-            categories.forEach { buildingSublayer ->
-                var categoryChecked by remember { mutableStateOf(buildingSublayer.isVisible) }
-                var showSubCategories by remember { mutableStateOf(false) }
-
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(text = buildingSublayer.name, modifier = Modifier.padding(8.dp))
-                    Spacer(modifier = Modifier.weight(1f))
-                    Checkbox(checked = categoryChecked, onCheckedChange = {
-                        categoryChecked = it
-                        buildingSublayer.isVisible = categoryChecked
-                    })
-                    IconButton(
-                        onClick = { showSubCategories = !showSubCategories }
-                    ) {
-                        Icon(
-                            imageVector = when {
-                                showSubCategories -> Icons.Default.ArrowDropUp
-                                else -> Icons.Default.ArrowDropDown
-                            },
-                            contentDescription = "Show sub-categories",
-                            modifier = Modifier
+                    state.categories.forEach {
+                        CategorySelector(
+                            builingSubLayerProvider = { it },
+                            onSelected = { buildingSubLayer, isSelected ->
+                                buildingSubLayer.isVisible = isSelected
+                            }
                         )
                     }
                 }
-                if (showSubCategories) {
-                    remember {
-                        val buildingGroupSublayer = buildingSublayer as BuildingGroupSublayer
-                        buildingGroupSublayer.sublayers.sortedBy { it.name }
-                    }.forEach {
-                        var subCategoryChecked by remember { mutableStateOf(it.isVisible) }
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(text = it.name, modifier = Modifier.padding(8.dp))
-                            Spacer(modifier = Modifier.weight(1f))
-                            Checkbox(checked = subCategoryChecked, onCheckedChange = { isChecked ->
-                                subCategoryChecked = isChecked
-                                it.isVisible = isChecked
-                            })
-                        }
-                    }
-                }
-                HorizontalDivider()
             }
         }
     }
 }
+
+@Composable
+private fun CategorySelector(
+    builingSubLayerProvider: () -> BuildingSublayer,
+    onSelected: (BuildingSublayer, Boolean) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val buildingSublayer = remember { builingSubLayerProvider() }
+    var categoryChecked by remember { mutableStateOf(buildingSublayer.isVisible) }
+    var showSubCategories by remember { mutableStateOf(false) }
+
+    Box(modifier = modifier) {
+        Column {
+            Row {
+                Text(text = buildingSublayer.name, modifier = Modifier.padding(8.dp))
+                Spacer(modifier = Modifier.weight(1f))
+                Checkbox(checked = categoryChecked, onCheckedChange = {
+                    categoryChecked = it
+                    onSelected(buildingSublayer, it)
+                })
+                IconButton(
+                    onClick = { showSubCategories = !showSubCategories }
+                ) {
+                    Icon(
+                        imageVector = when {
+                            showSubCategories -> Icons.Default.ArrowDropUp
+                            else -> Icons.Default.ArrowDropDown
+                        },
+                        contentDescription = "Show sub-categories",
+                        modifier = Modifier
+                    )
+                }
+            }
+            if (showSubCategories) {
+                remember {
+                    val buildingGroupSublayer = buildingSublayer as BuildingGroupSublayer
+                    buildingGroupSublayer.sublayers.sortedBy { it.name }
+                }.forEach { buildingSublayer ->
+                    SubCategorySelector(
+                        { buildingSublayer },
+                        { buildingSublayer, isChecked -> buildingSublayer.isVisible = isChecked }
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun SubCategorySelector(
+    buildingSublayerProvider: () -> BuildingSublayer,
+    onSelected: (BuildingSublayer, Boolean) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val buildingSublayer = remember { buildingSublayerProvider()}
+    var subCategoryChecked by remember { mutableStateOf(buildingSublayer.isVisible) }
+
+    Box(modifier = modifier) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(text = buildingSublayer.name, modifier = Modifier.padding(8.dp))
+            Spacer(modifier = Modifier.weight(1f))
+            Checkbox(
+                checked = subCategoryChecked,
+                onCheckedChange = { isChecked ->
+                    subCategoryChecked = isChecked
+                    onSelected(buildingSublayer, isChecked)
+                })
+        }
+    }
+}
+
+///**
+// * Check boxes to select building categories and sub-categories
+// */
+//@Composable
+//private fun CategorySelector(
+//    categories: List<BuildingSublayer>,
+//    modifier: Modifier = Modifier
+//) {
+//    Box(modifier = modifier) {
+//        Column(
+//            horizontalAlignment = Alignment.CenterHorizontally
+//        ) {
+//            Text(text = "Disciplines and Categories:", modifier = Modifier.padding(8.dp))
+//
+//            Column {
+//                categories.forEach { buildingSublayer ->
+//                    var categoryChecked by remember { mutableStateOf(buildingSublayer.isVisible) }
+//                    var showSubCategories by remember { mutableStateOf(false) }
+//
+//                    Row(verticalAlignment = Alignment.CenterVertically) {
+////                        Text(text = buildingSublayer.name, modifier = Modifier.padding(8.dp))
+////                        Spacer(modifier = Modifier.weight(1f))
+////                        Checkbox(checked = categoryChecked, onCheckedChange = {
+////                            categoryChecked = it
+////                            buildingSublayer.isVisible = categoryChecked
+////                        })
+//                        CategorySelector(
+//                            builingSubLayerProvider = { buildingSublayer },
+//                            onSelected = { buildingSublayer, isSelected ->
+//                                buildingSublayer.isVisible = isSelected
+//                            })
+//                        IconButton(
+//                            onClick = { showSubCategories = !showSubCategories }
+//                        ) {
+//                            Icon(
+//                                imageVector = when {
+//                                    showSubCategories -> Icons.Default.ArrowDropUp
+//                                    else -> Icons.Default.ArrowDropDown
+//                                },
+//                                contentDescription = "Show sub-categories",
+//                                modifier = Modifier
+//                            )
+//                        }
+//                    }
+//                    if (showSubCategories) {
+//                        remember {
+//                            val buildingGroupSublayer = buildingSublayer as BuildingGroupSublayer
+//                            buildingGroupSublayer.sublayers.sortedBy { it.name }
+//                        }.forEach {
+//                            var subCategoryChecked by remember { mutableStateOf(it.isVisible) }
+//                            Row(verticalAlignment = Alignment.CenterVertically) {
+//                                Text(text = it.name, modifier = Modifier.padding(8.dp))
+//                                Spacer(modifier = Modifier.weight(1f))
+//                                Checkbox(
+//                                    checked = subCategoryChecked,
+//                                    onCheckedChange = { isChecked ->
+//                                        subCategoryChecked = isChecked
+//                                        it.isVisible = isChecked
+//                                    })
+//                            }
+//                        }
+//                    }
+//                    HorizontalDivider()
+//                }
+//            }
+//        }
+//    }
+//}
+
+//@Composable
+//private fun SubCategory(name: String, modifier: Modifier = Modifier, onChecked: () -> Unit = {}) {
+//    var checked by remember { mutableStateOf(true) }
+//
+//    Row(verticalAlignment = Alignment.CenterVertically) {
+//        Text(text = name, modifier = Modifier.padding(8.dp))
+//        Spacer(modifier = Modifier.weight(1f))
+//        Checkbox(
+//            checked = checked,
+//            onCheckedChange = { isChecked ->
+//                checked= isChecked
+//                onChecked()
+//            })
+//    }
+//}
 
 @Preview(showBackground = true)
 @Composable
