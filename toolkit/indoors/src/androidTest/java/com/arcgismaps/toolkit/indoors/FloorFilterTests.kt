@@ -17,10 +17,9 @@
 
 package com.arcgismaps.toolkit.indoors
 
-import android.util.Log
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotDisplayed
-import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.performClick
@@ -156,7 +155,7 @@ class MapViewModel(
             when (floorFilterSelection.type) {
                 is FloorFilterSelection.Type.FloorSite -> {
                     val floorFilterSelectionType =
-                        floorFilterSelection.type as FloorFilterSelection.Type.FloorSite
+                        floorFilterSelection.type
                     floorFilterSelectionType.site.geometry?.let {
                         mapProxy.setViewpoint(Viewpoint(it))
                     }
@@ -164,7 +163,7 @@ class MapViewModel(
 
                 is FloorFilterSelection.Type.FloorFacility -> {
                     val floorFilterSelectionType =
-                        floorFilterSelection.type as FloorFilterSelection.Type.FloorFacility
+                        floorFilterSelection.type
                     floorFilterSelectionType.facility.geometry?.let {
                         mapProxy.setViewpoint(Viewpoint(it))
                     }

@@ -23,6 +23,8 @@ plugins {
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
     id("com.google.dagger.hilt.android")
     id("com.google.devtools.ksp")
+    id("kotlin-conventions-plugin")
+
     alias(libs.plugins.kotlin.serialization) apply true
 }
 

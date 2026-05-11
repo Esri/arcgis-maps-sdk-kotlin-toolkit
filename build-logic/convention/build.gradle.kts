@@ -20,20 +20,30 @@ plugins {
     `kotlin-dsl`
 }
 
-// Since the build-logic-internal build is not included for non-internal developers,
-// plugins created there are not accessible to them. That means modules that
-// apply plugins from build-logic-internal (e.g., `android-integration-testing`)
-// would fail to compile.
-//
-// To avoid this, we register a placeholder plugin with the same ID in the
-// publicly accessible build-logic build. This lets non-internal developers
-// compile and work with the code, while internal developers get the real
-// implementation from build-logic-internal.
 gradlePlugin {
     plugins {
+        // Since the build-logic-internal build is not included for non-internal developers,
+        // plugins created there are not accessible to them. That means modules that
+        // apply plugins from build-logic-internal (e.g., `android-integration-testing`)
+        // would fail to compile.
+        //
+        // To avoid this, we register a placeholder plugin with the same ID in the
+        // publicly accessible build-logic build. This lets non-internal developers
+        // compile and work with the code, while internal developers get the real
+        // implementation from build-logic-internal.
         register("androidIntegrationTesting") {
             id = libs.plugins.android.integration.testing.get().pluginId
             implementationClass = "EmptyPlugin"
         }
+
+        register("kotlinConventions") {
+            id = "kotlin-conventions-plugin"
+            implementationClass = "KotlinConventionsPlugin"
+        }
     }
+}
+
+dependencies {
+    compileOnly(libs.android.gradle.plugin)
+    implementation(libs.kotlin.gradle)
 }

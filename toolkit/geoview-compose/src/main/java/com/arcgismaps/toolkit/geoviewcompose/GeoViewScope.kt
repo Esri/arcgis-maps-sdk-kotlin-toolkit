@@ -104,7 +104,7 @@ import kotlin.math.sin
  *
  * @since 200.5.0
  */
-public sealed class GeoViewScope protected constructor(private val geoView: GeoView, canFocus: Boolean) {
+public sealed class GeoViewScope constructor(private val geoView: GeoView, canFocus: Boolean) {
 
     /**
      * Coordinator for managing mutually exclusive accessibility focus from GeoView and its trailing lambda content.
@@ -417,7 +417,10 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
                 geoView = geoView,
                 leaderPosition = leaderPosition,
                 actualLeaderPosition = actualLeaderPosition,
-                onActualLeaderPositionChanged = { actualLeaderPosition = it },
+                onActualLeaderPositionChanged = {
+                    @Suppress("AssignedValueIsNeverRead")
+                    actualLeaderPosition = it
+                },
                 maxSize = calloutContentMaxSize(
                     geoView = geoView,
                     density = LocalDensity.current,
@@ -1230,7 +1233,6 @@ private fun calloutPath(
                         arcAt(topLeft, 180f, 90f)
                     }
 
-                    else -> {}
                 }
             }
 
