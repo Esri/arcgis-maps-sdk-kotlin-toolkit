@@ -1,5 +1,3 @@
-import com.arcgismaps.kotlin.toolkit.build_logic.convention.implementation
-
 /*
  *
  *  Copyright 2025 Esri
@@ -21,6 +19,7 @@ import com.arcgismaps.kotlin.toolkit.build_logic.convention.implementation
 plugins {
     id("microapp-convention-plugin")
 }
+
 android {
     namespace = "com.arcgismaps.toolkit.arflyoverapp"
 

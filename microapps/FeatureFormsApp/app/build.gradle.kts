@@ -17,23 +17,13 @@
  */
 
 plugins {
-    id("com.android.application")
-    id("org.jetbrains.kotlin.android")
-    id("org.jetbrains.kotlin.plugin.compose")
-    id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
+    id("microapp-convention-plugin")
+    alias(libs.plugins.kotlin.serialization)
     id("com.google.dagger.hilt.android")
     id("com.google.devtools.ksp")
-    id("kotlin-convention-plugin")
-
-    alias(libs.plugins.kotlin.serialization) apply true
-}
-
-secrets {
-    defaultPropertiesFileName = "secrets.defaults.properties"
 }
 
 kotlin {
-    jvmToolchain(17)
     compilerOptions {
         freeCompilerArgs.add("-Xannotation-default-target=param-property")
     }
@@ -41,69 +31,22 @@ kotlin {
 
 android {
     namespace = "com.arcgismaps.toolkit.featureformsapp"
-    compileSdk = libs.versions.compileSdk.get().toInt()
 
     defaultConfig {
         applicationId ="com.arcgismaps.toolkit.featureformsapp"
-        minSdk = libs.versions.minSdk.get().toInt()
-        targetSdk = libs.versions.compileSdk.get().toInt()
-        versionCode = 1
-        versionName = "1.0"
-
-        testInstrumentationRunner ="androidx.test.runner.AndroidJUnitRunner"
-        vectorDrawables {
-            useSupportLibrary = true
-        }
     }
 
-    flavorDimensions += "toolkitDependencies"
-
-    productFlavors {
-        create("buildWithSourceCode") {
-            dimension = "toolkitDependencies"
-            isDefault = true
-        }
-        create("buildWithMavenArtifacts") {
-            dimension = "toolkitDependencies"
-        }
-    }
-
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-            //proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"),("proguard-rules.pro"
-        }
-    }
-    buildFeatures {
-        compose = true
-        buildConfig = true
-    }
-
-    packaging {
-        resources {
-            excludes += "/META-INF/{AL2.0,LGPL2.1}"
-        }
-    }
-
-    // Avoids an empty test report showing up in the CI integration test report.
-    // Remove this if tests will be added.
-    tasks.withType<Test> {
-        enabled = false
-    }
 }
 
 dependencies {
-    "buildWithSourceCodeImplementation"(project(mapOf("path" to ":geoview-compose")))
-    "buildWithMavenArtifactsImplementation"(arcgis.geoview.compose)
-    "buildWithSourceCodeImplementation"(project(mapOf("path" to ":authentication")))
+
+    "buildWithSourceCodeImplementation"(project(":authentication"))
     "buildWithMavenArtifactsImplementation"(arcgis.authentication)
-    "buildWithSourceCodeImplementation"(project(mapOf("path" to ":featureforms")))
+    "buildWithSourceCodeImplementation"(project(":featureforms"))
     "buildWithMavenArtifactsImplementation"(arcgis.featureforms)
-    "buildWithSourceCodeImplementation"(project(mapOf("path" to ":offline")))
+    "buildWithSourceCodeImplementation"(project(":offline"))
     "buildWithMavenArtifactsImplementation"(arcgis.offline)
 
-    // sdk
-    implementation(arcgis.mapsSdk)
     // hilt
     implementation(libs.hilt.android.core)
     implementation(libs.androidx.hilt.navigation.compose)
@@ -122,16 +65,5 @@ dependencies {
     // coil
     implementation(libs.coil3.compose)
     // compose
-    implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.androidx.material.icons.core)
-    implementation(libs.bundles.composeCore)
-    implementation(libs.bundles.core)
-    implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.navigation)
-    implementation(libs.androidx.lifecycle.viewmodel.compose)
-    testImplementation(libs.bundles.unitTest)
-    testImplementation(platform(libs.androidx.compose.bom))
-    androidTestImplementation(libs.bundles.composeTest)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
-    debugImplementation(libs.bundles.debug)
 }
