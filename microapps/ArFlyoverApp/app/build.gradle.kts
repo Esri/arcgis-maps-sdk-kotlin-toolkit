@@ -30,7 +30,7 @@ android {
 }
 
 dependencies {
-    "buildWithSourceCodeImplementation"(project(mapOf("path" to ":ar")))
+    "buildWithSourceCodeImplementation"(project(":ar"))
     "buildWithMavenArtifactsImplementation"(arcgis.ar)
     implementation(libs.arcore)
 }

@@ -99,15 +99,15 @@ class MicroappConventionPlugin : Plugin<Project> {
                     enabled = false
                 }
 
-                flavorDimensions += "toolkitDependencies"
+                flavorDimensions += "toolkitModule"
 
                 productFlavors {
                     create("buildWithSourceCode") {
-                        dimension = "toolkitDependencies"
+                        dimension = "toolkitModule"
                         isDefault = true
                     }
                     create("buildWithMavenArtifacts") {
-                        dimension = "toolkitDependencies"
+                        dimension = "toolkitModule"
                     }
                 }
             }
@@ -116,7 +116,7 @@ class MicroappConventionPlugin : Plugin<Project> {
                 dependencies {
                     implementation(project(":microapps-lib"))
 
-                    "buildWithSourceCodeImplementation"(project(mapOf("path" to ":geoview-compose")))
+                    "buildWithSourceCodeImplementation"(project(":geoview-compose"))
                     "buildWithMavenArtifactsImplementation"(arcgis.findLibrary("geoview-compose").get())
                     implementation(arcgis.findLibrary("mapsSdk").get())
 
