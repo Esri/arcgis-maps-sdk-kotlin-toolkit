@@ -24,7 +24,7 @@ plugins {
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
     id("kotlin-parcelize")
     id("android-integration-testing")
-    id("kotlin-conventions-plugin")
+    id("kotlin-convention-plugin")
     alias(libs.plugins.binary.compatibility.validator) apply true
     alias(libs.plugins.kotlin.serialization) apply true
 }

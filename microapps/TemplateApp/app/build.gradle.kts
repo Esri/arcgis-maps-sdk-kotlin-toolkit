@@ -21,7 +21,7 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
-    id("kotlin-conventions-plugin")
+    id("kotlin-convention-plugin")
 }
 
 secrets {

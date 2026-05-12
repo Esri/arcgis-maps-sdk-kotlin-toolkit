@@ -22,7 +22,7 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose")
     id("artifact-deploy")
     id("kotlin-parcelize")
-    id("kotlin-conventions-plugin")
+    id("kotlin-convention-plugin")
     alias(libs.plugins.binary.compatibility.validator) apply true
     alias(libs.plugins.kotlin.serialization) apply true
 }

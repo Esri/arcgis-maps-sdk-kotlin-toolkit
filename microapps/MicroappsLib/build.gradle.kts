@@ -20,7 +20,7 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.compose.compiler)
-    id("kotlin-conventions-plugin")
+    id("kotlin-convention-plugin")
 }
 
 kotlin {
