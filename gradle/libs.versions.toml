@@ -124,7 +124,9 @@ arcgismaps-testdata-sync = { id = "com.esri.gradle-plugins.testdata.sync", versi
 
 # Plugins defined by the project build-logic
 android-integration-testing = { id = "android-integration-testing" }
+#noinspection UnusedVersionCatalogEntry
 kotlin-convention-plugin = { id = "kotlin-convention-plugin" }
+microapp-convention-plugin = { id = "microapp-convention-plugin" }
 
 [bundles]
 camerax = [

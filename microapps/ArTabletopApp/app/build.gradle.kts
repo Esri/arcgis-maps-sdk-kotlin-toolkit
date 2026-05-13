@@ -17,7 +17,7 @@
  */
 
 plugins {
-    id("microapp-convention-plugin")
+    alias(libs.plugins.microapp.convention.plugin)
 }
 
 android {

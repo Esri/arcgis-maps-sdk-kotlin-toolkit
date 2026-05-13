@@ -28,7 +28,7 @@ fun DependencyHandler.implementation(dependencyNotation: Any): Dependency? =
     add("implementation", dependencyNotation)
 
 fun DependencyHandler.debugImplementation(dependencyNotation: Any): Dependency? =
-    add("com.arcgismaps.kotlin.toolkit.build_logic.convention.debugImplementation", dependencyNotation)
+    add("debugImplementation", dependencyNotation)
 
 val Project.libs
     get(): VersionCatalog = extensions

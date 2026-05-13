@@ -17,7 +17,7 @@
  */
 
 plugins {
-    id("microapp-convention-plugin")
+    alias(libs.plugins.microapp.convention.plugin)
 }
 
 android {
@@ -28,4 +28,6 @@ android {
     }
 }
 
-dependencies { }
+dependencies {
+    implementation(libs.androidx.compose.navigation)
+}

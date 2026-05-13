@@ -17,7 +17,7 @@
  */
 
 plugins {
-    id("microapp-convention-plugin")
+    alias(libs.plugins.microapp.convention.plugin)
     alias(libs.plugins.kotlin.serialization)
     id("com.google.dagger.hilt.android")
     id("com.google.devtools.ksp")

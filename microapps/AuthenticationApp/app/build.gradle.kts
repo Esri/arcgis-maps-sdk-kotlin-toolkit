@@ -17,7 +17,7 @@
  */
 
 plugins {
-    id("microapp-convention-plugin")
+    alias(libs.plugins.microapp.convention.plugin)
 }
 
 android {
@@ -29,6 +29,6 @@ android {
 }
 
 dependencies {
-    "buildWithSourceCodeImplementation"(":authentication")
+    "buildWithSourceCodeImplementation"(project(":authentication"))
     "buildWithMavenArtifactsImplementation"(arcgis.authentication)
 }

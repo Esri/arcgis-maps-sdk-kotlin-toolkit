@@ -121,7 +121,7 @@ class MicroappConventionPlugin : Plugin<Project> {
                     implementation(arcgis.findLibrary("mapsSdk").get())
 
                     val composeBom = libs.findLibrary("androidx-compose-bom").get()
-                    implementation(composeBom)
+                    implementation(platform(composeBom))
                     implementation(libs.findLibrary("androidx-material-icons-core").get())
                     implementation(libs.findBundle("composeCore").get())
                     implementation(libs.findBundle("core").get())
