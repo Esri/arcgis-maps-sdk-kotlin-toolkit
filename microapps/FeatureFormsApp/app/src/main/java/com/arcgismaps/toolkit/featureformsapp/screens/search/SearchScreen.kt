@@ -48,13 +48,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arcgismaps.toolkit.featureformsapp.R
 import com.arcgismaps.toolkit.featureformsapp.screens.browse.MapListItem
-import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -141,7 +141,7 @@ fun SearchScreen(
                     MapListItem(
                         title = item.title,
                         lastModified = item.modified,
-                        shareType = item.access.encoding.uppercase(Locale.getDefault()),
+                        shareType = item.access.encoding.uppercase(LocalLocale.current.platformLocale),
                         thumbnail = item.thumbnail,
                         modifier = Modifier
                             .fillMaxWidth()

@@ -21,6 +21,7 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
+    id("kotlin-conventions-plugin")
 }
 
 secrets {
@@ -55,7 +56,7 @@ android {
             //proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"),("proguard-rules.pro"
         }
     }
-    @Suppress("UnstableApiUsage")
+
     buildFeatures {
         compose = true
         buildConfig = true

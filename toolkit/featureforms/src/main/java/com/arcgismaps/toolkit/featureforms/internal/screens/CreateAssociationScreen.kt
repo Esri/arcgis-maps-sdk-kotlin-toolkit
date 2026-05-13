@@ -16,6 +16,7 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.screens
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -58,6 +59,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+@SuppressLint("LocalContextGetResourceValueCall")
 @Composable
 internal fun CreateAssociationScreen(
     viewModel: AddAssociationFromSourceViewModel,

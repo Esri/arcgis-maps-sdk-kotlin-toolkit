@@ -73,7 +73,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -115,7 +114,6 @@ internal fun FeaturesFilterScreen(
     val filters = filterStateManager.filters
     val fields = viewModel.fields
     val lazyListState = rememberLazyListState()
-    val context = LocalContext.current
     var showDiscardDialog by rememberSaveable {
         mutableStateOf(false)
     }
@@ -218,11 +216,9 @@ internal fun FeaturesFilterScreen(
                     items = filters,
                     key = { _, filter -> filter.id }
                 ) { idx, filter ->
+                    val conditions = stringResource(R.string.condition_numbered, filters.count() - idx)
                     FilterItem(
-                        name = context.getString(
-                            R.string.condition_numbered,
-                            filters.count() - idx
-                        ),
+                        name = conditions,
                         filter = filter,
                         fields = fields,
                         onDelete = {
@@ -267,7 +263,10 @@ internal fun FeaturesFilterScreen(
     }
     if (showDiscardDialog) {
         ConfirmationDialog(
-            onDismissRequest = { showDiscardDialog = false },
+            onDismissRequest = {
+                @Suppress("AssignedValueIsNeverRead")
+                showDiscardDialog = false
+            },
             onConfirmRequest = {
                 filterStateManager.restoreSnapshot()
                 onBackPressed()
@@ -570,10 +569,12 @@ private fun DatePickerModalInput(
         DateTimePicker(
             pickerState,
             {
+                @Suppress("AssignedValueIsNeverRead")
                 showDatePicker = false
                 focusManager.clearFocus()
             },
             {
+                @Suppress("AssignedValueIsNeverRead")
                 showDatePicker = false
                 focusManager.clearFocus()
             },
@@ -585,6 +586,7 @@ private fun DatePickerModalInput(
                     )
                 }
                 onValueChange(valueString ?: "")
+                @Suppress("AssignedValueIsNeverRead")
                 showDatePicker = false
                 focusManager.clearFocus()
             }

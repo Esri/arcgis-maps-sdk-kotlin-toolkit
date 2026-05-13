@@ -23,7 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.R
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 
 @Immutable
 @JvmInline
@@ -50,7 +50,7 @@ value class Strings private constructor(
 @Composable
 fun getString(string: Strings): String {
     LocalConfiguration.current
-    val resources = LocalContext.current.resources
+    val resources = LocalResources.current
     return when (string) {
         Strings.NavigationMenu -> resources.getString(R.string.navigation_menu)
         Strings.CloseDrawer -> resources.getString(R.string.close_drawer)

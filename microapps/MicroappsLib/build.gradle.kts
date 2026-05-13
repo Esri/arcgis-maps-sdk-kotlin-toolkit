@@ -20,6 +20,7 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.compose.compiler)
+    id("kotlin-conventions-plugin")
 }
 
 kotlin {
@@ -49,7 +50,7 @@ android {
     buildFeatures {
         compose = true
     }
-    @Suppress("UnstableApiUsage")
+
     testOptions {
         targetSdk = libs.versions.compileSdk.get().toInt()
     }

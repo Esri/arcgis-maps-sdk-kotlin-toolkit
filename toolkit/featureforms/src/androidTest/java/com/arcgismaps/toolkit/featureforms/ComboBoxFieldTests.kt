@@ -24,13 +24,14 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotFocused
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.hasText
-import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.platform.app.InstrumentationRegistry
 import com.arcgismaps.mapping.featureforms.ComboBoxFormInput
+import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Rule
@@ -80,8 +81,8 @@ class ComboBoxFieldTests : FeatureFormTestRunner(
     fun testClearValueNoValueLabel() {
         val formElement = featureForm.getFieldFormElementWithLabel("Combo String")
         assertThat(formElement).isNotNull()
-        val input = formElement!!.input as ComboBoxFormInput
-        // find the field with the the label
+        formElement as FieldFormElement
+        // find the field with the label
         val comboBoxField = composeTestRule.onNodeWithText(formElement.label)
         // assert it is displayed and not focused
         comboBoxField.assertIsDisplayed()
@@ -93,7 +94,7 @@ class ComboBoxFieldTests : FeatureFormTestRunner(
         assert(hasDescriptionMatcher.matches(descriptionNode.fetchSemanticsNode())) {
             "Failed to assert the following: ${hasDescriptionMatcher.description}"
         }
-        // validate that the pre-populated value shown shown in accurate and as expected
+        // validate that the pre-populated value shown in accurate and as expected
         // assertTextEquals matches the Text(the label) and Editable Text (the actual editable input text)
         comboBoxField.assertTextEquals(formElement.label, formElement.formattedValue)
     }

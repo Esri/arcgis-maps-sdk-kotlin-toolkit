@@ -76,6 +76,7 @@ public fun Trace(
                 TabRow(
                     selectedTabIndex,
                     onNavigateTo = {
+                        @Suppress("AssignedValueIsNeverRead")
                         selectedTabIndex = it.first
                         traceState.showScreen(it.second)
                     }
@@ -103,11 +104,12 @@ private fun TraceScaffold(
     content: @Composable () -> Unit
 ) {
     val localContext = LocalContext.current
+    val traceComponentDescription = stringResource(R.string.trace_component)
     Surface(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp)
-            .semantics { contentDescription = localContext.getString(R.string.trace_component) }
+            .semantics { contentDescription = traceComponentDescription }
     ) {
         Column(
             modifier = modifier,
