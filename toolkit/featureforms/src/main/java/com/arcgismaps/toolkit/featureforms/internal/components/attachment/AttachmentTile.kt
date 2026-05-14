@@ -89,6 +89,7 @@ import java.io.File
 
 @Composable
 internal fun AttachmentTile(
+    onFocused: () -> Unit,
     state: FormAttachmentState,
     allowUserRename: Boolean,
     displayFilename: Boolean,
@@ -193,6 +194,7 @@ internal fun AttachmentTile(
     LaunchedEffect(interactionSource, state) {
         var wasALongPress = false
         interactionSource.interactions.collectLatest {
+            onFocused()
             when (it) {
                 is PressInteraction.Press -> {
                     wasALongPress = false
@@ -449,6 +451,7 @@ private fun Size(
 @Composable
 private fun AttachmentTilePreview() {
     AttachmentTile(
+        onFocused = {},
         state = FormAttachmentState(
             "Photo 1.jpg",
             2024,

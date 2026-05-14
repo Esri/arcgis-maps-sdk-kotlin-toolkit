@@ -169,11 +169,11 @@ public class FeatureFormState private constructor(
      *
      * @since 200.8.0
      */
-    public suspend fun discardEdits() :  Result<List<FormExpressionEvaluationError>> {
+    public suspend fun discardEdits(): Result<List<FormExpressionEvaluationError>> {
         val formData = getActiveFormStateData()
         formData.featureForm.discardEdits()
         formData.stateCollection.forEach {
-            when(it.state) {
+            when (it.state) {
                 is AttachmentElementState -> {
                     (it.state as AttachmentElementState).refreshAttachments()
                 }
@@ -249,7 +249,7 @@ public class FeatureFormState private constructor(
      * @param feature the [ArcGISFeature] to create the [FeatureForm] for.
      */
     @MainThread
-    internal fun navigateTo(backStackEntry: NavBackStackEntry, feature: ArcGISFeature, ): Boolean {
+    internal fun navigateTo(backStackEntry: NavBackStackEntry, feature: ArcGISFeature): Boolean {
         val navigateTo = navigateToRoute ?: return false
         // Check if the backStackEntry is in the resumed state.
         if (backStackEntry.lifecycleIsResumed().not()) return false
@@ -317,15 +317,24 @@ public class FeatureFormState private constructor(
     internal fun validateAllFields() {
         // Force validation of all the states in the current form.
         getActiveFormStateData().stateCollection.forEach { entry ->
-            // validate all fields
-            if (entry.formElement is FieldFormElement) {
-                entry.getState<BaseFieldState<*>>().forceValidation()
-            }
-            // validate any fields that are within a group
-            if (entry.formElement is GroupFormElement) {
-                entry.getState<BaseGroupState>().fieldStates.forEach { childEntry ->
-                    childEntry.getState<BaseFieldState<*>>().forceValidation()
+            when (entry.formElement) {
+                // validate attachments
+                is AttachmentsFormElement -> {
+                    (entry.getState<AttachmentElementState>()).forceValidation()
                 }
+                // validate all fields
+                is FieldFormElement -> {
+                    entry.getState<BaseFieldState<*>>().forceValidation()
+                }
+
+                // validate any fields that are within a group
+                is GroupFormElement -> {
+                    entry.getState<BaseGroupState>().fieldStates.forEach { childEntry ->
+                        childEntry.getState<BaseFieldState<*>>().forceValidation()
+                    }
+                }
+
+                else -> {}
             }
         }
     }
@@ -347,7 +356,7 @@ internal data class FormStateData(
     /**
      * Indicates if the expressions for the [featureForm] have been evaluated at least once.
      */
-    var initialEvaluation : Boolean by mutableStateOf(false)
+    var initialEvaluation: Boolean by mutableStateOf(false)
         private set
 
     /**
@@ -361,7 +370,7 @@ internal data class FormStateData(
      * evaluation, the [initialEvaluation] is set to true. While this function is running, the
      * [isEvaluatingExpressions] will be true.
      */
-    suspend fun evaluateExpressions() : Result<List<FormExpressionEvaluationError>> {
+    suspend fun evaluateExpressions(): Result<List<FormExpressionEvaluationError>> {
         try {
             isEvaluatingExpressions = true
             return featureForm.evaluateExpressions().onSuccess {

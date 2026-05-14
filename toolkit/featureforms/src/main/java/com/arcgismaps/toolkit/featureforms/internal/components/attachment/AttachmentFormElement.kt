@@ -91,6 +91,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 import java.time.Instant
 import androidx.core.net.toUri
+import com.arcgismaps.toolkit.featureforms.internal.components.base.ValidationErrorState
 
 @Composable
 internal fun AttachmentFormElement(
@@ -112,7 +113,11 @@ internal fun AttachmentFormElement(
         maxAttachmentCount = state.maxAttachmentCount,
         stateId = state.id,
         attachments = state.attachments,
+        error = state.validationError,
         lazyListState = state.lazyListState,
+        onFocused = {
+            state.onFocusChanged(true)
+        },
         modifier = modifier
     )
 }
@@ -130,13 +135,21 @@ internal fun AttachmentFormElement(
     maxAttachmentCount: Int,
     stateId: Int,
     attachments: List<FormAttachmentState>,
+    error: ValidationErrorState,
     lazyListState: LazyListState,
+    onFocused: () -> Unit,
     modifier: Modifier = Modifier,
     colors: AttachmentsElementColors = LocalColorScheme.current.attachmentsElementColors,
     typography: AttachmentsElementTypography = LocalTypography.current.attachmentsElementTypography
 ) {
     val canAddAttachments = attachments.size < maxAttachmentCount && editable
-    Surface (
+    val isError = error !is ValidationErrorState.NoError
+    val supportingText = if (isError) {
+        error.getString()
+    } else {
+        description
+    }
+    Surface(
         modifier = modifier.semantics(mergeDescendants = true) {},
         color = colors.containerColor
     ) {
@@ -146,7 +159,8 @@ internal fun AttachmentFormElement(
             ) {
                 Header(
                     title = label,
-                    description = description,
+                    supportingText = supportingText,
+                    isError = isError,
                     titleColor = colors.labelColor,
                     titleTextStyle = typography.labelStyle,
                     descriptionColor = colors.supportingTextColor,
@@ -156,6 +170,7 @@ internal fun AttachmentFormElement(
                 if (canAddAttachments) {
                     // Add attachment button
                     AddAttachment(
+                        onFocused = onFocused,
                         stateId = stateId,
                         captureOptions = captureOptions,
                         inputType = inputType,
@@ -167,10 +182,17 @@ internal fun AttachmentFormElement(
             Carousel(
                 state = lazyListState,
                 attachments = attachments,
+                onItemFocused = onFocused,
                 allowUserRename = allowUserRename,
                 displayFilename = displayFilename,
                 scrollBarColor = colors.scrollBarColor
             )
+        }
+    }
+    LaunchedEffect(lazyListState.isScrollInProgress) {
+        // if the user is scrolling and an item is focused, clear the focus to hide the keyboard
+        if (lazyListState.isScrollInProgress) {
+            onFocused()
         }
     }
 }
@@ -179,6 +201,7 @@ internal fun AttachmentFormElement(
 private fun Carousel(
     state: LazyListState,
     attachments: List<FormAttachmentState>,
+    onItemFocused: () -> Unit,
     allowUserRename: Boolean,
     displayFilename: Boolean,
     scrollBarColor: Color,
@@ -210,6 +233,7 @@ private fun Carousel(
     ) {
         items(attachments) { attachment ->
             AttachmentTile(
+                onFocused = onItemFocused,
                 state = attachment,
                 allowUserRename = allowUserRename,
                 displayFilename = displayFilename,
@@ -222,13 +246,19 @@ private fun Carousel(
 @Composable
 private fun Header(
     title: String,
-    description: String,
+    supportingText: String,
+    isError: Boolean,
     titleColor: Color,
     titleTextStyle: TextStyle,
     descriptionColor: Color,
     descriptionTextStyle: TextStyle,
     modifier: Modifier = Modifier
 ) {
+    val supportingTextColor = if (isError) {
+        MaterialTheme.colorScheme.error
+    } else {
+        descriptionColor
+    }
     Row(
         modifier = modifier.wrapContentHeight(),
         verticalAlignment = Alignment.CenterVertically
@@ -241,10 +271,10 @@ private fun Header(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
-            if (description.isNotEmpty()) {
+            if (supportingText.isNotEmpty()) {
                 Text(
-                    text = description,
-                    color = descriptionColor,
+                    text = supportingText,
+                    color = supportingTextColor,
                     style = descriptionTextStyle,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
@@ -256,6 +286,7 @@ private fun Header(
 
 @Composable
 private fun AddAttachment(
+    onFocused: () -> Unit,
     stateId: Int,
     captureOptions: CaptureOptions,
     inputType: ImageAttachmentsFormInput,
@@ -268,17 +299,20 @@ private fun AddAttachment(
     val inputMethod = inputType.inputMethod
     val supportsCapture = remember(inputMethod) {
         inputMethod == ImageAttachmentsFormInput.InputMethod.Capture ||
-                inputMethod == ImageAttachmentsFormInput.InputMethod.Any
+            inputMethod == ImageAttachmentsFormInput.InputMethod.Any
     }
 
     val supportsUpload = remember(inputMethod) {
         inputMethod == ImageAttachmentsFormInput.InputMethod.Upload ||
-                inputMethod == ImageAttachmentsFormInput.InputMethod.Any
+            inputMethod == ImageAttachmentsFormInput.InputMethod.Any
     }
 
     Box {
         IconButton(
-            onClick = { showMenu = true },
+            onClick = {
+                onFocused()
+                showMenu = true
+            },
         ) {
             Icon(
                 Icons.Rounded.Add,
@@ -627,6 +661,8 @@ private fun AttachmentFormElementPreview() {
         maxAttachmentCount = 5,
         stateId = 1,
         attachments = list + list + list + list,
+        error = ValidationErrorState.NullNotAllowed,
         lazyListState = LazyListState(),
+        onFocused = {}
     )
 }
