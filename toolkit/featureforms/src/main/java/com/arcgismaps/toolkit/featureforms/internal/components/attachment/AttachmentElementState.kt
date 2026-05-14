@@ -104,9 +104,19 @@ internal class AttachmentElementState(
         get() = _attachments
 
     /**
+     * Indicates whether renaming an attachment is allowed.
+     */
+    val allowUserRename : Boolean = true
+
+    /**
      * Indicates whether the attachment form element is editable.
      */
     val isEditable = formElement.isEditable
+
+    /**
+     * Indicates whether the filename of the attachment should be displayed.
+     */
+    val displayFilename : Boolean = true
 
     /**
      * The input type for the attachment form element. This is determined based on the allowed
@@ -120,6 +130,21 @@ internal class AttachmentElementState(
      * The state of the lazy list that displays the [attachments].
      */
     val lazyListState = LazyListState()
+
+    /**
+     * The maximum number of attachments that can be added.
+     */
+    val maxAttachmentCount : Int = Int.MAX_VALUE
+
+    /**
+     * The minimum number of attachments that must be added.
+     */
+    val minAttachmentCount : Int = 0
+
+    /**
+     * Indicates whether to use the original filename of the attachment when adding an attachment.
+     */
+    val useOriginalFilename : Boolean = true
 
     init {
         refreshAttachments()

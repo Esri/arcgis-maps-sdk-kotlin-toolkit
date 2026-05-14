@@ -65,6 +65,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
@@ -105,10 +106,13 @@ internal fun AttachmentFormElement(
         editable = editable,
         captureOptions = CaptureOptions.Any,
         inputType = inputType,
+        hasCameraPermission = state.hasCameraPermissions(context),
+        allowUserRename = state.allowUserRename,
+        displayFilename = state.displayFilename,
+        maxAttachmentCount = state.maxAttachmentCount,
         stateId = state.id,
         attachments = state.attachments,
         lazyListState = state.lazyListState,
-        hasCameraPermission = state.hasCameraPermissions(context),
         modifier = modifier
     )
 }
@@ -120,14 +124,18 @@ internal fun AttachmentFormElement(
     editable: Boolean,
     captureOptions: CaptureOptions,
     inputType: ImageAttachmentsFormInput,
+    hasCameraPermission: Boolean,
+    allowUserRename: Boolean,
+    displayFilename: Boolean,
+    maxAttachmentCount: Int,
     stateId: Int,
     attachments: List<FormAttachmentState>,
     lazyListState: LazyListState,
-    hasCameraPermission: Boolean,
     modifier: Modifier = Modifier,
     colors: AttachmentsElementColors = LocalColorScheme.current.attachmentsElementColors,
     typography: AttachmentsElementTypography = LocalTypography.current.attachmentsElementTypography
 ) {
+    val canAddAttachments = attachments.size < maxAttachmentCount && editable
     Surface (
         modifier = modifier.semantics(mergeDescendants = true) {},
         color = colors.containerColor
@@ -145,7 +153,7 @@ internal fun AttachmentFormElement(
                     descriptionTextStyle = typography.supportingTextStyle
                 )
                 Spacer(modifier = Modifier.weight(1f))
-                if (editable) {
+                if (canAddAttachments) {
                     // Add attachment button
                     AddAttachment(
                         stateId = stateId,
@@ -156,7 +164,13 @@ internal fun AttachmentFormElement(
                 }
             }
             Spacer(modifier = Modifier.height(20.dp))
-            Carousel(lazyListState, attachments, colors.scrollBarColor)
+            Carousel(
+                state = lazyListState,
+                attachments = attachments,
+                allowUserRename = allowUserRename,
+                displayFilename = displayFilename,
+                scrollBarColor = colors.scrollBarColor
+            )
         }
     }
 }
@@ -165,6 +179,8 @@ internal fun AttachmentFormElement(
 private fun Carousel(
     state: LazyListState,
     attachments: List<FormAttachmentState>,
+    allowUserRename: Boolean,
+    displayFilename: Boolean,
     scrollBarColor: Color,
 ) {
     var initialSize by remember(state) {
@@ -193,7 +209,12 @@ private fun Carousel(
         state = state,
     ) {
         items(attachments) { attachment ->
-            AttachmentTile(state = attachment, modifier = Modifier.padding(end = 8.dp))
+            AttachmentTile(
+                state = attachment,
+                allowUserRename = allowUserRename,
+                displayFilename = displayFilename,
+                modifier = Modifier.padding(end = 8.dp)
+            )
         }
     }
 }
@@ -562,7 +583,7 @@ internal fun Modifier.horizontalScrollbar(
                 drawRoundRect(
                     color = trackColor,
                     topLeft = Offset(0f, scrollBarOffsetY),
-                    size = androidx.compose.ui.geometry.Size(size.width, height.toPx()),
+                    size = Size(size.width, height.toPx()),
                     cornerRadius = CornerRadius(10f, 10f),
                     alpha = alpha
                 )
@@ -570,7 +591,7 @@ internal fun Modifier.horizontalScrollbar(
                 drawRoundRect(
                     color = color,
                     topLeft = Offset(scrollBarOffsetX, scrollBarOffsetY),
-                    size = androidx.compose.ui.geometry.Size(scrollbarWidth, height.toPx()),
+                    size = Size(scrollbarWidth, height.toPx()),
                     cornerRadius = CornerRadius(10f, 10f),
                     alpha = alpha
                 )
@@ -600,9 +621,12 @@ private fun AttachmentFormElementPreview() {
         inputType = ImageAttachmentsFormInput(
             inputMethod = ImageAttachmentsFormInput.InputMethod.Capture
         ),
+        hasCameraPermission = true,
+        allowUserRename = true,
+        displayFilename = true,
+        maxAttachmentCount = 5,
         stateId = 1,
         attachments = list + list + list + list,
         lazyListState = LazyListState(),
-        hasCameraPermission = true,
     )
 }
