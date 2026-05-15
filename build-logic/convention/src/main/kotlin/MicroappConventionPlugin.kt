@@ -25,7 +25,6 @@ import org.gradle.api.JavaVersion
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.tasks.testing.Test
-import org.gradle.internal.Actions.with
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.dependencies
 import org.gradle.kotlin.dsl.withType
@@ -34,7 +33,7 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinAndroidProjectExtension
 @Suppress("UNUSED")
 class MicroappConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
-        kotlin.with(target) {
+        with(target) {
             with(pluginManager) {
                 apply("com.android.application")
                 apply("org.jetbrains.kotlin.android")
@@ -52,8 +51,6 @@ class MicroappConventionPlugin : Plugin<Project> {
             }
 
             extensions.configure<ApplicationExtension> {
-                compileSdk = libs.findVersion("targetSdk").get().toString().toInt()
-
                 compileOptions {
                     sourceCompatibility = JavaVersion.VERSION_17
                     targetCompatibility = JavaVersion.VERSION_17
@@ -113,21 +110,19 @@ class MicroappConventionPlugin : Plugin<Project> {
             }
 
             dependencies {
-                dependencies {
-                    implementation(project(":microapps-lib"))
+                implementation(project(":microapps-lib"))
 
-                    "buildWithSourceCodeImplementation"(project(":geoview-compose"))
-                    "buildWithMavenArtifactsImplementation"(arcgis.findLibrary("geoview-compose").get())
-                    implementation(arcgis.findLibrary("mapsSdk").get())
+                "buildWithSourceCodeImplementation"(project(":geoview-compose"))
+                "buildWithMavenArtifactsImplementation"(arcgis.findLibrary("geoview-compose").get())
+                implementation(arcgis.findLibrary("mapsSdk").get())
 
-                    val composeBom = libs.findLibrary("androidx-compose-bom").get()
-                    implementation(platform(composeBom))
-                    implementation(libs.findLibrary("androidx-material-icons-core").get())
-                    implementation(libs.findBundle("composeCore").get())
-                    implementation(libs.findBundle("core").get())
-                    implementation(libs.findLibrary("androidx-activity-compose").get())
-                    implementation(libs.findLibrary("androidx-lifecycle-viewmodel-compose").get())
-                }
+                val composeBom = libs.findLibrary("androidx-compose-bom").get()
+                implementation(platform(composeBom))
+                implementation(libs.findLibrary("androidx-material-icons-core").get())
+                implementation(libs.findBundle("composeCore").get())
+                implementation(libs.findBundle("core").get())
+                implementation(libs.findLibrary("androidx-activity-compose").get())
+                implementation(libs.findLibrary("androidx-lifecycle-viewmodel-compose").get())
             }
         }
     }
