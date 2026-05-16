@@ -104,7 +104,7 @@ internal fun AttachmentFormElement(
     AttachmentFormElement(
         label = state.label,
         description = state.description,
-        editable = editable,
+        isEditable = editable,
         captureOptions = CaptureOptions.Any,
         inputType = inputType,
         hasCameraPermission = state.hasCameraPermissions(context),
@@ -126,7 +126,7 @@ internal fun AttachmentFormElement(
 internal fun AttachmentFormElement(
     label: String,
     description: String,
-    editable: Boolean,
+    isEditable: Boolean,
     captureOptions: CaptureOptions,
     inputType: ImageAttachmentsFormInput,
     hasCameraPermission: Boolean,
@@ -142,7 +142,7 @@ internal fun AttachmentFormElement(
     colors: AttachmentsElementColors = LocalColorScheme.current.attachmentsElementColors,
     typography: AttachmentsElementTypography = LocalTypography.current.attachmentsElementTypography
 ) {
-    val canAddAttachments = attachments.size < maxAttachmentCount && editable
+    val canAddAttachments = attachments.size < maxAttachmentCount && isEditable
     val isError = error !is ValidationErrorState.NoError
     val supportingText = if (isError) {
         error.getString()
@@ -650,7 +650,7 @@ private fun AttachmentFormElementPreview() {
     AttachmentFormElement(
         label = "Attachments",
         description = "Add attachments",
-        editable = true,
+        isEditable = true,
         captureOptions = CaptureOptions.Any,
         inputType = ImageAttachmentsFormInput(
             inputMethod = ImageAttachmentsFormInput.InputMethod.Capture
