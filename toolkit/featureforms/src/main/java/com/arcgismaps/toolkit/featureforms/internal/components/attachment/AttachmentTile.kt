@@ -89,9 +89,22 @@ import java.io.File
 
 @Composable
 internal fun AttachmentTile(
+    onFocused: () -> Unit,
     state: FormAttachmentState,
+    allowUserRename: Boolean,
+    displayFilename: Boolean,
     modifier: Modifier = Modifier
 ) {
+    val name = remember(state.name) {
+        if (displayFilename) {
+            state.name
+        } else {
+            ""
+        }
+    }
+    val isRenameEnabled = remember(state) {
+        allowUserRename && state.size <= maxAttachmentUploadSize
+    }
     val loadStatus by state.loadStatus.collectAsState()
     val interactionSource = remember(state) { MutableInteractionSource() }
     val thumbnail by state.thumbnail
@@ -115,14 +128,14 @@ internal fun AttachmentTile(
         Box(modifier = Modifier) {
             when (loadStatus) {
                 LoadStatus.Loaded -> LoadedView(
-                    title = state.name,
+                    title = name,
                     size = state.size,
                     type = state.type,
                     thumbnail = thumbnail
                 )
 
                 else -> DefaultView(
-                    title = state.name,
+                    title = name,
                     size = state.size,
                     type = state.type,
                     loadStatus = loadStatus
@@ -152,7 +165,7 @@ internal fun AttachmentTile(
                             )
                         }
                     },
-                    enabled = state.size <= maxAttachmentUploadSize
+                    enabled = isRenameEnabled
                 )
                 DropdownMenuItem(
                     text = { Text(text = stringResource(R.string.delete)) },
@@ -181,6 +194,7 @@ internal fun AttachmentTile(
     LaunchedEffect(interactionSource, state) {
         var wasALongPress = false
         interactionSource.interactions.collectLatest {
+            onFocused()
             when (it) {
                 is PressInteraction.Press -> {
                     wasALongPress = false
@@ -282,7 +296,9 @@ private fun IconView(
     ) {
         icon()
         Spacer(modifier = Modifier.height(4.dp))
-        Title(text = title, modifier = Modifier)
+        if (title.isNotEmpty()) {
+            Title(text = title, modifier = Modifier)
+        }
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
@@ -315,21 +331,23 @@ private fun LoadedView(
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize()
             )
-            Column(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .fillMaxWidth()
-                    .height(20.dp)
-                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.7f)),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Title(
-                    text = title,
+            if (title.isNotEmpty()) {
+                Column(
                     modifier = Modifier
+                        .align(Alignment.BottomCenter)
                         .fillMaxWidth()
-                        .padding(horizontal = 5.dp),
-                )
+                        .height(20.dp)
+                        .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.7f)),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Title(
+                        text = title,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 5.dp),
+                    )
+                }
             }
         } else {
             IconView(
@@ -433,7 +451,8 @@ private fun Size(
 @Composable
 private fun AttachmentTilePreview() {
     AttachmentTile(
-        FormAttachmentState(
+        onFocused = {},
+        state = FormAttachmentState(
             "Photo 1.jpg",
             2024,
             "image/jpeg",
@@ -441,6 +460,8 @@ private fun AttachmentTilePreview() {
             1,
             {},
             scope = rememberCoroutineScope()
-        )
+        ),
+        allowUserRename = true,
+        displayFilename = false
     )
 }

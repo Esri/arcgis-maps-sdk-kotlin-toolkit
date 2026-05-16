@@ -65,6 +65,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
@@ -90,6 +91,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 import java.time.Instant
 import androidx.core.net.toUri
+import com.arcgismaps.toolkit.featureforms.internal.components.base.ValidationErrorState
 
 @Composable
 internal fun AttachmentFormElement(
@@ -102,13 +104,20 @@ internal fun AttachmentFormElement(
     AttachmentFormElement(
         label = state.label,
         description = state.description,
-        editable = editable,
+        isEditable = editable,
         captureOptions = CaptureOptions.Any,
         inputType = inputType,
+        hasCameraPermission = state.hasCameraPermissions(context),
+        allowUserRename = state.allowUserRename,
+        displayFilename = state.displayFilename,
+        maxAttachmentCount = state.maxAttachmentCount,
         stateId = state.id,
         attachments = state.attachments,
+        error = state.validationError,
         lazyListState = state.lazyListState,
-        hasCameraPermission = state.hasCameraPermissions(context),
+        onFocused = {
+            state.onFocusChanged(true)
+        },
         modifier = modifier
     )
 }
@@ -117,18 +126,30 @@ internal fun AttachmentFormElement(
 internal fun AttachmentFormElement(
     label: String,
     description: String,
-    editable: Boolean,
+    isEditable: Boolean,
     captureOptions: CaptureOptions,
     inputType: ImageAttachmentsFormInput,
+    hasCameraPermission: Boolean,
+    allowUserRename: Boolean,
+    displayFilename: Boolean,
+    maxAttachmentCount: Int,
     stateId: Int,
     attachments: List<FormAttachmentState>,
+    error: ValidationErrorState,
     lazyListState: LazyListState,
-    hasCameraPermission: Boolean,
+    onFocused: () -> Unit,
     modifier: Modifier = Modifier,
     colors: AttachmentsElementColors = LocalColorScheme.current.attachmentsElementColors,
     typography: AttachmentsElementTypography = LocalTypography.current.attachmentsElementTypography
 ) {
-    Surface (
+    val canAddAttachments = attachments.size < maxAttachmentCount && isEditable
+    val isError = error !is ValidationErrorState.NoError
+    val supportingText = if (isError) {
+        error.getString()
+    } else {
+        description
+    }
+    Surface(
         modifier = modifier.semantics(mergeDescendants = true) {},
         color = colors.containerColor
     ) {
@@ -138,16 +159,18 @@ internal fun AttachmentFormElement(
             ) {
                 Header(
                     title = label,
-                    description = description,
+                    supportingText = supportingText,
+                    isError = isError,
                     titleColor = colors.labelColor,
                     titleTextStyle = typography.labelStyle,
                     descriptionColor = colors.supportingTextColor,
                     descriptionTextStyle = typography.supportingTextStyle
                 )
                 Spacer(modifier = Modifier.weight(1f))
-                if (editable) {
+                if (canAddAttachments) {
                     // Add attachment button
                     AddAttachment(
+                        onFocused = onFocused,
                         stateId = stateId,
                         captureOptions = captureOptions,
                         inputType = inputType,
@@ -156,7 +179,20 @@ internal fun AttachmentFormElement(
                 }
             }
             Spacer(modifier = Modifier.height(20.dp))
-            Carousel(lazyListState, attachments, colors.scrollBarColor)
+            Carousel(
+                state = lazyListState,
+                attachments = attachments,
+                onItemFocused = onFocused,
+                allowUserRename = allowUserRename,
+                displayFilename = displayFilename,
+                scrollBarColor = colors.scrollBarColor
+            )
+        }
+    }
+    LaunchedEffect(lazyListState.isScrollInProgress) {
+        // if the user is scrolling and an item is focused, clear the focus to hide the keyboard
+        if (lazyListState.isScrollInProgress) {
+            onFocused()
         }
     }
 }
@@ -165,6 +201,9 @@ internal fun AttachmentFormElement(
 private fun Carousel(
     state: LazyListState,
     attachments: List<FormAttachmentState>,
+    onItemFocused: () -> Unit,
+    allowUserRename: Boolean,
+    displayFilename: Boolean,
     scrollBarColor: Color,
 ) {
     var initialSize by remember(state) {
@@ -193,7 +232,13 @@ private fun Carousel(
         state = state,
     ) {
         items(attachments) { attachment ->
-            AttachmentTile(state = attachment, modifier = Modifier.padding(end = 8.dp))
+            AttachmentTile(
+                onFocused = onItemFocused,
+                state = attachment,
+                allowUserRename = allowUserRename,
+                displayFilename = displayFilename,
+                modifier = Modifier.padding(end = 8.dp)
+            )
         }
     }
 }
@@ -201,13 +246,19 @@ private fun Carousel(
 @Composable
 private fun Header(
     title: String,
-    description: String,
+    supportingText: String,
+    isError: Boolean,
     titleColor: Color,
     titleTextStyle: TextStyle,
     descriptionColor: Color,
     descriptionTextStyle: TextStyle,
     modifier: Modifier = Modifier
 ) {
+    val supportingTextColor = if (isError) {
+        MaterialTheme.colorScheme.error
+    } else {
+        descriptionColor
+    }
     Row(
         modifier = modifier.wrapContentHeight(),
         verticalAlignment = Alignment.CenterVertically
@@ -220,10 +271,10 @@ private fun Header(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
-            if (description.isNotEmpty()) {
+            if (supportingText.isNotEmpty()) {
                 Text(
-                    text = description,
-                    color = descriptionColor,
+                    text = supportingText,
+                    color = supportingTextColor,
                     style = descriptionTextStyle,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
@@ -235,6 +286,7 @@ private fun Header(
 
 @Composable
 private fun AddAttachment(
+    onFocused: () -> Unit,
     stateId: Int,
     captureOptions: CaptureOptions,
     inputType: ImageAttachmentsFormInput,
@@ -247,17 +299,20 @@ private fun AddAttachment(
     val inputMethod = inputType.inputMethod
     val supportsCapture = remember(inputMethod) {
         inputMethod == ImageAttachmentsFormInput.InputMethod.Capture ||
-                inputMethod == ImageAttachmentsFormInput.InputMethod.Any
+            inputMethod == ImageAttachmentsFormInput.InputMethod.Any
     }
 
     val supportsUpload = remember(inputMethod) {
         inputMethod == ImageAttachmentsFormInput.InputMethod.Upload ||
-                inputMethod == ImageAttachmentsFormInput.InputMethod.Any
+            inputMethod == ImageAttachmentsFormInput.InputMethod.Any
     }
 
     Box {
         IconButton(
-            onClick = { showMenu = true },
+            onClick = {
+                onFocused()
+                showMenu = true
+            },
         ) {
             Icon(
                 Icons.Rounded.Add,
@@ -562,7 +617,7 @@ internal fun Modifier.horizontalScrollbar(
                 drawRoundRect(
                     color = trackColor,
                     topLeft = Offset(0f, scrollBarOffsetY),
-                    size = androidx.compose.ui.geometry.Size(size.width, height.toPx()),
+                    size = Size(size.width, height.toPx()),
                     cornerRadius = CornerRadius(10f, 10f),
                     alpha = alpha
                 )
@@ -570,7 +625,7 @@ internal fun Modifier.horizontalScrollbar(
                 drawRoundRect(
                     color = color,
                     topLeft = Offset(scrollBarOffsetX, scrollBarOffsetY),
-                    size = androidx.compose.ui.geometry.Size(scrollbarWidth, height.toPx()),
+                    size = Size(scrollbarWidth, height.toPx()),
                     cornerRadius = CornerRadius(10f, 10f),
                     alpha = alpha
                 )
@@ -595,14 +650,19 @@ private fun AttachmentFormElementPreview() {
     AttachmentFormElement(
         label = "Attachments",
         description = "Add attachments",
-        editable = true,
+        isEditable = true,
         captureOptions = CaptureOptions.Any,
         inputType = ImageAttachmentsFormInput(
             inputMethod = ImageAttachmentsFormInput.InputMethod.Capture
         ),
+        hasCameraPermission = true,
+        allowUserRename = true,
+        displayFilename = true,
+        maxAttachmentCount = 5,
         stateId = 1,
         attachments = list + list + list + list,
+        error = ValidationErrorState.NullNotAllowed,
         lazyListState = LazyListState(),
-        hasCameraPermission = true,
+        onFocused = {}
     )
 }
