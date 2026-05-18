@@ -18,7 +18,6 @@
 
 plugins {
     id("com.android.library")
-    id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
     id("artifact-deploy")
     alias(libs.plugins.kotlin.convention.plugin)
@@ -78,17 +77,20 @@ android {
     }
 
     val toolkitTests = project.findProperty("toolkitTestDir") as String
-    sourceSets.getByName("androidTest") {
-        var file = file("$toolkitTests/${project.name}/androidTest")
-        if (file.exists()) {
-            java.setSrcDirs(java.srcDirs.plus(file))
-        }
-    }
+    androidComponents {
+        onVariants { variant ->
 
-    sourceSets.getByName("test") {
-        var file = file("$toolkitTests/${project.name}/test")
-        if (file.exists()) {
-            java.setSrcDirs(java.srcDirs.plus(file))
+            var file = file("$toolkitTests/${project.name}/androidTest")
+            if (file.exists()) {
+                variant.androidTest?.sources?.java?.addStaticSourceDirectory(project.relativePath(file.path))
+            }
+
+            file = file("$toolkitTests/${project.name}/test")
+            if (file.exists()) {
+                variant.hostTests.values.forEach {
+                    it.sources.java?.addStaticSourceDirectory(project.relativePath(file.path))
+                }
+            }
         }
     }
 }

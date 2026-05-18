@@ -19,7 +19,6 @@
 plugins {
     alias(libs.plugins.binary.compatibility.validator) apply true
     id("com.android.library")
-    id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
     alias(libs.plugins.kotlin.convention.plugin)
 }
@@ -72,16 +71,20 @@ android {
      * Include this if any internal-only tests are required
      */
     val toolkitTests = project.findProperty("toolkitTestDir") as String
-    sourceSets.getByName("androidTest") {
-        var file = file("$toolkitTests/${project.name}/androidTest")
-        if (file.exists()) {
-            java.setSrcDirs(java.srcDirs.plus(file))
-        }
-    }
-    sourceSets.getByName("test") {
-        var file = file("$toolkitTests/${project.name}/test")
-        if (file.exists()) {
-            java.setSrcDirs(java.srcDirs.plus(file))
+    androidComponents {
+        onVariants { variant ->
+
+            var file = file("$toolkitTests/${project.name}/androidTest")
+            if (file.exists()) {
+                variant.androidTest?.sources?.java?.addStaticSourceDirectory(project.relativePath(file.path))
+            }
+
+            file = file("$toolkitTests/${project.name}/test")
+            if (file.exists()) {
+                variant.hostTests.values.forEach {
+                    it.sources.java?.addStaticSourceDirectory(project.relativePath(file.path))
+                }
+            }
         }
     }
 }

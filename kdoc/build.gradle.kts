@@ -18,7 +18,6 @@
 
 plugins {
     id("com.android.library")
-    id("org.jetbrains.kotlin.android")
     alias(libs.plugins.dokka) apply true
 }
 
@@ -49,10 +48,13 @@ val releasedSourceSetPaths = releasedModules.map { subproject ->
 dokka {
     moduleName.set("arcgis-maps-kotlin-toolkit")
     moduleVersion.set(versionNumber)
-    dokkaSourceSets.main {
-        sourceRoots.from(releasedSourceSetPaths)
-    }
+    // Configure dokkaSourceSets in a safe, backwards-compatible way: configure each source set
+    // and add the released modules to the 'main' source set's roots.
     dokkaSourceSets.configureEach {
+        if (name == "main") {
+            sourceRoots.from(releasedSourceSetPaths)
+        }
+
         perPackageOption {
             matchingRegex.set(".*internal.*")
             suppress.set(true)
