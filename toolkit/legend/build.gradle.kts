@@ -23,7 +23,7 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
     id("artifact-deploy")
-    id("kotlin-conventions-plugin")
+    alias(libs.plugins.kotlin.convention.plugin)
 
 }
 

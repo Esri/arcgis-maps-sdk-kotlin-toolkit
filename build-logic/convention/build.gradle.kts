@@ -36,9 +36,14 @@ gradlePlugin {
             implementationClass = "EmptyPlugin"
         }
 
-        register("kotlinConventions") {
-            id = "kotlin-conventions-plugin"
-            implementationClass = "KotlinConventionsPlugin"
+        register("kotlinConvention") {
+            id = "kotlin-convention-plugin"
+            implementationClass = "KotlinConventionPlugin"
+        }
+
+        register("microappConvention") {
+            id = "microapp-convention-plugin"
+            implementationClass = "MicroappConventionPlugin"
         }
     }
 }
@@ -46,4 +51,5 @@ gradlePlugin {
 dependencies {
     compileOnly(libs.android.gradle.plugin)
     implementation(libs.kotlin.gradle)
+    compileOnly(libs.secrets.gradle.plugin)
 }

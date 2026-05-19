@@ -22,7 +22,7 @@ plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
     id("artifact-deploy")
-    id("kotlin-conventions-plugin")
+    alias(libs.plugins.kotlin.convention.plugin)
     id("org.jetbrains.kotlin.plugin.compose")
 }
 kotlin {

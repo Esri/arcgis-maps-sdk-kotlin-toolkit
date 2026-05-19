@@ -23,7 +23,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 @Suppress("UNUSED")
-class KotlinConventionsPlugin : Plugin<Project> {
+class KotlinConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
             tasks.withType(KotlinCompile::class.java).configureEach {
