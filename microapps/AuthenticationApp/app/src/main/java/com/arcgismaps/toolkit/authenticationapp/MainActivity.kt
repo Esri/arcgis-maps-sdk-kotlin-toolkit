@@ -54,11 +54,23 @@ import androidx.compose.ui.unit.dp
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.toolkit.authentication.DialogAuthenticator
 import com.esri.microappslib.theme.MicroAppTheme
+import java.net.InetSocketAddress
+import java.net.Proxy
 
 class MainActivity : ComponentActivity() {
     private val authenticationAppViewModel: AuthenticationAppViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+//        ArcGISEnvironment.configureArcGISHttpClient {
+//            val proxy = Proxy(
+//                Proxy.Type.HTTP, InetSocketAddress(
+//                    "192.168.2.178",
+//                    8888
+//                )
+//            )
+//            proxy(proxy)
+//        }
         // Application context must be set for client certificate authentication.
         ArcGISEnvironment.applicationContext = applicationContext
         setContent {
