@@ -18,7 +18,7 @@
 
 plugins {
     id("com.android.library")
-    alias(libs.plugins.dokka) apply true
+    alias(libs.plugins.dokka)
 }
 
 val versionNumber: String by project

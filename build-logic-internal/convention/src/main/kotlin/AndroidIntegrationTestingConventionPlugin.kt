@@ -22,7 +22,6 @@ import com.arcgismaps.GrantDevicePermissions
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.internal.Actions.with
-import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.register
 
 /**
@@ -73,19 +72,17 @@ class AndroidIntegrationTestingConventionPlugin : Plugin<Project> {
                         if (task.name.startsWith("connected") && task.name.endsWith("AndroidTest")) {
                             task.dependsOn("grantDevicePermissions")
                             if (syncTestDataBeforeInstrumentedTests) {
-                                try {
-                                    task.dependsOn(gradle.includedBuild("build-logic-internal")
-                                        .task(":syncTestData"))
-                                } catch (e: Exception) {
-                                    // syncTestData may not exist
-                                }
+                                task.dependsOn(
+                                    gradle.includedBuild("build-logic-internal")
+                                        .task(":syncTestData")
+                                )
                             }
-                            try {
-                                task.dependsOn(gradle.includedBuild("build-logic-internal")
-                                    .task(":deleteICOutput"))
-                            } catch (e: Exception) {
-                                // deleteICOutput may not exist
-                            }
+
+                            task.dependsOn(
+                                gradle.includedBuild("build-logic-internal")
+                                    .task(":deleteICOutput")
+                            )
+
                         }
                     }
 
