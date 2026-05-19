@@ -16,15 +16,13 @@
  *
  */
 
-import com.android.build.gradle.LibraryExtension
-import com.android.build.gradle.internal.tasks.factory.dependsOn
+import com.android.build.api.dsl.LibraryExtension
+import com.android.build.api.variant.LibraryAndroidComponentsExtension
 import com.arcgismaps.GrantDevicePermissions
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.internal.Actions.with
-import org.gradle.kotlin.dsl.provideDelegate
 import org.gradle.kotlin.dsl.register
-import java.util.Locale
 
 /**
  * Convention plugin for Android library modules that wire prerequisite tasks for
@@ -51,47 +49,50 @@ class AndroidIntegrationTestingConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
             pluginManager.withPlugin("com.android.library") {
-                val android = extensions.getByType(LibraryExtension::class.java)
-
-                // Registers a module-specific `grantDevicePermissions` task for the test app.
-                tasks.register<GrantDevicePermissions>("grantDevicePermissions") {
-                    adbExe.set(android.adbExecutable.absoluteFile)
-                    testApplicationId.set(android.defaultConfig.testApplicationId)
-                }
-
                 afterEvaluate {
+                    val androidDsl = extensions.getByType(LibraryExtension::class.java)
+                    val androidComponents = extensions.getByType(LibraryAndroidComponentsExtension::class.java)
+                    val adbPath = androidComponents.sdkComponents.adb.get().asFile
 
-                    android.testVariants.forEach { testVariant ->
-                        val capitalizedTestVariantName =
-                            testVariant.name.replaceFirstChar {
-                                if (it.isLowerCase()) {
-                                    it.titlecase(Locale.US)
-                                } else {
-                                    it.toString()
-                                }
-                            }
-                        tasks.named("connected$capitalizedTestVariantName") {
-                            val syncTestDataBeforeInstrumentedTests: String by project
+                    tasks.register<GrantDevicePermissions>("grantDevicePermissions") {
+                        if (adbPath.exists()) {
+                            adbExe.set(adbPath.absoluteFile)
+                        }
+                        val testAppId = androidDsl.defaultConfig.testApplicationId
+                        if (!testAppId.isNullOrBlank()) {
+                            testApplicationId.set(testAppId)
+                        }
+                    }
 
-                            if (syncTestDataBeforeInstrumentedTests.toBoolean()) {
-                                // Uses adb to sync the test data to the test device.
-                                dependsOn(
+                    val syncTestDataBeforeInstrumentedTests =
+                        project.findProperty("syncTestDataBeforeInstrumentedTests")
+                            ?.toString()?.toBoolean() ?: false
+
+                    tasks.forEach { task ->
+                        if (task.name.startsWith("connected") && task.name.endsWith("AndroidTest")) {
+                            task.dependsOn("grantDevicePermissions")
+                            if (syncTestDataBeforeInstrumentedTests) {
+                                task.dependsOn(
                                     gradle.includedBuild("build-logic-internal")
                                         .task(":syncTestData")
                                 )
                             }
-                            // Grants storage permissions requested by the test app.
-                            dependsOn("grantDevicePermissions")
-                            // Deletes ic-output folder before running connectedAndroidTests
-                            dependsOn(
-                                gradle.includedBuild("build-logic-internal").task(":deleteICOutput")
-                            )
-                        }
 
-                        // Make sure the permissions task only runs after the install task, otherwise the app
-                        // may not be installed yet.
-                        tasks.named("grantDevicePermissions")
-                            .dependsOn("install$capitalizedTestVariantName")
+                            task.dependsOn(
+                                gradle.includedBuild("build-logic-internal")
+                                    .task(":deleteICOutput")
+                            )
+
+                        }
+                    }
+
+                    // Wire the grantDevicePermissions task to depend on install*AndroidTest tasks
+                    tasks.forEach { task ->
+                        if (task.name.startsWith("install") && task.name.endsWith("AndroidTest")) {
+                            tasks.named("grantDevicePermissions").configure {
+                                dependsOn(task.name)
+                            }
+                        }
                     }
                 }
             }

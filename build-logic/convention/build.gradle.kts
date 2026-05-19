@@ -20,6 +20,13 @@ plugins {
     `kotlin-dsl`
 }
 
+tasks {
+    validatePlugins {
+        enableStricterValidation = true
+        failOnWarning = true
+    }
+}
+
 gradlePlugin {
     plugins {
         // Since the build-logic-internal build is not included for non-internal developers,

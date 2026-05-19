@@ -18,8 +18,7 @@
 
 plugins {
     id("com.android.library")
-    id("org.jetbrains.kotlin.android")
-    alias(libs.plugins.dokka) apply true
+    alias(libs.plugins.dokka)
 }
 
 val versionNumber: String by project
@@ -49,10 +48,12 @@ val releasedSourceSetPaths = releasedModules.map { subproject ->
 dokka {
     moduleName.set("arcgis-maps-kotlin-toolkit")
     moduleVersion.set(versionNumber)
-    dokkaSourceSets.main {
-        sourceRoots.from(releasedSourceSetPaths)
-    }
+
     dokkaSourceSets.configureEach {
+        if (name == "main") {
+            sourceRoots.from(releasedSourceSetPaths)
+        }
+
         perPackageOption {
             matchingRegex.set(".*internal.*")
             suppress.set(true)
@@ -67,7 +68,6 @@ android {
     
     defaultConfig {
         minSdk = libs.versions.minSdk.get().toInt()
-        consumerProguardFiles("consumer-rules.pro")
     }
 }
 
