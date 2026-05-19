@@ -67,16 +67,3 @@ dependencies {
     // compose
     implementation(libs.androidx.compose.navigation)
 }
-
-// Apply Hilt plugin after the Android application plugin is present. Using pluginManager.withPlugin
-// ensures we only attempt to apply Hilt when the Android plugin has been applied (it is added by the
-// microapp convention plugin), avoiding timing/classloader issues during script evaluation.
-//try {
-//    pluginManager.withPlugin("com.android.application") {
-//        apply(plugin = "com.google.dagger.hilt.android")
-//    }
-//} catch (_: Throwable) {
-//    // Ignore Hilt application failures during configuration. This can happen when the Hilt
-//    // Gradle plugin is not compatible with the AGP version used to evaluate the build.
-//}
-

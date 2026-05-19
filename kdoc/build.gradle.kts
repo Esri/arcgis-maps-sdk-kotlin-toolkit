@@ -48,8 +48,7 @@ val releasedSourceSetPaths = releasedModules.map { subproject ->
 dokka {
     moduleName.set("arcgis-maps-kotlin-toolkit")
     moduleVersion.set(versionNumber)
-    // Configure dokkaSourceSets in a safe, backwards-compatible way: configure each source set
-    // and add the released modules to the 'main' source set's roots.
+
     dokkaSourceSets.configureEach {
         if (name == "main") {
             sourceRoots.from(releasedSourceSetPaths)
