@@ -36,14 +36,33 @@ class AuthenticationAppViewModel(application: Application) : AndroidViewModel(ap
 
     private val noPortalInfoText = application.getString(R.string.no_portal_info)
     private val startInfoText = application.getString(R.string.start_info_text)
-    private val arcGISUrl = "https://www.arcgis.com"
+    private val arcGISUrl = "https://devapp00056.esri.com/portal" // "https://www.arcgis.com"
     private val oAuthUserConfiguration = OAuthUserConfiguration(
         arcGISUrl,
         // This client ID is for demo purposes only. For use of the Authenticator in your own app,
         // create your own client ID. For more info see: https://developers.arcgis.com/documentation/mapping-apis-and-services/security/tutorials/register-your-application/
-        "aink3YEhnDNBBcJq",
-        "kotlin-toolkit-authenticator-microapp://auth"
+        "fieldmaps", //"aink3YEhnDNBBcJq",
+        "arcgis-fieldmaps://auth", //"kotlin-toolkit-authenticator-microapp://auth"  // "urn:ietf:wg:oauth:2.0:oob"
+        preferPrivateWebBrowserSession = true
     )
+
+//    private val arcGISUrl = "https://fatestserver.dev.geocloud.com/portal"
+//    private val oAuthUserConfiguration = OAuthUserConfiguration(
+//        arcGISUrl,
+//        // This client ID is for demo purposes only. For use of the Authenticator in your own app,
+//        // create your own client ID. For more info see: https://developers.arcgis.com/documentation/mapping-apis-and-services/security/tutorials/register-your-application/
+//        "fieldmaps", //"aink3YEhnDNBBcJq",
+//        "arcgis-fieldmaps://auth" //"kotlin-toolkit-authenticator-microapp://auth"  // "urn:ietf:wg:oauth:2.0:oob"
+//    )
+
+//    private val arcGISUrl = "https://dev004684.esri.com/portal" // "https://www.arcgis.com"
+//    private val oAuthUserConfiguration = OAuthUserConfiguration(
+//        arcGISUrl,
+//        // This client ID is for demo purposes only. For use of the Authenticator in your own app,
+//        // create your own client ID. For more info see: https://developers.arcgis.com/documentation/mapping-apis-and-services/security/tutorials/register-your-application/
+//        "0j4iQvrRSshIdQPK", //"aink3YEhnDNBBcJq",
+//        "mapssdktests://auth" //"kotlin-toolkit-authenticator-microapp://auth"  // "urn:ietf:wg:oauth:2.0:oob"
+//    )
 
     private val _infoText: MutableStateFlow<String> = MutableStateFlow(startInfoText)
     val infoText: StateFlow<String> = _infoText.asStateFlow()
