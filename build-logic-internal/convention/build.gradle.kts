@@ -20,6 +20,13 @@ plugins {
     `kotlin-dsl`
 }
 
+tasks {
+    validatePlugins {
+        enableStricterValidation = true
+        failOnWarning = true
+    }
+}
+
 // All plugins created in this module should have a corresponding placeholder plugin
 // with the same ID in build-logic. build-logic-internal is not included for
 // non-internal developers, so they can’t access these plugins and applying a missing
