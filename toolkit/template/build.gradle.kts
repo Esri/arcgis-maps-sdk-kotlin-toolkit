@@ -23,6 +23,10 @@ plugins {
     alias(libs.plugins.kotlin.convention.plugin)
 }
 
+/**
+ * Include this if any internal-only tests are required
+ */
+val toolkitTests = project.findProperty("toolkitTestDir") as String
 kotlin {
     jvmToolchain(17)
 }
@@ -46,6 +50,33 @@ android {
     buildFeatures {
         compose = true
     }
+
+    sourceSets {
+        var file = file("$toolkitTests/${project.name}/androidTest")
+        if (file.exists()) {
+            named("androidTest") {
+                kotlin {
+                    directories += "$toolkitTests/${project.name}/androidTest"
+                }
+                java {
+                    directories += "$toolkitTests/${project.name}/androidTest"
+                }
+            }
+        }
+
+        file = file("$toolkitTests/${project.name}/test")
+        if (file.exists()) {
+            named("test") {
+                kotlin {
+                    directories += "$toolkitTests/${project.name}/test"
+                }
+                java {
+                    directories += "$toolkitTests/${project.name}/test"
+                }
+            }
+        }
+    }
+
     // If this were not an android project, we would just write `explicitApi()` in the Kotlin scope.
     // but as an android project could write `freeCompilerArgs = listOf("-Xexplicit-api=strict")`
     // in the kotlinOptions above, but that would enforce api rules on the test code, which we don't want.
@@ -65,27 +96,6 @@ android {
         targetSdk = libs.versions.compileSdk.get().toInt()
         val connectedTestReportsPath: String by project
         reportDir = "$connectedTestReportsPath/${project.name}"
-    }
-
-    /**
-     * Include this if any internal-only tests are required
-     */
-    val toolkitTests = project.findProperty("toolkitTestDir") as String
-    androidComponents {
-        onVariants { variant ->
-
-            var file = file("$toolkitTests/${project.name}/androidTest")
-            if (file.exists()) {
-                variant.androidTest?.sources?.java?.addStaticSourceDirectory(project.relativePath(file.path))
-            }
-
-            file = file("$toolkitTests/${project.name}/test")
-            if (file.exists()) {
-                variant.hostTests.values.forEach {
-                    it.sources.java?.addStaticSourceDirectory(project.relativePath(file.path))
-                }
-            }
-        }
     }
 }
 
