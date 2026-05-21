@@ -49,50 +49,44 @@ class AndroidIntegrationTestingConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
             pluginManager.withPlugin("com.android.library") {
-                afterEvaluate {
-                    val androidDsl = extensions.getByType(LibraryExtension::class.java)
-                    val androidComponents = extensions.getByType(LibraryAndroidComponentsExtension::class.java)
-                    val adbPath = androidComponents.sdkComponents.adb.get().asFile
-
+                val androidDsl = extensions.getByType(LibraryExtension::class.java)
+                val androidComponents =
+                    extensions.getByType(LibraryAndroidComponentsExtension::class.java)
+                val grantDevicePermissionsTask =
                     tasks.register<GrantDevicePermissions>("grantDevicePermissions") {
-                        if (adbPath.exists()) {
-                            adbExe.set(adbPath.absoluteFile)
-                        }
-                        val testAppId = androidDsl.defaultConfig.testApplicationId
-                        if (!testAppId.isNullOrBlank()) {
-                            testApplicationId.set(testAppId)
-                        }
+                        adbExe.set(androidComponents.sdkComponents.adb.map { it.asFile.absoluteFile })
+                        testApplicationId.set(project.provider {
+                            androidDsl.defaultConfig.testApplicationId.orEmpty()
+                        })
                     }
 
-                    val syncTestDataBeforeInstrumentedTests =
-                        project.findProperty("syncTestDataBeforeInstrumentedTests")
-                            ?.toString()?.toBoolean() ?: false
+                val syncTestDataBeforeInstrumentedTests =
+                    project.findProperty("syncTestDataBeforeInstrumentedTests")
+                        ?.toString()?.toBoolean() ?: false
 
-                    tasks.forEach { task ->
-                        if (task.name.startsWith("connected") && task.name.endsWith("AndroidTest")) {
-                            task.dependsOn("grantDevicePermissions")
-                            if (syncTestDataBeforeInstrumentedTests) {
-                                task.dependsOn(
-                                    gradle.includedBuild("build-logic-internal")
-                                        .task(":syncTestData")
-                                )
-                            }
-
-                            task.dependsOn(
-                                gradle.includedBuild("build-logic-internal")
-                                    .task(":deleteICOutput")
-                            )
-
-                        }
+                tasks.matching {
+                    it.name.startsWith("connected") && it.name.endsWith("AndroidTest")
+                }.configureEach {
+                    dependsOn(grantDevicePermissionsTask)
+                    if (syncTestDataBeforeInstrumentedTests) {
+                        dependsOn(
+                            gradle.includedBuild("build-logic-internal")
+                                .task(":syncTestData")
+                        )
                     }
 
-                    // Wire the grantDevicePermissions task to depend on install*AndroidTest tasks
-                    tasks.forEach { task ->
-                        if (task.name.startsWith("install") && task.name.endsWith("AndroidTest")) {
-                            tasks.named("grantDevicePermissions").configure {
-                                dependsOn(task.name)
-                            }
-                        }
+                    dependsOn(
+                        gradle.includedBuild("build-logic-internal")
+                            .task(":deleteICOutput")
+                    )
+                }
+
+                // Wire the grantDevicePermissions task to depend on install*AndroidTest tasks
+                tasks.matching {
+                    it.name.startsWith("install") && it.name.endsWith("AndroidTest")
+                }.configureEach {
+                    grantDevicePermissionsTask.configure {
+                        dependsOn(this@configureEach)
                     }
                 }
             }

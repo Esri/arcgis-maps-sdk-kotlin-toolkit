@@ -23,9 +23,7 @@ import org.gradle.api.Project
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin
-import org.gradle.configurationcache.extensions.capitalized
 import org.gradle.kotlin.dsl.configure
-import org.gradle.kotlin.dsl.get
 import org.gradle.kotlin.dsl.provideDelegate
 import java.net.URI
 
@@ -55,37 +53,41 @@ class ArtifactPublisher : Plugin<Project> {
         } else {
             "$versionNumber-$buildNumber"
         }
-        val artifactoryArtifactId: String = "$artifactoryArtifactBaseId-${project.name}"
+        val artifactoryArtifactId = "$artifactoryArtifactBaseId-${project.name}"
         
         project.pluginManager.apply(MavenPublishPlugin::class.java)
-        project.afterEvaluate {
-            project.extensions.configure<PublishingExtension> {
-                repositories {
-                    repositories.maven {
-                        url = URI.create(artifactoryUrl)
-                        credentials {
-                            username = artifactoryUsername
-                            password = artifactoryPassword
-                        }
-                    }
-                }
-                publications {
-                    publications.create(
-                        project.name,
-                        MavenPublication::class.java
-                    ) {
-                        groupId = artifactoryGroupId
-                        artifactId = artifactoryArtifactId
-                        version = artifactVersion
-                        
-                        from(project.components["release"])
+        project.extensions.configure<PublishingExtension> {
+            repositories {
+                repositories.maven {
+                    url = URI.create(artifactoryUrl)
+                    credentials {
+                        username = artifactoryUsername
+                        password = artifactoryPassword
                     }
                 }
             }
 
-            tasks.findByName("publish${project.name.replaceFirstChar { it.uppercase() }}PublicationToMavenRepository")
-                ?.dependsOn("assembleRelease")
-            tasks.findByName("publishToMavenLocal")?.dependsOn("assembleRelease")
+            project.components.configureEach releaseComponent@{
+                if (name != "release") return@releaseComponent
+
+                publications.create(
+                    project.name,
+                    MavenPublication::class.java
+                ) {
+                    groupId = artifactoryGroupId
+                    artifactId = artifactoryArtifactId
+                    version = artifactVersion
+
+                    from(this@releaseComponent)
+                }
+            }
+        }
+
+        project.tasks.matching { task ->
+            task.name == "publish${project.name.replaceFirstChar { it.uppercase() }}PublicationToMavenRepository"
+                    || task.name == "publishToMavenLocal"
+        }.configureEach {
+            dependsOn("assembleRelease")
         }
     }
 }

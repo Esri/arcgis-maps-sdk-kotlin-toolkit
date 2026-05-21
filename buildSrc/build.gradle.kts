@@ -26,6 +26,13 @@ plugins {
     `maven-publish`
 }
 
+tasks {
+    validatePlugins {
+        enableStricterValidation = true
+        failOnWarning = true
+    }
+}
+
 version = "1.0"
 
 gradlePlugin {
