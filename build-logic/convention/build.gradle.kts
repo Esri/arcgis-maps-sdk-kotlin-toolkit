@@ -18,6 +18,7 @@
 
 plugins {
     `kotlin-dsl`
+    `maven-publish`
 }
 
 tasks {
@@ -51,6 +52,12 @@ gradlePlugin {
         register("microappConvention") {
             id = "microapp-convention-plugin"
             implementationClass = "MicroappConventionPlugin"
+        }
+
+        register("artifactDeploy") {
+            group = "internal"
+            id = "artifact-deploy"
+            implementationClass = "ArtifactPublisher"
         }
     }
 }

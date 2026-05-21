@@ -67,7 +67,6 @@ class AndroidIntegrationTestingConventionPlugin : Plugin<Project> {
                 tasks.matching {
                     it.name.startsWith("connected") && it.name.endsWith("AndroidTest")
                 }.configureEach {
-                    dependsOn(grantDevicePermissionsTask)
                     if (syncTestDataBeforeInstrumentedTests) {
                         dependsOn(
                             gradle.includedBuild("build-logic-internal")
@@ -86,7 +85,7 @@ class AndroidIntegrationTestingConventionPlugin : Plugin<Project> {
                     it.name.startsWith("install") && it.name.endsWith("AndroidTest")
                 }.configureEach {
                     grantDevicePermissionsTask.configure {
-                        dependsOn(this@configureEach)
+                        finalizedBy(this@configureEach)
                     }
                 }
             }

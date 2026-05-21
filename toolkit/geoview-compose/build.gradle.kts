@@ -77,7 +77,6 @@ android {
         }
     }
 
-
     // If this were not an android project, we would just write `explicitApi()` in the Kotlin scope.
     // but as an android project could write `freeCompilerArgs = listOf("-Xexplicit-api=strict")`
     // in the kotlinOptions above, but that would enforce api rules on the test code, which we don't want.

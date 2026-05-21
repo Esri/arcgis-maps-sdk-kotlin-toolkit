@@ -1,6 +1,6 @@
 /*
  *
- *  Copyright 2023 Esri
+ *  Copyright 2026 Esri
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -15,8 +15,6 @@
  *  limitations under the License.
  *
  */
-
-package deploy
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -37,6 +35,7 @@ import java.net.URI
  *
  * @since 200.2.0
  */
+@Suppress("UNUSED")
 class ArtifactPublisher : Plugin<Project> {
     override fun apply(project: Project) {
         val artifactoryGroupId: String by project
