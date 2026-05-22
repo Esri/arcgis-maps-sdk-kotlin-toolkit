@@ -366,8 +366,14 @@ private fun AttachmentsFormInput.getCaptureOptions(): List<CaptureOptions> {
 }
 
 /**
- * Merges a list of [CaptureOptions] by combining multiple gallery options into one with multiple
- * media types and combining multiple file options into one with multiple allowed MIME types.
+ * A [GenericAttachmentFormInput] may contain multiple input types, which can lead to duplicate
+ * capture options. This function merges those duplicate options into one.
+ *
+ * For example, if there are multiple gallery options with different media types, they will be
+ * merged into one gallery option with multiple media types.
+ *
+ * Similarly, if there are multiple file options with different allowed MIME types, they will be merged
+ * into one file option with multiple allowed MIME types.
  */
 private fun List<CaptureOptions>.merge(): List<CaptureOptions> {
     val options = mutableListOf<CaptureOptions>()
