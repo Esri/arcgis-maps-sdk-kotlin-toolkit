@@ -83,12 +83,14 @@ class AndroidIntegrationTestingConventionPlugin : Plugin<Project> {
                 // Wire the grantDevicePermissions task to depend on install*AndroidTest tasks
                 tasks.matching {
                     it.name.startsWith("install") && it.name.endsWith("AndroidTest")
-                }.configureEach {
+                }.forEach {
                     grantDevicePermissionsTask.configure {
-                        finalizedBy(this@configureEach)
+                        finalizedBy(it)
                     }
                 }
+
             }
+
         }
     }
 }
