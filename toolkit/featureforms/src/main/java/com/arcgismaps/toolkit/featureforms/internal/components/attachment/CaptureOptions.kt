@@ -17,41 +17,15 @@
 package com.arcgismaps.toolkit.featureforms.internal.components.attachment
 
 import androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia.VisualMediaType
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.res.stringResource
-import com.arcgismaps.toolkit.featureforms.R
 
 /**
  * Represents valid options for capturing attachments. This is used to determine the types of
  * attachments that can be captured by the UI.
  */
 internal sealed class CaptureOptions {
-
+    data object CaptureAudio : CaptureOptions()
     data object CaptureImage : CaptureOptions()
     data object CaptureVideo : CaptureOptions()
     data class Gallery(val mediaType: VisualMediaType) : CaptureOptions()
-    data object CaptureAudio : CaptureOptions()
     data class File(val allowedMimeTypes: List<String>) : CaptureOptions()
-
-    /**
-     * Returns a list of allowed mime types for this capture option.
-     */
-    fun getAllowedMimeTypes(): List<String> {
-        return when (this) {
-            CaptureAudio -> listOf("audio/*")
-            //Document -> listOf("application/*", "text/*")
-            CaptureImage -> listOf("image/*")
-            CaptureVideo -> listOf("video/*")
-            else -> emptyList()
-        }
-    }
-
-    @Composable
-    fun getString(): String = when (this) {
-        is CaptureAudio -> stringResource(R.string.record_audio)
-        is CaptureImage -> stringResource(R.string.take_photo)
-        is CaptureVideo -> stringResource(R.string.record_video)
-        is File -> stringResource(R.string.add_file)
-        is Gallery -> stringResource(R.string.add_from_gallery)
-    }
 }

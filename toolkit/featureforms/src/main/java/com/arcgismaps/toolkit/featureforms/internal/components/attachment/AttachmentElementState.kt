@@ -130,7 +130,7 @@ internal class AttachmentElementState(
         associationType = AttachmentAssociationType.Exact,
         inputTypes = listOf(
             ImageAttachmentsFormInput(
-                inputMethod = ImageAttachmentsFormInput.InputMethod.Capture
+                inputMethod = ImageAttachmentsFormInput.InputMethod.Any
             )
         )
     ) // formElement.input

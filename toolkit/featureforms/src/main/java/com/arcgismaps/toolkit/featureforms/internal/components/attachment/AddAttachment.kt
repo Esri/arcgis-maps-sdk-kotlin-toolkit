@@ -358,44 +358,45 @@ private fun AttachmentsFormInput.getCaptureOptions(): List<CaptureOptions> {
         }
 
         is GenericAttachmentFormInput -> {
-            val options = mutableListOf<CaptureOptions>()
-            val types = mutableListOf<VisualMediaType>()
-            val mimeTypes = mutableListOf<String>()
-            inputTypes.forEach { type ->
-                when (type) {
-                    is ImageAttachmentsFormInput -> {
-                        when (type.inputMethod) {
-                            ImageAttachmentsFormInput.InputMethod.Capture -> {
-                                options.add(CaptureOptions.CaptureImage)
-                            }
-
-                            ImageAttachmentsFormInput.InputMethod.Upload -> {
-                                types.add(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                                mimeTypes.add("image/*")
-                            }
-
-                            ImageAttachmentsFormInput.InputMethod.Any -> {
-                                options.add(CaptureOptions.CaptureImage)
-                                types.add(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                                mimeTypes.add("image/*")
-                            }
-                        }
-                    }
-
-                    else -> {}
-                }
-            }
-            if (types.isNotEmpty()) {
-                options.add(CaptureOptions.Gallery(mediaType = types.toPickerMediaType()))
-            }
-            if (mimeTypes.isNotEmpty()) {
-                options.add(CaptureOptions.File(allowedMimeTypes = mimeTypes))
-            }
-            options
+            inputTypes.flatMap { type ->
+                type.getCaptureOptions()
+            }.merge()
         }
     }
 }
 
+/**
+ * Merges a list of [CaptureOptions] by combining multiple gallery options into one with multiple
+ * media types and combining multiple file options into one with multiple allowed MIME types.
+ */
+private fun List<CaptureOptions>.merge(): List<CaptureOptions> {
+    val options = mutableListOf<CaptureOptions>()
+    // Add explicit capture options first
+    options.addAll(
+        this.filter {
+            it is CaptureOptions.CaptureAudio
+                || it is CaptureOptions.CaptureImage
+                || it is CaptureOptions.CaptureVideo
+        }
+    )
+    // Find gallery options and merge them into one if there are multiples
+    val galleryOptions = this.filterIsInstance<CaptureOptions.Gallery>()
+    if (galleryOptions.isNotEmpty()) {
+        val mediaTypes = galleryOptions.map { it.mediaType }
+        options.add(CaptureOptions.Gallery(mediaType = mediaTypes.toPickerMediaType()))
+    }
+    // Find file options and merge them into one if there are multiples
+    val fileOptions = this.filterIsInstance<CaptureOptions.File>()
+    if (fileOptions.isNotEmpty()) {
+        val allowedMimeTypes = fileOptions.flatMap { it.allowedMimeTypes }.distinct()
+        options.add(CaptureOptions.File(allowedMimeTypes = allowedMimeTypes))
+    }
+    return options
+}
+
+/**
+ * Converts a list of [VisualMediaType] to a single [VisualMediaType] for the gallery picker.
+ */
 private fun List<VisualMediaType>.toPickerMediaType(): VisualMediaType = when {
     size == 1 -> first()
     contains(ActivityResultContracts.PickVisualMedia.ImageOnly) && contains(ActivityResultContracts.PickVisualMedia.VideoOnly) -> ActivityResultContracts.PickVisualMedia.ImageAndVideo
