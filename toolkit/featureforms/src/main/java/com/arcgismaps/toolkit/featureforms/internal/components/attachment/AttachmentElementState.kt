@@ -126,8 +126,13 @@ internal class AttachmentElementState(
      * The input type for the attachment form element. This is determined based on the allowed
      * attachment types specified by the form element.
      */
-    val inputType = ImageAttachmentsFormInput(
-        inputMethod = ImageAttachmentsFormInput.InputMethod.Capture
+    val inputType = GenericAttachmentFormInput(
+        associationType = AttachmentAssociationType.Exact,
+        inputTypes = listOf(
+            ImageAttachmentsFormInput(
+                inputMethod = ImageAttachmentsFormInput.InputMethod.Capture
+            )
+        )
     ) // formElement.input
 
     /**
@@ -515,56 +520,6 @@ internal class FormAttachmentState(
                 throw ex
             }
             null
-        }
-    }
-}
-
-/**
- * Represents valid options for capturing attachments. This is used to determine the types of
- * attachments that can be captured by the UI.
- */
-internal sealed class CaptureOptions {
-
-    data object Image : CaptureOptions()
-    data object Video : CaptureOptions()
-    data object Audio : CaptureOptions()
-    data object Document : CaptureOptions()
-    data object Signature : CaptureOptions()
-    data object Any : CaptureOptions()
-    data object Unknown : CaptureOptions()
-
-    /**
-     * Returns `true` if the capture options include image capture.
-     */
-    fun hasImageCapture(): Boolean = this is Any || this is Image
-
-    /**
-     * Returns `true` if the capture options include video capture.
-     */
-    fun hasVideoCapture(): Boolean = this is Any || this is Video
-
-    /**
-     * Returns `true` if the capture options include image or video capture.
-     */
-    fun hasMediaCapture(): Boolean = hasImageCapture() || hasVideoCapture()
-
-    /**
-     * Returns `true` if the capture options include document capture.
-     */
-    fun hasFileCapture(): Boolean = this is Any || this is Document
-
-    /**
-     * Returns a list of allowed mime types for this capture option.
-     */
-    fun getAllowedMimeTypes(): List<String> {
-        return when (this) {
-            is Any -> listOf("*/*")
-            Audio -> listOf("audio/*")
-            Document -> listOf("application/*", "text/*")
-            Image -> listOf("image/*")
-            Signature -> listOf("image/*")
-            Video -> listOf("video/*")
-            Unknown -> emptyList()
         }
     }
 }
