@@ -139,7 +139,6 @@ internal fun AttachmentFormElement(
                     AddAttachment(
                         onFocused = onFocused,
                         stateId = stateId,
-                        //captureOptions = captureOptions,
                         inputType = inputType,
                         hasCameraPermission = hasCameraPermission
                     )
