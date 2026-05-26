@@ -30,7 +30,7 @@ import androidx.compose.runtime.setValue
 internal class ImageAttachmentsFormInput(
     inputMethod: InputMethod,
     maxImageSize: Int? = null
-) {
+) : AttachmentsFormInput() {
     var inputMethod by mutableStateOf(inputMethod)
 
     /**
