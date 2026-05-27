@@ -99,6 +99,10 @@ android {
     }
 }
 
+apiValidation {
+    ignoredClasses.add("com.arcgismaps.toolkit.geoviewcompose.BuildConfig")
+}
+
 dependencies {
     api(arcgis.mapsSdk)
     implementation(platform(libs.androidx.compose.bom))
