@@ -18,6 +18,14 @@
 
 plugins {
     `kotlin-dsl`
+    `maven-publish`
+}
+
+tasks {
+    validatePlugins {
+        enableStricterValidation = true
+        failOnWarning = true
+    }
 }
 
 gradlePlugin {
@@ -44,6 +52,12 @@ gradlePlugin {
         register("microappConvention") {
             id = "microapp-convention-plugin"
             implementationClass = "MicroappConventionPlugin"
+        }
+
+        register("artifactDeploy") {
+            group = "internal"
+            id = "artifact-deploy"
+            implementationClass = "ArtifactPublisher"
         }
     }
 }
