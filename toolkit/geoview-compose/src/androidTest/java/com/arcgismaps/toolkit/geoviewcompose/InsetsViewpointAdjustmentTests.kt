@@ -37,7 +37,6 @@ import com.arcgismaps.mapping.view.InsetsViewpointAdjustmentType
 import com.arcgismaps.mapping.view.LocationDisplay
 import com.arcgismaps.sharedtestutilities.assertIsLoaded
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
@@ -67,7 +66,7 @@ class InsetsViewpointAdjustmentTests {
      * @since 300.1.0
      */
     @Test
-    fun testInsetsViewpointAdjustment() = runBlocking {
+    fun testInsetsViewpointAdjustment() = runTest {
         // Create and load a map
         val mapViewProxy = MapViewProxy()
         val map = ArcGISMap(SpatialReference.wgs84())
