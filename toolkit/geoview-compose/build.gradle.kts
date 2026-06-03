@@ -18,11 +18,16 @@
 
 plugins {
     id("com.android.library")
+    id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
     alias(libs.plugins.android.integration.testing)
     id("org.jetbrains.kotlin.plugin.compose")
     id("artifact-deploy")
     alias(libs.plugins.kotlin.convention.plugin)
     alias(libs.plugins.binary.compatibility.validator)
+}
+
+secrets {
+    defaultPropertiesFileName = "secrets.defaults.properties"
 }
 
 val toolkitTests = project.findProperty("toolkitTestDir") as String
@@ -49,6 +54,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 
     sourceSets {
@@ -103,6 +109,10 @@ android {
             // This is the default variant.
         }
     }
+}
+
+apiValidation {
+    ignoredClasses.add("com.arcgismaps.toolkit.geoviewcompose.BuildConfig")
 }
 
 dependencies {
