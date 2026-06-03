@@ -36,7 +36,7 @@ import kotlin.time.Duration.Companion.seconds
 import kotlin.time.DurationUnit
 
 /**
- * Used to perform operations on a composable MapView or SceneView.
+ * Used to perform operations on a composable MapView, SceneView, or LocalSceneView.
  *
  * @since 200.4.0
  */

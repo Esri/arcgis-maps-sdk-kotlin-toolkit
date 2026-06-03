@@ -19,6 +19,7 @@
 package com.arcgismaps.toolkit.ar.internal
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -165,6 +166,7 @@ internal val Pose.transformationMatrix: TransformationMatrix
  *
  * @since 200.7.0
  */
+@SuppressLint("LocalContextGetResourceValueCall")
 @Composable
 internal fun rememberArCoreInstalled(
     onFailed: (IllegalStateException) -> Unit
@@ -197,6 +199,7 @@ internal fun rememberArCoreInstalled(
  * @return A [State] that will be true when all permissions are granted.
  * @since 200.7.0
  */
+@SuppressLint("LocalContextGetResourceValueCall")
 @Composable
 internal fun rememberPermissionsGranted(
     permissionsToRequest: List<String>,

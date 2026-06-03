@@ -19,10 +19,11 @@
 
 plugins {
     id("com.android.library")
-    id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
     id("artifact-deploy")
-    alias(libs.plugins.binary.compatibility.validator) apply true
+
+    alias(libs.plugins.kotlin.convention.plugin)
+    alias(libs.plugins.binary.compatibility.validator)
 }
 
 kotlin {
@@ -71,7 +72,6 @@ android {
      * Configures the test report for connected (instrumented) tests to be copied to a central
      * folder in the project's root directory.
      */
-    @Suppress("UnstableApiUsage")
     testOptions {
         targetSdk = libs.versions.compileSdk.get().toInt()
         val connectedTestReportsPath: String by project

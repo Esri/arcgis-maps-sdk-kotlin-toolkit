@@ -184,6 +184,7 @@ internal fun FeatureFormDialog(states: FormStateCollection) {
     val dialogType by dialogRequester.requestFlow.collectAsState()
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    val attachmentError = stringResource(R.string.attachment_error)
     when (dialogType) {
         is DialogType.ComboBoxDialog -> {
             val stateId = (dialogType as DialogType.ComboBoxDialog).stateId
@@ -264,7 +265,7 @@ internal fun FeatureFormDialog(states: FormStateCollection) {
                     state.addAttachmentFromUri(uri, context, false).onFailure {
                         showError(
                             context,
-                            it.message ?: context.getString(R.string.attachment_error)
+                            it.message ?: attachmentError
                         )
                     }
                     dialogRequester.dismissDialog()
@@ -288,7 +289,7 @@ internal fun FeatureFormDialog(states: FormStateCollection) {
                     state.addAttachmentFromUri(uri, context, false).onFailure {
                         showError(
                             context,
-                            it.message ?: context.getString(R.string.attachment_error)
+                            it.message ?: attachmentError
                         )
                     }
                     dialogRequester.dismissDialog()
@@ -312,7 +313,7 @@ internal fun FeatureFormDialog(states: FormStateCollection) {
                     state.addAttachmentFromUri(uri, context, true).onFailure {
                         showError(
                             context,
-                            it.message ?: context.getString(R.string.attachment_error)
+                            it.message ?: attachmentError
                         )
                     }
                     dialogRequester.dismissDialog()
@@ -424,7 +425,7 @@ internal fun computeWindowSizeClasses(context: Context): WindowSizeClass {
     try {
         val windowSizeClass = WindowSizeClass.compute(width / density, height / density)
         return windowSizeClass
-    } catch (ex: IllegalArgumentException) {
+    } catch (_: IllegalArgumentException) {
         // if the calculation has thrown an exception due to width or height being negative (like
         // in a preview), then use a default size of 400x900dp which indicates a compact size
         // representing 99.96% of phones in portrait

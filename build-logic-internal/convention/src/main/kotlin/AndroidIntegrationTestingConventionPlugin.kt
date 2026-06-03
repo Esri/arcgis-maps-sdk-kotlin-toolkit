@@ -16,15 +16,13 @@
  *
  */
 
-import com.android.build.gradle.LibraryExtension
-import com.android.build.gradle.internal.tasks.factory.dependsOn
+import com.android.build.api.dsl.LibraryExtension
+import com.android.build.api.variant.LibraryAndroidComponentsExtension
 import com.arcgismaps.GrantDevicePermissions
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.internal.Actions.with
-import org.gradle.kotlin.dsl.provideDelegate
 import org.gradle.kotlin.dsl.register
-import java.util.Locale
 
 /**
  * Convention plugin for Android library modules that wire prerequisite tasks for
@@ -46,48 +44,53 @@ import java.util.Locale
  * - `com.android.library` is applied on the target module.
  * - Gradle property `syncTestDataBeforeInstrumentedTests` is defined (`true`/`false`).
  */
+@Suppress("UNUSED")
 class AndroidIntegrationTestingConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
             pluginManager.withPlugin("com.android.library") {
-                val android = extensions.getByType(LibraryExtension::class.java)
-
-                // Registers a module-specific `grantDevicePermissions` task for the test app.
-                tasks.register<GrantDevicePermissions>("grantDevicePermissions") {
-                    adbExe.set(android.adbExecutable.absoluteFile)
-                    testApplicationId.set(android.defaultConfig.testApplicationId)
-                }
-
-                afterEvaluate {
-
-                    android.testVariants.forEach { testVariant ->
-                        val capitalizedTestVariantName =
-                            testVariant.name.replaceFirstChar {
-                                if (it.isLowerCase()) {
-                                    it.titlecase(Locale.US)
-                                }
-                                else {
-                                    it.toString()
-                                }
-                            }
-                        tasks.named("connected$capitalizedTestVariantName") {
-                            val syncTestDataBeforeInstrumentedTests: String by project
-
-                            if (syncTestDataBeforeInstrumentedTests.toBoolean()) {
-                                // Uses adb to sync the test data to the test device.
-                                dependsOn(gradle.includedBuild("build-logic-internal").task(":syncTestData"))
-                            }
-                            // Grants storage permissions requested by the test app.
-                            dependsOn("grantDevicePermissions")
-                            // Deletes ic-output folder before running connectedAndroidTests
-                            dependsOn(gradle.includedBuild("build-logic-internal").task(":deleteICOutput"))
-                        }
-
-                        // Make sure the permissions task only runs after the install task, otherwise the app
-                        // may not be installed yet.
-                        tasks.named("grantDevicePermissions").dependsOn("install$capitalizedTestVariantName")
+                val androidDsl = extensions.getByType(LibraryExtension::class.java)
+                val androidComponents =
+                    extensions.getByType(LibraryAndroidComponentsExtension::class.java)
+                val grantDevicePermissionsTask =
+                    tasks.register<GrantDevicePermissions>("grantDevicePermissions") {
+                        adbExe.set(androidComponents.sdkComponents.adb.map { it.asFile.absoluteFile })
+                        testApplicationId.set(project.provider {
+                            androidDsl.defaultConfig.testApplicationId.orEmpty()
+                        })
                     }
+
+                val syncTestDataBeforeInstrumentedTests =
+                    project.findProperty("syncTestDataBeforeInstrumentedTests")
+                        ?.toString()?.toBoolean() ?: false
+
+                tasks.matching {
+                    it.name.startsWith("connected") && it.name.endsWith("AndroidTest")
+                }.configureEach {
+                    dependsOn(grantDevicePermissionsTask)
+                    if (syncTestDataBeforeInstrumentedTests) {
+                        dependsOn(
+                            gradle.includedBuild("build-logic-internal")
+                                .task(":syncTestData")
+                        )
+                    }
+
+                    dependsOn(
+                        gradle.includedBuild("build-logic-internal")
+                            .task(":deleteICOutput")
+                    )
                 }
+
+                grantDevicePermissionsTask.configure {
+                    dependsOn(
+                        tasks.matching {
+                            it.name.startsWith("install") && it.name.endsWith("AndroidTest")
+                        }
+                    )
+                }
+
             }
-    } }
+
+        }
+    }
 }
