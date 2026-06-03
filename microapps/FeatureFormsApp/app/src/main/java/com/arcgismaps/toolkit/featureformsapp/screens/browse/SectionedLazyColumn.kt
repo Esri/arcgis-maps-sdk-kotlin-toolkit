@@ -57,6 +57,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -69,7 +70,6 @@ import com.arcgismaps.portal.PortalFolder
 import com.arcgismaps.toolkit.featureformsapp.R
 import kotlinx.coroutines.launch
 import java.time.Instant
-import java.util.Locale
 
 @Composable
 fun SectionedLazyColumn(
@@ -105,7 +105,7 @@ fun SectionedLazyColumn(
                     count = portalFolders.size,
                     modifier = Modifier
                         .fillMaxWidth(),
-                    onExpanded = { expanded ->
+                    onExpanded = { _ ->
                         isFolderViewExpanded = !isFolderViewExpanded
                         scope.launch {
                             if (folders.isEmpty()) {
@@ -153,7 +153,7 @@ fun SectionedLazyColumn(
             MapListItem(
                 title = item.title,
                 lastModified = item.modified,
-                shareType = item.access.encoding.uppercase(Locale.getDefault()),
+                shareType = item.access.encoding.uppercase(LocalLocale.current.platformLocale),
                 thumbnail = item.thumbnail,
                 modifier = Modifier.fillMaxWidth().height(100.dp)
             ) {

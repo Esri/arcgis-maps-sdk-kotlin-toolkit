@@ -21,7 +21,7 @@ import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasText
-import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -74,7 +74,7 @@ class DateTimeFieldTests : FeatureFormTestRunner(
             dialogSurface.assertIsDisplayed()
             val cancel = dialogSurface.onChildWithContentDescription("cancel")
             cancel.performClick()
-        } catch (t: Throwable) {
+        } catch (_: Throwable) {
             // dialog wasn't open.
         }
     }
@@ -162,7 +162,7 @@ class DateTimeFieldTests : FeatureFormTestRunner(
             try {
                 dateTimeField.assertEditableTextEquals("No value")
                 false
-            } catch (t: Throwable) {
+            } catch (_: Throwable) {
                 true
             }
         )
@@ -214,7 +214,7 @@ class DateTimeFieldTests : FeatureFormTestRunner(
             try {
                 dialogSurface.onChildWithContentDescription("toggle date and time")
                 false
-            } catch (e: Throwable) {
+            } catch (_: Throwable) {
                 true
             }
         )

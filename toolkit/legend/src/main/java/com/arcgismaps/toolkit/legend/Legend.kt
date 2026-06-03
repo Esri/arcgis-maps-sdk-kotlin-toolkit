@@ -44,7 +44,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -138,7 +138,7 @@ public fun Legend(
     title: String = stringResource(R.string.title),
     typography: Typography = LegendDefaults.typography()
 ) {
-    val density = LocalContext.current.resources.displayMetrics.density
+    val density = LocalResources.current.displayMetrics.density
     var initialized: Boolean by remember(operationalLayers, basemap) { mutableStateOf(false) }
     val layerContentData =
         remember(operationalLayers, basemap) {
@@ -257,11 +257,17 @@ public fun Legend(
 
     if (showErrorDialog) {
         AlertDialog(
-            onDismissRequest = { showErrorDialog = false },
+            onDismissRequest = {
+                @Suppress("AssignedValueIsNeverRead")
+                showErrorDialog = false
+            },
             title = { Text(text = stringResource(R.string.error)) },
             text = { Text(text = errorMessage) },
             confirmButton = {
-                Button(onClick = { showErrorDialog = false }) {
+                Button(onClick = {
+                    @Suppress("AssignedValueIsNeverRead")
+                    showErrorDialog = false
+                }) {
                     Text("OK")
                 }
             }
@@ -396,9 +402,9 @@ private fun Legend(
     title: String,
     typography: Typography
 ) {
-    val localContext = LocalContext.current
+    val legendComponent = stringResource(R.string.legend_component)
     Column(modifier = modifier
-        .semantics { contentDescription = localContext.getString(R.string.legend_component) }) {
+        .semantics { contentDescription = legendComponent }) {
         if (title.isNotEmpty()) {
             Text(
                 text = title,

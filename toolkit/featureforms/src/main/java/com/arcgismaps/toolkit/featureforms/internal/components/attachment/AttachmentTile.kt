@@ -16,6 +16,7 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.components.attachment
 
+import android.annotation.SuppressLint
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.graphics.Bitmap
@@ -87,6 +88,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import java.io.File
 
+@SuppressLint("LocalContextGetResourceValueCall")
 @Composable
 internal fun AttachmentTile(
     state: FormAttachmentState,
@@ -216,7 +218,7 @@ internal fun AttachmentTile(
                             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                             try {
                                 context.startActivity(intent)
-                            } catch (e: ActivityNotFoundException) {
+                            } catch (_: ActivityNotFoundException) {
                                 // show a toast if there is no app to open the file type
                                 Toast.makeText(context, R.string.no_app_found, Toast.LENGTH_SHORT)
                                     .show()

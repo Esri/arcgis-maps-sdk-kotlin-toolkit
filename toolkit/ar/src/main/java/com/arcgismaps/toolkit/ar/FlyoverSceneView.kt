@@ -29,6 +29,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.ArcGISScene
 import com.arcgismaps.mapping.TimeExtent
@@ -300,12 +301,13 @@ public fun FlyoverSceneView(
         }
     )
 
+    val permissionsNotGranted = stringResource(R.string.camera_permission_not_granted)
     val cameraPermissionGranted by rememberPermissionsGranted(listOf(Manifest.permission.CAMERA)) {
         // onNotGranted
         initializationStatus.update(
             FlyoverSceneViewStatus.FailedToInitialize(
                 IllegalStateException(
-                    context.getString(R.string.camera_permission_not_granted)
+                    permissionsNotGranted
                 )
             ),
             onInitializationStatusChanged
@@ -345,7 +347,7 @@ public fun FlyoverSceneView(
 
         ArCameraFeed(
             session = arSessionWrapper,
-            onFrame = { frame, displayRotation, session ->
+            onFrame = { frame, _, _ ->
                 if (frame.camera.trackingState == TrackingState.TRACKING) {
                     proxy.cameraController.transformationMatrix =
                         frame.camera.displayOrientedPose.transformationMatrix

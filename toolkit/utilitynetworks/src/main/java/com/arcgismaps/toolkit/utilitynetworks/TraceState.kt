@@ -579,7 +579,7 @@ public class TraceState(
                             setCurrentError(it)
                             _addStartingPointMode.value = AddStartingPointMode.Stopped
                             showScreen(TraceNavRoute.TraceError)
-                            return
+                            return@withProgressIndicator
                         }
                     }
                 }

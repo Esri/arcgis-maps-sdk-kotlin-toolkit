@@ -4,7 +4,7 @@
 
 ## Description
 
-The Legend visually explains the symbols used on a map. It shows the names of layers, sublayers and the legendInfo used in the map or scene. The legend will display the layer symbology and description so users can better understand what is being viewed in the map view or scene view. The Legend is dynamic and only contains information about visible layers. As layers go in and out of scale range, the legend updates to include only those layers that are visible to the user at that scale.
+The Legend visually explains the symbols used on a map. It shows the names of layers, sublayers and the legendInfo used in the map or scene. The legend will display the layer symbology and description so users can better understand what is being viewed in the MapView, SceneView, or LocalSceneView. The Legend is dynamic and only contains information about visible layers. As layers go in and out of scale range, the legend updates to include only those layers that are visible to the user at that scale.
 
 ![Screenshot](screenshot.png)
 
