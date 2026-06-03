@@ -84,6 +84,7 @@ internal fun MediaTile(
             model = model,
             title = state.title,
             caption = state.caption,
+            altText = state.altText,
             modifier = Modifier.padding(padding)
         )
     }
@@ -130,6 +131,7 @@ internal fun MediaView(
     model: String,
     title: String,
     caption: String,
+    altText: String?,
     modifier: Modifier = Modifier
 ) {
     Box(
@@ -141,7 +143,7 @@ internal fun MediaView(
                     .data(model)
                     .crossfade(1000)
                     .build(),
-                contentDescription = title,
+                contentDescription = altText ?: title,
                 contentScale = ContentScale.FillBounds,
                 modifier = modifier.fillMaxSize(),
                 alignment = Alignment.Center,
