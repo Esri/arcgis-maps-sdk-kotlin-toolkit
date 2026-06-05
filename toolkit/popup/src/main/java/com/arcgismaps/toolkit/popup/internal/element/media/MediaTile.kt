@@ -39,6 +39,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.DefaultAlpha
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -84,6 +85,7 @@ internal fun MediaTile(
             model = model,
             title = state.title,
             caption = state.caption,
+            altText = state.altText,
             modifier = Modifier.padding(padding)
         )
     }
@@ -130,18 +132,20 @@ internal fun MediaView(
     model: String,
     title: String,
     caption: String,
+    altText: String?,
     modifier: Modifier = Modifier
 ) {
     Box(
         modifier = Modifier
             .fillMaxSize()
+            .semantics(mergeDescendants = false) {}
     ) {
             AsyncImage(
                 model = ImageRequest.Builder(LocalContext.current)
                     .data(model)
                     .crossfade(1000)
                     .build(),
-                contentDescription = title,
+                contentDescription = altText ?: title,
                 contentScale = ContentScale.FillBounds,
                 modifier = modifier.fillMaxSize(),
                 alignment = Alignment.Center,
