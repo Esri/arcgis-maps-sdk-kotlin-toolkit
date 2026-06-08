@@ -27,7 +27,7 @@ import androidx.compose.runtime.setValue
  * A prototype implementation for the image attachments form input class.
  */
 @Stable
-internal class ImageAttachmentsFormInput(
+internal class ImageFormInput(
     inputMethod: InputMethod,
     maxImageSize: Int? = null
 ) : AttachmentsFormInput() {

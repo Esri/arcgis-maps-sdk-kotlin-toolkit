@@ -18,16 +18,8 @@ package com.arcgismaps.toolkit.featureforms.internal.components.attachment
 
 // Prototype
 
-/**
- * A prototype implementation for a generic attachments form input class.
- */
-internal class GenericAttachmentFormInput(
-    val associationType: AttachmentAssociationType,
-    val inputTypes : List<AttachmentsFormInput>
-) : AttachmentsFormInput()
-
-internal sealed class AttachmentAssociationType {
-    data object Any : AttachmentAssociationType()
-    data object Exact : AttachmentAssociationType()
-    data object ExactOrNone : AttachmentAssociationType()
+internal sealed class AttachmentKeywordAssociation {
+    data object Any : AttachmentKeywordAssociation()
+    data object Exact : AttachmentKeywordAssociation()
+    data object ExactOrNone : AttachmentKeywordAssociation()
 }
