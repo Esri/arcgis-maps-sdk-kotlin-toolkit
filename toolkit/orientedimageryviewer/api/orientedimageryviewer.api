@@ -1,0 +1,8 @@
+public abstract interface class com/arcgismaps/toolkit/orientedimageryviewer/OrientedimageryviewerInterface {
+	public abstract fun getSomeProperty ()Lkotlinx/coroutines/flow/StateFlow;
+}
+
+public final class com/arcgismaps/toolkit/orientedimageryviewer/OrientedimageryviewerKt {
+	public static final fun Orientedimageryviewer (Lcom/arcgismaps/toolkit/orientedimageryviewer/OrientedimageryviewerInterface;Landroidx/compose/runtime/Composer;I)V
+}
+
