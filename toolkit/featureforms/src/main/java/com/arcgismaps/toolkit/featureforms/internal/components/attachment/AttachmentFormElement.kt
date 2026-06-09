@@ -74,7 +74,7 @@ internal fun AttachmentFormElement(
         label = state.label,
         description = state.description,
         isEditable = editable,
-        inputType = state.inputType,
+        inputs = state.inputs,
         hasCameraPermission = state.hasCameraPermissions(context),
         allowUserRename = state.allowUserRename,
         displayFilename = state.displayFilename,
@@ -95,7 +95,7 @@ internal fun AttachmentFormElement(
     label: String,
     description: String,
     isEditable: Boolean,
-    inputType: AttachmentsFormInput,
+    inputs: List<AttachmentsFormInput>,
     hasCameraPermission: Boolean,
     allowUserRename: Boolean,
     displayFilename: Boolean,
@@ -139,7 +139,7 @@ internal fun AttachmentFormElement(
                     AddAttachment(
                         onFocused = onFocused,
                         stateId = stateId,
-                        inputType = inputType,
+                        inputs = inputs,
                         hasCameraPermission = hasCameraPermission
                     )
                 }
@@ -342,8 +342,10 @@ private fun AttachmentFormElementPreview() {
         label = "Attachments",
         description = "Add attachments",
         isEditable = true,
-        inputType = ImageAttachmentsFormInput(
-            inputMethod = ImageAttachmentsFormInput.InputMethod.Capture
+        inputs = listOf(
+            ImageFormInput(
+                inputMethod = ImageFormInput.InputMethod.Capture
+            )
         ),
         hasCameraPermission = true,
         allowUserRename = true,

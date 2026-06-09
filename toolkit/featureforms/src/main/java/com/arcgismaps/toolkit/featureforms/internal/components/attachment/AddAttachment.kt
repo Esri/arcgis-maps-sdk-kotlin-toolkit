@@ -67,15 +67,15 @@ import java.time.Instant
 internal fun AddAttachment(
     onFocused: () -> Unit,
     stateId: Int,
-    inputType: AttachmentsFormInput,
+    inputs: List<AttachmentsFormInput>,
     hasCameraPermission: Boolean,
 ) {
     var showMenu by remember { mutableStateOf(false) }
     val dialogRequester = LocalDialogRequester.current
     val scope = rememberCoroutineScope()
     val pickerStyle = remember { MutableSharedFlow<PickerStyle>() }
-    val captureOptions = remember(inputType) {
-        inputType.getCaptureOptions()
+    val captureOptions = remember(inputs) {
+        inputs.getCaptureOptions().merge()
     }
 
     Box {
@@ -339,34 +339,39 @@ private sealed class PickerStyle {
 /**
  * Determines the capture options available for an attachment form input.
  */
-private fun AttachmentsFormInput.getCaptureOptions(): List<CaptureOptions> {
-    return when (this) {
-        is ImageAttachmentsFormInput -> {
-            when (inputMethod) {
-                ImageAttachmentsFormInput.InputMethod.Capture -> listOf(CaptureOptions.CaptureImage)
-                ImageAttachmentsFormInput.InputMethod.Upload -> listOf(
-                    CaptureOptions.Gallery(mediaType = ActivityResultContracts.PickVisualMedia.ImageOnly),
-                    CaptureOptions.File(allowedMimeTypes = listOf("image/*"))
-                )
+private fun List<AttachmentsFormInput>.getCaptureOptions(): List<CaptureOptions> {
+    return flatMap { input ->
+        when (input) {
+            is ImageFormInput -> {
+                when (input.inputMethod) {
+                    ImageFormInput.InputMethod.Capture -> listOf(CaptureOptions.CaptureImage)
+                    ImageFormInput.InputMethod.Upload -> listOf(
+                        CaptureOptions.Gallery(
+                            mediaType = ActivityResultContracts.PickVisualMedia.ImageOnly
+                        ),
+                        CaptureOptions.File(allowedMimeTypes = listOf("image/*"))
+                    )
 
-                ImageAttachmentsFormInput.InputMethod.Any -> listOf(
-                    CaptureOptions.CaptureImage,
-                    CaptureOptions.Gallery(mediaType = ActivityResultContracts.PickVisualMedia.ImageOnly),
-                    CaptureOptions.File(allowedMimeTypes = listOf("image/*"))
-                )
+
+                    ImageFormInput.InputMethod.Any -> listOf(
+                        CaptureOptions.CaptureImage,
+                        CaptureOptions.Gallery(
+                            mediaType = ActivityResultContracts.PickVisualMedia.ImageOnly
+                        ),
+                        CaptureOptions.File(allowedMimeTypes = listOf("image/*"))
+                    )
+                }
             }
-        }
 
-        is GenericAttachmentFormInput -> {
-            inputTypes.flatMap { type ->
-                type.getCaptureOptions()
-            }.merge()
+            is DocumentFormInput -> listOf(
+                CaptureOptions.File(allowedMimeTypes = listOf("application/*", "text/*"))
+            )
         }
     }
 }
 
 /**
- * A [GenericAttachmentFormInput] may contain multiple input types, which can lead to duplicate
+ * The list of capture options may contain multiple input types, which can lead to duplicate
  * capture options. This function merges those duplicate options into one.
  *
  * For example, if there are multiple gallery options with different media types, they will be

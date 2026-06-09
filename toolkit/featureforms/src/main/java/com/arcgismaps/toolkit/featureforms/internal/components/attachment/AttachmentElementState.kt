@@ -126,14 +126,14 @@ internal class AttachmentElementState(
      * The input type for the attachment form element. This is determined based on the allowed
      * attachment types specified by the form element.
      */
-    val inputType = GenericAttachmentFormInput(
-        associationType = AttachmentAssociationType.Exact,
-        inputTypes = listOf(
-            ImageAttachmentsFormInput(
-                inputMethod = ImageAttachmentsFormInput.InputMethod.Any
-            )
-        )
+    val inputs : List<AttachmentsFormInput> = listOf(
+        ImageFormInput(
+            inputMethod = ImageFormInput.InputMethod.Any
+        ),
+        DocumentFormInput()
     ) // formElement.input
+
+    val attachmentKeywordAssociation : AttachmentKeywordAssociation = AttachmentKeywordAssociation.Exact
 
     /**
      * The state of the lazy list that displays the [attachments].
