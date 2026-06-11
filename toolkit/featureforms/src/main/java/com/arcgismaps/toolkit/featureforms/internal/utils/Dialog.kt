@@ -60,7 +60,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.time.Instant
-import kotlin.math.max
 
 /**
  * Local containing the default [DialogRequester] for providing the same instance in the

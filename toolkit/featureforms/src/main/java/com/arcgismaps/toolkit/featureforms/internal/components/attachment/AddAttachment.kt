@@ -44,7 +44,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -60,10 +59,7 @@ import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.internal.utils.AttachmentsFileProvider
 import com.arcgismaps.toolkit.featureforms.internal.utils.DialogType
 import com.arcgismaps.toolkit.featureforms.internal.utils.LocalDialogRequester
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.launch
 import java.time.Instant
-import kotlin.math.max
 
 /**
  * A component that provides UI for adding attachments.
@@ -388,18 +384,18 @@ private fun List<AttachmentsFormInput>.getCaptureOptions(): List<CaptureOptions>
                 when (input.inputMethod) {
                     InputMethod.Capture -> listOf(CaptureOptions.CaptureAudio(input.maxDuration))
                     InputMethod.Upload -> listOf(
-                        CaptureOptions.File(allowedMimeTypes = listOf("audio/*"))
+                        CaptureOptions.File(allowedMimeTypes = input.getMimeTypes())
                     )
 
                     InputMethod.Any -> listOf(
                         CaptureOptions.CaptureAudio(input.maxDuration),
-                        CaptureOptions.File(allowedMimeTypes = listOf("audio/*"))
+                        CaptureOptions.File(allowedMimeTypes = input.getMimeTypes())
                     )
                 }
             }
 
             is DocumentFormInput -> listOf(
-                CaptureOptions.File(allowedMimeTypes = listOf("application/*", "text/*"))
+                CaptureOptions.File(allowedMimeTypes = input.getMimeTypes())
             )
 
             is ImageFormInput -> {
@@ -409,7 +405,7 @@ private fun List<AttachmentsFormInput>.getCaptureOptions(): List<CaptureOptions>
                         CaptureOptions.Gallery(
                             mediaType = ActivityResultContracts.PickVisualMedia.ImageOnly
                         ),
-                        CaptureOptions.File(allowedMimeTypes = listOf("image/*"))
+                        CaptureOptions.File(allowedMimeTypes = input.getMimeTypes())
                     )
 
                     InputMethod.Any -> listOf(
@@ -417,7 +413,7 @@ private fun List<AttachmentsFormInput>.getCaptureOptions(): List<CaptureOptions>
                         CaptureOptions.Gallery(
                             mediaType = ActivityResultContracts.PickVisualMedia.ImageOnly
                         ),
-                        CaptureOptions.File(allowedMimeTypes = listOf("image/*"))
+                        CaptureOptions.File(allowedMimeTypes = input.getMimeTypes())
                     )
                 }
             }
@@ -429,7 +425,7 @@ private fun List<AttachmentsFormInput>.getCaptureOptions(): List<CaptureOptions>
                         CaptureOptions.Gallery(
                             mediaType = ActivityResultContracts.PickVisualMedia.VideoOnly
                         ),
-                        CaptureOptions.File(allowedMimeTypes = listOf("video/*"))
+                        CaptureOptions.File(allowedMimeTypes = input.getMimeTypes())
                     )
 
                     InputMethod.Any -> listOf(
@@ -437,7 +433,7 @@ private fun List<AttachmentsFormInput>.getCaptureOptions(): List<CaptureOptions>
                         CaptureOptions.Gallery(
                             mediaType = ActivityResultContracts.PickVisualMedia.VideoOnly
                         ),
-                        CaptureOptions.File(allowedMimeTypes = listOf("video/*"))
+                        CaptureOptions.File(allowedMimeTypes = input.getMimeTypes())
                     )
                 }
             }
@@ -497,5 +493,22 @@ internal fun Long.toIntClamped(): Int {
         this > Int.MAX_VALUE -> Int.MAX_VALUE
         this < Int.MIN_VALUE -> Int.MIN_VALUE
         else -> this.toInt()
+    }
+}
+
+/**
+ * Gets the list of MIME types supported by an attachment form input.
+ *
+ * Suppresses the redundant else in when warning, as new input types may be added in the future and
+ * this provides binary compatibility without requiring changes to this function.
+ */
+@Suppress("REDUNDANT_ELSE_IN_WHEN")
+internal fun AttachmentsFormInput.getMimeTypes(): List<String> {
+    return when (this) {
+        is AudioFormInput -> listOf("audio/*")
+        is DocumentFormInput -> listOf("application/*", "text/*")
+        is ImageFormInput -> listOf("image/*")
+        is VideoFormInput -> listOf("video/*")
+        else -> emptyList()
     }
 }
