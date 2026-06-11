@@ -17,8 +17,9 @@
 package com.arcgismaps.toolkit.featureforms.internal.components.attachment
 
 /**
- * A prototype implementation for the document attachments form input class.
+ * A prototype implementation for the video attachments form input class.
  */
-internal class DocumentFormInput(
-    val maxFileSize: Int = Int.MAX_VALUE
+internal class VideoFormInput(
+    val inputMethod: InputMethod,
+    val maxDuration: Long = Long.MAX_VALUE
 ) : AttachmentsFormInput()

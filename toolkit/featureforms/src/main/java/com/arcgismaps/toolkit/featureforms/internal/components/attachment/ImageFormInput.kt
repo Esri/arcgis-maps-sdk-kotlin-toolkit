@@ -40,10 +40,4 @@ internal class ImageFormInput(
      * images will not be resized.
      */
     var maxImageSize by mutableStateOf(maxImageSize)
-
-    enum class InputMethod {
-        Any,
-        Capture,
-        Upload
-    }
 }

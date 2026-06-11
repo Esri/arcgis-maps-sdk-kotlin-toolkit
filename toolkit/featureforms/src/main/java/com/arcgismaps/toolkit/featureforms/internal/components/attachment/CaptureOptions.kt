@@ -23,9 +23,9 @@ import androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia
  * attachments that can be captured by the UI.
  */
 internal sealed class CaptureOptions {
-    data object CaptureAudio : CaptureOptions()
+    data class CaptureAudio(val maxDuration: Long) : CaptureOptions()
     data object CaptureImage : CaptureOptions()
-    data object CaptureVideo : CaptureOptions()
+    data class CaptureVideo(val maxDuration: Long) : CaptureOptions()
     data class Gallery(val mediaType: VisualMediaType) : CaptureOptions()
     data class File(val allowedMimeTypes: List<String>) : CaptureOptions()
 }

@@ -42,6 +42,7 @@ import com.arcgismaps.toolkit.featureforms.internal.components.attachment.FilePi
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.GalleryPicker
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.ImageCapture
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.RenameAttachmentDialog
+import com.arcgismaps.toolkit.featureforms.internal.components.attachment.VideoCapture
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.addAttachmentFromUri
 import com.arcgismaps.toolkit.featureforms.internal.components.barcode.BarcodeScanner
 import com.arcgismaps.toolkit.featureforms.internal.components.barcode.BarcodeTextFieldState
@@ -59,6 +60,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.time.Instant
+import kotlin.math.max
 
 /**
  * Local containing the default [DialogRequester] for providing the same instance in the
@@ -119,6 +121,16 @@ internal sealed class DialogType {
      */
     data class ImageCaptureDialog(
         val stateId: Int
+    ) : DialogType()
+
+    /**
+     * Indicates a video capture dialog.
+     *
+     * @param stateId The id of the [AttachmentElementState] that requested the dialog.
+     */
+    data class VideoCaptureDialog(
+        val stateId: Int,
+        val maxDuration: Long
     ) : DialogType()
 
     /**
@@ -259,6 +271,30 @@ internal fun FeatureFormDialog(states: FormStateCollection) {
                 return
             }
             ImageCapture(
+                onDismissRequest = dialogRequester::dismissDialog
+            ) { uri ->
+                scope.launch {
+                    state.addAttachmentFromUri(uri, context, false).onFailure {
+                        showError(
+                            context,
+                            it.message ?: attachmentError
+                        )
+                    }
+                    dialogRequester.dismissDialog()
+                }
+            }
+        }
+
+        is DialogType.VideoCaptureDialog -> {
+            val stateId = (dialogType as DialogType.VideoCaptureDialog).stateId
+            val maxDuration = (dialogType as DialogType.VideoCaptureDialog).maxDuration
+            val state = states[stateId] as? AttachmentElementState
+            if (state == null) {
+                dialogRequester.dismissDialog()
+                return
+            }
+            VideoCapture(
+                maxDuration = maxDuration,
                 onDismissRequest = dialogRequester::dismissDialog
             ) { uri ->
                 scope.launch {

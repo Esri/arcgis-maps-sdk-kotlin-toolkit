@@ -94,12 +94,12 @@
     <string name="ff_time_picker_pm">PM</string>
 
     <string name="take_photo">Take Photo</string>
-    <string name="add_from_gallery">Add From Gallery</string>
+    <string name="add_from_gallery">Choose From Gallery</string>
     <string name="rename">Rename</string>
     <string name="delete">Delete</string>
     <string name="rename_attachment">Rename Attachment</string>
     <string name="name">Name</string>
-    <string name="add_file">Add From Files</string>
+    <string name="add_file">Choose From Files</string>
     <string name="attachment_error">Error Adding Attachment</string>
     <string name="no_app_found">No application found to open this file type.</string>
     <string name="attachment_too_large">The File is too large. Please add a file less than 50 MB.</string>
