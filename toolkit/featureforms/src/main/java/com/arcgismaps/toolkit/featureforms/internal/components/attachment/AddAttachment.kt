@@ -16,7 +16,10 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.components.attachment
 
+import android.content.Context
+import android.content.Intent
 import android.net.Uri
+import android.provider.MediaStore
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -28,6 +31,7 @@ import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Folder
 import androidx.compose.material.icons.rounded.Photo
 import androidx.compose.material.icons.rounded.PhotoCamera
+import androidx.compose.material.icons.rounded.Videocam
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -40,7 +44,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -56,8 +59,6 @@ import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.internal.utils.AttachmentsFileProvider
 import com.arcgismaps.toolkit.featureforms.internal.utils.DialogType
 import com.arcgismaps.toolkit.featureforms.internal.utils.LocalDialogRequester
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.launch
 import java.time.Instant
 
 /**
@@ -72,8 +73,6 @@ internal fun AddAttachment(
 ) {
     var showMenu by remember { mutableStateOf(false) }
     val dialogRequester = LocalDialogRequester.current
-    val scope = rememberCoroutineScope()
-    val pickerStyle = remember { MutableSharedFlow<PickerStyle>() }
     val captureOptions = remember(inputs) {
         inputs.getCaptureOptions().merge()
     }
@@ -98,7 +97,7 @@ internal fun AddAttachment(
         ) {
             captureOptions.forEach { option ->
                 when (option) {
-                    CaptureOptions.CaptureAudio -> {
+                    is CaptureOptions.CaptureAudio -> {
                         // not supported yet
                     }
 
@@ -113,16 +112,34 @@ internal fun AddAttachment(
                                 )
                             },
                             onClick = {
-                                scope.launch {
-                                    pickerStyle.emit(PickerStyle.Camera)
-                                    showMenu = false
-                                }
+                                dialogRequester.requestDialog(
+                                    DialogType.ImageCaptureDialog(stateId = stateId)
+                                )
+                                showMenu = false
                             }
                         )
                     }
 
                     is CaptureOptions.CaptureVideo if hasCameraPermission -> {
-                        // not supported yet
+                        DropdownMenuItem(
+                            text = { Text(text = "Take Video") },
+                            trailingIcon = {
+                                Icon(
+                                    imageVector = Icons.Rounded.Videocam,
+                                    contentDescription = "Take Video",
+                                    modifier = Modifier.alpha(0.4f)
+                                )
+                            },
+                            onClick = {
+                                dialogRequester.requestDialog(
+                                    DialogType.VideoCaptureDialog(
+                                        stateId = stateId,
+                                        maxDuration = option.maxDuration
+                                    )
+                                )
+                                showMenu = false
+                            }
+                        )
                     }
 
                     is CaptureOptions.Gallery -> {
@@ -131,15 +148,18 @@ internal fun AddAttachment(
                             trailingIcon = {
                                 Icon(
                                     imageVector = Icons.Rounded.Photo,
-                                    contentDescription = "Add From Gallery",
+                                    contentDescription = "Choose From Gallery",
                                     modifier = Modifier.alpha(0.4f)
                                 )
                             },
                             onClick = {
-                                scope.launch {
-                                    pickerStyle.emit(PickerStyle.PickMedia(option.mediaType))
-                                    showMenu = false
-                                }
+                                dialogRequester.requestDialog(
+                                    DialogType.GalleryPickerDialog(
+                                        stateId = stateId,
+                                        type = option.mediaType
+                                    )
+                                )
+                                showMenu = false
                             }
                         )
                     }
@@ -150,51 +170,23 @@ internal fun AddAttachment(
                             trailingIcon = {
                                 Icon(
                                     imageVector = Icons.Rounded.Folder,
-                                    contentDescription = "Add File",
+                                    contentDescription = "Choose From Files",
                                     modifier = Modifier.alpha(0.4f)
                                 )
                             },
                             onClick = {
-                                scope.launch {
-                                    pickerStyle.emit(PickerStyle.File(option.allowedMimeTypes))
-                                    showMenu = false
-                                }
+                                dialogRequester.requestDialog(
+                                    DialogType.FilePickerDialog(
+                                        stateId = stateId,
+                                        allowedTypes = option.allowedMimeTypes
+                                    )
+                                )
+                                showMenu = false
                             }
                         )
                     }
 
                     else -> {}
-                }
-            }
-        }
-    }
-    LaunchedEffect(Unit) {
-        pickerStyle.collect {
-            when (it) {
-                PickerStyle.Camera -> {
-                    dialogRequester.requestDialog(
-                        DialogType.ImageCaptureDialog(
-                            stateId = stateId
-                        )
-                    )
-                }
-
-                is PickerStyle.PickMedia -> {
-                    dialogRequester.requestDialog(
-                        DialogType.GalleryPickerDialog(
-                            stateId = stateId,
-                            type = it.type
-                        )
-                    )
-                }
-
-                is PickerStyle.File -> {
-                    dialogRequester.requestDialog(
-                        DialogType.FilePickerDialog(
-                            stateId = stateId,
-                            allowedTypes = it.allowedMimeTypes
-                        )
-                    )
                 }
             }
         }
@@ -241,6 +233,61 @@ internal fun ImageCapture(
         if (!hasLaunched) {
             hasLaunched = true
             cameraLauncher.launch(capturedImageUri)
+        }
+    }
+}
+
+/**
+ * Launches the camera to capture a video. When a video is captured, the [onVideoCaptured] callback
+ * is invoked with the URI of the captured video.
+ *
+ * @param onDismissRequest A request to dismiss the camera picker.
+ * @param onVideoCaptured A callback to invoke when a video is captured.
+ */
+@Composable
+internal fun VideoCapture(
+    maxDuration: Long,
+    onDismissRequest: () -> Unit,
+    onVideoCaptured: (Uri) -> Unit
+) {
+    val context = LocalContext.current
+    var hasLaunched by rememberSaveable {
+        mutableStateOf(false)
+    }
+    val capturedVideoUri = rememberSaveable(
+        saver = listSaver(
+            save = { listOf(it.toString()) },
+            restore = { it.first().toUri() }
+        )
+    ) {
+        val timeStamp = Instant.now().toEpochMilli()
+        AttachmentsFileProvider.createTempFileWithUri("VIDEO_$timeStamp", ".mp4", context)
+    }
+    val captureVideoContract = remember {
+        object : ActivityResultContracts.CaptureVideo() {
+            override fun createIntent(context: Context, input: Uri): Intent {
+                return super.createIntent(context, input).apply {
+                    // set the max duration limit for the captured video. The value must be clamped
+                    // to the range of Int values, as the intent extra only accepts Int values.
+                    putExtra(MediaStore.EXTRA_DURATION_LIMIT, maxDuration.toIntClamped())
+                }
+            }
+        }
+    }
+    val cameraLauncher = rememberLauncherForActivityResult(
+        contract = captureVideoContract,
+        onResult = { success ->
+            if (success) {
+                onVideoCaptured(capturedVideoUri)
+            } else {
+                onDismissRequest()
+            }
+        }
+    )
+    LaunchedEffect(Unit) {
+        if (!hasLaunched) {
+            hasLaunched = true
+            cameraLauncher.launch(capturedVideoUri)
         }
     }
 }
@@ -328,44 +375,68 @@ internal fun FilePicker(
 }
 
 /**
- * Determines the type of picker to launch.
- */
-private sealed class PickerStyle {
-    data object Camera : PickerStyle()
-    data class PickMedia(val type: VisualMediaType) : PickerStyle()
-    data class File(val allowedMimeTypes: List<String>) : PickerStyle()
-}
-
-/**
  * Determines the capture options available for an attachment form input.
  */
 private fun List<AttachmentsFormInput>.getCaptureOptions(): List<CaptureOptions> {
     return flatMap { input ->
         when (input) {
-            is ImageFormInput -> {
+            is AudioFormInput -> {
                 when (input.inputMethod) {
-                    ImageFormInput.InputMethod.Capture -> listOf(CaptureOptions.CaptureImage)
-                    ImageFormInput.InputMethod.Upload -> listOf(
-                        CaptureOptions.Gallery(
-                            mediaType = ActivityResultContracts.PickVisualMedia.ImageOnly
-                        ),
-                        CaptureOptions.File(allowedMimeTypes = listOf("image/*"))
+                    InputMethod.Capture -> listOf(CaptureOptions.CaptureAudio(input.maxDuration))
+                    InputMethod.Upload -> listOf(
+                        CaptureOptions.File(allowedMimeTypes = input.getMimeTypes())
                     )
 
-
-                    ImageFormInput.InputMethod.Any -> listOf(
-                        CaptureOptions.CaptureImage,
-                        CaptureOptions.Gallery(
-                            mediaType = ActivityResultContracts.PickVisualMedia.ImageOnly
-                        ),
-                        CaptureOptions.File(allowedMimeTypes = listOf("image/*"))
+                    InputMethod.Any -> listOf(
+                        CaptureOptions.CaptureAudio(input.maxDuration),
+                        CaptureOptions.File(allowedMimeTypes = input.getMimeTypes())
                     )
                 }
             }
 
             is DocumentFormInput -> listOf(
-                CaptureOptions.File(allowedMimeTypes = listOf("application/*", "text/*"))
+                CaptureOptions.File(allowedMimeTypes = input.getMimeTypes())
             )
+
+            is ImageFormInput -> {
+                when (input.inputMethod) {
+                    InputMethod.Capture -> listOf(CaptureOptions.CaptureImage)
+                    InputMethod.Upload -> listOf(
+                        CaptureOptions.Gallery(
+                            mediaType = ActivityResultContracts.PickVisualMedia.ImageOnly
+                        ),
+                        CaptureOptions.File(allowedMimeTypes = input.getMimeTypes())
+                    )
+
+                    InputMethod.Any -> listOf(
+                        CaptureOptions.CaptureImage,
+                        CaptureOptions.Gallery(
+                            mediaType = ActivityResultContracts.PickVisualMedia.ImageOnly
+                        ),
+                        CaptureOptions.File(allowedMimeTypes = input.getMimeTypes())
+                    )
+                }
+            }
+
+            is VideoFormInput -> {
+                when (input.inputMethod) {
+                    InputMethod.Capture -> listOf(CaptureOptions.CaptureVideo(input.maxDuration))
+                    InputMethod.Upload -> listOf(
+                        CaptureOptions.Gallery(
+                            mediaType = ActivityResultContracts.PickVisualMedia.VideoOnly
+                        ),
+                        CaptureOptions.File(allowedMimeTypes = input.getMimeTypes())
+                    )
+
+                    InputMethod.Any -> listOf(
+                        CaptureOptions.CaptureVideo(input.maxDuration),
+                        CaptureOptions.Gallery(
+                            mediaType = ActivityResultContracts.PickVisualMedia.VideoOnly
+                        ),
+                        CaptureOptions.File(allowedMimeTypes = input.getMimeTypes())
+                    )
+                }
+            }
         }
     }
 }
@@ -412,4 +483,32 @@ private fun List<VisualMediaType>.toPickerMediaType(): VisualMediaType = when {
     size == 1 -> first()
     contains(ActivityResultContracts.PickVisualMedia.ImageOnly) && contains(ActivityResultContracts.PickVisualMedia.VideoOnly) -> ActivityResultContracts.PickVisualMedia.ImageAndVideo
     else -> throw IllegalArgumentException("Unsupported combination of media types")
+}
+
+/**
+ * Clamps a Long value to the range of Int values.
+ */
+internal fun Long.toIntClamped(): Int {
+    return when {
+        this > Int.MAX_VALUE -> Int.MAX_VALUE
+        this < Int.MIN_VALUE -> Int.MIN_VALUE
+        else -> this.toInt()
+    }
+}
+
+/**
+ * Gets the list of MIME types supported by an attachment form input.
+ *
+ * Suppresses the redundant else in when warning, as new input types may be added in the future and
+ * this provides binary compatibility without requiring changes to this function.
+ */
+@Suppress("REDUNDANT_ELSE_IN_WHEN")
+internal fun AttachmentsFormInput.getMimeTypes(): List<String> {
+    return when (this) {
+        is AudioFormInput -> listOf("audio/*")
+        is DocumentFormInput -> listOf("application/*", "text/*")
+        is ImageFormInput -> listOf("image/*")
+        is VideoFormInput -> listOf("video/*")
+        else -> emptyList()
+    }
 }

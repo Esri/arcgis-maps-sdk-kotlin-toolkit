@@ -344,7 +344,7 @@ private fun AttachmentFormElementPreview() {
         isEditable = true,
         inputs = listOf(
             ImageFormInput(
-                inputMethod = ImageFormInput.InputMethod.Capture
+                inputMethod = InputMethod.Capture
             )
         ),
         hasCameraPermission = true,

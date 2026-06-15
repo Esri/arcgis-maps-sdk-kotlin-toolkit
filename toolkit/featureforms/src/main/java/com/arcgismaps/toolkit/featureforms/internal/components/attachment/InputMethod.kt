@@ -17,8 +17,10 @@
 package com.arcgismaps.toolkit.featureforms.internal.components.attachment
 
 /**
- * A prototype implementation for the document attachments form input class.
+ * The method by which the user will provide an attachment.
  */
-internal class DocumentFormInput(
-    val maxFileSize: Int = Int.MAX_VALUE
-) : AttachmentsFormInput()
+internal enum class InputMethod {
+    Any,
+    Capture,
+    Upload
+}
