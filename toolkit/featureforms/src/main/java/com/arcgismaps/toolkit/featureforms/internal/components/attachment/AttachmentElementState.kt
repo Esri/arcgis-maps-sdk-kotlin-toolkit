@@ -127,9 +127,9 @@ internal class AttachmentElementState(
      * attachment types specified by the form element.
      */
     val inputs: List<AttachmentsFormInput> = listOf(
-        //ImageFormInput(inputMethod = InputMethod.Any),
-        //AudioFormInput(inputMethod = InputMethod.Any),
-        VideoFormInput(inputMethod = InputMethod.Any, maxDuration = 10),
+        ImageFormInput(inputMethod = InputMethod.Any),
+        AudioFormInput(inputMethod = InputMethod.Any),
+        VideoFormInput(inputMethod = InputMethod.Any, maxDuration = 20),
         DocumentFormInput()
     ) // formElement.input
 
