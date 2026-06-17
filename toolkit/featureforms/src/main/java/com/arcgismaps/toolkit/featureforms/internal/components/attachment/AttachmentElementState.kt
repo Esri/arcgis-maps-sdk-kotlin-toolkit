@@ -129,7 +129,7 @@ internal class AttachmentElementState(
     val inputs: List<AttachmentsFormInput> = listOf(
         ImageFormInput(inputMethod = InputMethod.Any),
         AudioFormInput(inputMethod = InputMethod.Any),
-        VideoFormInput(inputMethod = InputMethod.Any, maxDuration = 20),
+        VideoFormInput(inputMethod = InputMethod.Any, maxDuration = 5),
         DocumentFormInput()
     ) // formElement.input
 
@@ -184,9 +184,7 @@ internal class AttachmentElementState(
      * A list of validation errors for the attachments.
      */
     private val validationErrors: StateFlow<List<ValidationErrorState>> = MutableStateFlow(
-        listOf(
-            ValidationErrorState.NullNotAllowed
-        )
+        emptyList()
     )
 
     init {
