@@ -60,7 +60,7 @@
         <!-- Insert your Google API key in order to use Geospatial tracking. -->
         <meta-data
                 android:name="com.google.android.ar.API_KEY"
-                android:value="AIzaSyBoaYFDdlYzINr7Fms1ChVg2400cLOX9e8"/>
+                android:value=""/>
     </application>
 
 </manifest>
