@@ -135,6 +135,10 @@ public class WorldScaleSceneViewProxy internal constructor(internal val sceneVie
      */
     public suspend fun exportImage(): Result<BitmapDrawable> = sceneViewProxy.exportImage()
 
+    public fun exportOrientedImage(): ArOrientedImage? = _currentCamera?.let {
+        ArOrientedImage(it.location)
+    }
+
     /**
      * Initiate an Identify operation on the specified [graphicsOverlay].
      *
