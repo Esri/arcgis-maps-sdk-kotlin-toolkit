@@ -73,6 +73,12 @@ public class WorldScaleSceneViewProxy internal constructor(internal val sceneVie
         _currentCamera = camera
     }
 
+    private var _currentFrame: FrameDerivatives? = null
+
+    internal fun updateCurrentFrame(frame: FrameDerivatives) {
+        _currentFrame = frame
+    }
+
     /**
      * True if continuous panning across the international date line is enabled in the WorldScaleSceneView, false otherwise.
      * A null value represents that it is currently undetermined.
@@ -136,8 +142,9 @@ public class WorldScaleSceneViewProxy internal constructor(internal val sceneVie
      */
     public suspend fun exportImage(): Result<BitmapDrawable> = sceneViewProxy.exportImage()
 
-    public fun exportOrientedImage(): ArOrientedImage? = _currentCamera?.let {
-        ArOrientedImage(it.location)
+    public fun exportOrientedImage(): ArOrientedImage? = _currentFrame?.let {
+        if (it.error == null) ArOrientedImage(it.projectedLocation)
+        else null
     }
 
     /**
@@ -361,9 +368,6 @@ public class WorldScaleSceneViewProxy internal constructor(internal val sceneVie
      */
     public fun screenToBaseSurface(screenCoordinate: ScreenCoordinate): Point? =
         sceneViewProxy.screenToBaseSurface(screenCoordinate)
-
-    internal fun updateCurrentFrame(frame: FrameDerivatives) {
-    }
 
     /**
      * The horizontal field of view of the WorldScaleSceneView in degrees.
