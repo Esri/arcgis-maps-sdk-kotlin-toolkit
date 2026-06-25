@@ -51,7 +51,7 @@ internal interface WorldScaleCameraController : DefaultLifecycleObserver {
      *
      * @since 200.7.0
      */
-    fun updateCamera(frame: Frame, session: Session)
+    fun updateCamera(frame: FrameDerivatives)
 
     /**
      * Converts an ARCore [Pose] to a global [Point].

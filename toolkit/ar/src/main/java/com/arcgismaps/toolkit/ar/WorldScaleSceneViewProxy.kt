@@ -34,6 +34,7 @@ import com.arcgismaps.mapping.view.LayerViewState
 import com.arcgismaps.mapping.view.LocationToScreenResult
 import com.arcgismaps.mapping.view.ScreenCoordinate
 import com.arcgismaps.toolkit.ar.internal.ArSessionWrapper
+import com.arcgismaps.toolkit.ar.internal.FrameDerivatives
 import com.arcgismaps.toolkit.geoviewcompose.SceneViewProxy
 import com.google.ar.core.VpsAvailability
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -360,6 +361,9 @@ public class WorldScaleSceneViewProxy internal constructor(internal val sceneVie
      */
     public fun screenToBaseSurface(screenCoordinate: ScreenCoordinate): Point? =
         sceneViewProxy.screenToBaseSurface(screenCoordinate)
+
+    internal fun updateCurrentFrame(frame: FrameDerivatives) {
+    }
 
     /**
      * The horizontal field of view of the WorldScaleSceneView in degrees.
