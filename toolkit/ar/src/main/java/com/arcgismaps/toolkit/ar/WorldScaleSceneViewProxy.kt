@@ -34,7 +34,7 @@ import com.arcgismaps.mapping.view.LayerViewState
 import com.arcgismaps.mapping.view.LocationToScreenResult
 import com.arcgismaps.mapping.view.ScreenCoordinate
 import com.arcgismaps.toolkit.ar.internal.ArSessionWrapper
-import com.arcgismaps.toolkit.ar.internal.FrameDerivatives
+import com.arcgismaps.toolkit.ar.internal.FrameState
 import com.arcgismaps.toolkit.geoviewcompose.SceneViewProxy
 import com.google.ar.core.VpsAvailability
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -73,9 +73,9 @@ public class WorldScaleSceneViewProxy internal constructor(internal val sceneVie
         _currentCamera = camera
     }
 
-    private var _currentFrame: FrameDerivatives? = null
+    private var _currentFrame: FrameState? = null
 
-    internal fun updateCurrentFrame(frame: FrameDerivatives) {
+    internal fun updateCurrentFrame(frame: FrameState) {
         _currentFrame = frame
     }
 
@@ -146,7 +146,7 @@ public class WorldScaleSceneViewProxy internal constructor(internal val sceneVie
         orientedImageOrNull(it)
     }
 
-    private fun orientedImageOrNull(frame: FrameDerivatives): ArOrientedImage? =
+    private fun orientedImageOrNull(frame: FrameState): ArOrientedImage? =
         if (frame.error == null) ArOrientedImage(frame)
         else null
 

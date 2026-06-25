@@ -21,7 +21,6 @@ package com.arcgismaps.toolkit.ar.internal
 import androidx.lifecycle.DefaultLifecycleObserver
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.view.CameraController
-import com.google.ar.core.Frame
 import com.google.ar.core.Pose
 import com.google.ar.core.Session
 
@@ -51,7 +50,7 @@ internal interface WorldScaleCameraController : DefaultLifecycleObserver {
      *
      * @since 200.7.0
      */
-    fun updateCamera(frame: FrameDerivatives)
+    fun updateCamera(frame: FrameState)
 
     /**
      * Converts an ARCore [Pose] to a global [Point].

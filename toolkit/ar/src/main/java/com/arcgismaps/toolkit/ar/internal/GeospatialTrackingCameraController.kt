@@ -34,7 +34,6 @@ import com.arcgismaps.toolkit.ar.ArCoreAuthorizationException
 import com.arcgismaps.toolkit.ar.ArCoreResourceExhaustedException
 import com.google.ar.core.Earth
 import com.google.ar.core.Earth.EarthState
-import com.google.ar.core.Frame
 import com.google.ar.core.Pose
 import com.google.ar.core.Session
 import com.google.ar.core.TrackingState
@@ -69,7 +68,7 @@ internal class GeospatialTrackingCameraController(
 
     private var error: Throwable? = null
 
-    override fun updateCamera(frame: FrameDerivatives) {
+    override fun updateCamera(frame: FrameState) {
         frame.session.earth?.let { earth ->
             checkForEarthStateErrors(earth, hasSetOriginCamera)
             if (error != null) return@let

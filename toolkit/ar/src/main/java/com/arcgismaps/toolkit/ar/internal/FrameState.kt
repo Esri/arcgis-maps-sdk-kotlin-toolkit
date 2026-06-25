@@ -14,10 +14,11 @@ import com.google.ar.core.TrackingState
 import com.google.ar.core.exceptions.NotTrackingException
 
 /**
- * Frame state that has been derived/calculated from a [Frame]. This state can be used by various
- * components during a frame update.
+ * State that has been derived/calculated from a [Frame] such as the [projectedLocation] of
+ * the frame's camera. This state can be used by various components during a frame update.
+ * It avoids repeated calculations of the same state throughout a frame update.
  */
-internal class FrameDerivatives(
+internal class FrameState(
     val frame: Frame,
     val session: Session,
     private val calibrationState: CalibrationState) {

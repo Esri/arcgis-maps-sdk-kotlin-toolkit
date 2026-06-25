@@ -64,7 +64,7 @@ import com.arcgismaps.mapping.view.ViewLabelProperties
 import com.arcgismaps.toolkit.ar.internal.ArCameraFeed
 import com.arcgismaps.toolkit.ar.internal.ArErrorType
 import com.arcgismaps.toolkit.ar.internal.CalibrationState
-import com.arcgismaps.toolkit.ar.internal.FrameDerivatives
+import com.arcgismaps.toolkit.ar.internal.FrameState
 import com.arcgismaps.toolkit.ar.internal.GeospatialTrackingCameraController
 import com.arcgismaps.toolkit.ar.internal.WorldScaleCameraController
 import com.arcgismaps.toolkit.ar.internal.WorldTrackingCameraController
@@ -468,7 +468,7 @@ public fun WorldScaleSceneView(
                 // update the camera controller with the current frame
                 // this has to be done even if the origin camera is not set, because the frame
                 // is needed for the GeospatialTrackingCameraController in order to set the origin camera.
-                val frame = FrameDerivatives(frame, session, calibrationState)
+                val frame = FrameState(frame, session, calibrationState)
                 worldScaleCameraController.updateCamera(frame)
 
                 // pass current frame state to the proxy, for calculations such as oriented image
