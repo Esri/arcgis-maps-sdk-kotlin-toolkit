@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -36,22 +37,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.ArcGISScene
 import com.arcgismaps.mapping.Basemap
 import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.mapping.ElevationSource
-import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.mapping.layers.ArcGISSceneLayer
-import com.arcgismaps.mapping.view.Graphic
-import com.arcgismaps.mapping.view.GraphicsOverlay
-import com.arcgismaps.mapping.view.SurfacePlacement
 import com.arcgismaps.toolkit.ar.WorldScaleSceneView
-import com.arcgismaps.toolkit.ar.WorldScaleSceneViewProxy
+import com.arcgismaps.toolkit.ar.WorldScaleSceneViewStatus
 import com.arcgismaps.toolkit.ar.WorldScaleTrackingMode
 import com.arcgismaps.toolkit.ar.rememberWorldScaleSceneViewStatus
 import com.arcgismaps.toolkit.arrealitycaptureapp.R
-import com.arcgismaps.toolkit.geoviewcompose.MapView
 
 @Composable
 fun MainScreen(
@@ -80,7 +75,7 @@ fun MainScreen(
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
-        // Upper row: 3/4 of screen height
+        // Upper row: WorldScaleSceneView
         Box(
             modifier = Modifier
                 .weight(1f)
@@ -104,22 +99,45 @@ fun MainScreen(
             )
         }
 
-        // Lower row: 1/4 of screen height
+        // Lower row - initialization status and capture button
         Box(
             modifier = Modifier.fillMaxWidth(),
             contentAlignment = Alignment.Center
         ) {
-            FloatingActionButton(
-                modifier = Modifier.padding(32.dp),
-                onClick = {
-                    viewModel.captureOrientedImage()
-                },
-                shape = CircleShape
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_photo_camera_24px),
-                    contentDescription = "Take photo"
-                )
+            when(val status = initializationStatus) {
+                is WorldScaleSceneViewStatus.Initializing -> {
+                    Text(
+                        text = "Initializing VPS...",
+                        modifier = Modifier.padding(32.dp)
+                    )
+                }
+                is WorldScaleSceneViewStatus.Initialized -> {
+                    if (trackingError == null) {
+                        FloatingActionButton(
+                            modifier = Modifier.padding(32.dp),
+                            onClick = {
+                                viewModel.captureOrientedImage()
+                            },
+                            shape = CircleShape
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_photo_camera_24px),
+                                contentDescription = "Take photo"
+                            )
+                        }
+                    } else {
+                        Text(
+                            text = "Tracking error: ${trackingError?.message}",
+                            modifier = Modifier.padding(32.dp)
+                        )
+                    }
+                }
+                is WorldScaleSceneViewStatus.FailedToInitialize -> {
+                    Text(
+                        text = "Failed to initialize VPS: ${status.error.message}",
+                        modifier = Modifier.padding(32.dp)
+                    )
+                }
             }
         }
     }
