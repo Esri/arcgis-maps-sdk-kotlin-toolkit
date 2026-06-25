@@ -2,8 +2,15 @@ package com.arcgismaps.toolkit.arrealitycaptureapp.screens
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
+import com.arcgismaps.Color
+import com.arcgismaps.mapping.symbology.SceneSymbolAnchorPosition
+import com.arcgismaps.mapping.symbology.SimpleLineSymbol
+import com.arcgismaps.mapping.symbology.SimpleLineSymbolMarkerPlacement
+import com.arcgismaps.mapping.symbology.SimpleLineSymbolMarkerStyle
+import com.arcgismaps.mapping.symbology.SimpleLineSymbolStyle
 import com.arcgismaps.mapping.symbology.SimpleMarkerSceneSymbol
 import com.arcgismaps.mapping.symbology.SimpleMarkerSceneSymbolStyle
+import com.arcgismaps.mapping.view.Graphic
 import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.mapping.view.SurfacePlacement
 import com.arcgismaps.toolkit.ar.ArOrientedImage
@@ -31,17 +38,36 @@ class MainScreenViewModel: ViewModel() {
 }
 
 private fun GraphicsOverlay.addFrustumGraphic(orientedImage: ArOrientedImage) {
-    this.graphics.add(orientedImage.toFrustumGraphic())
+
+    // graphic for camera location
+    Graphic(
+        geometry = orientedImage.location,
+        symbol = SimpleMarkerSceneSymbol(
+            style = SimpleMarkerSceneSymbolStyle.Sphere,
+            color = Color.red,
+            height = 0.1,
+            width = 0.1,
+            depth = 0.1,
+            anchorPosition = SceneSymbolAnchorPosition.Center
+        )
+    ).also {
+        this.graphics.add(it)
+    }
+
+    // graphic for camera orientation
+    orientedImage.orientationPointer?.let { pointer ->
+        Graphic(
+            geometry = pointer,
+            symbol = SimpleLineSymbol(
+                style = SimpleLineSymbolStyle.Solid,
+                color = Color.green,
+                width = 2f,
+                markerStyle = SimpleLineSymbolMarkerStyle.Arrow,
+                markerPlacement = SimpleLineSymbolMarkerPlacement.End
+            )
+        ).also {
+            this.graphics.add(it)
+        }
+    }
 }
 
-private fun ArOrientedImage.toFrustumGraphic() = com.arcgismaps.mapping.view.Graphic(
-    geometry = this.location,
-    symbol = SimpleMarkerSceneSymbol(
-        style = SimpleMarkerSceneSymbolStyle.Sphere,
-        color = com.arcgismaps.Color.red,
-        height = 0.1,
-        width = 0.1,
-        depth = 0.1,
-        anchorPosition = com.arcgismaps.mapping.symbology.SceneSymbolAnchorPosition.Center
-    )
-)
