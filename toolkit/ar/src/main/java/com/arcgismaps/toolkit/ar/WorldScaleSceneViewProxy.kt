@@ -143,9 +143,12 @@ public class WorldScaleSceneViewProxy internal constructor(internal val sceneVie
     public suspend fun exportImage(): Result<BitmapDrawable> = sceneViewProxy.exportImage()
 
     public fun exportOrientedImage(): ArOrientedImage? = _currentFrame?.let {
-        if (it.error == null) ArOrientedImage(it.projectedLocation)
-        else null
+        orientedImageOrNull(it)
     }
+
+    private fun orientedImageOrNull(frame: FrameDerivatives): ArOrientedImage? =
+        if (frame.error == null) ArOrientedImage(frame)
+        else null
 
     /**
      * Initiate an Identify operation on the specified [graphicsOverlay].
