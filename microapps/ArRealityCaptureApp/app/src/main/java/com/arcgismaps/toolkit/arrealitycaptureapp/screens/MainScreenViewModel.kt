@@ -2,6 +2,7 @@ package com.arcgismaps.toolkit.arrealitycaptureapp.screens
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.arcgismaps.Color
 import com.arcgismaps.mapping.symbology.SceneSymbolAnchorPosition
 import com.arcgismaps.mapping.symbology.SimpleLineSymbol
@@ -15,6 +16,8 @@ import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.mapping.view.SurfacePlacement
 import com.arcgismaps.toolkit.ar.ArOrientedImage
 import com.arcgismaps.toolkit.ar.WorldScaleSceneViewProxy
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 const val TAG = "RealityCaptureApp"
 
@@ -32,7 +35,10 @@ class MainScreenViewModel: ViewModel() {
 
     fun captureOrientedImage() {
         proxy.exportOrientedImage()?.let {
-            graphicsOverlays.first().addFrustumGraphic(it)
+            // calculation of the frustum graphic is heavy, switch to a background thread to avoid blocking the UI thread
+            viewModelScope.launch(Dispatchers.Default) {
+                graphicsOverlays.first().addFrustumGraphic(it)
+            }
         } ?: Log.d(TAG, "Failed to capture oriented image.")
     }
 }
