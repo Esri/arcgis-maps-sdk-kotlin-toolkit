@@ -116,6 +116,7 @@ internal class MediaElementState(
  *
  * @property title the title from the PopupMedia
  * @property caption the caption from the PopupMedia
+ * @property altText the alternative text of the PopupMedia
  * @property refreshInterval the PopupMedia refresh interval
  * @property linkUrl the link to use to view the media for image type media in the media viewer
  * @property sourceUrl the link to use to render the image for image type media
@@ -127,6 +128,7 @@ internal class MediaElementState(
 internal class PopupMediaState(
     val title: String,
     val caption: String,
+    val altText: String,
     private val refreshInterval: Long,
     @Suppress("unused") private val linkUrl: String,
     @Suppress("unused") private val sourceUrl: String,
@@ -160,6 +162,7 @@ internal class PopupMediaState(
     ) : this(
         title = media.title,
         caption = media.caption,
+        altText = media.alternativeText,
         refreshInterval = media.imageRefreshInterval,
         linkUrl = media.value?.linkUrl ?: "",
         sourceUrl = media.value?.sourceUrl ?: "",
@@ -207,7 +210,7 @@ internal class PopupMediaState(
             imageFolder: String,
             context: Context
         ): PopupMediaState {
-            val srcUrl: String? = media.value?.sourceUrl ?: ""
+            val srcUrl: String = media.value?.sourceUrl ?: ""
             return PopupMediaState(
                 media,
                 scope,
@@ -224,7 +227,7 @@ internal class PopupMediaState(
                     (context.imageLoader.execute(request).drawable as? BitmapDrawable)?.bitmap
                         ?: ContextCompat.getDrawable(context, R.drawable.no_image_32)?.toBitmap()
                         ?: throw IllegalStateException(
-                            if (srcUrl.isNullOrEmpty()) {
+                            if (srcUrl.isEmpty()) {
                                 "couldn't load image: sourceUrl is missing or empty, and placeholder drawable could not be loaded"
                             } else {
                                 "couldn't load image at $srcUrl, and placeholder drawable could not be loaded"
