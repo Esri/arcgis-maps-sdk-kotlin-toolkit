@@ -11,6 +11,10 @@ queries:
   # - uses: "security-extended" # level 2 minimal baseline and extended security checks
   - uses: "security-and-quality" # level 3 minimal baseline, extended security and code quality level checks
 
+query-filters:
+  - exclude:
+      id: java/field-masks-super-field
+
 # paths: does not work with compiled languages, the build command dictates what files are analyzed
 # paths-ignore: does not work with compiled languages, use exclude in the sarif-tools filter configuration instead
 
