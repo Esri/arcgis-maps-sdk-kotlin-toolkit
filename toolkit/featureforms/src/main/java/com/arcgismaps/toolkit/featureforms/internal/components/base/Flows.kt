@@ -36,7 +36,6 @@ import com.arcgismaps.toolkit.featureforms.internal.utils.isNumeric
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
@@ -256,20 +255,6 @@ private fun createValidationErrorStates(
                             add(ValidationErrorState.MaxDatetimeConstraint(formatted))
                         }
                     }
-                }
-
-                is FeatureFormValidationException.MaxAttachmentSizeConstraintException -> {
-                    add(ValidationErrorState.MaxAttachmentSizeConstraint)
-                }
-
-                is FeatureFormValidationException.MaxAttachmentDurationConstraintException -> {
-                    (formElement as? AttachmentsFormElement)?.let {
-                        add(ValidationErrorState.MaxAttachmentDurationConstraint)
-                    }
-                }
-
-                is FeatureFormValidationException.IncorrectAttachmentTypeException -> {
-                    add(ValidationErrorState.IncorrectAttachmentType)
                 }
 
                 is FeatureFormValidationException.MaxAttachmentCountConstraintException -> {

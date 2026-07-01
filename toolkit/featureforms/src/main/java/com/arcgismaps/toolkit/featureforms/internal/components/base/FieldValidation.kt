@@ -39,9 +39,6 @@ internal sealed class ValidationErrorState(
     class MaxDatetimeConstraint(max: String) : ValidationErrorState(max)
     class MaxAttachmentCountConstraint(max: String) : ValidationErrorState(max)
     class MinAttachmentCountConstraint(min: String) : ValidationErrorState(min)
-    data object MaxAttachmentSizeConstraint : ValidationErrorState()
-    data object MaxAttachmentDurationConstraint : ValidationErrorState()
-    data object IncorrectAttachmentType : ValidationErrorState()
     data object NotANumber : ValidationErrorState()
     data object NotAWholeNumber : ValidationErrorState()
     data object NotInCodedValueDomain : ValidationErrorState()
@@ -129,17 +126,8 @@ internal sealed class ValidationErrorState(
                 stringResource(R.string.value_must_not_be_empty)
             }
 
-            IncorrectAttachmentType -> {
-                stringResource(R.string.one_or_more_attachments_are_of_an_unsupported_type)
-            }
             is MaxAttachmentCountConstraint -> {
                 stringResource(R.string.the_attachment_limit_of_has_been_exceeded, *formatArgs)
-            }
-            is MaxAttachmentDurationConstraint -> {
-                stringResource(R.string.one_or_more_attachments_exceed_the_allowed_duration)
-            }
-            is MaxAttachmentSizeConstraint -> {
-                stringResource(R.string.one_or_more_attachments_exceed_the_allowed_file_size)
             }
             is MinAttachmentCountConstraint -> {
                 stringResource(R.string.you_must_add_at_least_attachments, *formatArgs)

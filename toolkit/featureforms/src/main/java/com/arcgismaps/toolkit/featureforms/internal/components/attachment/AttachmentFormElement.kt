@@ -16,8 +16,11 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.components.attachment
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -28,6 +31,7 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -55,7 +59,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.max
 import com.arcgismaps.mapping.featureforms.AttachmentsFormInput
 import com.arcgismaps.mapping.featureforms.FormAttachmentType
 import com.arcgismaps.toolkit.featureforms.internal.components.base.ValidationErrorState
@@ -80,6 +83,7 @@ internal fun AttachmentFormElement(
         hasCameraPermission = state.hasCameraPermissions(context),
         allowUserRename = state.allowUserRename,
         displayFilename = state.displayFilename,
+        minAttachmentCount = state.minAttachmentCount,
         maxAttachmentCount = state.maxAttachmentCount,
         stateId = state.id,
         attachments = state.attachments,
@@ -101,6 +105,7 @@ internal fun AttachmentFormElement(
     hasCameraPermission: Boolean,
     allowUserRename: Boolean,
     displayFilename: Boolean,
+    minAttachmentCount: Long,
     maxAttachmentCount: Long?,
     stateId: Int,
     attachments: List<FormAttachmentState>,
@@ -129,6 +134,8 @@ internal fun AttachmentFormElement(
                 Header(
                     title = label,
                     supportingText = supportingText,
+                    min = minAttachmentCount,
+                    max = maxAttachmentCount,
                     isError = isError,
                     titleColor = colors.labelColor,
                     titleTextStyle = typography.labelStyle,
@@ -136,25 +143,32 @@ internal fun AttachmentFormElement(
                     descriptionTextStyle = typography.supportingTextStyle
                 )
                 Spacer(modifier = Modifier.weight(1f))
-                if (canAddAttachments) {
-                    // Add attachment button
-                    AddAttachment(
-                        onFocused = onFocused,
-                        stateId = stateId,
-                        inputs = inputs,
-                        hasCameraPermission = hasCameraPermission
+                // Add attachment button
+                AddAttachment(
+                    onFocused = onFocused,
+                    stateId = stateId,
+                    inputs = inputs,
+                    hasCameraPermission = hasCameraPermission,
+                    enabled = canAddAttachments
+                )
+            }
+            Spacer(modifier = Modifier.height(20.dp))
+            AnimatedContent(targetState = attachments.isEmpty()) { empty ->
+                if (empty) {
+                    Row(horizontalArrangement = Arrangement.Start) {
+                        Text(text = "No attachments", style = MaterialTheme.typography.labelMedium)
+                    }
+                } else {
+                    Carousel(
+                        state = lazyListState,
+                        attachments = attachments,
+                        onItemFocused = onFocused,
+                        allowUserRename = allowUserRename,
+                        displayFilename = displayFilename,
+                        scrollBarColor = colors.scrollBarColor
                     )
                 }
             }
-            Spacer(modifier = Modifier.height(20.dp))
-            Carousel(
-                state = lazyListState,
-                attachments = attachments,
-                onItemFocused = onFocused,
-                allowUserRename = allowUserRename,
-                displayFilename = displayFilename,
-                scrollBarColor = colors.scrollBarColor
-            )
         }
     }
     LaunchedEffect(lazyListState.isScrollInProgress) {
@@ -215,6 +229,8 @@ private fun Carousel(
 private fun Header(
     title: String,
     supportingText: String,
+    min: Long,
+    max: Long?,
     isError: Boolean,
     titleColor: Color,
     titleTextStyle: TextStyle,
@@ -248,7 +264,35 @@ private fun Header(
                     overflow = TextOverflow.Ellipsis
                 )
             }
+            Row(
+                modifier = Modifier.padding(vertical = 6.dp),
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                if (min in 1..<4294967295) {
+                    AttachmentCount(text = "Min", count = min)
+                }
+                if (max != null) {
+                    AttachmentCount(text = "Max", count = max)
+                }
+            }
         }
+    }
+}
+
+@Composable
+private fun AttachmentCount(
+    text: String,
+    count: Long
+) {
+    Surface (
+        shape = RoundedCornerShape(25.dp),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.secondaryContainer),
+    ) {
+        Text(
+            text = "$text: $count",
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+            style = MaterialTheme.typography.labelMedium
+        )
     }
 }
 
@@ -348,6 +392,7 @@ private fun AttachmentFormElementPreview() {
         hasCameraPermission = true,
         allowUserRename = true,
         displayFilename = true,
+        minAttachmentCount = 2,
         maxAttachmentCount = 5,
         stateId = 1,
         attachments = list + list + list + list,

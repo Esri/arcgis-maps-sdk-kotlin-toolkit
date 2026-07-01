@@ -181,9 +181,6 @@
     <string name="discard_changes_confirmation">Are you sure you want to discard the changes?</string>
     <string name="record_audio">Record Audio</string>
     <string name="record_video">Record Video</string>
-    <string name="one_or_more_attachments_are_of_an_unsupported_type">One or more attachments are of an unsupported type</string>
-    <string name="the_attachment_limit_of_has_been_exceeded">The attachment limit of %1$s has been exceeded</string>
-    <string name="one_or_more_attachments_exceed_the_allowed_duration">One or more attachments exceed the allowed duration</string>
-    <string name="one_or_more_attachments_exceed_the_allowed_file_size">One or more attachments exceed the allowed file size</string>
-    <string name="you_must_add_at_least_attachments">You must add at least %1$s attachments</string>
+    <string name="the_attachment_limit_of_has_been_exceeded">The maximum number of attachments is %1$s</string>
+    <string name="you_must_add_at_least_attachments">At least %1$s attachments are required</string>
 </resources>

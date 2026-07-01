@@ -53,7 +53,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.max
 import androidx.compose.ui.window.Dialog
 import androidx.core.net.toUri
 import com.arcgismaps.mapping.featureforms.AttachmentInputMethod
@@ -77,6 +76,7 @@ internal fun AddAttachment(
     stateId: Int,
     inputs: List<AttachmentsFormInput>,
     hasCameraPermission: Boolean,
+    enabled: Boolean
 ) {
     var showMenu by remember { mutableStateOf(false) }
     val dialogRequester = LocalDialogRequester.current
@@ -90,6 +90,7 @@ internal fun AddAttachment(
                 onFocused()
                 showMenu = true
             },
+            enabled = enabled
         ) {
             Icon(
                 Icons.Rounded.Add,

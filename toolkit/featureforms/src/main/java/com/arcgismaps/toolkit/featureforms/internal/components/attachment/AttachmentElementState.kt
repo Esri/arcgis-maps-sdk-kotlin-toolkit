@@ -192,7 +192,6 @@ internal class AttachmentElementState(
                 snapshotFlow { _wasFocused.value },
                 validationErrors
             ) { focused, errors ->
-                Log.e("TAG", "${errors.firstOrNull()}: ", )
                 Pair(focused, errors)
             }.collect {
                 val (focused, errors) = it
