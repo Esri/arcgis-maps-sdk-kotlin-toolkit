@@ -55,6 +55,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.max
+import com.arcgismaps.mapping.featureforms.AttachmentsFormInput
 import com.arcgismaps.mapping.featureforms.FormAttachmentType
 import com.arcgismaps.toolkit.featureforms.internal.components.base.ValidationErrorState
 import com.arcgismaps.toolkit.featureforms.theme.AttachmentsElementColors
@@ -99,7 +101,7 @@ internal fun AttachmentFormElement(
     hasCameraPermission: Boolean,
     allowUserRename: Boolean,
     displayFilename: Boolean,
-    maxAttachmentCount: Int,
+    maxAttachmentCount: Long?,
     stateId: Int,
     attachments: List<FormAttachmentState>,
     error: ValidationErrorState,
@@ -109,7 +111,7 @@ internal fun AttachmentFormElement(
     colors: AttachmentsElementColors = LocalColorScheme.current.attachmentsElementColors,
     typography: AttachmentsElementTypography = LocalTypography.current.attachmentsElementTypography
 ) {
-    val canAddAttachments = attachments.size < maxAttachmentCount && isEditable
+    val canAddAttachments = attachments.size < (maxAttachmentCount ?: Long.MAX_VALUE) && isEditable
     val isError = error !is ValidationErrorState.NoError
     val supportingText = if (isError) {
         error.getString()
@@ -342,11 +344,7 @@ private fun AttachmentFormElementPreview() {
         label = "Attachments",
         description = "Add attachments",
         isEditable = true,
-        inputs = listOf(
-            ImageFormInput(
-                inputMethod = InputMethod.Capture
-            )
-        ),
+        inputs = emptyList(),
         hasCameraPermission = true,
         allowUserRename = true,
         displayFilename = true,

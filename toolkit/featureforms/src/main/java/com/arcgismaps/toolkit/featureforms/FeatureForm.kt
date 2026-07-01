@@ -376,7 +376,7 @@ public fun FeatureForm(
         val form = state.getActiveFormStateData().featureForm
         focusManager.clearFocus()
         // Check for validation errors
-        val errorCount = form.validationErrors.value.entries.count()
+        val errorCount = form.elementValidationErrors.value.entries.count()
         return if (errorCount == 0) {
             // Finish editing the form if there are no validation errors
             state.saveEdits().onSuccess {

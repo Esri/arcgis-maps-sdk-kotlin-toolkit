@@ -53,12 +53,19 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.max
 import androidx.compose.ui.window.Dialog
 import androidx.core.net.toUri
+import com.arcgismaps.mapping.featureforms.AttachmentInputMethod
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.internal.utils.AttachmentsFileProvider
 import com.arcgismaps.toolkit.featureforms.internal.utils.DialogType
 import com.arcgismaps.toolkit.featureforms.internal.utils.LocalDialogRequester
+import com.arcgismaps.mapping.featureforms.AttachmentsFormInput
+import com.arcgismaps.mapping.featureforms.AudioFormInput
+import com.arcgismaps.mapping.featureforms.DocumentFormInput
+import com.arcgismaps.mapping.featureforms.ImageFormInput
+import com.arcgismaps.mapping.featureforms.VideoFormInput
 import java.time.Instant
 
 /**
@@ -87,7 +94,7 @@ internal fun AddAttachment(
             Icon(
                 Icons.Rounded.Add,
                 contentDescription = "Add attachment",
-                modifier = Modifier.size(32.dp)
+                modifier = Modifier.size(32.dp),
             )
         }
         DropdownMenu(
@@ -246,7 +253,7 @@ internal fun ImageCapture(
  */
 @Composable
 internal fun VideoCapture(
-    maxDuration: Long,
+    maxDuration: Long?,
     onDismissRequest: () -> Unit,
     onVideoCaptured: (Uri) -> Unit
 ) {
@@ -267,9 +274,11 @@ internal fun VideoCapture(
         object : ActivityResultContracts.CaptureVideo() {
             override fun createIntent(context: Context, input: Uri): Intent {
                 return super.createIntent(context, input).apply {
-                    // set the max duration limit for the captured video. The value must be clamped
-                    // to the range of Int values, as the intent extra only accepts Int values.
-                    putExtra(MediaStore.EXTRA_DURATION_LIMIT, maxDuration.toIntClamped())
+                    if (maxDuration != null) {
+                        // set the max duration limit for the captured video. The value must be clamped
+                        // to the range of Int values, as the intent extra only accepts Int values.
+                        putExtra(MediaStore.EXTRA_DURATION_LIMIT, maxDuration.toIntClamped())
+                    }
                 }
             }
         }
@@ -382,12 +391,12 @@ private fun List<AttachmentsFormInput>.getCaptureOptions(): List<CaptureOptions>
         when (input) {
             is AudioFormInput -> {
                 when (input.inputMethod) {
-                    InputMethod.Capture -> listOf(CaptureOptions.CaptureAudio(input.maxDuration))
-                    InputMethod.Upload -> listOf(
+                    AttachmentInputMethod.Capture -> listOf(CaptureOptions.CaptureAudio(input.maxDuration))
+                    AttachmentInputMethod.Upload -> listOf(
                         CaptureOptions.File(allowedMimeTypes = input.getMimeTypes())
                     )
 
-                    InputMethod.Any -> listOf(
+                    AttachmentInputMethod.Any -> listOf(
                         CaptureOptions.CaptureAudio(input.maxDuration),
                         CaptureOptions.File(allowedMimeTypes = input.getMimeTypes())
                     )
@@ -400,15 +409,15 @@ private fun List<AttachmentsFormInput>.getCaptureOptions(): List<CaptureOptions>
 
             is ImageFormInput -> {
                 when (input.inputMethod) {
-                    InputMethod.Capture -> listOf(CaptureOptions.CaptureImage)
-                    InputMethod.Upload -> listOf(
+                    AttachmentInputMethod.Capture -> listOf(CaptureOptions.CaptureImage)
+                    AttachmentInputMethod.Upload -> listOf(
                         CaptureOptions.Gallery(
                             mediaType = ActivityResultContracts.PickVisualMedia.ImageOnly
                         ),
                         CaptureOptions.File(allowedMimeTypes = input.getMimeTypes())
                     )
 
-                    InputMethod.Any -> listOf(
+                    AttachmentInputMethod.Any -> listOf(
                         CaptureOptions.CaptureImage,
                         CaptureOptions.Gallery(
                             mediaType = ActivityResultContracts.PickVisualMedia.ImageOnly
@@ -420,15 +429,15 @@ private fun List<AttachmentsFormInput>.getCaptureOptions(): List<CaptureOptions>
 
             is VideoFormInput -> {
                 when (input.inputMethod) {
-                    InputMethod.Capture -> listOf(CaptureOptions.CaptureVideo(input.maxDuration))
-                    InputMethod.Upload -> listOf(
+                    AttachmentInputMethod.Capture -> listOf(CaptureOptions.CaptureVideo(input.maxDuration))
+                    AttachmentInputMethod.Upload -> listOf(
                         CaptureOptions.Gallery(
                             mediaType = ActivityResultContracts.PickVisualMedia.VideoOnly
                         ),
                         CaptureOptions.File(allowedMimeTypes = input.getMimeTypes())
                     )
 
-                    InputMethod.Any -> listOf(
+                    AttachmentInputMethod.Any -> listOf(
                         CaptureOptions.CaptureVideo(input.maxDuration),
                         CaptureOptions.Gallery(
                             mediaType = ActivityResultContracts.PickVisualMedia.VideoOnly
@@ -437,6 +446,8 @@ private fun List<AttachmentsFormInput>.getCaptureOptions(): List<CaptureOptions>
                     )
                 }
             }
+
+            else -> emptyList()
         }
     }
 }

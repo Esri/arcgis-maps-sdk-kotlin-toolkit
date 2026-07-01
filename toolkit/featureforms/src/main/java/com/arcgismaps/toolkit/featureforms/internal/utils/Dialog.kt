@@ -20,6 +20,10 @@ package com.arcgismaps.toolkit.featureforms.internal.utils
 import android.content.Context
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.Box
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.collectAsState
@@ -129,7 +133,7 @@ internal sealed class DialogType {
      */
     data class VideoCaptureDialog(
         val stateId: Int,
-        val maxDuration: Long
+        val maxDuration: Long?
     ) : DialogType()
 
     /**
@@ -190,6 +194,7 @@ internal sealed class DialogType {
  */
 @Composable
 internal fun FeatureFormDialog(states: FormStateCollection) {
+    val snackbarHostState = remember { SnackbarHostState() }
     val focusManager = LocalFocusManager.current
     val dialogRequester = LocalDialogRequester.current
     val dialogType by dialogRequester.requestFlow.collectAsState()
@@ -346,10 +351,11 @@ internal fun FeatureFormDialog(states: FormStateCollection) {
             ) { uri ->
                 scope.launch {
                     state.addAttachmentFromUri(uri, context, true).onFailure {
-                        showError(
-                            context,
-                            it.message ?: attachmentError
-                        )
+                        snackbarHostState.showSnackbar(it.message ?: attachmentError)
+//                        showError(
+//                            context,
+//                            it.message ?: attachmentError
+//                        )
                     }
                     dialogRequester.dismissDialog()
                 }
@@ -446,6 +452,9 @@ internal fun FeatureFormDialog(states: FormStateCollection) {
                 focusManager.clearFocus()
             }
         }
+    }
+    Box {
+        SnackbarHost(snackbarHostState)
     }
 }
 
