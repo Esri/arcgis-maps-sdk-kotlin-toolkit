@@ -259,15 +259,16 @@ private fun createValidationErrorStates(
 
                 is FeatureFormValidationException.MaxAttachmentCountConstraintException -> {
                     (formElement as? AttachmentsFormElement)?.let {
-                        val count = formElement.maxAttachmentCount
-                        add(ValidationErrorState.MaxAttachmentCountConstraint("$count"))
+                        formElement.maxAttachmentCount?.let { count ->
+                            add(ValidationErrorState.MaxAttachmentCountConstraint(count))
+                        }
                     }
                 }
 
                 is FeatureFormValidationException.MinAttachmentCountConstraintException -> {
                     (formElement as? AttachmentsFormElement)?.let {
                         val count = formElement.minAttachmentCount
-                        add(ValidationErrorState.MinAttachmentCountConstraint("$count"))
+                        add(ValidationErrorState.MinAttachmentCountConstraint(count))
                     }
                 }
             }

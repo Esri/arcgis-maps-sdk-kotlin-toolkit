@@ -37,6 +37,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.window.core.layout.WindowSizeClass
@@ -209,6 +210,7 @@ internal fun FeatureFormDialog(states: FormStateCollection) {
     val dialogRequester = LocalDialogRequester.current
     val dialogType by dialogRequester.requestFlow.collectAsState()
     val context = LocalContext.current
+    val resources = LocalResources.current
     val scope = rememberCoroutineScope()
     val attachmentError = stringResource(R.string.attachment_error)
     when (dialogType) {
@@ -325,7 +327,7 @@ internal fun FeatureFormDialog(states: FormStateCollection) {
                 dialogRequester.dismissDialog()
                 return
             }
-            val duration = when(val input = state.inputs.firstOrNull()) {
+            val duration = when (val input = state.inputs.firstOrNull()) {
                 is AudioFormInput -> input.maxDuration
                 is VideoFormInput -> input.maxDuration
                 else -> null
@@ -336,14 +338,19 @@ internal fun FeatureFormDialog(states: FormStateCollection) {
             ) { uri ->
                 scope.launch {
                     state.addAttachmentFromUri(uri, context, false).onFailure {
-                        errorMessage = when(it) {
+                        errorMessage = when (it) {
                             is MaxAttachmentDurationConstraintException -> {
-                                "This attachment is longer than the allowed duration of " +
-                                    "${duration?.div(1000)} seconds."
+                                resources.getString(
+                                    R.string.media_too_long, 
+                                    duration?.div(60)
+                                )
                             }
 
                             is MaxAttachmentCountConstraintException -> {
-                                "The maximum number of attachments allowed is ${state.maxAttachmentCount}."
+                                resources.getString(
+                                    R.string.max_attachments_limit_reached,
+                                    state.maxAttachmentCount
+                                )
                             }
 
                             else -> {
@@ -364,7 +371,7 @@ internal fun FeatureFormDialog(states: FormStateCollection) {
                 dialogRequester.dismissDialog()
                 return
             }
-            val limit = when(val input = state.inputs.firstOrNull()) {
+            val limit = when (val input = state.inputs.firstOrNull()) {
                 is AudioFormInput -> input.maxDuration
                 is VideoFormInput -> input.maxDuration
                 is DocumentFormInput -> input.maxFileSize
@@ -376,19 +383,26 @@ internal fun FeatureFormDialog(states: FormStateCollection) {
             ) { uri ->
                 scope.launch {
                     state.addAttachmentFromUri(uri, context, true).onFailure {
-                        errorMessage = when(it) {
+                        errorMessage = when (it) {
                             is MaxAttachmentDurationConstraintException -> {
-                                "This attachment is longer than the allowed duration of " +
-                                    "${limit?.div(60)} seconds."
+                                resources.getString(
+                                    R.string.media_too_long,
+                                    limit?.div(60)
+                                )
                             }
 
                             is MaxAttachmentCountConstraintException -> {
-                                "The maximum number of attachments allowed is ${state.maxAttachmentCount}."
+                                resources.getString(
+                                    R.string.max_attachments_limit_reached,
+                                    state.maxAttachmentCount
+                                )
                             }
 
                             is MaxAttachmentSizeConstraintException -> {
-                                "This attachment is larger than the allowed size of " +
-                                    "${limit?.div(1_000_000)} MB."
+                                resources.getString(
+                                    R.string.this_file_is_too_large,
+                                    limit?.div(1_000_000)
+                                )
                             }
 
                             else -> {
@@ -492,7 +506,7 @@ internal fun FeatureFormDialog(states: FormStateCollection) {
             }
         }
     }
-    if (errorMessage != null ) {
+    if (errorMessage != null) {
         AlertDialog(
             onDismissRequest = {
                 errorMessage = null

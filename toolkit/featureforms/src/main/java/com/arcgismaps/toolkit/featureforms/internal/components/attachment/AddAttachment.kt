@@ -26,6 +26,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia.VisualMediaType
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Folder
@@ -101,7 +102,8 @@ internal fun AddAttachment(
         DropdownMenu(
             expanded = showMenu,
             offset = DpOffset.Zero,
-            onDismissRequest = { showMenu = false }
+            onDismissRequest = { showMenu = false },
+            shape = RoundedCornerShape(12.dp)
         ) {
             captureOptions.forEach { option ->
                 when (option) {
