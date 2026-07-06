@@ -269,9 +269,9 @@ public object FeatureFormDefaults {
     public fun attachmentsElementColors(
         labelColor: Color = Color.Unspecified,
         supportingTextColor: Color = Color.Unspecified,
-        containerColor: Color = Color.Unspecified,
+        containerColor: Color = MaterialTheme.colorScheme.surfaceContainerLow,
         tileTextColor: Color = MaterialTheme.colorScheme.onSurface,
-        tileContainerColor: Color = Color.Unspecified,
+        tileContainerColor: Color = MaterialTheme.colorScheme.surfaceContainerHighest,
         scrollBarColor: Color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
     ): AttachmentsElementColors {
         return AttachmentsElementColors(
@@ -402,8 +402,8 @@ public object FeatureFormDefaults {
      */
     @Composable
     public fun attachmentsElementTypography(
-        labelStyle: TextStyle = MaterialTheme.typography.headlineSmall,
-        supportingTextStyle: TextStyle = MaterialTheme.typography.bodyMedium,
+        labelStyle: TextStyle = MaterialTheme.typography.titleLarge,
+        supportingTextStyle: TextStyle = MaterialTheme.typography.bodySmall,
         tileTextStyle: TextStyle = MaterialTheme.typography.labelSmall.copy(
             textAlign = TextAlign.Center
         ),

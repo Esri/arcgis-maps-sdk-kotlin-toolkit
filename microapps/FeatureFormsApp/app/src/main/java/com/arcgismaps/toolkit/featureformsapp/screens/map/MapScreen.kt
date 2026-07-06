@@ -451,7 +451,7 @@ fun FeatureFormSheet(
             expansionHeight = SheetExpansionHeight(0.5f),
             sheetSwipeEnabled = true,
             shape = RoundedCornerShape(5.dp),
-            containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+            containerColor = MaterialTheme.colorScheme.surface,
             layoutHeight = layoutHeight.toFloat(),
             sheetWidth = with(LocalDensity.current) { layoutWidth.toDp() },
             tonalElevation = (-1).dp

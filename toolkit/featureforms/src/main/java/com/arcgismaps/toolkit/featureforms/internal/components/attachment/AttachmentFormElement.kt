@@ -40,9 +40,11 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
@@ -125,11 +127,15 @@ internal fun AttachmentFormElement(
     }
     Surface(
         modifier = modifier.semantics(mergeDescendants = true) {},
+        shape = RoundedCornerShape(18.dp),
         color = colors.containerColor
     ) {
-        Column {
+        Column(
+            modifier = Modifier.padding(10.dp)
+        ) {
             Row(
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.Top,
+                horizontalArrangement = Arrangement.End
             ) {
                 Header(
                     title = label,
@@ -140,9 +146,9 @@ internal fun AttachmentFormElement(
                     titleColor = colors.labelColor,
                     titleTextStyle = typography.labelStyle,
                     descriptionColor = colors.supportingTextColor,
-                    descriptionTextStyle = typography.supportingTextStyle
+                    descriptionTextStyle = typography.supportingTextStyle,
+                    modifier = Modifier.weight(1f)
                 )
-                Spacer(modifier = Modifier.weight(1f))
                 // Add attachment button
                 AddAttachment(
                     onFocused = onFocused,
@@ -194,7 +200,6 @@ private fun Carousel(
     val scope = rememberCoroutineScope()
     LazyRow(
         modifier = Modifier
-            .padding(bottom = 5.dp)
             .fillMaxWidth()
             .horizontalScrollbar(
                 state = state,
@@ -202,7 +207,8 @@ private fun Carousel(
                 color = scrollBarColor,
                 height = 4.dp,
                 offsetY = 5.dp,
-                autoHide = false
+                autoHide = false,
+                bottomPadding = 8.dp
             )
             .onGloballyPositioned {
                 // Scroll to the start of the list when a new attachment is added
@@ -238,6 +244,19 @@ private fun Header(
     descriptionTextStyle: TextStyle,
     modifier: Modifier = Modifier
 ) {
+    val characterLimit = 255
+    // Clamp the title to 255 characters and add ellipsis if it exceeds that length
+    val titleClamped = if (title.length > characterLimit) {
+        title.take(characterLimit) + "..."
+    } else {
+        title
+    }
+    // Clamp the supporting text to 255 characters and add ellipsis if it exceeds that length
+    val supportingTextClamped = if (supportingText.length > characterLimit) {
+        supportingText.take(characterLimit) + "..."
+    } else {
+        supportingText
+    }
     val supportingTextColor = if (isError) {
         MaterialTheme.colorScheme.error
     } else {
@@ -249,18 +268,16 @@ private fun Header(
     ) {
         Column {
             Text(
-                text = title,
+                text = titleClamped,
                 color = titleColor,
                 style = titleTextStyle,
-                maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
             if (supportingText.isNotEmpty()) {
                 Text(
-                    text = supportingText,
+                    text = supportingTextClamped,
                     color = supportingTextColor,
                     style = descriptionTextStyle,
-                    maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
             }
@@ -284,7 +301,7 @@ private fun AttachmentCount(
     text: String,
     count: Long
 ) {
-    Surface (
+    Surface(
         shape = RoundedCornerShape(25.dp),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.secondaryContainer),
     ) {
@@ -313,6 +330,7 @@ private fun AttachmentCount(
  * @param height The height of the scrollbar.
  * @param offsetY The offset of the scrollbar in the Y axis, from the bottom of the [LazyRow].
  * @param autoHide Whether the scrollbar should auto-hide when not scrolling.
+ * @param bottomPadding The padding to be added to the bottom of the scrollbar.
  */
 internal fun Modifier.horizontalScrollbar(
     state: LazyListState,
@@ -320,55 +338,97 @@ internal fun Modifier.horizontalScrollbar(
     color: Color,
     height: Dp,
     offsetY: Dp,
-    autoHide: Boolean = true
-): Modifier = this
-    .padding(bottom = offsetY)
-    .then(
-        this.composed {
-            // fade in fast when scrolling, fade out slow when not scrolling
-            val duration = if (state.isScrollInProgress) 50 else 500
-            // animate the scrollbar alpha based on the scroll state
-            val alpha by animateFloatAsState(
-                targetValue = if (!autoHide || state.isScrollInProgress) 1f else 0f,
-                animationSpec = tween(durationMillis = duration),
-                label = ""
-            )
-
-            drawWithContent {
-                drawContent()
-
-                val firstVisibleElement =
-                    state.layoutInfo.visibleItemsInfo.firstOrNull() ?: return@drawWithContent
-                val itemWidth = firstVisibleElement.size.toFloat()
-                val totalWidth = itemWidth * state.layoutInfo.totalItemsCount
-                val scrollbarWidth = minOf(size.width / totalWidth, 1f) * size.width
-                // Do not draw scrollbar if it is not needed
-                if (scrollbarWidth >= size.width) return@drawWithContent
-                // Calculate the x offset of the scrollbar
-                val scrollBarOffsetX = (size.width / totalWidth) *
-                    (state.firstVisibleItemIndex * itemWidth + state.firstVisibleItemScrollOffset)
-                // Calculate the y offset of the scrollbar
-                val scrollBarOffsetY = size.height + height.toPx() + offsetY.toPx()
-
-                // draw the scroll bar track
-                drawRoundRect(
-                    color = trackColor,
-                    topLeft = Offset(0f, scrollBarOffsetY),
-                    size = Size(size.width, height.toPx()),
-                    cornerRadius = CornerRadius(10f, 10f),
-                    alpha = alpha
-                )
-                // draw the scroll bar
-                drawRoundRect(
-                    color = color,
-                    topLeft = Offset(scrollBarOffsetX, scrollBarOffsetY),
-                    size = Size(scrollbarWidth, height.toPx()),
-                    cornerRadius = CornerRadius(10f, 10f),
-                    alpha = alpha
-                )
-            }
-        }
+    autoHide: Boolean = true,
+    bottomPadding: Dp = 0.dp
+): Modifier = composed {
+    // fade in fast when scrolling, fade out slow when not scrolling
+    val duration = if (state.isScrollInProgress) 50 else 500
+    // animate the scrollbar alpha based on the scroll state
+    val alpha by animateFloatAsState(
+        targetValue = if (!autoHide || state.isScrollInProgress) 1f else 0f,
+        animationSpec = tween(durationMillis = duration),
+        label = ""
     )
+
+    val scrollbarInfo by produceState(
+        initialValue = ScrollbarInfo(0f, 0f, 0f),
+        key1 = state
+    ) {
+        snapshotFlow {
+            val info = state.layoutInfo
+            val firstVisibleElement = info.visibleItemsInfo.firstOrNull()
+            if (firstVisibleElement != null) {
+                val itemWidth = firstVisibleElement.size.toFloat()
+                val totalWidth = itemWidth * info.totalItemsCount
+                ScrollbarInfo(itemWidth, totalWidth, info.viewportSize.width.toFloat())
+            } else {
+                ScrollbarInfo(0f, 0f, 0f)
+            }
+        }.collect { value = it }
+    }
+
+    val paddedModifier = if (scrollbarInfo.shouldDraw) {
+        Modifier.padding(bottom = offsetY + bottomPadding)
+    } else {
+        Modifier
+    }
+
+    this@horizontalScrollbar
+        .then(paddedModifier)
+        .drawWithContent {
+            drawContent()
+            if (scrollbarInfo.shouldDraw.not()) return@drawWithContent
+            // Calculate the x offset of the scrollbar
+            val scrollBarOffsetX = (size.width / scrollbarInfo.totalWidth) *
+                (state.firstVisibleItemIndex * scrollbarInfo.itemWidth + state.firstVisibleItemScrollOffset)
+            // Calculate the y offset of the scrollbar
+            val scrollBarOffsetY = size.height + height.toPx() + offsetY.toPx()
+
+            // draw the scroll bar track
+            drawRoundRect(
+                color = trackColor,
+                topLeft = Offset(0f, scrollBarOffsetY),
+                size = Size(size.width, height.toPx()),
+                cornerRadius = CornerRadius(10f, 10f),
+                alpha = alpha
+            )
+            // draw the scroll bar
+            drawRoundRect(
+                color = color,
+                topLeft = Offset(scrollBarOffsetX, scrollBarOffsetY),
+                size = Size(scrollbarInfo.scrollbarWidth, height.toPx()),
+                cornerRadius = CornerRadius(10f, 10f),
+                alpha = alpha
+            )
+        }
+}
+
+/**
+ * A class that holds information about the drawing of the horizontal scrollbar.
+ *
+ * @param itemWidth The width of a single item in the [LazyRow].
+ * @param totalWidth The total width of all items in the [LazyRow].
+ * @param viewportWidth The width of the viewport of the [LazyRow].
+ */
+private class ScrollbarInfo(
+    val itemWidth: Float,
+    val totalWidth: Float,
+    viewportWidth: Float
+) {
+    /**
+     * The width of the scrollbar based on the provided properties.
+     */
+    val scrollbarWidth: Float = if (viewportWidth > 0 && totalWidth > 0) {
+        minOf(viewportWidth / totalWidth, 1f) * viewportWidth
+    } else {
+        0f
+    }
+
+    /**
+     * Whether the scrollbar should be drawn based on the provided properties.
+     */
+    val shouldDraw: Boolean = viewportWidth > 0 && scrollbarWidth < viewportWidth
+}
 
 @Preview
 @Composable
