@@ -24,6 +24,7 @@ import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import com.arcgismaps.mapping.featureforms.AttachmentsFormElement
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -53,7 +54,9 @@ class AttachmentTests : FeatureFormTestRunner(
         composeTestRule.setContent {
             FeatureForm(featureFormState = featureFormState)
         }
-        val attachmentsFormElement = featureForm.defaultAttachmentsElement
+        val attachmentsFormElement = featureForm.elements.firstOrNull {
+            it.label == "General"
+        } as? AttachmentsFormElement
         assertThat(attachmentsFormElement).isNotNull()
         composeTestRule.waitUntil(
             timeoutMillis = 2_000,

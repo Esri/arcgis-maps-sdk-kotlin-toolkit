@@ -285,7 +285,7 @@ private fun Header(
                 modifier = Modifier.padding(vertical = 6.dp),
                 horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                if (min in 1..<4294967295) {
+                if (min > 0) {
                     AttachmentCount(text = "Min", count = min)
                 }
                 if (max != null) {
