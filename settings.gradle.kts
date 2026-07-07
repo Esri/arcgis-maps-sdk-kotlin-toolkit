@@ -73,7 +73,6 @@ pluginManagement {
         }
         gradlePluginPortal()
         google()
-        mavenLocal()
         mavenCentral()
     }
 }
@@ -132,7 +131,6 @@ dependencyResolutionManagement {
     @Suppress("UnstableApiUsage")
     repositories {
         google()
-        mavenLocal()
         mavenCentral()
         maven {
             url = java.net.URI(
