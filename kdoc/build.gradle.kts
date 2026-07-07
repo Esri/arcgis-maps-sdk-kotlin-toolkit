@@ -16,10 +16,11 @@
  *
  */
 
+import java.time.Year
+
 plugins {
     id("com.android.library")
-    id("org.jetbrains.kotlin.android")
-    alias(libs.plugins.dokka) apply true
+    alias(libs.plugins.dokka)
 }
 
 val versionNumber: String by project
@@ -46,19 +47,63 @@ val releasedSourceSetPaths = releasedModules.map { subproject ->
     File(rootDir, "toolkit/${subproject.name}/src/main/java").canonicalPath
 }
 
-dokka {
-    moduleName.set("arcgis-maps-kotlin-toolkit")
-    moduleVersion.set(versionNumber)
-    dokkaSourceSets.main {
-        sourceRoots.from(releasedSourceSetPaths)
-    }
-    dokkaSourceSets.configureEach {
-        perPackageOption {
-            matchingRegex.set(".*internal.*")
-            suppress.set(true)
-            reportUndocumented = true
+tasks {
+    // Runs after Dokka generation. Changes string "arcgis-maps-kotlin-toolkit" to "ArcGIS Maps SDK for Kotlin Toolkit" in
+    // index.html only. Will display product name at the top of the landing page,
+    // Using moduleName.set("ArcGIS Maps SDK for Kotlin Toolkit"), results in URLs too long. So we use moduleName.set("arcgis-maps-kotlin-toolkit"),
+    // which results in a URL like this:
+    // https://developers.arcgis.com/kotlin/toolkit-api-reference/arcgis-maps-kotlin-toolkit/com.arcgismaps.toolkit.geoviewcompose/-map-view.html.
+    // Then this task changes "arcgis-maps-kotlin-toolkit" to "ArcGIS Maps SDK for Kotlin Toolkit" in the index.html only,
+    // for display purposes.
+    register("replaceToolkitApiRefName") {
+        doLast {
+            val indexFile = file("build/dokka/html/index.html")
+            val newName = indexFile.readText()
+                .replace(Regex(">arcgis-maps-kotlin-toolkit</"), ">ArcGIS Maps SDK for Kotlin Toolkit</")
+            indexFile.writeText(newName)
         }
     }
+}
+
+// To generate the KDoc for Toolkit project, run: `./gradlew :kdoc:dokkaGenerate`
+dokka {
+    dokkaPublications.html {
+        pluginsConfiguration.versioning {
+            version = versionNumber
+        }
+        pluginsConfiguration.html {
+            separateInheritedMembers = true
+            failOnWarning = false
+        }
+        moduleName.set("arcgis-maps-kotlin-toolkit")
+        moduleVersion.set(versionNumber)
+
+        dokkaSourceSets.configureEach {
+            sourceRoots.from(releasedSourceSetPaths)
+
+            perPackageOption {
+                matchingRegex.set(".*internal.*")
+                suppress.set(true)
+                reportUndocumented = true
+            }
+        }
+        pluginsConfiguration.html {
+            footerMessage.set("Copyright © ${Year.now().value} Esri. All Rights Reserved.")
+            homepageLink = "https://developers.arcgis.com/kotlin/"
+            customAssets.from(
+                project.layout.projectDirectory.file("dokka-assets/logo-icon.svg")
+            )
+        }
+    }
+}
+
+val dokkaGenerationTasks = setOf(
+    tasks.dokkaGenerate.get(),
+    tasks.dokkaGenerateHtml.get(),
+    tasks.dokkaGeneratePublicationHtml.get()
+)
+tasks.matching { it in dokkaGenerationTasks }.configureEach {
+    finalizedBy(tasks.named("replaceToolkitApiRefName"))
 }
 
 android {
@@ -67,7 +112,6 @@ android {
     
     defaultConfig {
         minSdk = libs.versions.minSdk.get().toInt()
-        consumerProguardFiles("consumer-rules.pro")
     }
 }
 
@@ -79,5 +123,3 @@ dependencies {
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.composeCore)
 }
-
-//dokkaGenerate

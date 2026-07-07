@@ -1,6 +1,6 @@
 /*
  *
- *  Copyright 2023 Esri
+ *  Copyright 2026 Esri
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -16,24 +16,22 @@
  *
  */
 
-repositories {
-    google()
-    mavenCentral()
-}
+import org.gradle.api.Plugin
+import org.gradle.api.Project
+import org.gradle.internal.Actions.with
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-plugins {
-    `kotlin-dsl`
-    `maven-publish`
-}
-
-version = "1.0"
-
-gradlePlugin {
-    plugins {
-        create("artifactDeploy") {
-            group = "internal"
-            id = "artifact-deploy"
-            implementationClass = "deploy.ArtifactPublisher"
+@Suppress("UNUSED")
+class KotlinConventionPlugin : Plugin<Project> {
+    override fun apply(target: Project) {
+        with(target) {
+            tasks.withType(KotlinCompile::class.java).configureEach {
+                compilerOptions {
+                    allWarningsAsErrors.set(true)
+                    jvmTarget.set(JvmTarget.JVM_17)
+                }
+            }
         }
     }
 }

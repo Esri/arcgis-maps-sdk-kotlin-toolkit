@@ -17,12 +17,11 @@
  */
 
 plugins {
-    alias(libs.plugins.binary.compatibility.validator) apply true
+    alias(libs.plugins.binary.compatibility.validator)
     id("com.android.library")
-    id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
     id("artifact-deploy")
-    id("kotlin-conventions-plugin")
+    alias(libs.plugins.kotlin.convention.plugin)
 }
 
 kotlin {

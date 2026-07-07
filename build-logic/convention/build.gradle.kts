@@ -18,6 +18,14 @@
 
 plugins {
     `kotlin-dsl`
+    `maven-publish`
+}
+
+tasks {
+    validatePlugins {
+        enableStricterValidation = true
+        failOnWarning = true
+    }
 }
 
 gradlePlugin {
@@ -36,9 +44,20 @@ gradlePlugin {
             implementationClass = "EmptyPlugin"
         }
 
-        register("kotlinConventions") {
-            id = "kotlin-conventions-plugin"
-            implementationClass = "KotlinConventionsPlugin"
+        register("kotlinConvention") {
+            id = "kotlin-convention-plugin"
+            implementationClass = "KotlinConventionPlugin"
+        }
+
+        register("microappConvention") {
+            id = "microapp-convention-plugin"
+            implementationClass = "MicroappConventionPlugin"
+        }
+
+        register("artifactDeploy") {
+            group = "internal"
+            id = "artifact-deploy"
+            implementationClass = "ArtifactPublisher"
         }
     }
 }
@@ -46,4 +65,5 @@ gradlePlugin {
 dependencies {
     compileOnly(libs.android.gradle.plugin)
     implementation(libs.kotlin.gradle)
+    compileOnly(libs.secrets.gradle.plugin)
 }
