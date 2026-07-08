@@ -18,9 +18,11 @@
 
 
 plugins {
-    alias(libs.plugins.binary.compatibility.validator) apply true
+    alias(libs.plugins.binary.compatibility.validator)
     id("com.android.library")
     id("artifact-deploy")
+    alias(libs.plugins.kotlin.convention.plugin)
+    id("org.jetbrains.kotlin.plugin.compose")
 }
 /**
  * Include this if any internal-only tests are required
