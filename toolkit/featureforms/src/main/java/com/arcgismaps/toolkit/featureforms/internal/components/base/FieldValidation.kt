@@ -19,6 +19,7 @@ package com.arcgismaps.toolkit.featureforms.internal.components.base
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.snapshots.toInt
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import com.arcgismaps.toolkit.featureforms.R
@@ -37,6 +38,8 @@ internal sealed class ValidationErrorState(
     class MinMaxNumericConstraint(min: String, max: String, hasValueExpression: Boolean) : ValidationErrorState(min, max, hasValueExpression)
     class MinDatetimeConstraint(min: String) : ValidationErrorState(min)
     class MaxDatetimeConstraint(max: String) : ValidationErrorState(max)
+    class MaxAttachmentCountConstraint(val max: Long) : ValidationErrorState(max)
+    class MinAttachmentCountConstraint(val min: Long) : ValidationErrorState(min)
     data object NotANumber : ValidationErrorState()
     data object NotAWholeNumber : ValidationErrorState()
     data object NotInCodedValueDomain : ValidationErrorState()
@@ -122,6 +125,14 @@ internal sealed class ValidationErrorState(
 
             NullNotAllowed -> {
                 stringResource(R.string.value_must_not_be_empty)
+            }
+
+            is MaxAttachmentCountConstraint -> {
+                stringResource(R.string.max_attachments_limit_reached, *formatArgs)
+            }
+            is MinAttachmentCountConstraint -> {
+                val count = this.min
+                pluralStringResource(R.plurals.min_attachments_required, count.toInt(), count)
             }
         }
     }

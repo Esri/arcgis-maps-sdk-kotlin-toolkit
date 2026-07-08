@@ -40,6 +40,7 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.core.content.ContextCompat
@@ -52,11 +53,15 @@ import com.arcgismaps.mapping.featureforms.FormAttachment
 import com.arcgismaps.mapping.featureforms.FormAttachmentType
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.internal.components.base.FormElementState
+import com.arcgismaps.toolkit.featureforms.internal.components.base.ValidationErrorState
+import com.arcgismaps.toolkit.featureforms.internal.components.base.mapValidationErrors
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -104,16 +109,99 @@ internal class AttachmentElementState(
         get() = _attachments
 
     /**
+     * Indicates whether renaming an attachment is allowed.
+     */
+    val allowUserRename = formElement.allowUserRename
+
+    /**
      * Indicates whether the attachment form element is editable.
      */
     val isEditable = formElement.isEditable
+
+    /**
+     * Indicates whether the filename of the attachment should be displayed.
+     */
+    val displayFilename = formElement.displayFilename
+
+    /**
+     * The input type for the attachment form element. This is determined based on the allowed
+     * attachment types specified by the form element.
+     */
+    val inputs = formElement.inputs
+
+    /**
+     * The attachment keyword association for the attachment form element.
+     */
+    val attachmentKeywordAssociation = formElement.attachmentKeywordAssociation
 
     /**
      * The state of the lazy list that displays the [attachments].
      */
     val lazyListState = LazyListState()
 
+    /**
+     * The maximum number of attachments that can be added.
+     */
+    val maxAttachmentCount = formElement.maxAttachmentCount
+
+    /**
+     * The minimum number of attachments that must be added.
+     */
+    val minAttachmentCount = formElement.minAttachmentCount
+
+    /**
+     * Indicates whether to use the original filename of the attachment when adding an attachment.
+     */
+    val useOriginalFilename = formElement.useOriginalFilename
+
+    /**
+     * A validation error for the attachment form element.
+     */
+    val validationError: ValidationErrorState
+        get() = _validationError.value
+
+    /**
+     * Backing mutable state for the [validationError] property.
+     */
+    private var _validationError: MutableState<ValidationErrorState> = mutableStateOf(
+        ValidationErrorState.NoError
+    )
+
+    /**
+     * Indicates whether the attachment form element has ever been focused.
+     */
+    val wasFocused: Boolean
+        get() = _wasFocused.value
+
+    /**
+     * Backing mutable state for the [wasFocused] property.
+     */
+    private var _wasFocused = mutableStateOf(false)
+
+    /**
+     * A list of validation errors for the attachments.
+     */
+    private val validationErrors: StateFlow<List<ValidationErrorState>> =
+        formElement.mapValidationErrors(scope)
+
     init {
+        scope.launch {
+            // Produce a validation error based on the current state of the errors and the focused
+            // state. The error is only shown when the element is focused.
+            combine(
+                snapshotFlow { _wasFocused.value },
+                validationErrors
+            ) { focused, errors ->
+                Pair(focused, errors)
+            }.collect {
+                val (focused, errors) = it
+                _validationError.value = if (focused) {
+                    errors.firstOrNull() ?: ValidationErrorState.NoError
+                } else {
+                    ValidationErrorState.NoError
+                }
+            }
+        }
         refreshAttachments()
     }
 
@@ -158,11 +246,18 @@ internal class AttachmentElementState(
      * Adds an attachment with the given [name], [contentType], and [filePath].
      */
     suspend fun addAttachment(name: String, contentType: String, filePath: String): Result<Unit> {
-        return formElement.addAttachment(
-            name = name,
-            contentType = contentType,
-            filePath = filePath
-        ).onSuccess { formAttachment ->
+        return if (useOriginalFilename) {
+            formElement.addAttachment(
+                name,
+                contentType,
+                filePath
+            )
+        } else {
+            formElement.addAttachment(
+                contentType = contentType,
+                filePath = filePath
+            )
+        }.onSuccess { formAttachment ->
             // create a new state
             val attachment = FormAttachmentState(
                 name = formAttachment.name,
@@ -208,6 +303,19 @@ internal class AttachmentElementState(
             state.formAttachment == formAttachment
         }?.name = newName
         scope.launch { evaluateExpressions() }
+    }
+
+    /**
+     * Changes the current focus state for the element.
+     */
+    fun onFocusChanged(focus: Boolean) {
+        if (focus) {
+            _wasFocused.value = true
+        }
+    }
+
+    fun forceValidation() {
+        _wasFocused.value = true
     }
 
     /**
@@ -405,56 +513,6 @@ internal class FormAttachmentState(
                 throw ex
             }
             null
-        }
-    }
-}
-
-/**
- * Represents valid options for capturing attachments. This is used to determine the types of
- * attachments that can be captured by the UI.
- */
-internal sealed class CaptureOptions {
-
-    data object Image : CaptureOptions()
-    data object Video : CaptureOptions()
-    data object Audio : CaptureOptions()
-    data object Document : CaptureOptions()
-    data object Signature : CaptureOptions()
-    data object Any : CaptureOptions()
-    data object Unknown : CaptureOptions()
-
-    /**
-     * Returns `true` if the capture options include image capture.
-     */
-    fun hasImageCapture(): Boolean = this is Any || this is Image
-
-    /**
-     * Returns `true` if the capture options include video capture.
-     */
-    fun hasVideoCapture(): Boolean = this is Any || this is Video
-
-    /**
-     * Returns `true` if the capture options include image or video capture.
-     */
-    fun hasMediaCapture(): Boolean = hasImageCapture() || hasVideoCapture()
-
-    /**
-     * Returns `true` if the capture options include document capture.
-     */
-    fun hasFileCapture(): Boolean = this is Any || this is Document
-
-    /**
-     * Returns a list of allowed mime types for this capture option.
-     */
-    fun getAllowedMimeTypes(): List<String> {
-        return when (this) {
-            is Any -> listOf("*/*")
-            Audio -> listOf("audio/*")
-            Document -> listOf("application/*", "text/*")
-            Image -> listOf("image/*")
-            Signature -> listOf("image/*")
-            Video -> listOf("video/*")
-            Unknown -> emptyList()
         }
     }
 }
