@@ -20,6 +20,7 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.plugin.compose")
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
+    kotlin("plugin.dataframe") version "2.4.0" // for CSV writing
 }
 
 secrets {
@@ -77,6 +78,7 @@ dependencies {
     implementation(project(":geoview-compose"))
     implementation(project(":microapps-lib"))
     implementation(project(":ar"))
+    implementation("org.jetbrains.kotlinx:dataframe:1.0.0-Beta5")
     implementation(arcgis.mapsSdk)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.composeCore)
