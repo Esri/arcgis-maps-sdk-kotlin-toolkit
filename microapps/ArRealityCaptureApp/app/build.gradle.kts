@@ -63,7 +63,11 @@ android {
 
     packaging {
         resources {
-            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            excludes.apply {
+                add("/META-INF/{AL2.0,LGPL2.1}")
+                add("META-INF/thirdparty-LICENSE")
+                add("META-INF/DEPENDENCIES")
+            }
         }
     }
 
