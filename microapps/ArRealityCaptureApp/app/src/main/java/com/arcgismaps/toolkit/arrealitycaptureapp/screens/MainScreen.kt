@@ -20,13 +20,22 @@ package com.arcgismaps.toolkit.arrealitycaptureapp.screens
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -35,6 +44,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arcgismaps.mapping.ArcGISScene
@@ -48,6 +58,7 @@ import com.arcgismaps.toolkit.ar.WorldScaleTrackingMode
 import com.arcgismaps.toolkit.ar.rememberWorldScaleSceneViewStatus
 import com.arcgismaps.toolkit.arrealitycaptureapp.R
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(
     viewModel: MainScreenViewModel = viewModel()
@@ -72,71 +83,109 @@ fun MainScreen(
     var initializationStatus by rememberWorldScaleSceneViewStatus()
     var trackingError by remember { mutableStateOf<Throwable?>(null) }
 
-    Column(
-        modifier = Modifier.fillMaxSize()
-    ) {
-        // Upper row: WorldScaleSceneView
-        Box(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth()
-        ) {
-            WorldScaleSceneView(
-                arcGISScene = arcGISScene,
-                modifier = Modifier
-                    .fillMaxSize(),
-                worldScaleTrackingMode = WorldScaleTrackingMode.Geospatial(),
-                clippingDistance = 100.0,
-                onInitializationStatusChanged = {
-                    initializationStatus = it
-                },
-                worldScaleSceneViewProxy = viewModel.proxy,
-                onTrackingErrorChanged = {
-                    trackingError = it
-                },
-                onSingleTapConfirmed = { singleTapConfirmedEvent -> },
-                graphicsOverlays = viewModel.graphicsOverlays
-            )
-        }
-
-        // Lower row - initialization status and capture button
-        Box(
-            modifier = Modifier.fillMaxWidth(),
-            contentAlignment = Alignment.Center
-        ) {
-            when(val status = initializationStatus) {
-                is WorldScaleSceneViewStatus.Initializing -> {
+    val snackbarHostState = remember { SnackbarHostState() }
+    Scaffold(
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+        topBar = {
+            TopAppBar(
+                title = {
                     Text(
-                        text = "Initializing VPS...",
-                        modifier = Modifier.padding(32.dp)
+                        stringResource(
+                            com.arcgismaps.toolkit.arrealitycaptureapp.R.string.app_name
+                        )
                     )
-                }
-                is WorldScaleSceneViewStatus.Initialized -> {
-                    if (trackingError == null) {
-                        FloatingActionButton(
-                            modifier = Modifier.padding(32.dp),
+                },
+                actions = {
+                    var actionsExpanded by remember { mutableStateOf(false) }
+                    IconButton(onClick = { actionsExpanded = !actionsExpanded }) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_more_vert_24px),
+                            contentDescription = "More"
+                        )
+                    }
+
+                    DropdownMenu(
+                        expanded = actionsExpanded,
+                        onDismissRequest = { actionsExpanded = false }
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text("Save to CSV") },
                             onClick = {
-                                viewModel.captureOrientedImage()
+                                TODO()
                             },
-                            shape = CircleShape
-                        ) {
-                            Icon(
-                                painter = painterResource(R.drawable.ic_photo_camera_24px),
-                                contentDescription = "Take photo"
-                            )
-                        }
-                    } else {
-                        Text(
-                            text = "Tracking error: ${trackingError?.message}",
-                            modifier = Modifier.padding(32.dp)
+                            contentPadding = PaddingValues(end = 12.dp),
                         )
                     }
                 }
-                is WorldScaleSceneViewStatus.FailedToInitialize -> {
-                    Text(
-                        text = "Failed to initialize VPS: ${status.error.message}",
-                        modifier = Modifier.padding(32.dp)
-                    )
+            )
+        }) { innerPadding ->
+
+        Column(
+            modifier = Modifier.fillMaxSize().padding(innerPadding)
+        ) {
+            // Upper row: WorldScaleSceneView
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+            ) {
+                WorldScaleSceneView(
+                    arcGISScene = arcGISScene,
+                    modifier = Modifier
+                        .fillMaxSize(),
+                    worldScaleTrackingMode = WorldScaleTrackingMode.Geospatial(),
+                    clippingDistance = 100.0,
+                    onInitializationStatusChanged = {
+                        initializationStatus = it
+                    },
+                    worldScaleSceneViewProxy = viewModel.proxy,
+                    onTrackingErrorChanged = {
+                        trackingError = it
+                    },
+                    onSingleTapConfirmed = { singleTapConfirmedEvent -> },
+                    graphicsOverlays = viewModel.graphicsOverlays
+                )
+            }
+
+            // Lower row - initialization status and capture button
+            Box(
+                modifier = Modifier.fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
+                when(val status = initializationStatus) {
+                    is WorldScaleSceneViewStatus.Initializing -> {
+                        Text(
+                            text = "Initializing VPS...",
+                            modifier = Modifier.padding(32.dp)
+                        )
+                    }
+                    is WorldScaleSceneViewStatus.Initialized -> {
+                        if (trackingError == null) {
+                            FloatingActionButton(
+                                modifier = Modifier.padding(32.dp),
+                                onClick = {
+                                    viewModel.captureOrientedImage()
+                                },
+                                shape = CircleShape
+                            ) {
+                                Icon(
+                                    painter = painterResource(R.drawable.ic_photo_camera_24px),
+                                    contentDescription = "Take photo"
+                                )
+                            }
+                        } else {
+                            Text(
+                                text = "Tracking error: ${trackingError?.message}",
+                                modifier = Modifier.padding(32.dp)
+                            )
+                        }
+                    }
+                    is WorldScaleSceneViewStatus.FailedToInitialize -> {
+                        Text(
+                            text = "Failed to initialize VPS: ${status.error.message}",
+                            modifier = Modifier.padding(32.dp)
+                        )
+                    }
                 }
             }
         }

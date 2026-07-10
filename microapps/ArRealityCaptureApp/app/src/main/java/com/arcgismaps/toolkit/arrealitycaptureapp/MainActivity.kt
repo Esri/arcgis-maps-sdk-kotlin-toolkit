@@ -50,14 +50,7 @@ class MainActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ArRealityCaptureApp() {
-    Scaffold(
-        topBar = { TopAppBar(title = { Text("ArRealityCaptureApp") }) }
-    ) {
-        Box(Modifier.padding(it)) {
-            MainScreen()
-        }
-    }
-
+    MainScreen()
 }
 
 @Preview(showBackground = true)
