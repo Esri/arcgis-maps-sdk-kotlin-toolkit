@@ -111,7 +111,7 @@ fun MainScreen(
                         DropdownMenuItem(
                             text = { Text("Save to CSV") },
                             onClick = {
-                                TODO()
+                                viewModel.frameRepository.saveToCsv()
                             },
                             contentPadding = PaddingValues(end = 12.dp),
                         )

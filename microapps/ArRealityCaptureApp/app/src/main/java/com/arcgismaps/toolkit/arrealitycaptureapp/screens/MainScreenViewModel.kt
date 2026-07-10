@@ -16,12 +16,15 @@ import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.mapping.view.SurfacePlacement
 import com.arcgismaps.toolkit.ar.ArOrientedImage
 import com.arcgismaps.toolkit.ar.WorldScaleSceneViewProxy
+import com.arcgismaps.toolkit.arrealitycaptureapp.io.FrameRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 const val TAG = "RealityCaptureApp"
 
 class MainScreenViewModel: ViewModel() {
+    val frameRepository by lazy { FrameRepository() }
+
     val proxy = WorldScaleSceneViewProxy()
 
     // The graphics overlay should have a surface placement of absolute to ensure
