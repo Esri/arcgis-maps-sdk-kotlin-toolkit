@@ -1,19 +1,13 @@
 package com.arcgismaps.toolkit.arrealitycaptureapp.io
 
-import android.os.Environment
+import android.content.Context
 import org.jetbrains.kotlinx.dataframe.api.cast
 import org.jetbrains.kotlinx.dataframe.api.columnOf
 import org.jetbrains.kotlinx.dataframe.api.dataFrameOf
 import org.jetbrains.kotlinx.dataframe.io.writeCsv
 import java.io.File
 
-private const val ANDROID_KOTLIN_DATA_DIR = "/Data/androidKotlin"
-
-class FrameRepository {
-
-    val androidKotlinRootDir by lazy {
-        File(Environment.getExternalStorageDirectory(), ANDROID_KOTLIN_DATA_DIR)
-    }
+class FrameRepository(private val context: Context) {
 
 //    private val camerasTable = CamerasTable().apply {
 //        this.append(
@@ -52,6 +46,12 @@ class FrameRepository {
     ).cast<FramesTable>()
 
     fun saveToCsv() {
-        framesTable.writeCsv(File(androidKotlinRootDir,"realitycapture/frames.csv"))
+        val rootDir = context.getExternalFilesDir(null) ?: throw IllegalStateException("External files directory is not available.")
+        val csvFile = File(rootDir, "realitycapture/frames.csv")
+        csvFile.parentFile?.mkdirs() ?: throw IllegalStateException("Failed to create parent directory for CSV file: ${csvFile.absolutePath}")
+        if (csvFile.exists()) {
+            csvFile.delete()
+        }
+        framesTable.writeCsv(csvFile)
     }
 }
