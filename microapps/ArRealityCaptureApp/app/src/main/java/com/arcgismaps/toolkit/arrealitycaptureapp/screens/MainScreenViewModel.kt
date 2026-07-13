@@ -1,7 +1,8 @@
 package com.arcgismaps.toolkit.arrealitycaptureapp.screens
 
+import android.app.Application
 import android.util.Log
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.arcgismaps.Color
 import com.arcgismaps.mapping.symbology.SceneSymbolAnchorPosition
@@ -22,8 +23,8 @@ import kotlinx.coroutines.launch
 
 const val TAG = "RealityCaptureApp"
 
-class MainScreenViewModel: ViewModel() {
-    val frameRepository by lazy { FrameRepository() }
+class MainScreenViewModel(application: Application): AndroidViewModel(application) {
+    val frameRepository by lazy { FrameRepository(application) }
 
     val proxy = WorldScaleSceneViewProxy()
 
