@@ -94,12 +94,12 @@
     <string name="ff_time_picker_pm">PM</string>
 
     <string name="take_photo">Take Photo</string>
-    <string name="add_from_gallery">Choose From Gallery</string>
+    <string name="choose_from_gallery">Choose From Gallery</string>
     <string name="rename">Rename</string>
     <string name="delete">Delete</string>
     <string name="rename_attachment">Rename Attachment</string>
     <string name="name">Name</string>
-    <string name="add_file">Choose From Files</string>
+    <string name="choose_from_files">Choose From Files</string>
     <string name="attachment_error">Error Adding Attachment</string>
     <string name="no_app_found">No application found to open this file type.</string>
     <string name="attachment_too_large">The File is too large. Please add a file less than 50 MB.</string>
@@ -180,13 +180,15 @@
     <string name="filters_not_applied">Filters have not been applied</string>
     <string name="discard_changes_confirmation">Are you sure you want to discard the changes?</string>
     <string name="record_audio">Record Audio</string>
-    <string name="record_video">Record Video</string>
+    <string name="take_video">Take Video</string>
     <string name="max_attachments_limit_reached">The maximum number of attachments allowed is %1$d</string>
     <string name="media_too_long">This media is too long. Maximum allowed duration is %1$d seconds.</string>
     <string name="this_file_is_too_large">This file is too large. Maximum allowed size is %1$d MB.</string>
+    <string name="attachment_with_name">Attachment: %1$s</string>
+    <string name="add_attachment">Add Attachment</string>
     <plurals name="min_attachments_required">
         <item quantity="zero">At least %1$d attachments are required</item>
-        <item quantity="one">At least %1$d attachment is required></item>
+        <item quantity="one">At least %1$d attachment is required</item>
         <item quantity="two">At least %1$d attachments are required</item>
         <item quantity="few">At least %1$d attachments are required</item>
         <item quantity="many">At least %1$d attachments are required</item>

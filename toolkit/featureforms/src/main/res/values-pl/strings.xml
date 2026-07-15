@@ -91,12 +91,12 @@
     <string name="ff_time_picker_pm">po południu</string>
 
     <string name="take_photo">Zrób zdjęcie</string>
-    <string name="add_from_gallery">Dodaj z galerii</string>
+    <string name="choose_from_gallery">Dodaj z galerii</string>
     <string name="rename">Zmień nazwę</string>
     <string name="delete">Usuń</string>
     <string name="rename_attachment">Zmień nazwę załącznika</string>
     <string name="name">Nazwa</string>
-    <string name="add_file">Dodaj z plików</string>
+    <string name="choose_from_files">Dodaj z plików</string>
     <string name="attachment_error">Błąd podczas dodawania załącznika</string>
     <string name="no_app_found">Nie znaleziono aplikacji do otwarcia tego typu pliku.</string>
     <string name="attachment_too_large">Plik jest za duży. Dodaj plik o rozmiarze mniejszym niż 50 MB.</string>

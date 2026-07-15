@@ -91,12 +91,12 @@
     <string name="ff_time_picker_pm">PM</string>
 
     <string name="take_photo">Feu una foto</string>
-    <string name="add_from_gallery">Afegeix des de la galeria</string>
+    <string name="choose_from_gallery">Afegeix des de la galeria</string>
     <string name="rename">Canvia el nom</string>
     <string name="delete">Suprimeix</string>
     <string name="rename_attachment">Canvia el nom del fitxer adjunt</string>
     <string name="name">Nom</string>
-    <string name="add_file">Afegeix des dels fitxers</string>
+    <string name="choose_from_files">Afegeix des dels fitxers</string>
     <string name="attachment_error">Error en afegir el fitxer adjunt</string>
     <string name="no_app_found">No s\'ha trobat cap aplicació per obrir aquest tipus de fitxer.</string>
     <string name="attachment_too_large">El fitxer és massa gran. Afegiu un fitxer de menys de 50 MB.</string>

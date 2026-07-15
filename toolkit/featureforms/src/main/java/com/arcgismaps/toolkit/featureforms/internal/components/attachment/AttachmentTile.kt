@@ -71,6 +71,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -120,7 +122,14 @@ internal fun AttachmentTile(
         onClick = {},
         modifier = modifier
             .width(AttachmentFormElementDefaults.tileWidth)
-            .height(AttachmentFormElementDefaults.tileHeight),
+            .height(AttachmentFormElementDefaults.tileHeight)
+            .semantics(mergeDescendants = displayFilename) {
+                // set the content description, when displayFilename is false
+                if (name.isEmpty()) {
+                    contentDescription =
+                        context.getString(R.string.attachment_with_name, state.name)
+                }
+            },
         colors = CardDefaults.cardColors(
             containerColor = colors.tileContainerColor
         ),
@@ -220,7 +229,7 @@ internal fun AttachmentTile(
                         } else if (loadStatus is LoadStatus.Loaded) {
                             // open attachment
                             val intent = Intent()
-                            intent.setAction(Intent.ACTION_VIEW)
+                            intent.action = Intent.ACTION_VIEW
                             val uri = AttachmentsFileProvider.getUriForFile(
                                 context = context,
                                 file = File(state.filePath)

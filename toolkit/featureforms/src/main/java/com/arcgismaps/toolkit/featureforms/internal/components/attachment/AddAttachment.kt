@@ -91,11 +91,11 @@ internal fun AddAttachment(
                 onFocused()
                 showMenu = true
             },
-            enabled = enabled
+            enabled = enabled && captureOptions.isNotEmpty()
         ) {
             Icon(
                 Icons.Rounded.Add,
-                contentDescription = "Add attachment",
+                contentDescription = stringResource(R.string.add_attachment),
                 modifier = Modifier.size(32.dp),
             )
         }
@@ -132,7 +132,7 @@ internal fun AddAttachment(
 
                     is CaptureOptions.CaptureVideo if hasCameraPermission -> {
                         DropdownMenuItem(
-                            text = { Text(text = "Take Video") },
+                            text = { Text(text = stringResource(R.string.take_video)) },
                             trailingIcon = {
                                 Icon(
                                     imageVector = Icons.Rounded.Videocam,
@@ -154,7 +154,7 @@ internal fun AddAttachment(
 
                     is CaptureOptions.Gallery -> {
                         DropdownMenuItem(
-                            text = { Text(text = stringResource(R.string.add_from_gallery)) },
+                            text = { Text(text = stringResource(R.string.choose_from_gallery)) },
                             trailingIcon = {
                                 Icon(
                                     imageVector = Icons.Rounded.Photo,
@@ -176,7 +176,7 @@ internal fun AddAttachment(
 
                     is CaptureOptions.File -> {
                         DropdownMenuItem(
-                            text = { Text(text = stringResource(R.string.add_file)) },
+                            text = { Text(text = stringResource(R.string.choose_from_files)) },
                             trailingIcon = {
                                 Icon(
                                     imageVector = Icons.Rounded.Folder,
@@ -394,7 +394,7 @@ private fun List<AttachmentsFormInput>.getCaptureOptions(): List<CaptureOptions>
         when (input) {
             is AudioFormInput -> {
                 when (input.inputMethod) {
-                    AttachmentInputMethod.Capture -> listOf(CaptureOptions.CaptureAudio(input.maxDuration))
+                    AttachmentInputMethod.Capture -> emptyList() // not supported yet
                     AttachmentInputMethod.Upload -> listOf(
                         CaptureOptions.File(allowedMimeTypes = input.getMimeTypes())
                     )

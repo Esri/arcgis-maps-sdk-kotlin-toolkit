@@ -91,12 +91,12 @@
     <string name="ff_time_picker_pm">PM</string>
 
     <string name="take_photo">צלם תמונה</string>
-    <string name="add_from_gallery">הוסף מהגלריה</string>
+    <string name="choose_from_gallery">הוסף מהגלריה</string>
     <string name="rename">שנה שם</string>
     <string name="delete">מחק</string>
     <string name="rename_attachment">שנה שם קובץ מצורף</string>
     <string name="name">שם</string>
-    <string name="add_file">הוסף מקבצים</string>
+    <string name="choose_from_files">הוסף מקבצים</string>
     <string name="attachment_error">שגיאה בהוספת צורפה</string>
     <string name="no_app_found">לא נמצא יישום לפתיחת סוג קובץ זה.</string>
     <string name="attachment_too_large">הקובץ גדול מדי. הוסף קובץ קטן מ-50 MB.</string>
