@@ -20,6 +20,7 @@ import android.app.Activity
 import android.app.Instrumentation
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsDisplayed
@@ -29,6 +30,7 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isDialog
 import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.isEnabled
+import androidx.compose.ui.test.isNotDisplayed
 import androidx.compose.ui.test.isPopup
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.longClick
@@ -103,13 +105,13 @@ class AttachmentsFormElementTests : FeatureFormTestRunner(
         generalAttachmentsNode.assertIsDisplayed()
 
         // Get the add attachment button and assert that it is displayed
-        val addAttachmentButton =
+        var addAttachmentButton =
             generalAttachmentsNode.onChildWithContentDescription(context.getString(R.string.add_attachment))
         addAttachmentButton.assertIsDisplayed()
         addAttachmentButton.performClick()
 
         // Assert all the options are displayed
-        val menu = composeTestRule.onNode(isPopup())
+        var menu = composeTestRule.onNode(isPopup())
         menu.assertIsDisplayed()
         assertValidCaptureOptions(
             node = menu,
@@ -125,7 +127,7 @@ class AttachmentsFormElementTests : FeatureFormTestRunner(
         ).assertIsDisplayed()
 
         // Create a temporary file to simulate the selected document
-        mockFilePickerIntentResult(context, "test_document.txt")
+        mockFilePickerIntentResult(context, "test_document.txt", "text/plain")
         // Perform the click on the "Choose From Files" option
         chooseFromFiles.performClick()
         composeTestRule.waitForIdle()
@@ -147,7 +149,7 @@ class AttachmentsFormElementTests : FeatureFormTestRunner(
         composeTestRule.onNodeWithText(context.getString(R.string.rename)).assert(isEnabled().not())
 
         // Create another temporary file to simulate the selected document
-        mockFilePickerIntentResult(context, "test_document_2.txt")
+        mockFilePickerIntentResult(context, "test_document_2.txt", "text/plain")
         // Perform the click on the "Choose From Files" option
         addAttachmentButton.performClick()
         composeTestRule.onNodeWithContentDescription(
@@ -168,8 +170,10 @@ class AttachmentsFormElementTests : FeatureFormTestRunner(
         )
         // Long click on the attachment to trigger the context menu
         attachmentNode.performTouchInput { longClick() }
-        // Assert the Rename option is disable
+        // Assert the Rename option is disabled
         composeTestRule.onNodeWithText(context.getString(R.string.rename)).assert(isEnabled().not())
+        // Dismiss the menu
+        Espresso.pressBack()
 
         // Assert that the add attachments button is now disabled since the max number of
         // attachments configured is 2
@@ -206,6 +210,59 @@ class AttachmentsFormElementTests : FeatureFormTestRunner(
                 R.plurals.min_attachments_required, 1, 1
             )
         )
+
+        // Create a temporary file to simulate the selected image
+        mockFilePickerIntentResult(context, "test_img.png", "image/png")
+
+        // Click the add attachment button to open the menu
+        addAttachmentButton = photoAttachmentsNode.onChildWithContentDescription(
+            context.getString(R.string.add_attachment)
+        ).assertIsDisplayed()
+        addAttachmentButton.performClick()
+
+        // Perform the click on the "Choose From Files" option
+        menu = composeTestRule.onNode(isPopup())
+        menu.assertIsDisplayed()
+        menu.onChildWithText(
+            value = context.getString(R.string.choose_from_files),
+            recurse = true
+        ).performClick()
+        composeTestRule.waitForIdle()
+
+        // Wait until the progress dialog is dismissed
+        composeTestRule.waitUntil(timeoutMillis = 5_000) {
+            composeTestRule.onNode(isDialog()).isNotDisplayed()
+        }
+
+        // Assert that the new attachment is displayed in the attachments list
+        composeTestRule.waitUntil {
+            // Check for the thumbnail in content description since `displayFileName` is true
+            photoAttachmentsNode.onChildWithContentDescription(
+                "Thumbnail",
+                recurse = true
+            ).isDisplayed()
+        }
+
+        // Assert that the attachment has a name that matches the pattern "attachment_#.png"
+        attachmentNode = photoAttachmentsNode.onChildWithContentDescription(
+            "Thumbnail",
+            recurse = true
+        )
+        val pattern = Regex("attachment_\\d+\\.png", RegexOption.IGNORE_CASE)
+        attachmentNode.assert(hasTextMatching(pattern))
+
+        // Assert the validation error is no longer visible on the element
+        photoAttachmentsNode.assert(
+            hasText(
+                context.resources.getQuantityString(
+                    R.plurals.min_attachments_required, 1, 1
+                )
+            ).not()
+        )
+
+        // Assert the attachment can be renamed
+        attachmentNode.performTouchInput { longClick() }
+        composeTestRule.onNodeWithText(context.getString(R.string.rename)).assert(isEnabled())
     }
 
     /**
@@ -610,14 +667,20 @@ class AttachmentsFormElementTests : FeatureFormTestRunner(
 
     /**
      * Mocks the result of a file picker intent to simulate selecting a file from the device's
-     * storage.
+     * storage. This method supports mocking files with the following content types: "image/png" and
+     * "text/plain". If an unsupported content type is provided, an [UnsupportedOperationException]
+     * will be thrown.
      *
      * @param context The context used to create the mock file and intent.
      * @param fileName The name of the file to be mocked as selected.
+     * @param contentType The MIME type of the file to be mocked as selected.
+     *
+     * @throws UnsupportedOperationException if the provided content type is not supported.
      */
     private fun mockFilePickerIntentResult(
         context: Context,
-        fileName: String
+        fileName: String,
+        contentType: String
     ) {
         val file = File(
             // parent nested dir must match the path in the file provider xml
@@ -627,11 +690,27 @@ class AttachmentsFormElementTests : FeatureFormTestRunner(
         )
         // Create the mock document file with some content
         file.parentFile?.mkdirs()
-        // Create the mock document file with some content if it doesn't exist
-        if (file.exists().not()) {
-            FileWriter(file).use { writer ->
-                writer.write("Mock file content for testing.")
-                writer.flush()
+        // If the file already exists, we don't need to create it again
+        if (file.exists()) return
+        when (contentType) {
+            "image/png" -> {
+                val bitmap = Bitmap.createBitmap(50, 50, Bitmap.Config.ARGB_8888)
+                file.outputStream().use { outputStream ->
+                    bitmap.compress(Bitmap.CompressFormat.PNG, 0, outputStream)
+                }
+                bitmap.recycle()
+            }
+
+            "text/plain" -> {
+                FileWriter(file).use { writer ->
+                    writer.write("Mock file content for testing.")
+                    writer.flush()
+                }
+            }
+
+            else -> {
+                // If the content type is not supported, throw an exception
+                throw UnsupportedOperationException("Unsupported content type: $contentType")
             }
         }
         // Set up the intent response with the file URI
