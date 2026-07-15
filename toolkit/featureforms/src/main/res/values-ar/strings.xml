@@ -91,12 +91,12 @@
     <string name="ff_time_picker_pm">مساءً</string>
 
     <string name="take_photo">التقاط صورة</string>
-    <string name="add_from_gallery">إضافة من المعرض</string>
+    <string name="choose_from_gallery">إضافة من المعرض</string>
     <string name="rename">إعادة تسمية</string>
     <string name="delete">حذف</string>
     <string name="rename_attachment">إعادة تسمية المرفق</string>
     <string name="name">الاسم</string>
-    <string name="add_file">إضافة من الملفات</string>
+    <string name="choose_from_files">إضافة من الملفات</string>
     <string name="attachment_error">حدث خطأ في أثناء إضافة المرفق</string>
     <string name="no_app_found">لم يتم العثور على تطبيق لفتح هذا النوع من الملفات.</string>
     <string name="attachment_too_large">الملف كبير للغاية. يرجى إضافة ملف أقل من 50 ميجابايت.</string>
