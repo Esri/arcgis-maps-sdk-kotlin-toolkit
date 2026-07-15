@@ -24,6 +24,7 @@ import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotDisplayed
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isDialog
@@ -562,11 +563,10 @@ class AttachmentsFormElementTests : FeatureFormTestRunner(
 
         // Assert that the add attachment button is displayed and enabled
         addAttachmentButton = attachmentsNode.onChildWithContentDescription("Add Attachment")
-        addAttachmentButton.assertIsDisplayed().performClick()
-
-        menu = composeTestRule.onNode(isPopup())
-        // Recording audio is not currently supported in the toolkit
-        menu.assertIsNotDisplayed()
+        addAttachmentButton.assertIsDisplayed()
+        // Recording audio is not currently supported in the toolkit and hence the add option
+        // is disabled
+        addAttachmentButton.assertIsNotEnabled()
 
         // Find the "Media - Audio - Upload" attachments form element
         attachmentsFormElement = featureForm.elements.firstOrNull {
