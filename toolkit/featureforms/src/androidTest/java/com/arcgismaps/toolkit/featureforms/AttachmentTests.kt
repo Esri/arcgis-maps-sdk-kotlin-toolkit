@@ -55,7 +55,7 @@ class AttachmentTests : FeatureFormTestRunner(
             FeatureForm(featureFormState = featureFormState)
         }
         val attachmentsFormElement = featureForm.elements.firstOrNull {
-            it.label == "General"
+            it.label == "Attachments"
         } as? AttachmentsFormElement
         assertThat(attachmentsFormElement).isNotNull()
         composeTestRule.waitUntil(
