@@ -185,6 +185,7 @@
     <string name="media_too_long">This media is too long. Maximum allowed duration is %1$d seconds.</string>
     <string name="this_file_is_too_large">This file is too large. Maximum allowed size is %1$d MB.</string>
     <string name="attachment_with_name">Attachment: %1$s</string>
+    <string name="add_attachment">Add Attachment</string>
     <plurals name="min_attachments_required">
         <item quantity="zero">At least %1$d attachments are required</item>
         <item quantity="one">At least %1$d attachment is required</item>

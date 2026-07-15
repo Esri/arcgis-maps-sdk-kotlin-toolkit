@@ -95,7 +95,7 @@ internal fun AddAttachment(
         ) {
             Icon(
                 Icons.Rounded.Add,
-                contentDescription = "Add Attachment",
+                contentDescription = stringResource(R.string.add_attachment),
                 modifier = Modifier.size(32.dp),
             )
         }

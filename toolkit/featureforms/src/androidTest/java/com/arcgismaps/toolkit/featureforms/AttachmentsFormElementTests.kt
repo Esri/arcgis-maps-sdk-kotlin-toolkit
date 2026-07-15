@@ -23,7 +23,6 @@ import android.content.Intent
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.hasText
@@ -105,7 +104,7 @@ class AttachmentsFormElementTests : FeatureFormTestRunner(
 
         // Get the add attachment button and assert that it is displayed
         val addAttachmentButton =
-            generalAttachmentsNode.onChildWithContentDescription("Add Attachment")
+            generalAttachmentsNode.onChildWithContentDescription(context.getString(R.string.add_attachment))
         addAttachmentButton.assertIsDisplayed()
         addAttachmentButton.performClick()
 
@@ -239,7 +238,8 @@ class AttachmentsFormElementTests : FeatureFormTestRunner(
         attachmentsNode.assertIsDisplayed()
 
         // Assert that the add attachment button is displayed and enabled
-        val addAttachmentButton = attachmentsNode.onChildWithContentDescription("Add Attachment")
+        val addAttachmentButton =
+            attachmentsNode.onChildWithContentDescription(context.getString(R.string.add_attachment))
         addAttachmentButton.assertIsDisplayed().performClick()
 
         // Assert only the "Choose From Files" option is displayed
@@ -291,7 +291,8 @@ class AttachmentsFormElementTests : FeatureFormTestRunner(
         attachmentsNode.assertIsDisplayed()
 
         // Assert that the add attachment button is displayed and enabled
-        var addAttachmentButton = attachmentsNode.onChildWithContentDescription("Add Attachment")
+        var addAttachmentButton =
+            attachmentsNode.onChildWithContentDescription(context.getString(R.string.add_attachment))
         addAttachmentButton.assertIsDisplayed().performClick()
 
         // Assert all the appropriate options are displayed in the menu
@@ -323,7 +324,8 @@ class AttachmentsFormElementTests : FeatureFormTestRunner(
         attachmentsNode.assertIsDisplayed()
 
         // Assert that the add attachment button is displayed and enabled
-        addAttachmentButton = attachmentsNode.onChildWithContentDescription("Add Attachment")
+        addAttachmentButton =
+            attachmentsNode.onChildWithContentDescription(context.getString(R.string.add_attachment))
         addAttachmentButton.assertIsDisplayed().performClick()
 
         // Assert all the appropriate options are displayed in the menu
@@ -355,7 +357,8 @@ class AttachmentsFormElementTests : FeatureFormTestRunner(
         attachmentsNode.assertIsDisplayed()
 
         // Assert that the add attachment button is displayed and enabled
-        addAttachmentButton = attachmentsNode.onChildWithContentDescription("Add Attachment")
+        addAttachmentButton =
+            attachmentsNode.onChildWithContentDescription(context.getString(R.string.add_attachment))
         addAttachmentButton.assertIsDisplayed().performClick()
 
         // Assert all the appropriate options are displayed in the menu
@@ -410,7 +413,8 @@ class AttachmentsFormElementTests : FeatureFormTestRunner(
         attachmentsNode.assertIsDisplayed()
 
         // Assert that the add attachment button is displayed and enabled
-        var addAttachmentButton = attachmentsNode.onChildWithContentDescription("Add Attachment")
+        var addAttachmentButton =
+            attachmentsNode.onChildWithContentDescription(context.getString(R.string.add_attachment))
         addAttachmentButton.assertIsDisplayed().performClick()
 
         // Assert all the appropriate options are displayed in the menu
@@ -442,7 +446,8 @@ class AttachmentsFormElementTests : FeatureFormTestRunner(
         attachmentsNode.assertIsDisplayed()
 
         // Assert that the add attachment button is displayed and enabled
-        addAttachmentButton = attachmentsNode.onChildWithContentDescription("Add Attachment")
+        addAttachmentButton =
+            attachmentsNode.onChildWithContentDescription(context.getString(R.string.add_attachment))
         addAttachmentButton.assertIsDisplayed().performClick()
 
         // Assert all the appropriate options are displayed in the menu
@@ -474,7 +479,8 @@ class AttachmentsFormElementTests : FeatureFormTestRunner(
         attachmentsNode.assertIsDisplayed()
 
         // Assert that the add attachment button is displayed and enabled
-        addAttachmentButton = attachmentsNode.onChildWithContentDescription("Add Attachment")
+        addAttachmentButton =
+            attachmentsNode.onChildWithContentDescription(context.getString(R.string.add_attachment))
         addAttachmentButton.assertIsDisplayed().performClick()
 
         // Assert all the appropriate options are displayed in the menu
@@ -529,7 +535,8 @@ class AttachmentsFormElementTests : FeatureFormTestRunner(
         attachmentsNode.assertIsDisplayed()
 
         // Assert that the add attachment button is displayed and enabled
-        var addAttachmentButton = attachmentsNode.onChildWithContentDescription("Add Attachment")
+        var addAttachmentButton =
+            attachmentsNode.onChildWithContentDescription(context.getString(R.string.add_attachment))
         addAttachmentButton.assertIsDisplayed().performClick()
 
         // Assert all the appropriate options are displayed in the menu
@@ -562,7 +569,8 @@ class AttachmentsFormElementTests : FeatureFormTestRunner(
         attachmentsNode.assertIsDisplayed()
 
         // Assert that the add attachment button is displayed and enabled
-        addAttachmentButton = attachmentsNode.onChildWithContentDescription("Add Attachment")
+        addAttachmentButton =
+            attachmentsNode.onChildWithContentDescription(context.getString(R.string.add_attachment))
         addAttachmentButton.assertIsDisplayed()
         // Recording audio is not currently supported in the toolkit and hence the add option
         // is disabled
@@ -580,7 +588,8 @@ class AttachmentsFormElementTests : FeatureFormTestRunner(
         attachmentsNode.assertIsDisplayed()
 
         // Assert that the add attachment button is displayed and enabled
-        addAttachmentButton = attachmentsNode.onChildWithContentDescription("Add Attachment")
+        addAttachmentButton =
+            attachmentsNode.onChildWithContentDescription(context.getString(R.string.add_attachment))
         addAttachmentButton.assertIsDisplayed().performClick()
 
         // Assert all the appropriate options are displayed in the menu
