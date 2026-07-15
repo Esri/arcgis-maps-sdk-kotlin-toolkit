@@ -636,6 +636,13 @@ class AttachmentsFormElementTests : FeatureFormTestRunner(
         intending(hasAction(Intent.ACTION_OPEN_DOCUMENT)).respondWith(result)
     }
 
+    /**
+     * Asserts that the specified options are displayed or not displayed in the given node.
+     *
+     * @param node The [SemanticsNodeInteraction] to check for the options.
+     * @param visibleOptions A list of options that should be displayed.
+     * @param nonVisibleOptions A list of options that should not be displayed.
+     */
     private fun assertValidCaptureOptions(
         node: SemanticsNodeInteraction,
         visibleOptions: List<String> = emptyList(),
