@@ -44,7 +44,16 @@ import androidx.test.espresso.intent.Intents.intending
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasAction
 import androidx.test.espresso.intent.rule.IntentsRule
 import androidx.test.platform.app.InstrumentationRegistry
+import com.arcgismaps.exceptions.FeatureFormValidationException
 import com.arcgismaps.mapping.featureforms.AttachmentsFormElement
+import com.arcgismaps.toolkit.featureforms.internal.components.attachment.AttachmentElementState
+import com.arcgismaps.toolkit.featureforms.internal.components.attachment.AttachmentSizeLimitExceededException
+import com.arcgismaps.toolkit.featureforms.internal.components.attachment.AttachmentSource
+import com.arcgismaps.toolkit.featureforms.internal.components.attachment.EmptyAttachmentException
+import com.arcgismaps.toolkit.featureforms.internal.components.attachment.addAttachmentFromFile
+import com.arcgismaps.toolkit.featureforms.internal.components.attachment.addAttachmentFromUri
+import com.arcgismaps.toolkit.featureforms.internal.components.attachment.deleteIfExists
+import com.arcgismaps.toolkit.featureforms.internal.components.attachment.maxAttachmentUploadSize
 import com.arcgismaps.toolkit.featureforms.internal.utils.AttachmentsFileProvider
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
@@ -53,6 +62,7 @@ import org.junit.Rule
 import org.junit.Test
 import java.io.File
 import java.io.FileWriter
+import java.io.RandomAccessFile
 
 /**
  * Test class for the authored AttachmentsFormElement in the FeatureForm.
@@ -666,6 +676,151 @@ class AttachmentsFormElementTests : FeatureFormTestRunner(
     }
 
     /**
+     * Given valid and invalid captured files
+     * When they are added as attachments
+     * Then each temporary file is deleted after the attempt
+     *
+     * @since 300.1.0
+     */
+    @Test
+    fun testCapturedFileIsDeleted() = runTest {
+        val featureFormState = FeatureFormState(
+            featureForm = featureForm,
+            coroutineScope = scope
+        )
+        val attachmentsFormElement = featureForm.elements.firstOrNull {
+            it.label == "General - All Inputs"
+        } as? AttachmentsFormElement
+        assertThat(attachmentsFormElement).isNotNull()
+
+        val elementState =
+            featureFormState.getActiveFormStateData().stateCollection[attachmentsFormElement!!] as? AttachmentElementState
+        assertThat(elementState).isNotNull()
+
+        // Create a temporary file to simulate a captured image
+        val validFile = File.createTempFile(
+            "source",
+            ".txt",
+            context.cacheDir
+        )
+        validFile.writeText("Attachment content")
+
+        try {
+            // Add the valid file and assert it was a success
+            val result = elementState!!.addAttachmentFromFile(
+                file = validFile,
+                source = AttachmentSource.Camera
+            )
+            assertThat(result.isSuccess).isTrue()
+            // Assert that the temporary file was deleted after the attempt
+            assertThat(validFile.exists()).isFalse()
+        } finally {
+            // Test fallback cleanup
+            validFile.deleteIfExists()
+        }
+
+        // Create empty file to simulate a captured image that will fail validation
+        val invalidFile = File.createTempFile(
+            "invalid_source",
+            ".txt",
+            context.cacheDir
+        )
+        try {
+            // Add the invalid file and assert it was a failure
+            val result = elementState.addAttachmentFromFile(
+                file = invalidFile,
+                source = AttachmentSource.Camera
+            )
+            assertThat(result.isFailure).isTrue()
+            assertThat(result.exceptionOrNull()).isInstanceOf(
+                EmptyAttachmentException::class.java
+            )
+            // Assert that the temporary file was deleted after the attempt
+            assertThat(invalidFile.exists()).isFalse()
+        } finally {
+            // Test fallback cleanup
+            invalidFile.deleteIfExists()
+        }
+
+        // Create a temporary file to simulate a captured image that exceeds the maximum attachment
+        // upload size
+        val overSizedFile = File.createTempFile(
+            "oversized_source",
+            ".txt",
+            context.cacheDir
+        )
+        try {
+            // Set the file length to exceed the maximum attachment upload size
+            RandomAccessFile(overSizedFile, "rw").use {
+                // Set the file length to exceed the maximum attachment upload size
+                it.setLength(maxAttachmentUploadSize + 1L)
+            }
+            // Add the oversized file and assert it was a failure due to exceeding the size limit
+            val result = elementState.addAttachmentFromFile(
+                file = overSizedFile,
+                source = AttachmentSource.Camera
+            )
+            assertThat(result.isFailure).isTrue()
+            assertThat(result.exceptionOrNull()).isInstanceOf(
+                AttachmentSizeLimitExceededException::class.java
+            )
+            // Assert that the temporary file was deleted after the attempt
+            assertThat(overSizedFile.exists()).isFalse()
+        } finally {
+            // Test fallback cleanup
+            overSizedFile.deleteIfExists()
+        }
+    }
+
+    /**
+     * Given a URI for an unsupported attachment type
+     * When it is added to an attachments element
+     * Then the validation failure is propagated
+     *
+     * @since 300.1.0
+     */
+    @Test
+    fun testAddAttachmentFromUriPropagatesFailures() = runTest {
+        val featureFormState = FeatureFormState(
+            featureForm = featureForm,
+            coroutineScope = scope
+        )
+        val attachmentsFormElement = featureForm.elements.firstOrNull {
+            it.label == "Media - Audio - Any"
+        } as? AttachmentsFormElement
+        assertThat(attachmentsFormElement).isNotNull()
+
+        val elementState =
+            featureFormState.getActiveFormStateData().stateCollection[attachmentsFormElement!!] as? AttachmentElementState
+        assertThat(elementState).isNotNull()
+
+        // Create a temporary file to simulate a selected document
+        val source = AttachmentsFileProvider.createTempFileWithUri(
+            prefix = "source",
+            suffix = ".txt",
+            context = context
+        )
+        source.file.writeText("Attachment content")
+
+        try {
+            val result = elementState!!.addAttachmentFromUri(
+                uri = source.uri,
+                context = context
+            )
+            // Since the file is not a valid attachment type for the "Media - Audio - Any" input,
+            // it should fail
+            assertThat(result.isFailure).isTrue()
+            assertThat(result.exceptionOrNull()).isInstanceOf(
+                FeatureFormValidationException.IncorrectAttachmentTypeException::class.java
+            )
+        } finally {
+            // Clean up the temporary file
+            source.file.deleteIfExists()
+        }
+        assertThat(source.file.exists()).isFalse()
+    }
+
+    /**
      * Mocks the result of a file picker intent to simulate selecting a file from the device's
      * storage. This method supports mocking files with the following content types: "image/png" and
      * "text/plain". If an unsupported content type is provided, an [UnsupportedOperationException]
@@ -683,7 +838,7 @@ class AttachmentsFormElementTests : FeatureFormTestRunner(
         contentType: String
     ) {
         val file = File(
-            // parent nested dir must match the path in the file provider xml
+            // parent nested dir must match the path in the file provider XML
             File(context.cacheDir, "feature_forms_attachments"),
             // the test file
             fileName //"test_document.txt"
