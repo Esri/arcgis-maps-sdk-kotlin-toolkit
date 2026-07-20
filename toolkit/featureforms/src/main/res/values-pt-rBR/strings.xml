@@ -91,12 +91,12 @@
     <string name="ff_time_picker_pm">PM</string>
 
     <string name="take_photo">Tirar Foto</string>
-    <string name="add_from_gallery">Adicionar da Galeria</string>
+    <string name="choose_from_gallery">Adicionar da Galeria</string>
     <string name="rename">Renomear</string>
     <string name="delete">Excluir</string>
     <string name="rename_attachment">Renomear Anexo</string>
     <string name="name">Nome</string>
-    <string name="add_file">Adicionar de Arquivos</string>
+    <string name="choose_from_files">Adicionar de Arquivos</string>
     <string name="attachment_error">Erro ao Adicionar Anexo</string>
     <string name="no_app_found">Nenhum aplicativo encontrado para abrir este tipo de arquivo.</string>
     <string name="attachment_too_large">O Arquivo é muito grande. Adicione um arquivo com menos de 50 MB.</string>

@@ -35,6 +35,7 @@ import com.arcgismaps.data.ArcGISFeatureTable
 import com.arcgismaps.data.FeatureEditResult
 import com.arcgismaps.data.FeatureTemplate
 import com.arcgismaps.data.ServiceFeatureTable
+import com.arcgismaps.data.ServiceGeodatabase
 import com.arcgismaps.geometry.GeometryType
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.ArcGISMap
@@ -160,13 +161,15 @@ data class DefaultFeatureRow(
 
 
 /**
- * Indicates an error state with the given [error].
+ * Represents a message to be shown in the UI with a title, details, and an optional action.
  */
 data class UIMessage(
     val kind: Kind,
     val title: String,
     val details: String,
-    val subTitle: String = ""
+    val subTitle: String = "",
+    val actionText: String? = null,
+    val action: () -> Unit = {}
 ) {
     enum class Kind {
         Error,
@@ -602,7 +605,7 @@ class MapViewModel @Inject constructor(
         }
         if (serviceFeatureTable.serviceGeodatabase?.hasLocalEdits() == false) {
             _uiMessage.value = UIMessage(
-                kind = UIMessage.Kind.Success,
+                kind = UIMessage.Kind.Info,
                 title = application.getString(R.string.already_up_to_date),
                 details = application.getString(R.string.no_local_edits)
             )
@@ -640,7 +643,14 @@ class MapViewModel @Inject constructor(
             _uiMessage.value = UIMessage(
                 kind = UIMessage.Kind.Error,
                 title = application.getString(R.string.failed_to_apply_edits),
-                details = errorText
+                details = errorText,
+                actionText = application.getString(R.string.undo_all_edits),
+                action = {
+                    viewModelScope.launch {
+                        // rollback the edits if user confirms the action through the UI message
+                        rollbackLocalEdits(serviceFeatureTable.serviceGeodatabase!!)
+                    }
+                }
             )
         } else {
             _uiMessage.value = UIMessage(
@@ -708,6 +718,37 @@ class MapViewModel @Inject constructor(
                 details = application.getString(R.string.map_is_in_sync_with_service)
             )
         }
+    }
+
+    /**
+     * Rolls back any local edits in the service geodatabase and refreshes the feature in the map
+     * if there is an active feature form.
+     */
+    private suspend fun rollbackLocalEdits(serviceGeodatabase: ServiceGeodatabase) {
+        // set to busy
+        _isBusy.value = true
+        serviceGeodatabase.undoLocalEdits().onSuccess {
+            // refresh the feature in the map if there is an active feature form
+            if (uiState.value is UIState.Editing) {
+                val featureFormState = (uiState.value as UIState.Editing).featureFormState
+                featureFormState.activeFeatureForm.feature.refresh()
+                // discard edits needed to reset the state of the form including its attachments and
+                // associations to match the refreshed feature
+                featureFormState.discardEdits()
+            }
+            _uiMessage.value = UIMessage(
+                kind = UIMessage.Kind.Success,
+                title = application.getString(R.string.success),
+                details = application.getString(R.string.edits_rolled_back)
+            )
+        }.onFailure {
+            _uiMessage.value = UIMessage(
+                kind = UIMessage.Kind.Error,
+                title = application.getString(R.string.failed_to_rollback_edits),
+                details = application.getString(R.string.no_servicefeaturetable)
+            )
+        }
+        _isBusy.value = false
     }
 }
 

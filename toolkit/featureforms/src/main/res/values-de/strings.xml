@@ -91,12 +91,12 @@
     <string name="ff_time_picker_pm">PM</string>
 
     <string name="take_photo">Foto aufnehmen</string>
-    <string name="add_from_gallery">Aus Galerie hinzufügen</string>
+    <string name="choose_from_gallery">Aus Galerie hinzufügen</string>
     <string name="rename">Umbenennen</string>
     <string name="delete">Löschen</string>
     <string name="rename_attachment">Anlage umbenennen</string>
     <string name="name">Name</string>
-    <string name="add_file">Aus Dateien hinzufügen</string>
+    <string name="choose_from_files">Aus Dateien hinzufügen</string>
     <string name="attachment_error">Anlage konnte nicht hinzugefügt werden.</string>
     <string name="no_app_found">Keine Anwendung zum Öffnen dieses Dateityps gefunden.</string>
     <string name="attachment_too_large">Die Datei ist zu groß. Fügen Sie eine Datei mit weniger als 50 MB hinzu.</string>

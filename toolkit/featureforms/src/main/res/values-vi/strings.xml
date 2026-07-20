@@ -91,12 +91,12 @@
     <string name="ff_time_picker_pm">CH</string>
 
     <string name="take_photo">Chụp Ảnh</string>
-    <string name="add_from_gallery">Thêm Từ Thư viện</string>
+    <string name="choose_from_gallery">Thêm Từ Thư viện</string>
     <string name="rename">Đổi tên</string>
     <string name="delete">Xóa</string>
     <string name="rename_attachment">Đổi tên Tệp đính kèm</string>
     <string name="name">Tên</string>
-    <string name="add_file">Thêm Từ Tệp</string>
+    <string name="choose_from_files">Thêm Từ Tệp</string>
     <string name="attachment_error">Lỗi khi Thêm Tệp đính kèm</string>
     <string name="no_app_found">Không tìm thấy ứng dụng để mở loại tệp này.</string>
     <string name="attachment_too_large">Tệp quá lớn. Vui lòng thêm tệp dưới 50 MB.</string>

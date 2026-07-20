@@ -195,6 +195,8 @@ dependencies {
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.bundles.composeTest)
     androidTestImplementation(libs.bundles.androidXTest)
+    androidTestImplementation(libs.androidx.test.espresso.core)
+    androidTestImplementation(libs.androidx.espresso.intents)
     debugImplementation(libs.bundles.debug)
 
     // Include only if internal tests are required

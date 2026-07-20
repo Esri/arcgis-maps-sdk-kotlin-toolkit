@@ -19,9 +19,11 @@ package com.arcgismaps.toolkit.featureforms.internal.components.base
 import com.arcgismaps.data.FieldType
 import com.arcgismaps.data.RangeDomain
 import com.arcgismaps.exceptions.FeatureFormValidationException
+import com.arcgismaps.mapping.featureforms.AttachmentsFormElement
 import com.arcgismaps.mapping.featureforms.BarcodeScannerFormInput
 import com.arcgismaps.mapping.featureforms.DateTimePickerFormInput
 import com.arcgismaps.mapping.featureforms.FieldFormElement
+import com.arcgismaps.mapping.featureforms.FormElement
 import com.arcgismaps.mapping.featureforms.TextAreaFormInput
 import com.arcgismaps.mapping.featureforms.TextBoxFormInput
 import com.arcgismaps.toolkit.featureforms.internal.components.datetime.formattedDateTime
@@ -66,14 +68,25 @@ internal fun FieldFormElement.formattedValueAsStateFlow(scope: CoroutineScope): 
 }
 
 /**
- * Creates and returns a new [StateFlow] that maps [FieldFormElement.validationErrors] from
- * List<[Throwable]> into List<[ValidationErrorState]>.
+ * Creates and returns a new [StateFlow] that maps [FieldFormElement.validationErrors] or
+ * [AttachmentsFormElement.validationErrors] from a List<[Throwable]> into List<[ValidationErrorState]>.
  *
  * @param scope A [CoroutineScope] to run the new [StateFlow] on.
- *
  * @return A new StateFlow<[ValidationErrorState]>
+ * @throws UnsupportedOperationException if the [FormElement] is not a [FieldFormElement] or
+ * [AttachmentsFormElement].
  */
-internal fun FieldFormElement.mapValidationErrors(scope: CoroutineScope): StateFlow<List<ValidationErrorState>> {
+internal fun FormElement.mapValidationErrors(scope: CoroutineScope): StateFlow<List<ValidationErrorState>> {
+    val validationErrors = when (this) {
+        is FieldFormElement -> this.validationErrors
+        is AttachmentsFormElement -> this.validationErrors
+        else -> {
+            throw UnsupportedOperationException(
+                "The form element must be a FieldFormElement or AttachmentsFormElement to map " +
+                    "validation errors."
+            )
+        }
+    }
     return validationErrors.map {
         createValidationErrorStates(it, this)
     }.stateIn(
@@ -104,10 +117,10 @@ internal fun handleCharConstraints(
  * [hasValueExpression] values.
  */
 internal fun handleCharConstraints(
-    min : Int,
-    max : Int,
-    hasValueExpression : Boolean
-) : ValidationErrorState {
+    min: Int,
+    max: Int,
+    hasValueExpression: Boolean
+): ValidationErrorState {
     return when {
         min == max -> ValidationErrorState.ExactCharConstraint(min, hasValueExpression)
         min > 0 && max > 0 -> ValidationErrorState.MinMaxCharConstraint(
@@ -155,6 +168,7 @@ internal fun handleNumericConstraints(
             max.format(),
             hasValueExpression
         )
+
         min != null -> ValidationErrorState.MinNumericConstraint(min.format())
         max != null -> ValidationErrorState.MaxNumericConstraint(max.format())
         else -> ValidationErrorState.NoError
@@ -167,7 +181,7 @@ internal fun handleNumericConstraints(
  */
 private fun createValidationErrorStates(
     errors: List<Throwable>,
-    formElement: FieldFormElement
+    formElement: FormElement
 ): List<ValidationErrorState> {
     var (hasMinRangeError, hasMaxRangeError) = Pair(false, false)
     var (hasMinCharError, hasMaxCharError) = Pair(false, false)
@@ -184,23 +198,23 @@ private fun createValidationErrorStates(
                 }
 
                 is FeatureFormValidationException.NullNotAllowedException -> {
-                    add(
-                        ValidationErrorState.NullNotAllowed
-                    )
+                    add(ValidationErrorState.NullNotAllowed)
                 }
 
                 is FeatureFormValidationException.IncorrectValueTypeException -> {
-                    when {
-                        formElement.fieldType.isFloatingPoint -> {
-                            add(ValidationErrorState.NotANumber)
-                        }
+                    (formElement as? FieldFormElement)?.let {
+                        when {
+                            formElement.fieldType.isFloatingPoint -> {
+                                add(ValidationErrorState.NotANumber)
+                            }
 
-                        formElement.fieldType.isIntegerType -> {
-                            add(ValidationErrorState.NotAWholeNumber)
-                        }
+                            formElement.fieldType.isIntegerType -> {
+                                add(ValidationErrorState.NotAWholeNumber)
+                            }
 
-                        formElement.fieldType is FieldType.Guid -> {
-                            add(ValidationErrorState.NotAGuid)
+                            formElement.fieldType is FieldType.Guid -> {
+                                add(ValidationErrorState.NotAGuid)
+                            }
                         }
                     }
                 }
@@ -222,25 +236,44 @@ private fun createValidationErrorStates(
                 }
 
                 is FeatureFormValidationException.LessThanMinimumDateTimeException -> {
-                    val dateTimePickerInput = formElement.input as DateTimePickerFormInput
-                    val formatted =
-                        dateTimePickerInput.min?.formattedDateTime(dateTimePickerInput.includeTime)
-                    if (formatted != null) {
-                        add(ValidationErrorState.MinDatetimeConstraint(formatted))
+                    (formElement as? FieldFormElement)?.let {
+                        val dateTimePickerInput = formElement.input as DateTimePickerFormInput
+                        val formatted =
+                            dateTimePickerInput.min?.formattedDateTime(dateTimePickerInput.includeTime)
+                        if (formatted != null) {
+                            add(ValidationErrorState.MinDatetimeConstraint(formatted))
+                        }
                     }
                 }
 
                 is FeatureFormValidationException.MaxDateTimeConstraintException -> {
-                    val dateTimePickerInput = formElement.input as DateTimePickerFormInput
-                    val formatted =
-                        dateTimePickerInput.max?.formattedDateTime(dateTimePickerInput.includeTime)
-                    if (formatted != null) {
-                        add(ValidationErrorState.MaxDatetimeConstraint(formatted))
+                    (formElement as? FieldFormElement)?.let {
+                        val dateTimePickerInput = formElement.input as DateTimePickerFormInput
+                        val formatted =
+                            dateTimePickerInput.max?.formattedDateTime(dateTimePickerInput.includeTime)
+                        if (formatted != null) {
+                            add(ValidationErrorState.MaxDatetimeConstraint(formatted))
+                        }
+                    }
+                }
+
+                is FeatureFormValidationException.MaxAttachmentCountConstraintException -> {
+                    (formElement as? AttachmentsFormElement)?.let {
+                        formElement.maxAttachmentCount?.let { count ->
+                            add(ValidationErrorState.MaxAttachmentCountConstraint(count))
+                        }
+                    }
+                }
+
+                is FeatureFormValidationException.MinAttachmentCountConstraintException -> {
+                    (formElement as? AttachmentsFormElement)?.let {
+                        val count = formElement.minAttachmentCount
+                        add(ValidationErrorState.MinAttachmentCountConstraint(count))
                     }
                 }
             }
             // check and add length/range constraints based validation rules
-            when (formElement.input) {
+            when ((formElement as? FieldFormElement)?.input) {
                 is TextBoxFormInput, is TextAreaFormInput, is BarcodeScannerFormInput -> {
                     if (!formElement.fieldType.isNumeric && (hasMinCharError || hasMaxCharError)) {
                         add(handleCharConstraints(formElement))
@@ -249,7 +282,8 @@ private fun createValidationErrorStates(
                     }
                 }
 
-                else -> { /* no constraints to check */ }
+                else -> { /* no constraints to check */
+                }
             }
         }
     }

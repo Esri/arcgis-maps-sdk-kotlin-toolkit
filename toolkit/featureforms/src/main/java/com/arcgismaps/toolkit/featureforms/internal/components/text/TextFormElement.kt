@@ -17,6 +17,8 @@
 package com.arcgismaps.toolkit.featureforms.internal.components.text
 
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -27,7 +29,6 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.mapping.featureforms.FormTextFormat
-import com.arcgismaps.mapping.featureforms.TextFormElement
 import com.arcgismaps.toolkit.featureforms.theme.FeatureFormTheme
 import kotlinx.coroutines.flow.MutableStateFlow
 
@@ -45,12 +46,14 @@ internal fun TextFormElement(state: TextFormElementState, modifier: Modifier = M
         // do not merge semantics for this composable so that each markdown/plain-text element
         // is treated as a separate node in the semantic tree
         Surface(
-            modifier = modifier.semantics(mergeDescendants = false) {}
+            modifier = modifier.semantics(mergeDescendants = false) {},
+            shape = RoundedCornerShape(12.dp),
+            color = MaterialTheme.colorScheme.surfaceContainerLow
         ) {
             if (state.format == FormTextFormat.Markdown) {
-                Markdown(text = text)
+                Markdown(text = text, modifier = Modifier.padding(8.dp))
             } else {
-                Text(text = text)
+                Text(text = text, modifier = Modifier.padding(8.dp))
             }
         }
     }

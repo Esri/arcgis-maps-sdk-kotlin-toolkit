@@ -91,12 +91,12 @@
     <string name="ff_time_picker_pm">오후</string>
 
     <string name="take_photo">사진 촬영</string>
-    <string name="add_from_gallery">갤러리에서 추가</string>
+    <string name="choose_from_gallery">갤러리에서 추가</string>
     <string name="rename">이름 바꾸기</string>
     <string name="delete">삭제</string>
     <string name="rename_attachment">첨부 파일 이름 바꾸기</string>
     <string name="name">이름</string>
-    <string name="add_file">파일에서 추가</string>
+    <string name="choose_from_files">파일에서 추가</string>
     <string name="attachment_error">첨부 파일을 추가하는 동안 오류 발생</string>
     <string name="no_app_found">이 파일 유형을 열 응용프로그램을 찾을 수 없습니다.</string>
     <string name="attachment_too_large">파일이 너무 큽니다. 크기가 50MB 미만인 파일을 추가하세요.</string>
