@@ -45,6 +45,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -57,15 +58,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.core.net.toUri
 import com.arcgismaps.mapping.featureforms.AttachmentInputMethod
-import com.arcgismaps.toolkit.featureforms.R
-import com.arcgismaps.toolkit.featureforms.internal.utils.AttachmentsFileProvider
-import com.arcgismaps.toolkit.featureforms.internal.utils.DialogType
-import com.arcgismaps.toolkit.featureforms.internal.utils.LocalDialogRequester
 import com.arcgismaps.mapping.featureforms.AttachmentsFormInput
 import com.arcgismaps.mapping.featureforms.AudioFormInput
 import com.arcgismaps.mapping.featureforms.DocumentFormInput
 import com.arcgismaps.mapping.featureforms.ImageFormInput
 import com.arcgismaps.mapping.featureforms.VideoFormInput
+import com.arcgismaps.toolkit.featureforms.R
+import com.arcgismaps.toolkit.featureforms.internal.utils.AttachmentsFileProvider
+import com.arcgismaps.toolkit.featureforms.internal.utils.DialogType
+import com.arcgismaps.toolkit.featureforms.internal.utils.FileUriReference
+import com.arcgismaps.toolkit.featureforms.internal.utils.LocalDialogRequester
+import kotlinx.coroutines.launch
+import java.io.File
 import java.time.Instant
 
 /**
@@ -205,7 +209,7 @@ internal fun AddAttachment(
 
 /**
  * Launches the camera to capture an image. When an image is captured, the [onImageCaptured] callback
- * is invoked with the URI of the captured image. In case of a dismissal or if no image is captured,
+ * is invoked with the [File] of the captured image. In case of a dismissal or if no image is captured,
  * the [onDismissRequest] callback is invoked.
  *
  * @param onDismissRequest A request to dismiss the camera picker.
@@ -214,17 +218,15 @@ internal fun AddAttachment(
 @Composable
 internal fun ImageCapture(
     onDismissRequest: () -> Unit,
-    onImageCaptured: (Uri) -> Unit
+    onImageCaptured: (File) -> Unit
 ) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     var hasLaunched by rememberSaveable {
         mutableStateOf(false)
     }
-    val capturedImageUri = rememberSaveable(
-        saver = listSaver(
-            save = { listOf(it.toString()) },
-            restore = { it.first().toUri() }
-        )
+    val capturedImageTarget = rememberSaveable(
+        saver = fileUriReferenceSaver
     ) {
         val timeStamp = Instant.now().toEpochMilli()
         AttachmentsFileProvider.createTempFileWithUri("IMAGE_$timeStamp", ".jpg", context)
@@ -233,23 +235,27 @@ internal fun ImageCapture(
         contract = ActivityResultContracts.TakePicture(),
         onResult = { success ->
             if (success) {
-                onImageCaptured(capturedImageUri)
+                onImageCaptured(capturedImageTarget.file)
             } else {
-                onDismissRequest()
+                scope.launch {
+                    // delete the temp file if the capture was not successful
+                    capturedImageTarget.file.deleteIfExists()
+                    onDismissRequest()
+                }
             }
         }
     )
     LaunchedEffect(Unit) {
         if (!hasLaunched) {
             hasLaunched = true
-            cameraLauncher.launch(capturedImageUri)
+            cameraLauncher.launch(capturedImageTarget.uri)
         }
     }
 }
 
 /**
  * Launches the camera to capture a video. When a video is captured, the [onVideoCaptured] callback
- * is invoked with the URI of the captured video.
+ * is invoked with the [File] of the captured video.
  *
  * @param onDismissRequest A request to dismiss the camera picker.
  * @param onVideoCaptured A callback to invoke when a video is captured.
@@ -258,17 +264,15 @@ internal fun ImageCapture(
 internal fun VideoCapture(
     maxDuration: Long?,
     onDismissRequest: () -> Unit,
-    onVideoCaptured: (Uri) -> Unit
+    onVideoCaptured: (File) -> Unit
 ) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     var hasLaunched by rememberSaveable {
         mutableStateOf(false)
     }
-    val capturedVideoUri = rememberSaveable(
-        saver = listSaver(
-            save = { listOf(it.toString()) },
-            restore = { it.first().toUri() }
-        )
+    val capturedVideoTarget = rememberSaveable(
+        saver = fileUriReferenceSaver
     ) {
         val timeStamp = Instant.now().toEpochMilli()
         AttachmentsFileProvider.createTempFileWithUri("VIDEO_$timeStamp", ".mp4", context)
@@ -290,16 +294,20 @@ internal fun VideoCapture(
         contract = captureVideoContract,
         onResult = { success ->
             if (success) {
-                onVideoCaptured(capturedVideoUri)
+                onVideoCaptured(capturedVideoTarget.file)
             } else {
-                onDismissRequest()
+                // delete the temp file if the video capture was not successful
+                scope.launch {
+                    capturedVideoTarget.file.deleteIfExists()
+                    onDismissRequest()
+                }
             }
         }
     )
     LaunchedEffect(Unit) {
         if (!hasLaunched) {
             hasLaunched = true
-            cameraLauncher.launch(capturedVideoUri)
+            cameraLauncher.launch(capturedVideoTarget.uri)
         }
     }
 }
@@ -498,6 +506,24 @@ private fun List<VisualMediaType>.toPickerMediaType(): VisualMediaType = when {
     contains(ActivityResultContracts.PickVisualMedia.ImageOnly) && contains(ActivityResultContracts.PickVisualMedia.VideoOnly) -> ActivityResultContracts.PickVisualMedia.ImageAndVideo
     else -> throw IllegalArgumentException("Unsupported combination of media types")
 }
+
+/**
+ * A saver for [FileUriReference] that saves and restores the object.
+ */
+private val fileUriReferenceSaver = listSaver<FileUriReference, String>(
+    save = { reference ->
+        listOf(
+            reference.file.absolutePath,
+            reference.uri.toString()
+        )
+    },
+    restore = { values ->
+        FileUriReference(
+            file = File(values[0]),
+            uri = values[1].toUri()
+        )
+    }
+)
 
 /**
  * Clamps a Long value to the range of Int values.

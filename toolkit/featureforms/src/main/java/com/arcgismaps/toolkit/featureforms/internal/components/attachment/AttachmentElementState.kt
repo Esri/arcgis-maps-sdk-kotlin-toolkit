@@ -55,9 +55,11 @@ import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.internal.components.base.FormElementState
 import com.arcgismaps.toolkit.featureforms.internal.components.base.ValidationErrorState
 import com.arcgismaps.toolkit.featureforms.internal.components.base.mapValidationErrors
+import com.arcgismaps.toolkit.featureforms.internal.utils.runCatchingCancellable
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -65,7 +67,9 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
+import java.io.FileNotFoundException
 import java.util.Objects
+import java.util.UUID
 
 /**
  * The maximum attachment size in bytes that can be added.
@@ -243,17 +247,30 @@ internal class AttachmentElementState(
     }
 
     /**
-     * Adds an attachment with the given [name], [contentType], and [filePath].
+     * Adds an attachment with the given [name], [contentType], and [filePath]. If the [source] is
+     * [AttachmentSource.FileSystem], the attachment will be added with the given [name]. If the
+     * [source] is [AttachmentSource.Camera], the attachment is added with the API generated name.
+     *
+     * @param name The name of the attachment.
+     * @param contentType The content type of the attachment.
+     * @param filePath The file path of the attachment.
+     * @param source The source of the attachment.
      */
-    suspend fun addAttachment(name: String, contentType: String, filePath: String): Result<Unit> {
-        return if (useOriginalFilename) {
-            formElement.addAttachment(
-                name,
-                contentType,
-                filePath
+    suspend fun addAttachment(
+        name: String,
+        contentType: String,
+        filePath: String,
+        source: AttachmentSource
+    ): Result<Unit> {
+        return when (source) {
+            // If the attachment is from the camera, use the API generated name.
+            AttachmentSource.Camera -> formElement.addAttachment(
+                contentType = contentType,
+                filePath = filePath
             )
-        } else {
-            formElement.addAttachment(
+            // If the attachment is from the file system, use the provided name.
+            AttachmentSource.FileSystem -> formElement.addAttachment(
+                name = name,
                 contentType = contentType,
                 filePath = filePath
             )
@@ -530,102 +547,124 @@ internal fun FormAttachmentType.getIcon(): ImageVector = when (this) {
 }
 
 /**
- * Returns a new attachment name based on the [contentType] and [extension].
+ * Returns a random temporary attachment name.
  *
- * @param contentType The content type of the attachment.
  * @param extension The file extension of the attachment.
  * @return A new attachment name including the file extension specified by [extension].
  */
-internal fun AttachmentElementState.getNewAttachmentNameForContentType(
-    contentType: String,
+internal fun generateTemporaryAttachmentName(
     extension: String
-): String {
-    // use the content type prefix to generate a new attachment name
-    val prefix = contentType.split("/").firstOrNull()?.replaceFirstChar(Char::titlecase)
-        ?: "Attachment"
-    var count = attachments.count { entry ->
-        // count the number of attachments with the same content type
-        entry.contentType == contentType
-    } + 1
-    // create a set of attachment names to check for duplicates
-    val names = attachments.mapTo(hashSetOf()) { it.name }
-    while (names.contains("${prefix}$count.$extension")) {
-        count++
+): String = "Attachment-${UUID.randomUUID()}.$extension"
+
+/**
+ * Adds an attachment to the [AttachmentElementState] from the specified [File]. The file will be
+ * deleted after the attempt to add the attachment. Hence, ensure the file is not needed or is a
+ * temporary file before calling this method.
+ *
+ * @param file The file to add as an attachment.
+ * @param source The source of the attachment.
+ * @return A [Result] indicating success or failure.
+ */
+internal suspend fun AttachmentElementState.addAttachmentFromFile(
+    file: File,
+    source: AttachmentSource
+): Result<Unit> = withContext(Dispatchers.IO) {
+    try {
+        if (file.exists().not()) {
+            return@withContext Result.failure(
+                FileNotFoundException("File not found: ${file.absolutePath}")
+            )
+        }
+        // get the name and content type of the file
+        val name = file.name
+        val contentType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(
+            file.extension.lowercase()
+        ) ?: "application/octet-stream"
+        // validate the file size before adding the attachment
+        return@withContext when {
+            file.length() == 0L -> Result.failure(EmptyAttachmentException())
+            file.length() > maxAttachmentUploadSize -> Result.failure(
+                AttachmentSizeLimitExceededException(maxAttachmentUploadSize)
+            )
+
+            else -> addAttachment(name, contentType, file.absolutePath, source)
+        }
+    } finally {
+        file.deleteIfExists()
     }
-    return "${prefix}$count.$extension"
 }
 
 /**
- * Adds an attachment to the [AttachmentElementState] from the specified [uri].
+ * Adds an attachment to the [AttachmentElementState] from the specified [uri]. The source of the
+ * provided [uri] must always be [AttachmentSource.FileSystem]. This is typically used when the
+ * uri is obtained from external or scoped storage sources.
  *
  * @param uri The uri of the attachment.
  * @param context The context.
- * @param useDefaultName Whether to use the default name from the uri. If false, a new name will be generated
- * based on the content type of the attachment.
+ * @return A [Result] indicating success or failure.
  */
 internal suspend fun AttachmentElementState.addAttachmentFromUri(
     uri: Uri,
-    context: Context,
-    useDefaultName: Boolean
-): Result<Unit> = withContext(Dispatchers.IO) {
-    // get the content type of the uri
-    val contentType = context.contentResolver.getType(uri) ?: run {
-        return@withContext Result.failure(Exception(context.getString(R.string.attachment_error)))
-    }
-    // get the file extension from the content type
-    val extension = MimeTypeMap.getSingleton().getExtensionFromMimeType(contentType) ?: run {
-        return@withContext Result.failure(Exception(context.getString(R.string.attachment_error)))
-    }
-    // generate a name for the attachment
-    var name = getNewAttachmentNameForContentType(contentType, extension)
-    // size of the attachment
-    var size = 0L
-    // get the name and size of the attachment
-    context.contentResolver.query(uri, null, null, null, null)?.use { cursor ->
-        cursor.moveToFirst()
-        val nameIndex =
-            cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-        val sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE)
-        // use the default file name from the uri if available
-        if (useDefaultName) {
-            cursor.getStringOrNull(nameIndex)?.let {
-                name = it
+    context: Context
+): Result<Unit> = runCatchingCancellable {
+    withContext(Dispatchers.IO) {
+        // get the content type of the uri
+        val contentType = context.contentResolver.getType(uri)
+            ?: "application/octet-stream"
+
+        // get the file extension from the content type
+        val extension = MimeTypeMap.getSingleton().getExtensionFromMimeType(contentType)
+            ?: throw Exception(context.getString(R.string.attachment_error))
+
+        // generate an initial name for the attachment
+        var name = generateTemporaryAttachmentName(extension)
+        // size of the attachment
+        var size = 0L
+        // get the name and size of the attachment
+        context.contentResolver.query(uri, null, null, null, null)?.use { cursor ->
+            if (cursor.moveToFirst()) {
+                val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                val sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE)
+                // use the default file name from the uri if available
+                cursor.getStringOrNull(nameIndex)?.let {
+                    name = it
+                }
+                // update the size
+                cursor.getLongOrNull(sizeIndex)?.let {
+                    size = it
+                }
             }
         }
-        // update the size
-        cursor.getLongOrNull(sizeIndex)?.let {
-            size = it
-        }
-    }
 
-    // Add the attachment if it passes all the checks
-    return@withContext when {
-        size == 0L -> Result.failure(EmptyAttachmentException())
-        size > maxAttachmentUploadSize -> Result.failure(
-            exception = AttachmentSizeLimitExceededException(maxAttachmentUploadSize)
-        )
-
-        else -> {
-            // Cache the file from the URI and get the cached file reference. This is required to get a file
-            // path that can be accessed by the toolkit/app.
-            context.cacheFile(uri, name).fold(
-                onSuccess = { cachedFile ->
-                    addAttachment(name, contentType, cachedFile.absolutePath).also {
-                        // delete the cached file after attempting to add the attachment since it's
-                        // no longer needed
-                        try {
-                            cachedFile.delete()
-                        } catch (ex: Exception) {
-                            Log.w(
-                                "FeatureFormToolkit",
-                                "Unable to clear cached attachment data",
-                                ex
-                            )
-                        }
-                    }
-                },
-                onFailure = { ex -> Result.failure(ex) }
+        // Add the attachment if it passes all the checks
+        return@withContext when {
+            size == 0L -> throw EmptyAttachmentException()
+            size > maxAttachmentUploadSize -> throw AttachmentSizeLimitExceededException(
+                maxAttachmentUploadSize
             )
+
+            else -> {
+                // Cache the file from the URI and get the cached file reference. This is required to get a file
+                // path that can be accessed by the toolkit/app.
+                context.cacheFile(uri, extension).fold(
+                    onSuccess = { cachedFile ->
+                        try {
+                            // Note here the name is from the original uri.
+                            addAttachment(
+                                name = name,
+                                contentType = contentType,
+                                filePath = cachedFile.absolutePath,
+                                source = AttachmentSource.FileSystem
+                            ).getOrThrow()
+                        } finally {
+                            // delete the cached file after attempting to add the attachment since it's
+                            // no longer needed
+                            cachedFile.deleteIfExists()
+                        }
+                    },
+                    onFailure = { ex -> throw ex }
+                )
+            }
         }
     }
 }
@@ -633,30 +672,58 @@ internal suspend fun AttachmentElementState.addAttachmentFromUri(
 
 /**
  * Copies the content from the specified [uri] to a file in the cache directory given by
- * [Context.getCacheDir].
+ * [Context.getCacheDir]. A unique file name is generated for the cached file to avoid conflicts
+ * with other files in the directory.
  *
  * @param uri The uri of the file to copy.
- * @param fileName The name of the file to create in the cache directory.
  * @return The file in the cache directory that contains the copied content.
  */
 internal suspend fun Context.cacheFile(
     uri: Uri,
-    fileName: String
-): Result<File> = runCatching {
-    withContext(Dispatchers.IO) {
-        val outFile = cacheDir.resolve(fileName)
-        // Delete the file if it already exists
-        if (outFile.exists()) {
-            outFile.delete()
-        }
-        // Copy the content from the uri to a file in the cache directory that the toolkit/app
-        // controls, so that it can be accessed.
-        contentResolver.openInputStream(uri)?.use { inputStream ->
-            outFile.outputStream().use { outputStream ->
-                inputStream.copyTo(outputStream)
+    extension: String
+): Result<File> = runCatchingCancellable {
+    require(extension.isNotEmpty()) { "File extension cannot be empty" }
+    val fileName = generateTemporaryAttachmentName(extension)
+    val outFile = cacheDir.resolve(fileName)
+    return@runCatchingCancellable try {
+        withContext(Dispatchers.IO) {
+            // Copy the content from the uri to a file in the cache directory that the toolkit/app
+            // controls, so that it can be accessed.
+            val inputStream = contentResolver.openInputStream(uri)
+                ?: throw Exception("Unable to open input stream for URI: $uri")
+            inputStream.use { inputStream ->
+                outFile.outputStream().use { outputStream ->
+                    inputStream.copyTo(outputStream)
+                }
             }
+            outFile
         }
-        return@withContext outFile
+    } catch (ex: Exception) {
+        // If an exception occurs during the copy process, delete the output file if it was created
+        outFile.deleteIfExists()
+        throw ex
+    }
+}
+
+/**
+ * Deletes the file if it exists. If the file cannot be deleted, a warning is logged. This function
+ * is executed in a non-cancellable context to ensure that the file deletion is attempted even if the
+ * calling coroutine is canceled.
+ */
+internal suspend fun File.deleteIfExists() = withContext(NonCancellable + Dispatchers.IO) {
+    try {
+        if (exists() && delete().not()) {
+            Log.w(
+                "FeatureFormToolkit",
+                "Unable to delete temporary file: $absolutePath"
+            )
+        }
+    } catch (ex: Exception) {
+        Log.w(
+            "FeatureFormToolkit",
+            "Exception occurred while trying to delete temporary file: $absolutePath",
+            ex
+        )
     }
 }
 
@@ -673,3 +740,11 @@ internal class AttachmentSizeLimitExceededException(val limit: Long) : Exception
  * Exception indicating that the attachment size is 0.
  */
 internal class EmptyAttachmentException : Exception("Attachment size is 0")
+
+/**
+ * Enum representing the source of an attachment.
+ */
+internal enum class AttachmentSource {
+    Camera,
+    FileSystem
+}

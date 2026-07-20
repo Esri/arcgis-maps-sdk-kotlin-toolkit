@@ -24,6 +24,7 @@ import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 import com.arcgismaps.data.CodedValue
+import kotlinx.coroutines.CancellationException
 
 /**
  * Changes the visual output of the placeholder and label properties of a TextField. Using this
@@ -92,3 +93,13 @@ internal fun Number?.format(digits: Int = 2): String =
 internal fun List<CodedValue>.toMap(): Map<Any?, String> {
     return associateBy(CodedValue::code, CodedValue::name)
 }
+
+/**
+ * Runs the specified [block] and catches any exceptions, returning a `Result` with the result of
+ * the block or the exception. If the exception is a [CancellationException], the exception will not
+ * be encapsulated in the failure but will be rethrown.
+
+ */
+internal inline fun <V> runCatchingCancellable(block: () -> V): Result<V> =
+    runCatching(block)
+        .onFailure { if (it is CancellationException) throw it }

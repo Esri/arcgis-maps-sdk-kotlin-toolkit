@@ -52,12 +52,14 @@ import com.arcgismaps.mapping.featureforms.VideoFormInput
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.AttachmentElementState
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.AttachmentErrorDialog
+import com.arcgismaps.toolkit.featureforms.internal.components.attachment.AttachmentSource
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.DeleteAttachmentDialog
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.FilePicker
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.GalleryPicker
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.ImageCapture
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.RenameAttachmentDialog
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.VideoCapture
+import com.arcgismaps.toolkit.featureforms.internal.components.attachment.addAttachmentFromFile
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.addAttachmentFromUri
 import com.arcgismaps.toolkit.featureforms.internal.components.barcode.BarcodeScanner
 import com.arcgismaps.toolkit.featureforms.internal.components.barcode.BarcodeTextFieldState
@@ -288,9 +290,12 @@ internal fun FeatureFormDialog(states: FormStateCollection) {
             }
             ImageCapture(
                 onDismissRequest = dialogRequester::dismissDialog
-            ) { uri ->
+            ) { file ->
                 scope.launch {
-                    state.addAttachmentFromUri(uri, context, false).onFailure {
+                    state.addAttachmentFromFile(
+                        file = file,
+                        source = AttachmentSource.Camera
+                    ).onFailure {
                         errorMessage = it.message ?: attachmentError
                     }
                     dialogRequester.dismissDialog()
@@ -309,9 +314,12 @@ internal fun FeatureFormDialog(states: FormStateCollection) {
             VideoCapture(
                 maxDuration = maxDuration,
                 onDismissRequest = dialogRequester::dismissDialog
-            ) { uri ->
+            ) { file ->
                 scope.launch {
-                    state.addAttachmentFromUri(uri, context, false).onFailure {
+                    state.addAttachmentFromFile(
+                        file = file,
+                        source = AttachmentSource.Camera
+                    ).onFailure {
                         errorMessage = it.message ?: attachmentError
                     }
                     dialogRequester.dismissDialog()
@@ -337,7 +345,7 @@ internal fun FeatureFormDialog(states: FormStateCollection) {
                 onDismissRequest = dialogRequester::dismissDialog
             ) { uri ->
                 scope.launch {
-                    state.addAttachmentFromUri(uri, context, false).onFailure {
+                    state.addAttachmentFromUri(uri, context).onFailure {
                         errorMessage = when (it) {
                             is MaxAttachmentDurationConstraintException -> {
                                 resources.getString(
@@ -382,7 +390,7 @@ internal fun FeatureFormDialog(states: FormStateCollection) {
                 onDismissRequest = dialogRequester::dismissDialog
             ) { uri ->
                 scope.launch {
-                    state.addAttachmentFromUri(uri, context, true).onFailure {
+                    state.addAttachmentFromUri(uri, context).onFailure {
                         errorMessage = when (it) {
                             is MaxAttachmentDurationConstraintException -> {
                                 resources.getString(
