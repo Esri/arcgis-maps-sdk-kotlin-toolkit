@@ -145,7 +145,8 @@ The `FeatureForm` component requires the following permissions to function corre
 ### [AttachmentsFormElement](https://developers.arcgis.com/kotlin/api-reference/arcgis-maps-kotlin/com.arcgismaps.mapping.featureforms/-attachments-form-element/index.html?query=class%20AttachmentsFormElement%20:%20FormElement)
 
 - The `AttachmentsFormElement` is used to display and manage attachments for a feature. It allows users to add, view, and delete attachments.
-- If camera permissions are not granted, the "Add" button will not be visible.
+- It provides photo capture, video capture, gallery selection and a file picker based on the configured options for the element.
+- If camera permissions are not granted, the appropriate camera capture options will be disabled.
 
 <img src="screenshots/attachments_form_element.png" width="250"/>
   
