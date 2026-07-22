@@ -2,56 +2,70 @@ package com.arcgismaps.toolkit.arrealitycaptureapp.io
 
 import android.content.Context
 import org.jetbrains.kotlinx.dataframe.api.cast
-import org.jetbrains.kotlinx.dataframe.api.columnOf
+import org.jetbrains.kotlinx.dataframe.api.concat
 import org.jetbrains.kotlinx.dataframe.api.dataFrameOf
+import org.jetbrains.kotlinx.dataframe.api.emptyDataFrame
 import org.jetbrains.kotlinx.dataframe.io.writeCsv
 import java.io.File
 
 class FrameRepository(private val context: Context) {
 
-//    private val camerasTable = CamerasTable().apply {
-//        this.append(
-//            "ObjectID", 1,
-//            "CameraID", "cam_01",
-//            "FocalLength", 35.0,
-//            "PixelSize", 0.005
-//        )
-//    }
+    private var framesTable = emptyDataFrame<FramesTable>()
+    private var camerasTable = emptyDataFrame<CamerasTable>()
 
-    //private val framesTable = createFramesTable().apply {
+    fun appendFrame(
+        objectId: Int,
+        raster: String,
+        cameraId: String,
+        perspectiveX: Double,
+        perspectiveY: Double,
+        perspectiveZ: Double,
+        omega: Double,
+        phi: Double,
+        kappa: Double
+    ) {
+        val newRow = dataFrameOf(
+            "ObjectID" to listOf(objectId),
+            "Raster" to listOf(raster),
+            "CameraID" to listOf(cameraId),
+            "PerspectiveX" to listOf(perspectiveX),
+            "PerspectiveY" to listOf(perspectiveY),
+            "PerspectiveZ" to listOf(perspectiveZ),
+            "Omega" to listOf(omega),
+            "Phi" to listOf(phi),
+            "Kappa" to listOf(kappa)
+        ).cast<FramesTable>()
+        framesTable = framesTable.concat(newRow)
+    }
 
-//        this.append(
-//            "ObjectID", 1,
-//            "Raster", "frame_0001.jpg",
-//            "CameraID", "cam_01",
-//            "PerspectiveX", 10.0,
-//            "PerspectiveY", 20.0,
-//            "PerspectiveZ", 30.0,
-//            "Omega", 0.1,
-//            "Phi", 0.2,
-//            "Kappa", 0.3,
-//        )
-    //}
-
-    private val framesTable = dataFrameOf(
-        "ObjectID" to columnOf(1),
-            "Raster" to columnOf("frame_0001.jpg"),
-            "CameraID" to columnOf("cam_01"),
-            "PerspectiveX" to columnOf(10.0),
-            "PerspectiveY" to columnOf(20.0),
-            "PerspectiveZ" to columnOf(30.0),
-            "Omega" to columnOf(0.1),
-            "Phi" to columnOf(0.2),
-            "Kappa" to columnOf(0.3)
-    ).cast<FramesTable>()
+    fun appendCamera(
+        objectId: Int,
+        cameraId: String,
+        focalLength: Double,
+        pixelSize: Double
+    ) {
+        val newRow = dataFrameOf(
+            "ObjectID" to listOf(objectId),
+            "CameraID" to listOf(cameraId),
+            "FocalLength" to listOf(focalLength),
+            "PixelSize" to listOf(pixelSize)
+        ).cast<CamerasTable>()
+        camerasTable = camerasTable.concat(newRow)
+    }
 
     fun saveToCsv() {
         val rootDir = context.getExternalFilesDir(null) ?: throw IllegalStateException("External files directory is not available.")
-        val csvFile = File(rootDir, "realitycapture/frames.csv")
-        csvFile.parentFile?.mkdirs() ?: throw IllegalStateException("Failed to create parent directory for CSV file: ${csvFile.absolutePath}")
-        if (csvFile.exists()) {
-            csvFile.delete()
+        val framesCsvFile = File(rootDir, "realitycapture/frames.csv")
+        framesCsvFile.parentFile?.mkdirs() ?: throw IllegalStateException("Failed to create parent directory for CSV file: ${framesCsvFile.absolutePath}")
+        if (framesCsvFile.exists()) {
+            framesCsvFile.delete()
         }
-        framesTable.writeCsv(csvFile)
+        val camerasCsvFile = File(rootDir, "realitycapture/cameras.csv")
+        camerasCsvFile.parentFile?.mkdirs() ?: throw IllegalStateException("Failed to create parent directory for CSV file: ${camerasCsvFile.absolutePath}")
+        if (camerasCsvFile.exists()) {
+            camerasCsvFile.delete()
+        }
+        framesTable.writeCsv(framesCsvFile)
+        camerasTable.writeCsv(camerasCsvFile)
     }
 }
