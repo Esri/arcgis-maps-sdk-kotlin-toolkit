@@ -18,6 +18,7 @@
 
 package com.arcgismaps.toolkit.buildingexplorer
 
+import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -41,18 +42,16 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Stable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.mapping.layers.BuildingSceneLayer
 import com.arcgismaps.mapping.layers.buildingscene.BuildingFilter
@@ -61,61 +60,68 @@ import com.arcgismaps.mapping.layers.buildingscene.BuildingGroupSublayer
 import com.arcgismaps.mapping.layers.buildingscene.BuildingSolidFilterMode
 import com.arcgismaps.mapping.layers.buildingscene.BuildingSublayer
 import com.arcgismaps.mapping.layers.buildingscene.BuildingXrayFilterMode
+import kotlinx.collections.immutable.PersistentList
+import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-@Stable
-public class BuildingExplorerState(
-    internal val buildingSceneLayer: BuildingSceneLayer?,
+internal class BuildingSceneLayerState(
+    private val buildingSceneLayer: BuildingSceneLayer,
     coroutineScope: CoroutineScope
 ) {
     // the name of the building layer
-    internal var name by mutableStateOf("")
-        private set
+    val name = buildingSceneLayer.name
 
     // the visibility of the building layer
-    internal var visible by mutableStateOf(true)
+    var visible by mutableStateOf(true)
         private set
 
     // whether the full model is being shown
-    internal var showFullModel by mutableStateOf(false)
+    var showFullModel by mutableStateOf(false)
         private set
 
     // The selected level
-    internal var selectedLevel: String by mutableStateOf("All")
+    var selectedLevel: String by mutableStateOf("All")
         private set
 
     // The list of available levels
-    internal val levels: MutableList<String> = mutableStateListOf(selectedLevel)
+    private val _levels = mutableStateListOf(selectedLevel)
+    private val levelsState by derivedStateOf { _levels.toList() }
+    val levels: List<String> get() = levelsState
 
     // the index of the selected construction phase
-    internal var selectedConstructionPhaseIndex by mutableIntStateOf(0)
+    var selectedConstructionPhaseIndex by mutableIntStateOf(0)
         private set
 
     // the list of construction phases
-    internal val constructionPhases: MutableList<String> = mutableStateListOf()
+    //val constructionPhases: MutableList<String> = mutableStateListOf()
+    private val _constructionPhases = mutableStateListOf<String>()
+    private val constructionPhasesState by derivedStateOf { _constructionPhases.toList() }
+    val constructionPhases: List<String> get() = constructionPhasesState
 
     // construction phase elements should only show if there are more than 2 phases
-    internal val isShowConstructionPhases by derivedStateOf { constructionPhases.size > 2 }
+    val isShowConstructionPhases by derivedStateOf { constructionPhases.size > 2 }
 
     // The list of building sublayer categories
-    internal val categories: MutableList<BuildingSublayer> = mutableStateListOf()
+    private val _categories = mutableStateListOf<BuildingSublayer>()
+    private val categoriesState by derivedStateOf { _categories.toList() }
+    val categories: List<BuildingSublayer> get() = categoriesState
 
     private var overviewSublayer: BuildingSublayer? = null
     private var fullModelSublayer: BuildingSublayer? = null
 
     // the show full model switch should only appear if both the full model and overview sublayers
     // are available
-    internal var isShowFullModelSwitch by mutableStateOf(false)
+    var isShowFullModelSwitch by mutableStateOf(false)
         private set
 
     init {
         coroutineScope.launch {
-            buildingSceneLayer?.let { buildingSceneLayer ->
+            buildingSceneLayer.let { buildingSceneLayer ->
                 // load the layer and extract the overview and full model sublayers if they are available
                 buildingSceneLayer.load().onFailure { throw it }
 
-                name = buildingSceneLayer.name
+                Log.i("Filter", buildingSceneLayer.activeFilter!!.description)
 
                 val sublayers = buildingSceneLayer.sublayers
                 overviewSublayer = sublayers.first { it.modelName == "Overview" }
@@ -129,26 +135,31 @@ public class BuildingExplorerState(
                 // Get the levels and construction phases from the statistics
                 buildingSceneLayer.fetchStatistics().onSuccess { statistics ->
                     statistics["BldgLevel"]?.mostFrequentValues?.let {
-                        levels.addAll(0, it.sorted())
+                        _levels.addAll(0, it.sortedBy { level -> level.toInt() })
                     }
                     statistics["CreatedPhase"]?.mostFrequentValues?.let {
-                        constructionPhases.addAll(0, it.sorted())
+                        // only allow integer phases because that is what the filter is expecting
+                        _constructionPhases.addAll(it.filter { phase -> phase.toIntOrNull() != null }
+                            .sortedBy { phase -> phase.toInt() })
                         selectedConstructionPhaseIndex = constructionPhases.size - 1
                     }
 
                     // The top-level sublayer groups will be the categories
                     fullModelSublayer?.let { buildingSublayer ->
                         buildingSublayer as BuildingGroupSublayer
-                        categories.addAll(buildingSublayer.sublayers.sortedBy { it.name })
+                        _categories.addAll(buildingSublayer.sublayers.sortedBy { it.name })
                     }
                 }
+
+                // clear any preset filter on the layer
+                filter()
             }
         }
     }
 
     internal fun toggleVisibility(visible: Boolean) {
         this.visible = visible
-        buildingSceneLayer?.isVisible = this.visible
+        buildingSceneLayer.isVisible = this.visible
     }
 
     internal fun toggleFullModel(fullModel: Boolean) {
@@ -157,7 +168,7 @@ public class BuildingExplorerState(
         overviewSublayer?.isVisible = !showFullModel
     }
 
-    //internal fun zoomToBuilding() {}
+    internal fun zoomToBuilding() {}
 
     internal fun onLevelSelected(index: Int) {
         selectedLevel = levels[index]
@@ -178,8 +189,7 @@ public class BuildingExplorerState(
             xRayWhere = "CreatedPhase <= ${constructionPhases[selectedConstructionPhaseIndex]}"
         }
 
-        buildingSceneLayer?.let { buildingSceneLayer ->
-            //if (selectedLevel == "All") {
+        buildingSceneLayer.let { buildingSceneLayer ->
             if (selectedLevel != "All") {
                 if (solidWhere.isNotEmpty()) {
                     solidWhere += " AND BldgLevel = $selectedLevel"
@@ -215,6 +225,32 @@ public class BuildingExplorerState(
     }
 }
 
+public class BuildingExplorerState(
+    buildingSceneLayers: PersistentList<BuildingSceneLayer>,
+    internal val coroutineScope: CoroutineScope
+) {
+    init {
+        require(buildingSceneLayers.isNotEmpty()) {
+            "BuildingExplorerState requires at least one BuildingSceneLayer."
+        }
+    }
+
+    internal val buildingSceneLayerStates = buildingSceneLayers.map {
+        BuildingSceneLayerState(it, coroutineScope)
+    }.sortedBy { it.name }.toPersistentList()
+
+    private var _buildingSceneLayerState by mutableStateOf(
+        buildingSceneLayerStates.first()
+    )
+
+    internal val buildingSceneLayerState: BuildingSceneLayerState
+        get() = _buildingSceneLayerState
+
+    internal fun onBuildingSceneLayerSelected(index: Int) {
+        _buildingSceneLayerState = buildingSceneLayerStates[index]
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 public fun BuildingExplorer(
@@ -227,20 +263,72 @@ public fun BuildingExplorer(
             modifier = Modifier.verticalScroll(rememberScrollState())
         ) {
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(8.dp)) {
-                Text(state.name)
+                if (state.buildingSceneLayerStates.size > 1) {
+                    var buildingSceneLayerExpanded by remember { mutableStateOf(false) }
+                    ExposedDropdownMenuBox(
+                        expanded = buildingSceneLayerExpanded,
+                        onExpandedChange = {
+                            buildingSceneLayerExpanded = !buildingSceneLayerExpanded
+                        },
+                        modifier = Modifier.padding(8.dp)
+                    ) {
+                        TextField(
+                            value = state.buildingSceneLayerState.name,
+                            onValueChange = {},
+                            readOnly = true,
+                            trailingIcon = {
+                                ExposedDropdownMenuDefaults.TrailingIcon(
+                                    expanded = buildingSceneLayerExpanded
+                                )
+                            },
+                            modifier = Modifier.menuAnchor(
+                                type = ExposedDropdownMenuAnchorType.PrimaryNotEditable
+                            )
+                        )
+                        ExposedDropdownMenu(
+                            expanded = buildingSceneLayerExpanded,
+                            onDismissRequest = { buildingSceneLayerExpanded = false }
+                        ) {
+                            state.buildingSceneLayerStates.forEachIndexed { index, buildingSceneLayerState ->
+                                DropdownMenuItem(
+                                    text = { Text(buildingSceneLayerState.name) },
+                                    onClick = {
+                                        state.onBuildingSceneLayerSelected(index)
+                                        buildingSceneLayerExpanded = false
+                                    }
+                                )
+                            }
+                        }
+                    }
+                } else {
+                    Text(text = state.buildingSceneLayerState.name)
+                }
             }
             HorizontalDivider()
+            BuildingExplorer(buildingSceneLayerState = state.buildingSceneLayerState)
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun BuildingExplorer(
+    buildingSceneLayerState: BuildingSceneLayerState,
+    modifier: Modifier = Modifier
+) {
+    Box(modifier = modifier) {
+        Column {
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(8.dp)) {
                 Text("Visible")
                 Spacer(modifier = Modifier.weight(1f))
                 Switch(
-                    checked = state.visible,
-                    onCheckedChange = state::toggleVisibility
+                    checked = buildingSceneLayerState.visible,
+                    onCheckedChange = buildingSceneLayerState::toggleVisibility
                 )
             }
 
-            if (state.visible) {
-                if (state.isShowFullModelSwitch) {
+            if (buildingSceneLayerState.visible) {
+                if (buildingSceneLayerState.isShowFullModelSwitch) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.padding(8.dp)
@@ -248,13 +336,13 @@ public fun BuildingExplorer(
                         Text("Show full model")
                         Spacer(modifier = Modifier.weight(1f))
                         Switch(
-                            checked = state.showFullModel,
-                            onCheckedChange = state::toggleFullModel
+                            checked = buildingSceneLayerState.showFullModel,
+                            onCheckedChange = buildingSceneLayerState::toggleFullModel
                         )
                     }
                 }
 
-                if (state.showFullModel) {
+                if (buildingSceneLayerState.showFullModel) {
                     var levelsExpanded by remember { mutableStateOf(false) }
                     Row {
                         Text(text = "Level", modifier = Modifier.padding(8.dp).weight(0.5f))
@@ -265,7 +353,7 @@ public fun BuildingExplorer(
                             modifier = Modifier.padding(8.dp).weight(0.5f)
                         ) {
                             TextField(
-                                value = state.selectedLevel,
+                                value = buildingSceneLayerState.selectedLevel,
                                 onValueChange = {},
                                 readOnly = true,
                                 trailingIcon = {
@@ -281,11 +369,11 @@ public fun BuildingExplorer(
                                 expanded = levelsExpanded,
                                 onDismissRequest = { levelsExpanded = false }
                             ) {
-                                state.levels.forEachIndexed { index, level ->
+                                buildingSceneLayerState.levels.forEachIndexed { index, level ->
                                     DropdownMenuItem(
                                         text = { Text(level) },
                                         onClick = {
-                                            state.onLevelSelected(index)
+                                            buildingSceneLayerState.onLevelSelected(index)
                                             levelsExpanded = false
                                         }
                                     )
@@ -294,7 +382,7 @@ public fun BuildingExplorer(
                         }
                     }
 
-                    if (state.isShowConstructionPhases) {
+                    if (buildingSceneLayerState.isShowConstructionPhases) {
                         var constructionPhasesExpanded by remember { mutableStateOf(false) }
                         Row {
                             Text(
@@ -310,7 +398,7 @@ public fun BuildingExplorer(
                                 modifier = Modifier.padding(8.dp).weight(0.5f)
                             ) {
                                 TextField(
-                                    value = state.constructionPhases[state.selectedConstructionPhaseIndex],
+                                    value = buildingSceneLayerState.constructionPhases[buildingSceneLayerState.selectedConstructionPhaseIndex],
                                     onValueChange = {},
                                     readOnly = true,
                                     trailingIcon = {
@@ -326,11 +414,13 @@ public fun BuildingExplorer(
                                     expanded = constructionPhasesExpanded,
                                     onDismissRequest = { constructionPhasesExpanded = false }
                                 ) {
-                                    state.constructionPhases.forEachIndexed { index, phase ->
+                                    buildingSceneLayerState.constructionPhases.forEachIndexed { index, phase ->
                                         DropdownMenuItem(
                                             text = { Text(phase) },
                                             onClick = {
-                                                state.onConstructionPhaseSelected(index)
+                                                buildingSceneLayerState.onConstructionPhaseSelected(
+                                                    index
+                                                )
                                                 constructionPhasesExpanded = false
                                             }
                                         )
@@ -341,13 +431,15 @@ public fun BuildingExplorer(
                     }
 
                     HorizontalDivider()
-                    state.categories.forEach {
-                        CategorySelector(
-                            builingSubLayerProvider = { it },
-                            onSelected = { buildingSubLayer, isSelected ->
-                                buildingSubLayer.isVisible = isSelected
-                            }
-                        )
+                    buildingSceneLayerState.categories.forEach {
+                        key(it) {
+                            CategorySelector(
+                                buildingSubLayerProvider = { it },
+                                onSelected = { buildingSubLayer, isSelected ->
+                                    buildingSubLayer.isVisible = isSelected
+                                }
+                            )
+                        }
                     }
                 }
             }
@@ -357,11 +449,11 @@ public fun BuildingExplorer(
 
 @Composable
 private fun CategorySelector(
-    builingSubLayerProvider: () -> BuildingSublayer,
+    buildingSubLayerProvider: () -> BuildingSublayer,
     onSelected: (BuildingSublayer, Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val buildingSublayer = remember { builingSubLayerProvider() }
+    val buildingSublayer = remember { buildingSubLayerProvider() }
     var categoryChecked by remember { mutableStateOf(buildingSublayer.isVisible) }
     var showSubCategories by remember { mutableStateOf(false) }
 
@@ -408,7 +500,7 @@ private fun SubCategorySelector(
     onSelected: (BuildingSublayer, Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val buildingSublayer = remember { buildingSublayerProvider()}
+    val buildingSublayer = remember { buildingSublayerProvider() }
     var subCategoryChecked by remember { mutableStateOf(buildingSublayer.isVisible) }
 
     Box(modifier = modifier) {
@@ -423,11 +515,5 @@ private fun SubCategorySelector(
                 })
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-internal fun BuildingExplorerPreview() {
-    BuildingExplorer(BuildingExplorerState(null, rememberCoroutineScope()))
 }
 
