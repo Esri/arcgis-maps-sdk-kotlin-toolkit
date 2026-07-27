@@ -48,7 +48,9 @@ fun MainScreen() {
         }
     } else {
         Column {
-            LocalSceneView(scene = viewModel.scene, modifier = Modifier.weight(0.5f))
+            LocalSceneView(
+                scene = viewModel.scene,
+                modifier = Modifier.weight(0.5f))
             BuildingExplorer(
                 state = viewModel.buildingExplorerState,
                 modifier = Modifier.weight(0.5f)
