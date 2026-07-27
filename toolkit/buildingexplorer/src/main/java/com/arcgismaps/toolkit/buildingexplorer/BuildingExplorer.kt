@@ -18,7 +18,6 @@
 
 package com.arcgismaps.toolkit.buildingexplorer
 
-import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -45,7 +44,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -90,7 +88,7 @@ internal class BuildingSceneLayerState(
     val levels: List<String> get() = levelsState
 
     // the index of the selected construction phase
-    var selectedConstructionPhaseIndex by mutableIntStateOf(0)
+    var selectedConstructionPhase by mutableStateOf("")
         private set
 
     // the list of construction phases
@@ -121,11 +119,9 @@ internal class BuildingSceneLayerState(
                 // load the layer and extract the overview and full model sublayers if they are available
                 buildingSceneLayer.load().onFailure { throw it }
 
-                Log.i("Filter", buildingSceneLayer.activeFilter!!.description)
-
                 val sublayers = buildingSceneLayer.sublayers
-                overviewSublayer = sublayers.first { it.modelName == "Overview" }
-                fullModelSublayer = sublayers.first { it.modelName == "FullModel" }
+                overviewSublayer = sublayers.firstOrNull { it.modelName == "Overview" }
+                fullModelSublayer = sublayers.firstOrNull { it.modelName == "FullModel" }
                 fullModelSublayer?.let {
                     showFullModel = it.isVisible
                 }
@@ -141,12 +137,13 @@ internal class BuildingSceneLayerState(
                         // only allow integer phases because that is what the filter is expecting
                         _constructionPhases.addAll(it.filter { phase -> phase.toIntOrNull() != null }
                             .sortedBy { phase -> phase.toInt() })
-                        selectedConstructionPhaseIndex = constructionPhases.size - 1
+                        if (_constructionPhases.isNotEmpty()) {
+                            selectedConstructionPhase = _constructionPhases.last()
+                        }
                     }
 
                     // The top-level sublayer groups will be the categories
-                    fullModelSublayer?.let { buildingSublayer ->
-                        buildingSublayer as BuildingGroupSublayer
+                    (fullModelSublayer as? BuildingGroupSublayer)?.let { buildingSublayer ->
                         _categories.addAll(buildingSublayer.sublayers.sortedBy { it.name })
                     }
                 }
@@ -168,15 +165,13 @@ internal class BuildingSceneLayerState(
         overviewSublayer?.isVisible = !showFullModel
     }
 
-    internal fun zoomToBuilding() {}
-
     internal fun onLevelSelected(index: Int) {
-        selectedLevel = levels[index]
+        selectedLevel = levels.getOrNull(index) ?: return
         filter()
     }
 
     internal fun onConstructionPhaseSelected(index: Int) {
-        selectedConstructionPhaseIndex = index
+        selectedConstructionPhase = constructionPhases.getOrNull(index) ?: return
         filter()
     }
 
@@ -185,8 +180,8 @@ internal class BuildingSceneLayerState(
         var xRayWhere = ""
 
         if (isShowConstructionPhases) {
-            solidWhere = "CreatedPhase <= ${constructionPhases[selectedConstructionPhaseIndex]}"
-            xRayWhere = "CreatedPhase <= ${constructionPhases[selectedConstructionPhaseIndex]}"
+            solidWhere = "CreatedPhase <= $selectedConstructionPhase"
+            xRayWhere = "CreatedPhase <= $selectedConstructionPhase"
         }
 
         buildingSceneLayer.let { buildingSceneLayer ->
@@ -247,7 +242,7 @@ public class BuildingExplorerState(
         get() = _buildingSceneLayerState
 
     internal fun onBuildingSceneLayerSelected(index: Int) {
-        _buildingSceneLayerState = buildingSceneLayerStates[index]
+        _buildingSceneLayerState = buildingSceneLayerStates.getOrNull(index) ?: return
     }
 }
 
@@ -398,7 +393,7 @@ private fun BuildingExplorer(
                                 modifier = Modifier.padding(8.dp).weight(0.5f)
                             ) {
                                 TextField(
-                                    value = buildingSceneLayerState.constructionPhases[buildingSceneLayerState.selectedConstructionPhaseIndex],
+                                    value = buildingSceneLayerState.selectedConstructionPhase,
                                     onValueChange = {},
                                     readOnly = true,
                                     trailingIcon = {
@@ -479,14 +474,21 @@ private fun CategorySelector(
                     )
                 }
             }
+
+            val sortedSubCategories = remember(buildingSublayer) {
+                (buildingSublayer as? BuildingGroupSublayer)
+                    ?.sublayers
+                    ?.sortedBy { it.name }
+                    .orEmpty()
+            }
+
             if (showSubCategories) {
-                remember {
-                    val buildingGroupSublayer = buildingSublayer as BuildingGroupSublayer
-                    buildingGroupSublayer.sublayers.sortedBy { it.name }
-                }.forEach { buildingSublayer ->
+                sortedSubCategories.forEach {
                     SubCategorySelector(
-                        { buildingSublayer },
-                        { buildingSublayer, isChecked -> buildingSublayer.isVisible = isChecked }
+                        buildingSublayerProvider = { it },
+                        onSelected = { it, isChecked ->
+                            it.isVisible = isChecked
+                        }
                     )
                 }
             }
