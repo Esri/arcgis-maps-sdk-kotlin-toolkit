@@ -32,6 +32,11 @@ import com.arcgismaps.toolkit.buildingexplorer.BuildingExplorer
 import com.arcgismaps.toolkit.buildingexplorerapp.ViewModel
 import com.arcgismaps.toolkit.geoviewcompose.LocalSceneView
 
+/**
+ * The main screen of the application consisting of a [LocalSceneView] and a [BuildingExplorer].
+ *
+ * @since 300.1.0
+ */
 @Composable
 fun MainScreen() {
     val viewModel: ViewModel = viewModel()
@@ -50,7 +55,8 @@ fun MainScreen() {
         Column {
             LocalSceneView(
                 scene = viewModel.scene,
-                modifier = Modifier.weight(0.5f))
+                modifier = Modifier.weight(0.5f)
+            )
             BuildingExplorer(
                 state = viewModel.buildingExplorerState,
                 modifier = Modifier.weight(0.5f)

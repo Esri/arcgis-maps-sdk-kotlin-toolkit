@@ -29,6 +29,14 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
+/**
+ * The view model.
+ *
+ * @param application the application associated with this view model
+ * @constructor constructs a viewmodel
+ *
+ * @since 300.1.0
+ */
 class ViewModel(application: Application) : AndroidViewModel(application) {
     val scene =
         ArcGISScene("https://www.arcgis.com/home/item.html?id=b7c387d599a84a50aafaece5ca139d44")

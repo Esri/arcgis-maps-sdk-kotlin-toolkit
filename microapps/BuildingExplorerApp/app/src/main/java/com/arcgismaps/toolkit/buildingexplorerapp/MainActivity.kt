@@ -35,6 +35,11 @@ import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.toolkit.buildingexplorerapp.screens.MainScreen
 import com.esri.microappslib.theme.MicroAppTheme
 
+/**
+ * The main activity of the application.
+ *
+ * @since 300.1.0
+ */
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

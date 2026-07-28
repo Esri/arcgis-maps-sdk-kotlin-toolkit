@@ -36,6 +36,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 /**
+ * The state of a [BuildingExplorer].
+ *
  * @since 300.1.0
  */
 public class BuildingExplorerState(
@@ -65,6 +67,8 @@ public class BuildingExplorerState(
 }
 
 /**
+ * The state for a single [BuildingSceneLayer] in a [BuildingExplorerState].
+ *
  * @since 300.1.0
  */
 internal class BuildingSceneLayerState(
