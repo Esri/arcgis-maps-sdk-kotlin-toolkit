@@ -41,10 +41,8 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -52,201 +50,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.arcgismaps.mapping.layers.BuildingSceneLayer
-import com.arcgismaps.mapping.layers.buildingscene.BuildingFilter
-import com.arcgismaps.mapping.layers.buildingscene.BuildingFilterBlock
 import com.arcgismaps.mapping.layers.buildingscene.BuildingGroupSublayer
-import com.arcgismaps.mapping.layers.buildingscene.BuildingSolidFilterMode
 import com.arcgismaps.mapping.layers.buildingscene.BuildingSublayer
-import com.arcgismaps.mapping.layers.buildingscene.BuildingXrayFilterMode
-import kotlinx.collections.immutable.PersistentList
-import kotlinx.collections.immutable.toPersistentList
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 
-internal class BuildingSceneLayerState(
-    private val buildingSceneLayer: BuildingSceneLayer,
-    coroutineScope: CoroutineScope
-) {
-    // the name of the building layer
-    val name = buildingSceneLayer.name
-
-    // the visibility of the building layer
-    var visible by mutableStateOf(true)
-        private set
-
-    // whether the full model is being shown
-    var showFullModel by mutableStateOf(false)
-        private set
-
-    // The selected level
-    var selectedLevel: String by mutableStateOf("All")
-        private set
-
-    // The list of available levels
-    private val _levels = mutableStateListOf(selectedLevel)
-    private val levelsState by derivedStateOf { _levels.toList() }
-    val levels: List<String> get() = levelsState
-
-    // the index of the selected construction phase
-    var selectedConstructionPhase by mutableStateOf("")
-        private set
-
-    // the list of construction phases
-    //val constructionPhases: MutableList<String> = mutableStateListOf()
-    private val _constructionPhases = mutableStateListOf<String>()
-    private val constructionPhasesState by derivedStateOf { _constructionPhases.toList() }
-    val constructionPhases: List<String> get() = constructionPhasesState
-
-    // construction phase elements should only show if there are more than 2 phases
-    val isShowConstructionPhases by derivedStateOf { constructionPhases.size > 2 }
-
-    // The list of building sublayer categories
-    private val _categories = mutableStateListOf<BuildingSublayer>()
-    private val categoriesState by derivedStateOf { _categories.toList() }
-    val categories: List<BuildingSublayer> get() = categoriesState
-
-    private var overviewSublayer: BuildingSublayer? = null
-    private var fullModelSublayer: BuildingSublayer? = null
-
-    // the show full model switch should only appear if both the full model and overview sublayers
-    // are available
-    var isShowFullModelSwitch by mutableStateOf(false)
-        private set
-
-    init {
-        coroutineScope.launch {
-            buildingSceneLayer.let { buildingSceneLayer ->
-                // load the layer and extract the overview and full model sublayers if they are available
-                buildingSceneLayer.load().onFailure { throw it }
-
-                val sublayers = buildingSceneLayer.sublayers
-                overviewSublayer = sublayers.firstOrNull { it.modelName == "Overview" }
-                fullModelSublayer = sublayers.firstOrNull { it.modelName == "FullModel" }
-                fullModelSublayer?.let {
-                    showFullModel = it.isVisible
-                }
-
-                isShowFullModelSwitch = fullModelSublayer != null && overviewSublayer != null
-
-                // Get the levels and construction phases from the statistics
-                buildingSceneLayer.fetchStatistics().onSuccess { statistics ->
-                    statistics["BldgLevel"]?.mostFrequentValues?.let {
-                        _levels.addAll(0, it.sortedBy { level -> level.toInt() })
-                    }
-                    statistics["CreatedPhase"]?.mostFrequentValues?.let {
-                        // only allow integer phases because that is what the filter is expecting
-                        _constructionPhases.addAll(it.filter { phase -> phase.toIntOrNull() != null }
-                            .sortedBy { phase -> phase.toInt() })
-                        if (_constructionPhases.isNotEmpty()) {
-                            selectedConstructionPhase = _constructionPhases.last()
-                        }
-                    }
-
-                    // The top-level sublayer groups will be the categories
-                    (fullModelSublayer as? BuildingGroupSublayer)?.let { buildingSublayer ->
-                        _categories.addAll(buildingSublayer.sublayers.sortedBy { it.name })
-                    }
-                }
-
-                // clear any preset filter on the layer
-                filter()
-            }
-        }
-    }
-
-    internal fun toggleVisibility(visible: Boolean) {
-        this.visible = visible
-        buildingSceneLayer.isVisible = this.visible
-    }
-
-    internal fun toggleFullModel(fullModel: Boolean) {
-        showFullModel = fullModel
-        fullModelSublayer?.isVisible = showFullModel
-        overviewSublayer?.isVisible = !showFullModel
-    }
-
-    internal fun onLevelSelected(index: Int) {
-        selectedLevel = levels.getOrNull(index) ?: return
-        filter()
-    }
-
-    internal fun onConstructionPhaseSelected(index: Int) {
-        selectedConstructionPhase = constructionPhases.getOrNull(index) ?: return
-        filter()
-    }
-
-    internal fun filter() {
-        var solidWhere = ""
-        var xRayWhere = ""
-
-        if (isShowConstructionPhases) {
-            solidWhere = "CreatedPhase <= $selectedConstructionPhase"
-            xRayWhere = "CreatedPhase <= $selectedConstructionPhase"
-        }
-
-        buildingSceneLayer.let { buildingSceneLayer ->
-            if (selectedLevel != "All") {
-                if (solidWhere.isNotEmpty()) {
-                    solidWhere += " AND BldgLevel = $selectedLevel"
-                } else {
-                    solidWhere = "BldgLevel = $selectedLevel"
-                }
-                if (xRayWhere.isNotEmpty()) {
-                    xRayWhere += " AND BldgLevel < $selectedLevel"
-                } else {
-                    xRayWhere = "BldgLevel < $selectedLevel"
-                }
-            }
-            // Build a building filter to show the selected floor and an xray view of the floors below.
-            // Floors above the selected floor are not shown at all.
-            val buildingFilter = BuildingFilter(
-                name = "Floor filter",
-                description = "Show selected floor and xray filter for lower floors.",
-                listOf(
-                    BuildingFilterBlock(
-                        title = "solid block",
-                        whereClause = solidWhere,
-                        mode = BuildingSolidFilterMode()
-                    ),
-                    BuildingFilterBlock(
-                        title = "x ray block",
-                        whereClause = xRayWhere,
-                        mode = BuildingXrayFilterMode()
-                    )
-                )
-            )
-            buildingSceneLayer.activeFilter = buildingFilter
-        }
-    }
-}
-
-public class BuildingExplorerState(
-    buildingSceneLayers: PersistentList<BuildingSceneLayer>,
-    internal val coroutineScope: CoroutineScope
-) {
-    init {
-        require(buildingSceneLayers.isNotEmpty()) {
-            "BuildingExplorerState requires at least one BuildingSceneLayer."
-        }
-    }
-
-    internal val buildingSceneLayerStates = buildingSceneLayers.map {
-        BuildingSceneLayerState(it, coroutineScope)
-    }.sortedBy { it.name }.toPersistentList()
-
-    private var _buildingSceneLayerState by mutableStateOf(
-        buildingSceneLayerStates.first()
-    )
-
-    internal val buildingSceneLayerState: BuildingSceneLayerState
-        get() = _buildingSceneLayerState
-
-    internal fun onBuildingSceneLayerSelected(index: Int) {
-        _buildingSceneLayerState = buildingSceneLayerStates.getOrNull(index) ?: return
-    }
-}
-
+/**
+ * Building Explorer is a composable for browsing the levels and sublayers of building scene
+ * layers.
+ *
+ * @since 300.1.0
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 public fun BuildingExplorer(
@@ -306,6 +118,11 @@ public fun BuildingExplorer(
     }
 }
 
+/**
+ * Building explorer composable for browsing a single building scene layer.
+ *
+ * @since 300.1.0
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun BuildingExplorer(
@@ -452,6 +269,11 @@ private fun BuildingExplorer(
     }
 }
 
+/**
+ * Composable for selecting a building sublayer category e.g. architectural features
+ *
+ * @since 300.1.0
+ */
 @Composable
 private fun CategorySelector(
     buildingSubLayerProvider: () -> BuildingSublayer,
@@ -506,6 +328,11 @@ private fun CategorySelector(
     }
 }
 
+/**
+ * Composable for selecting building sublayer category subcategories e.g. doors
+ *
+ * @since 300.1.0
+ */
 @Composable
 private fun SubCategorySelector(
     buildingSublayerProvider: () -> BuildingSublayer,

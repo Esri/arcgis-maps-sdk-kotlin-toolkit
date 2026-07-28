@@ -1,6 +1,6 @@
 # Building Explorer
 
-The Building Explorer provides a tool for users to browse the levels and sublayers of the building scene layers in a Scene.
+The Building Explorer provides a tool for browsing the levels and sublayers of building scene layers.
 
 ![Screenshot](screenshot.png)
 
@@ -56,4 +56,4 @@ Column {
 
 ## Example
 
-To see it in action, try out the [Building Explorer micro-app](../../microapps/BuildingExplorerApp) and refer to [MainScreen.kt](../../microapps/BasemapGalleryApp/app/src/main/java/com/arcgismaps/toolkit/buildingexplorerapp/screens/MainScreen.kt) in the project.
+To see it in action, try out the [Building Explorer micro-app](../../microapps/BuildingExplorerApp) and refer to [MainScreen.kt](../../microapps/BuildingExplorerApp/app/src/main/java/com/arcgismaps/toolkit/buildingexplorerapp/MainActivity.kt) in the project.

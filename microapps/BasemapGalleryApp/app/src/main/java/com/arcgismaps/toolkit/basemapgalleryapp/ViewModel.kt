@@ -116,3 +116,4 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
         arcGISScene.setBasemap(basemap)
     }
 }
+
