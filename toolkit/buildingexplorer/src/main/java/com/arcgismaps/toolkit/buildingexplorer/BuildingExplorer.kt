@@ -50,6 +50,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.mapping.layers.BuildingSceneLayer
 import com.arcgismaps.mapping.layers.buildingscene.BuildingFilter
@@ -314,7 +315,7 @@ private fun BuildingExplorer(
     Box(modifier = modifier) {
         Column {
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(8.dp)) {
-                Text("Visible")
+                Text(stringResource(R.string.visible))
                 Spacer(modifier = Modifier.weight(1f))
                 Switch(
                     checked = buildingSceneLayerState.visible,
@@ -328,7 +329,7 @@ private fun BuildingExplorer(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.padding(8.dp)
                     ) {
-                        Text("Show full model")
+                        Text(stringResource(R.string.show_full_model))
                         Spacer(modifier = Modifier.weight(1f))
                         Switch(
                             checked = buildingSceneLayerState.showFullModel,
@@ -340,7 +341,10 @@ private fun BuildingExplorer(
                 if (buildingSceneLayerState.showFullModel) {
                     var levelsExpanded by remember { mutableStateOf(false) }
                     Row {
-                        Text(text = "Level", modifier = Modifier.padding(8.dp).weight(0.5f))
+                        Text(
+                            text = stringResource(R.string.level),
+                            modifier = Modifier.padding(8.dp).weight(0.5f)
+                        )
                         Spacer(modifier = Modifier.weight(0.75f))
                         ExposedDropdownMenuBox(
                             expanded = levelsExpanded,
@@ -348,7 +352,9 @@ private fun BuildingExplorer(
                             modifier = Modifier.padding(8.dp).weight(0.5f)
                         ) {
                             TextField(
-                                value = buildingSceneLayerState.selectedLevel,
+                                value = if (buildingSceneLayerState.selectedLevel == "All") stringResource(
+                                    R.string.all
+                                ) else buildingSceneLayerState.selectedLevel,
                                 onValueChange = {},
                                 readOnly = true,
                                 trailingIcon = {
@@ -366,7 +372,11 @@ private fun BuildingExplorer(
                             ) {
                                 buildingSceneLayerState.levels.forEachIndexed { index, level ->
                                     DropdownMenuItem(
-                                        text = { Text(level) },
+                                        text = {
+                                            if (level == "All") Text(stringResource(R.string.all)) else Text(
+                                                level
+                                            )
+                                        },
                                         onClick = {
                                             buildingSceneLayerState.onLevelSelected(index)
                                             levelsExpanded = false
@@ -381,7 +391,7 @@ private fun BuildingExplorer(
                         var constructionPhasesExpanded by remember { mutableStateOf(false) }
                         Row {
                             Text(
-                                text = "Construction phase",
+                                text = stringResource(R.string.construction_phase),
                                 modifier = Modifier.padding(8.dp).weight(0.5f)
                             )
                             Spacer(modifier = Modifier.weight(0.75f))
