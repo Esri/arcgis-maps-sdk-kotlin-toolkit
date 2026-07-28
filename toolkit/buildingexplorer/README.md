@@ -55,4 +55,5 @@ Column {
 ```
 
 ## Example
+
 To see it in action, try out the [Building Explorer micro-app](../../microapps/BuildingExplorerApp) and refer to [MainScreen.kt](../../microapps/BasemapGalleryApp/app/src/main/java/com/arcgismaps/toolkit/buildingexplorerapp/screens/MainScreen.kt) in the project.
