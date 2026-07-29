@@ -29,18 +29,7 @@ android {
 }
 
 dependencies {
-    implementation(project(":buildingexplorer"))
-    implementation(project(":geoview-compose"))
-    implementation(project(":microapps-lib"))
-    //implementation(arcgis.mapsSdk)
-    implementation(platform(libs.androidx.compose.bom))
-    //implementation(libs.bundles.composeCore)
-    //implementation(libs.bundles.core)
-    implementation(libs.androidx.activity.compose)
-    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    "buildWithSourceCodeImplementation"(project(":buildingexplorer"))
+    "buildWithMavenArtifactsImplementation"(arcgis.buildingexplorer)
     implementation(libs.kotlinx.collections.immutable)
-    //testImplementation(libs.bundles.unitTest)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
-    //androidTestImplementation(libs.bundles.composeTest)
-    //debugImplementation(libs.bundles.debug)
 }
