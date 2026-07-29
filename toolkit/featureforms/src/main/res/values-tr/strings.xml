@@ -91,12 +91,12 @@
     <string name="ff_time_picker_pm">PM</string>
 
     <string name="take_photo">Fotoğraf Çek</string>
-    <string name="add_from_gallery">Galeriden Ekle</string>
+    <string name="choose_from_gallery">Galeriden Ekle</string>
     <string name="rename">Yeniden Adlandır</string>
     <string name="delete">Sil</string>
     <string name="rename_attachment">Eki Yeniden Adlandır</string>
     <string name="name">Adı</string>
-    <string name="add_file">Dosyalardan Ekle</string>
+    <string name="choose_from_files">Dosyalardan Ekle</string>
     <string name="attachment_error">Ek Ekleme Hatası</string>
     <string name="no_app_found">Bu dosya türünü açmak için herhangi bir uygulama bulunamadı.</string>
     <string name="attachment_too_large">Dosya fazla büyük. Lütfen 50 MB\'den küçük bir dosya ekleyin.</string>

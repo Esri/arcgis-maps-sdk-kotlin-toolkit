@@ -24,6 +24,7 @@ import com.arcgismaps.analysis.interactive.Analysis
 import com.arcgismaps.mapping.Bookmark
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.mapping.layers.Layer
+import com.arcgismaps.mapping.layers.ArcGISVectorTiledLayer
 import com.arcgismaps.mapping.view.AnalysisViewStatus
 import com.arcgismaps.mapping.view.GeoView
 import com.arcgismaps.mapping.view.GraphicsOverlay
@@ -193,6 +194,7 @@ public sealed class GeoViewProxy(className: String) {
      *
      * * false: the [IdentifyLayerResult.geoElements] property will be populated.
      * The [IdentifyLayerResult.popups] property will be populated if the layer has popups.
+     * Identifying an [ArcGISVectorTiledLayer] is only supported on the [MapView] composable.
      *
      * @param layer layer on which to run the identify
      * @param screenCoordinate location at which to run identify in screen coordinates
@@ -234,6 +236,7 @@ public sealed class GeoViewProxy(className: String) {
      * * true: each [IdentifyLayerResult.popups] property will be populated with results. Layers without
      * popups will be omitted.
      * * false: GeoElements will be populated. Layers with popups will also return popups.
+     * Identifying an [ArcGISVectorTiledLayer] is only supported on the [MapView] composable.
      *
      * @param screenCoordinate location on which to run identify in screen coordinates
      * @param tolerance extent of the region used during the identify operation

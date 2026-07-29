@@ -91,12 +91,12 @@
     <string name="ff_time_picker_pm">PM</string>
 
     <string name="take_photo">拍照</string>
-    <string name="add_from_gallery">从图库添加</string>
+    <string name="choose_from_gallery">从图库添加</string>
     <string name="rename">重命名</string>
     <string name="delete">删除</string>
     <string name="rename_attachment">重命名附件</string>
     <string name="name">名称</string>
-    <string name="add_file">从文件添加</string>
+    <string name="choose_from_files">从文件添加</string>
     <string name="attachment_error">添加附件时出错</string>
     <string name="no_app_found">未找到可以打开此文件类型的应用程序。</string>
     <string name="attachment_too_large">文件过大。 请添加小于 50 MB 的文件。</string>

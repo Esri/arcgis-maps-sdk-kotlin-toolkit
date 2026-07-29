@@ -91,12 +91,12 @@
     <string name="ff_time_picker_pm">PM</string>
 
     <string name="take_photo">Ta ett foto</string>
-    <string name="add_from_gallery">Lägg till från galleriet</string>
+    <string name="choose_from_gallery">Lägg till från galleriet</string>
     <string name="rename">Byt namn</string>
     <string name="delete">Ta bort</string>
     <string name="rename_attachment">Byt namn på bilaga</string>
     <string name="name">Namn</string>
-    <string name="add_file">Lägg till från filer</string>
+    <string name="choose_from_files">Lägg till från filer</string>
     <string name="attachment_error">Det uppstod ett fel när bilagan skulle läggas till</string>
     <string name="no_app_found">Ingen applikation hittades som kan öppna den här filtypen.</string>
     <string name="attachment_too_large">Filen är för stor. Lägg till en fil som är mindre än 50 MB.</string>

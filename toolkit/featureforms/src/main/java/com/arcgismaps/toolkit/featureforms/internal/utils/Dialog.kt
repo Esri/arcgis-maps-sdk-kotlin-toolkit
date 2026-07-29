@@ -18,30 +18,48 @@
 package com.arcgismaps.toolkit.featureforms.internal.utils
 
 import android.content.Context
-import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Warning
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.window.core.layout.WindowSizeClass
 import androidx.window.layout.WindowMetricsCalculator
+import com.arcgismaps.exceptions.FeatureFormValidationException.MaxAttachmentDurationConstraintException
+import com.arcgismaps.exceptions.FeatureFormValidationException.MaxAttachmentSizeConstraintException
+import com.arcgismaps.exceptions.FeatureFormValidationException.MaxAttachmentCountConstraintException
+import com.arcgismaps.mapping.featureforms.AudioFormInput
+import com.arcgismaps.mapping.featureforms.DocumentFormInput
 import com.arcgismaps.mapping.featureforms.FormAttachment
+import com.arcgismaps.mapping.featureforms.VideoFormInput
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.AttachmentElementState
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.AttachmentErrorDialog
+import com.arcgismaps.toolkit.featureforms.internal.components.attachment.AttachmentSource
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.DeleteAttachmentDialog
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.FilePicker
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.GalleryPicker
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.ImageCapture
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.RenameAttachmentDialog
+import com.arcgismaps.toolkit.featureforms.internal.components.attachment.VideoCapture
+import com.arcgismaps.toolkit.featureforms.internal.components.attachment.addAttachmentFromFile
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.addAttachmentFromUri
 import com.arcgismaps.toolkit.featureforms.internal.components.barcode.BarcodeScanner
 import com.arcgismaps.toolkit.featureforms.internal.components.barcode.BarcodeTextFieldState
@@ -122,7 +140,17 @@ internal sealed class DialogType {
     ) : DialogType()
 
     /**
-     * Indicates an gallery picker dialog.
+     * Indicates a video capture dialog.
+     *
+     * @param stateId The id of the [AttachmentElementState] that requested the dialog.
+     */
+    data class VideoCaptureDialog(
+        val stateId: Int,
+        val maxDuration: Long?
+    ) : DialogType()
+
+    /**
+     * Indicates a gallery picker dialog.
      *
      * @param stateId The id of the [AttachmentElementState] that requested the dialog.
      * @param type The content type of the file to pick.
@@ -179,10 +207,12 @@ internal sealed class DialogType {
  */
 @Composable
 internal fun FeatureFormDialog(states: FormStateCollection) {
+    var errorMessage by remember { mutableStateOf<String?>(null) }
     val focusManager = LocalFocusManager.current
     val dialogRequester = LocalDialogRequester.current
     val dialogType by dialogRequester.requestFlow.collectAsState()
     val context = LocalContext.current
+    val resources = LocalResources.current
     val scope = rememberCoroutineScope()
     val attachmentError = stringResource(R.string.attachment_error)
     when (dialogType) {
@@ -260,13 +290,37 @@ internal fun FeatureFormDialog(states: FormStateCollection) {
             }
             ImageCapture(
                 onDismissRequest = dialogRequester::dismissDialog
-            ) { uri ->
+            ) { file ->
                 scope.launch {
-                    state.addAttachmentFromUri(uri, context, false).onFailure {
-                        showError(
-                            context,
-                            it.message ?: attachmentError
-                        )
+                    state.addAttachmentFromFile(
+                        file = file,
+                        source = AttachmentSource.Camera
+                    ).onFailure {
+                        errorMessage = it.message ?: attachmentError
+                    }
+                    dialogRequester.dismissDialog()
+                }
+            }
+        }
+
+        is DialogType.VideoCaptureDialog -> {
+            val stateId = (dialogType as DialogType.VideoCaptureDialog).stateId
+            val maxDuration = (dialogType as DialogType.VideoCaptureDialog).maxDuration
+            val state = states[stateId] as? AttachmentElementState
+            if (state == null) {
+                dialogRequester.dismissDialog()
+                return
+            }
+            VideoCapture(
+                maxDuration = maxDuration,
+                onDismissRequest = dialogRequester::dismissDialog
+            ) { file ->
+                scope.launch {
+                    state.addAttachmentFromFile(
+                        file = file,
+                        source = AttachmentSource.Camera
+                    ).onFailure {
+                        errorMessage = it.message ?: attachmentError
                     }
                     dialogRequester.dismissDialog()
                 }
@@ -281,16 +335,36 @@ internal fun FeatureFormDialog(states: FormStateCollection) {
                 dialogRequester.dismissDialog()
                 return
             }
+            val duration = when (val input = state.inputs.firstOrNull()) {
+                is AudioFormInput -> input.maxDuration
+                is VideoFormInput -> input.maxDuration
+                else -> null
+            }
             GalleryPicker(
                 type = type,
                 onDismissRequest = dialogRequester::dismissDialog
             ) { uri ->
                 scope.launch {
-                    state.addAttachmentFromUri(uri, context, false).onFailure {
-                        showError(
-                            context,
-                            it.message ?: attachmentError
-                        )
+                    state.addAttachmentFromUri(uri, context).onFailure {
+                        errorMessage = when (it) {
+                            is MaxAttachmentDurationConstraintException -> {
+                                resources.getString(
+                                    R.string.media_too_long, 
+                                    duration?.div(60)
+                                )
+                            }
+
+                            is MaxAttachmentCountConstraintException -> {
+                                resources.getString(
+                                    R.string.max_attachments_limit_reached,
+                                    state.maxAttachmentCount
+                                )
+                            }
+
+                            else -> {
+                                it.message ?: attachmentError
+                            }
+                        }
                     }
                     dialogRequester.dismissDialog()
                 }
@@ -305,16 +379,44 @@ internal fun FeatureFormDialog(states: FormStateCollection) {
                 dialogRequester.dismissDialog()
                 return
             }
+            val limit = when (val input = state.inputs.firstOrNull()) {
+                is AudioFormInput -> input.maxDuration
+                is VideoFormInput -> input.maxDuration
+                is DocumentFormInput -> input.maxFileSize
+                else -> null
+            }
             FilePicker(
                 allowedMimeTypes = allowedMimeTypes,
                 onDismissRequest = dialogRequester::dismissDialog
             ) { uri ->
                 scope.launch {
-                    state.addAttachmentFromUri(uri, context, true).onFailure {
-                        showError(
-                            context,
-                            it.message ?: attachmentError
-                        )
+                    state.addAttachmentFromUri(uri, context).onFailure {
+                        errorMessage = when (it) {
+                            is MaxAttachmentDurationConstraintException -> {
+                                resources.getString(
+                                    R.string.media_too_long,
+                                    limit?.div(60)
+                                )
+                            }
+
+                            is MaxAttachmentCountConstraintException -> {
+                                resources.getString(
+                                    R.string.max_attachments_limit_reached,
+                                    state.maxAttachmentCount
+                                )
+                            }
+
+                            is MaxAttachmentSizeConstraintException -> {
+                                resources.getString(
+                                    R.string.this_file_is_too_large,
+                                    limit?.div(1_000_000)
+                                )
+                            }
+
+                            else -> {
+                                it.message ?: attachmentError
+                            }
+                        }
                     }
                     dialogRequester.dismissDialog()
                 }
@@ -412,6 +514,36 @@ internal fun FeatureFormDialog(states: FormStateCollection) {
             }
         }
     }
+    if (errorMessage != null) {
+        AlertDialog(
+            onDismissRequest = {
+                errorMessage = null
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        errorMessage = null
+                    }
+                ) {
+                    Text(text = stringResource(id = R.string.ok))
+                }
+            },
+            icon = {
+                Icon(
+                    imageVector = Icons.Rounded.Warning,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.error
+                )
+            },
+            text = {
+                Text(
+                    text = errorMessage ?: "",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            },
+        )
+    }
 }
 
 /**
@@ -431,8 +563,4 @@ internal fun computeWindowSizeClasses(context: Context): WindowSizeClass {
         // representing 99.96% of phones in portrait
         return WindowSizeClass.compute(400F, 900F)
     }
-}
-
-internal fun showError(context: Context, message: String) {
-    Toast.makeText(context, message, Toast.LENGTH_LONG).show()
 }
