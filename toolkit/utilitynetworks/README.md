@@ -56,11 +56,11 @@ To display an ArcGISMap containing a UtilityNetwork, create a new `TraceState` o
 
 #### Rendering the composable Trace function
 
-The `Trace tool` can be rendered within a composition by simply calling the `Trace` composable function). The Trace should be displayed in a container. Its visibility and the container are external and should be controlled by the calling Composable.
+The `Trace tool` can be rendered within a composition by simply calling the `Trace` composable function. The Trace should be displayed in a container. Its visibility and the container are external and should be controlled by the calling Composable.
 
 ```kotlin
 import com.arcgismaps.toolkit.utilitynetworks.TraceState
-import com.arcgismaps.toolkit.utilitynetwork.Trace
+import com.arcgismaps.toolkit.utilitynetworks.Trace
 
 @Composable  
 fun MyComposable(traceState : TraceState) {  
@@ -76,15 +76,16 @@ fun MyComposable(traceState : TraceState) {
             }
         }
         ...
-    ) { 
+    ) {
         MapView(
             arcGISMap = viewModel.arcGISMap,
             mapViewProxy = viewModel.mapViewProxy,
             graphicsOverlays = listOf(viewModel.graphicsOverlay),
             ...
         )
-       ... 
-} 
+        ...
+    }
+}
 ```  
 
 More information on the material 3 specs [here](https://m3.material.io/components/text-fields/specs#e4964192-72ad-414f-85b4-4b4357abb83c)

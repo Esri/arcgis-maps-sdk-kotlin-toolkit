@@ -4,7 +4,7 @@
 
 ## Description
 
-The Popup toolkit component enables users to view field values of features in a layer using the `Popup` API that has been configured externally (using either in the Web Map Viewer or the Fields Maps web app).
+The Popup toolkit component enables users to view field values of features in a layer using the `Popup` API that has been configured externally (using either in the Web Map Viewer or the Field Maps web app).
 
 ![Screenshot](screenshot.png)
 
@@ -26,7 +26,7 @@ Get Popup objects from tapping on [GeoElements](https://developers.arcgis.com/ko
 
 ```kotlin
 // set up some variables
-val mapViewProxy = rememeber { MapViewProxy() }
+val mapViewProxy = remember { MapViewProxy() }
 val scope = rememberCoroutineScope()
 var popup: Popup? by remember { mutableStateOf(null) }
 
@@ -40,10 +40,10 @@ val arcGISMap = remember { ArcGISMap(portalItem) }
 // call the composable MapView
 MapView(
     arcGISMap = arcGISMap,
-    mapViewProxy = proxy,
+    mapViewProxy = mapViewProxy,
     onSingleTapConfirmed = {
         scope.launch {
-            proxy.identifyLayers(
+            mapViewProxy.identifyLayers(
                 screenCoordinate = it.screenCoordinate,
                 tolerance = 22.dp,
                 returnPopupsOnly = true
@@ -70,17 +70,17 @@ MapView(
 
 #### Rendering the composable Popup function
 
-A `Popup` can be rendered within a composition by simply calling the `Popup` composable with a [Popup object](https://developers.arcgis.com/kotlin/api-reference/arcgis-maps-kotlin/com.arcgismaps.mapping.popup/-popup/index.html). The Popup should be displayed in a container. Its visibility and the container are external and should be controlled by the calling Composable.
+A `Popup` can be rendered within a composition by simply calling the `Popup` composable with a `PopupState` created from a [Popup object](https://developers.arcgis.com/kotlin/api-reference/arcgis-maps-kotlin/com.arcgismaps.mapping.popup/-popup/index.html). The Popup should be displayed in a container. Its visibility and the container are external and should be controlled by the calling Composable. The `PopupState` must be hoisted out of the composition to avoid losing state on recomposition.
 
 ```kotlin  
 @Composable  
-fun MyComposable(popup : Popup) {  
+fun MyComposable(popupState : PopupState) {  
     // a container  
     MyContainer(modifier = Modifier) {
     	// create a Popup Composable
         Popup(  
-	        // pass in the Popup object  
-	        popup = Popup,  
+	        // pass in the Popup state object  
+            popupState = popupState,  
 	        // control the layout using the modifier property  
 	        modifier = Modifier.fillMaxSize()  
 	    )  
@@ -90,22 +90,22 @@ fun MyComposable(popup : Popup) {
 
 #### Updating the `Popup`
 
-To display a new `Popup` object, simply trigger a recomposition with the new `Popup` object.
+To display a new popup, trigger a recomposition with a new `PopupState` object.
 
-```kotlin  
-@Composable  
-fun MyComposable(viewModel : MyViewModel) {  
-    // use a state object that will recompose this composable when the Popup changes
-    // in this example, the Popup object is hoisted in the ViewModel
-    val Popup : State by viewModel.Popup  
-    // a container  
+```kotlin
+@Composable
+fun MyComposable(viewModel : MyViewModel) {
+    // use a state object that will recompose this composable when the PopupState changes
+    // in this example, the PopupState object is hoisted in the ViewModel
+    val popupState = viewModel.popupState
+    // a container
     MyContainer(modifier = Modifier) {
-        Popup(    
-	        popup = Popup,  
-	        modifier = Modifier.fillMaxSize()  
-	    )  
-    }  
+        Popup(
+            popupState = popupState,
+            modifier = Modifier.fillMaxSize()
+        )
+    }
 }
-```  
+```
 
 More information on the material 3 specs [here](https://m3.material.io/components/text-fields/specs#e4964192-72ad-414f-85b4-4b4357abb83c)
