@@ -30,6 +30,6 @@ android {
 
 dependencies {
     "buildWithSourceCodeImplementation"(project(":buildingexplorer"))
-    //"buildWithMavenArtifactsImplementation"(arcgis.buildingexplorer)
+    "buildWithMavenArtifactsImplementation"(arcgis.buildingexplorer)
     implementation(libs.kotlinx.collections.immutable)
 }
