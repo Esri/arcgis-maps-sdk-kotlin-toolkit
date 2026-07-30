@@ -85,7 +85,7 @@ public fun Compass(
 }
 
 @Composable
-internal fun RandomComponent(text: String) {
+public fun RandomComponent(text: String) {
     Row {
         Text(text = text)
     }

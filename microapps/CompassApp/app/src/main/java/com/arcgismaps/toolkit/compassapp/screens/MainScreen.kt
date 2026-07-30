@@ -38,6 +38,7 @@ import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.toolkit.compass.Compass
+import com.arcgismaps.toolkit.compass.RandomComponent
 import com.arcgismaps.toolkit.geoviewcompose.MapView
 import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
 import kotlinx.coroutines.launch
@@ -71,6 +72,8 @@ fun MainScreen(modifier: Modifier) {
                 .fillMaxWidth()
                 .padding(25.dp)
         ) {
+            RandomComponent("Here is some more text")
+
             val coroutineScope = rememberCoroutineScope()
             // show the compass and pass the mapRotation state data
             Compass(
