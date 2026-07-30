@@ -26,13 +26,16 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -81,6 +84,13 @@ public fun Compass(
     }
 }
 
+@Composable
+internal fun RandomComponent(text: String) {
+    Row {
+        Text(text = text)
+    }
+}
+
 /**
  * A composable ButtonIcon for the Compass with the [icon] and [color] for container color.
  * Tap events can be handled using the [onClick] callback.
@@ -93,23 +103,26 @@ internal fun CompassButtonIcon(
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {}
 ) {
-    val borderWidth = 2.dp
-    Button(
-        modifier = modifier
-            .border(
-                BorderStroke(borderWidth, borderColor),
-                CircleShape
+    Column {
+        RandomComponent("Here is some text")
+        val borderWidth = 2.dp
+        Button(
+            modifier = modifier
+                .border(
+                    BorderStroke(borderWidth, borderColor),
+                    CircleShape
+                )
+                .padding(borderWidth)
+                .clip(CircleShape),
+            colors = ButtonDefaults.buttonColors(containerColor = color),
+            contentPadding = PaddingValues(10.dp),
+            onClick = onClick
+        ) {
+            Image(
+                modifier = Modifier.fillMaxSize(),
+                painter = painterResource(icon),
+                contentDescription = "CompassIcon"
             )
-            .padding(borderWidth)
-            .clip(CircleShape),
-        colors = ButtonDefaults.buttonColors(containerColor = color),
-        contentPadding = PaddingValues(10.dp),
-        onClick = onClick
-    ) {
-        Image(
-            modifier = Modifier.fillMaxSize(),
-            painter = painterResource(icon),
-            contentDescription = "CompassIcon"
-        )
+        }
     }
 }
