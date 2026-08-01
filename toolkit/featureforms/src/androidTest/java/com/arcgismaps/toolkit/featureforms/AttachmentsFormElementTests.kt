@@ -709,7 +709,7 @@ class AttachmentsFormElementTests : FeatureFormTestRunner(
             // Add the valid file and assert it was a success
             val result = elementState!!.addAttachmentFromFile(
                 file = validFile,
-                source = AttachmentSource.Camera
+                source = AttachmentSource.Capture
             )
             assertThat(result.isSuccess).isTrue()
             // Assert that the temporary file was deleted after the attempt
@@ -729,7 +729,7 @@ class AttachmentsFormElementTests : FeatureFormTestRunner(
             // Add the invalid file and assert it was a failure
             val result = elementState.addAttachmentFromFile(
                 file = invalidFile,
-                source = AttachmentSource.Camera
+                source = AttachmentSource.Capture
             )
             assertThat(result.isFailure).isTrue()
             assertThat(result.exceptionOrNull()).isInstanceOf(
@@ -758,7 +758,7 @@ class AttachmentsFormElementTests : FeatureFormTestRunner(
             // Add the oversized file and assert it was a failure due to exceeding the size limit
             val result = elementState.addAttachmentFromFile(
                 file = overSizedFile,
-                source = AttachmentSource.Camera
+                source = AttachmentSource.Capture
             )
             assertThat(result.isFailure).isTrue()
             assertThat(result.exceptionOrNull()).isInstanceOf(

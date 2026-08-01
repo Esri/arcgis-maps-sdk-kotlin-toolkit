@@ -306,7 +306,7 @@ internal fun FeatureFormDialog(states: FormStateCollection) {
                 scope.launch {
                     state.addAttachmentFromFile(
                         file = file,
-                        source = AttachmentSource.Camera
+                        source = AttachmentSource.Capture
                     ).onFailure {
                         errorMessage = it.message ?: attachmentError
                     }
@@ -351,7 +351,7 @@ internal fun FeatureFormDialog(states: FormStateCollection) {
                 scope.launch {
                     state.addAttachmentFromFile(
                         file = file,
-                        source = AttachmentSource.Camera
+                        source = AttachmentSource.Capture
                     ).onFailure {
                         errorMessage = it.message ?: attachmentError
                     }

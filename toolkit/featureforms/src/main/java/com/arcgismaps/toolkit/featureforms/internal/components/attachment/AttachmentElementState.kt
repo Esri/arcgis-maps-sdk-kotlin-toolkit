@@ -249,7 +249,7 @@ internal class AttachmentElementState(
     /**
      * Adds an attachment with the given [name], [contentType], and [filePath]. If the [source] is
      * [AttachmentSource.FileSystem], the attachment will be added with the given [name]. If the
-     * [source] is [AttachmentSource.Camera], the attachment is added with the API generated name.
+     * [source] is [AttachmentSource.Capture], the attachment is added with the API generated name.
      *
      * @param name The name of the attachment.
      * @param contentType The content type of the attachment.
@@ -264,7 +264,7 @@ internal class AttachmentElementState(
     ): Result<Unit> {
         return when (source) {
             // If the attachment is from the camera, use the API generated name.
-            AttachmentSource.Camera -> formElement.addAttachment(
+            AttachmentSource.Capture -> formElement.addAttachment(
                 contentType = contentType,
                 filePath = filePath
             )
@@ -745,6 +745,6 @@ internal class EmptyAttachmentException : Exception("Attachment size is 0")
  * Enum representing the source of an attachment.
  */
 internal enum class AttachmentSource {
-    Camera,
+    Capture,
     FileSystem
 }
