@@ -190,3 +190,24 @@ internal fun hasEditableText(
         actual == textValue
     }
 }
+
+/**
+ * Creates a semantic matcher to match text with the given regex.
+ *
+ * @param regex the regex to match
+ * @return a SemanticsMatcher to match the text of a SemanticsNodeInteraction.
+ */
+internal fun hasTextMatching(
+    regex: Regex
+) : SemanticsMatcher {
+    return SemanticsMatcher(
+        "Text matches regex [$regex]"
+    ) { node ->
+        val list = node.config.getOrNull(SemanticsProperties.Text)
+            ?: return@SemanticsMatcher false
+
+        list.any {
+            it.text.matches(regex)
+        }
+    }
+}

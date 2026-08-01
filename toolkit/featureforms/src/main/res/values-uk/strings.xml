@@ -91,12 +91,12 @@
     <string name="ff_time_picker_pm">PM</string>
 
     <string name="take_photo">Зробити фото</string>
-    <string name="add_from_gallery">Додати з галереї</string>
+    <string name="choose_from_gallery">Додати з галереї</string>
     <string name="rename">Змінити назву</string>
     <string name="delete">Видалити</string>
     <string name="rename_attachment">Перейменувати прикріплення</string>
     <string name="name">Назва</string>
-    <string name="add_file">Додати з файлів</string>
+    <string name="choose_from_files">Додати з файлів</string>
     <string name="attachment_error">Помилка при додаванні прикріплення</string>
     <string name="no_app_found">Не знайдено додатку, щоб відкрити файл цього типу.</string>
     <string name="attachment_too_large">Занадто великий розмір файлу. Додайте файл розміром до 50 МБ.</string>

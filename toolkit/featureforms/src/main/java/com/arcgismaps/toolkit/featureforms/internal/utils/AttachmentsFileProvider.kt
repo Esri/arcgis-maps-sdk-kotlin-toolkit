@@ -28,20 +28,33 @@ internal class AttachmentsFileProvider :
 
         private const val AUTHORITY_BASE = "com.arcgismaps.toolkit.featureforms.attachmentsfileprovider"
 
-        fun createTempFileWithUri(prefix: String, suffix: String, context: Context): Uri {
+        /**
+         * Creates a temporary file with the specified prefix and suffix in the cache directory of
+         * the app. The responsibility of deleting the file is on the caller.
+         *
+         * @param prefix The prefix string to be used in generating the file's name
+         * @param suffix The suffix string to be used in generating the file's name
+         * @param context The context of the application
+         * @return A [FileUriReference] containing the created file and its corresponding URI
+         */
+        fun createTempFileWithUri(prefix: String, suffix: String, context: Context): FileUriReference {
             // authority is unique, which uses the package name + base authority name
             // to avoid conflicts with other apps using the same library
             val authority = "${context.packageName}.$AUTHORITY_BASE"
             val directory = File(context.cacheDir.absolutePath)
             directory.mkdirs()
             val file =  File.createTempFile(prefix, suffix, directory)
-            // delete the temp file when no process is using it
-            file.deleteOnExit()
-            return getUriForFile(
-                context,
-                authority,
-                file,
-            )
+            return try {
+                val uri = getUriForFile(
+                    context,
+                    authority,
+                    file,
+                )
+                FileUriReference(file, uri)
+            } catch (ex: Exception) {
+                file.delete()
+                throw ex
+            }
         }
 
         fun getUriForFile(file: File, context: Context): Uri {
@@ -52,3 +65,14 @@ internal class AttachmentsFileProvider :
         }
     }
 }
+
+/**
+ * A data class that holds a reference to a file and its corresponding URI.
+ *
+ * @property file The file reference.
+ * @property uri The URI reference for the file.
+ */
+internal data class FileUriReference(
+    val file: File,
+    val uri: Uri,
+)
