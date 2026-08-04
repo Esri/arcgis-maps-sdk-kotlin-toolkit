@@ -85,6 +85,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:dataframe:1.0.0-Beta5")
     implementation(arcgis.mapsSdk)
     implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.arcore)
     implementation(libs.bundles.composeCore)
     implementation(libs.bundles.core)
     implementation(libs.androidx.activity.compose)

@@ -5,11 +5,16 @@ import com.arcgismaps.geometry.Point
 import com.arcgismaps.geometry.Polyline
 import com.arcgismaps.toolkit.ar.internal.FrameState
 import com.arcgismaps.toolkit.ar.internal.WorldScaleParameters
+import com.google.ar.core.GeospatialPose
 import com.google.ar.core.Pose
 
 public class ArOrientedImage internal constructor(private val frame: FrameState) {
     public val location: Point by lazy {
         frame.projectedLocation
+    }
+
+    public val geospatialPose: GeospatialPose by lazy {
+        frame.geospatialPose
     }
 
     public val orientationPointer: Polyline? by lazy {

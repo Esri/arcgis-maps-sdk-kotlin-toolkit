@@ -67,9 +67,9 @@ class MainScreenViewModel(application: Application): AndroidViewModel(applicatio
                 objectId = currentFrameObjectId,
                 raster = "$currentFrameObjectId.jpg",
                 cameraId = CamerasTable_CAMERA_ID,
-                perspectiveX = 1.0,
-                perspectiveY = 2.0,
-                perspectiveZ = 3.0,
+                perspectiveX = it.geospatialPose.longitude,
+                perspectiveY = it.geospatialPose.latitude,
+                perspectiveZ = it.geospatialPose.altitude, /* orthometric height */
                 omega = 1.0,
                 phi = 2.0,
                 kappa = 3.0
