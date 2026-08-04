@@ -1,8 +1,15 @@
 package com.arcgismaps.toolkit.arrealitycaptureapp.screens
 
 import android.app.Application
+import android.content.Context
+import android.graphics.Rect
+import android.hardware.camera2.CameraCharacteristics
+import android.hardware.camera2.CameraManager
 import android.util.Log
+import android.util.Size
+import android.util.SizeF
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.application
 import androidx.lifecycle.viewModelScope
 import com.arcgismaps.Color
 import com.arcgismaps.mapping.symbology.SceneSymbolAnchorPosition
@@ -17,6 +24,8 @@ import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.mapping.view.SurfacePlacement
 import com.arcgismaps.toolkit.ar.ArOrientedImage
 import com.arcgismaps.toolkit.ar.WorldScaleSceneViewProxy
+import com.arcgismaps.toolkit.arrealitycaptureapp.io.CamerasTable_CAMERA_ID
+import com.arcgismaps.toolkit.arrealitycaptureapp.io.CamerasTable_OBJECT_ID
 import com.arcgismaps.toolkit.arrealitycaptureapp.io.FrameRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -37,14 +46,83 @@ class MainScreenViewModel(application: Application): AndroidViewModel(applicatio
             }
         )
 
+    private var camerasTableInitialized = false
+
     fun captureOrientedImage() {
         proxy.exportOrientedImage()?.let {
+            if (!camerasTableInitialized) {
+                camerasTableInitialized = true
+                frameRepository.appendCamera(
+                    objectId = CamerasTable_OBJECT_ID,
+                    cameraId = CamerasTable_CAMERA_ID,
+                    focalLength = it.focalLength.toMicrons(application.pixelPitch(it.cameraId)), // in microns
+                    pixelSize = application.sensorSize(it.cameraId).toDouble() // in microns
+                )
+            }
             // calculation of the frustum graphic is heavy, switch to a background thread to avoid blocking the UI thread
             viewModelScope.launch(Dispatchers.Default) {
                 graphicsOverlays.first().addFrustumGraphic(it)
             }
         } ?: Log.d(TAG, "Failed to capture oriented image.")
     }
+}
+
+/**
+ * Gets the camera sensor size in microns.
+ */
+private fun Context.sensorSize(cameraId: String): Float {
+    val cm = getSystemService(Context.CAMERA_SERVICE) as CameraManager
+    val chars = cm.getCameraCharacteristics(cameraId)
+
+    val physicalSize: SizeF =
+        chars.get(CameraCharacteristics.SENSOR_INFO_PHYSICAL_SIZE) ?: throw IllegalStateException("Camera characteristics not found for cameraId: $cameraId")
+
+    // TODO: x vs y ??
+    return physicalSize.width * 1000f // convert mm to microns
+}
+
+/**
+ * Gets the pixel pitch in microns/px.
+ */
+private fun Context.pixelPitch(cameraId: String): Double {
+    val cm = getSystemService(Context.CAMERA_SERVICE) as CameraManager
+    val chars = cm.getCameraCharacteristics(cameraId)
+
+    val physicalSize: SizeF =
+        chars.get(CameraCharacteristics.SENSOR_INFO_PHYSICAL_SIZE) ?: throw IllegalStateException("Camera characteristics not found for cameraId: $cameraId")
+
+    // Prefer full pixel array; fallback to active array.
+    val pixelArraySize: Size? =
+        chars.get(CameraCharacteristics.SENSOR_INFO_PIXEL_ARRAY_SIZE)
+
+    val activeRect: Rect? =
+        chars.get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE)
+
+    val pixelWidth: Int
+    val pixelHeight: Int
+    if (pixelArraySize != null) {
+        pixelWidth = pixelArraySize.width
+        pixelHeight = pixelArraySize.height
+    } else if (activeRect != null) {
+        pixelWidth = activeRect.width()
+        pixelHeight = activeRect.height()
+    } else {
+        throw IllegalStateException("Camera characteristics do not contain pixel array size or active array size for cameraId: $cameraId")
+    }
+
+    val pitchXUm = (physicalSize.width.toDouble() * 1000.0) / pixelWidth.toDouble()
+    val pitchYUm = (physicalSize.height.toDouble() * 1000.0) / pixelHeight.toDouble()
+
+    // TODO pitchXUm vs pitchYUm ??
+    return pitchXUm
+}
+
+private fun FloatArray.toMicrons(pixelPitch: Double): Double {
+    val fxUm = this[0] * pixelPitch
+    val fyUm = this[1] * pixelPitch
+
+    // TODO: fxUm vs fyUm ??
+    return fxUm
 }
 
 private fun GraphicsOverlay.addFrustumGraphic(orientedImage: ArOrientedImage) {
