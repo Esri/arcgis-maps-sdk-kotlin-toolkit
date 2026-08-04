@@ -64,8 +64,8 @@ class MainScreenViewModel(application: Application): AndroidViewModel(applicatio
 
             // populate the frames table with the captured oriented image
             frameRepository.appendFrame(
-                objectId = currentFrameObjectId++,
-                raster = "todo.jpg",
+                objectId = currentFrameObjectId,
+                raster = "$currentFrameObjectId.jpg",
                 cameraId = CamerasTable_CAMERA_ID,
                 perspectiveX = 1.0,
                 perspectiveY = 2.0,
@@ -74,6 +74,7 @@ class MainScreenViewModel(application: Application): AndroidViewModel(applicatio
                 phi = 2.0,
                 kappa = 3.0
             )
+            currentFrameObjectId++
 
             // calculation of the frustum graphic is heavy, switch to a background thread to avoid blocking the UI thread
             viewModelScope.launch(Dispatchers.Default) {
