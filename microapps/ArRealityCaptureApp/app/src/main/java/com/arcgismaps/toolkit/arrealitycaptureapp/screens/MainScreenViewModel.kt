@@ -47,9 +47,11 @@ class MainScreenViewModel(application: Application): AndroidViewModel(applicatio
         )
 
     private var camerasTableInitialized = false
+    private var currentFrameObjectId = 0
 
     fun captureOrientedImage() {
         proxy.exportOrientedImage()?.let {
+            // populate the cameras table with the camera parameters only once, since they are the same for all frames
             if (!camerasTableInitialized) {
                 camerasTableInitialized = true
                 frameRepository.appendCamera(
@@ -59,6 +61,20 @@ class MainScreenViewModel(application: Application): AndroidViewModel(applicatio
                     pixelSize = application.sensorSize(it.cameraId).toDouble() // in microns
                 )
             }
+
+            // populate the frames table with the captured oriented image
+            frameRepository.appendFrame(
+                objectId = currentFrameObjectId++,
+                raster = "todo.jpg",
+                cameraId = CamerasTable_CAMERA_ID,
+                perspectiveX = 1.0,
+                perspectiveY = 2.0,
+                perspectiveZ = 3.0,
+                omega = 1.0,
+                phi = 2.0,
+                kappa = 3.0
+            )
+
             // calculation of the frustum graphic is heavy, switch to a background thread to avoid blocking the UI thread
             viewModelScope.launch(Dispatchers.Default) {
                 graphicsOverlays.first().addFrustumGraphic(it)
