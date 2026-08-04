@@ -16,6 +16,17 @@ public class ArOrientedImage internal constructor(private val frame: FrameState)
         orientationPointer()
     }
 
+    /**
+     * The focal length of the camera in pixels.
+     */
+    public val focalLength: FloatArray by lazy {
+        frame.frame.camera.imageIntrinsics.focalLength
+    }
+
+    public val cameraId: String by lazy {
+        frame.session.cameraConfig.cameraId
+    }
+
     private fun orientationPointer(): Polyline? =
         frame.localPose.moveForward(0.5f)?.let {
             Polyline(points = listOf(location, it))
