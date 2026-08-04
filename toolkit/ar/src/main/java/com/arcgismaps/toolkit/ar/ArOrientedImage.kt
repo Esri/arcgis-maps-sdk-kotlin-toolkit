@@ -23,6 +23,14 @@ public class ArOrientedImage internal constructor(private val frame: FrameState)
         frame.frame.camera.imageIntrinsics.focalLength
     }
 
+    /**
+     * Returns a FloatArray[2] containing the principal point.
+     * The order of values is {cx, cy}, in pixels.
+     */
+    public val principalPoint: FloatArray by lazy {
+        frame.frame.camera.imageIntrinsics.principalPoint
+    }
+
     public val cameraId: String by lazy {
         frame.session.cameraConfig.cameraId
     }
