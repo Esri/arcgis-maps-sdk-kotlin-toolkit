@@ -70,9 +70,9 @@ class MainScreenViewModel(application: Application): AndroidViewModel(applicatio
                 perspectiveX = it.geospatialPose.longitude,
                 perspectiveY = it.geospatialPose.latitude,
                 perspectiveZ = it.geospatialPose.altitude, /* orthometric height */
-                omega = 1.0,
-                phi = 2.0,
-                kappa = 3.0
+                omega = it.cameraRotationAngles.omegaDeg,
+                phi = it.cameraRotationAngles.phiDeg,
+                kappa = it.cameraRotationAngles.kappaDeg
             )
             currentFrameObjectId++
 

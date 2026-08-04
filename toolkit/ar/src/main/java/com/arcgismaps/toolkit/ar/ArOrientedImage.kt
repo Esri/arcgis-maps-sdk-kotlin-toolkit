@@ -7,6 +7,8 @@ import com.arcgismaps.toolkit.ar.internal.FrameState
 import com.arcgismaps.toolkit.ar.internal.WorldScaleParameters
 import com.google.ar.core.GeospatialPose
 import com.google.ar.core.Pose
+import kotlin.math.asin
+import kotlin.math.atan2
 
 public class ArOrientedImage internal constructor(private val frame: FrameState) {
     public val location: Point by lazy {
@@ -15,6 +17,13 @@ public class ArOrientedImage internal constructor(private val frame: FrameState)
 
     public val geospatialPose: GeospatialPose by lazy {
         frame.geospatialPose
+    }
+
+    /**
+     * Heading. pitch and roll of the camera in degrees, relative to the WGS84 coordinate system.
+     */
+    public val cameraRotationAngles: Opk by lazy {
+        arcoreGeospatialToOpk(frame.geospatialPose.eastUpSouthQuaternion)
     }
 
     public val orientationPointer: Polyline? by lazy {
@@ -68,4 +77,60 @@ public class ArOrientedImage internal constructor(private val frame: FrameState)
 
         return GeometryEngine.projectOrNull(wgsPoint, WorldScaleParameters.SR_CAMERA)
     }
+}
+
+/**
+ * Rotational camera angles Omega, Phi, and Kappa in degrees.
+ */
+public data class Opk(val omegaDeg: Double, val phiDeg: Double, val kappaDeg: Double)
+
+private data class Mat3(val m: Array<DoubleArray>) // m[row][col]
+
+private fun quatToMat3(qx: Double, qy: Double, qz: Double, qw: Double): Mat3 {
+    val xx = qx * qx; val yy = qy * qy; val zz = qz * qz
+    val xy = qx * qy; val xz = qx * qz; val yz = qy * qz
+    val wx = qw * qx; val wy = qw * qy; val wz = qw * qz
+    return Mat3(arrayOf(
+        doubleArrayOf(1 - 2*(yy + zz), 2*(xy - wz),     2*(xz + wy)),
+        doubleArrayOf(2*(xy + wz),     1 - 2*(xx + zz), 2*(yz - wx)),
+        doubleArrayOf(2*(xz - wy),     2*(yz + wx),     1 - 2*(xx + yy))
+    ))
+}
+
+private fun mul(a: Mat3, b: Mat3): Mat3 {
+    val r = Array(3) { DoubleArray(3) }
+    for (i in 0..2) for (j in 0..2) {
+        r[i][j] = 0.0
+        for (k in 0..2) r[i][j] += a.m[i][k] * b.m[k][j]
+    }
+    return Mat3(r)
+}
+
+private fun radToDeg(x: Double) = x * 180.0 / Math.PI
+
+private fun arcoreGeospatialToOpk(eusQ: FloatArray): Opk {
+    val rCamToEus = quatToMat3(
+        eusQ[0].toDouble(), eusQ[1].toDouble(), eusQ[2].toDouble(), eusQ[3].toDouble()
+    )
+
+    val rEusToEnu = Mat3(arrayOf(
+        doubleArrayOf(1.0, 0.0, 0.0),
+        doubleArrayOf(0.0, 0.0,-1.0),
+        doubleArrayOf(0.0, 1.0, 0.0)
+    ))
+
+    // Camera convention correction (adjust if needed for your Esri export)
+    val f = Mat3(arrayOf(
+        doubleArrayOf(1.0, 0.0, 0.0),
+        doubleArrayOf(0.0,-1.0, 0.0),
+        doubleArrayOf(0.0, 0.0,-1.0)
+    ))
+
+    val r = mul(mul(rEusToEnu, rCamToEus), f)
+
+    val phi = asin(-r.m[2][0])
+    val omega = atan2(r.m[2][1], r.m[2][2])
+    val kappa = atan2(r.m[1][0], r.m[0][0])
+
+    return Opk(radToDeg(omega), radToDeg(phi), radToDeg(kappa))
 }
