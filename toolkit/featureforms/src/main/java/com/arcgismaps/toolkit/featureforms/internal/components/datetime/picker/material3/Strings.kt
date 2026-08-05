@@ -24,10 +24,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLocale
+import androidx.compose.ui.platform.LocalResources
 import androidx.core.os.ConfigurationCompat
 import com.arcgismaps.toolkit.featureforms.R
-import java.util.Locale
 
 @Immutable
 @JvmInline
@@ -58,7 +58,7 @@ internal value class Strings private constructor(
 @ReadOnlyComposable
 internal fun getString(string: Strings): String {
     LocalConfiguration.current
-    val resources = LocalContext.current.resources
+    val resources = LocalResources.current
     return when (string) {
         Strings.TimePickerAM -> resources.getString(R.string.ff_time_picker_am)
         Strings.TimePickerPM -> resources.getString(R.string.ff_time_picker_pm)
@@ -81,6 +81,7 @@ internal fun getString(string: Strings): String {
 internal fun getString(string: Strings, vararg formatArgs: Any): String {
     val raw = getString(string)
     val locale =
-        ConfigurationCompat.getLocales(LocalConfiguration.current).get(0) ?: Locale.getDefault()
+        ConfigurationCompat.getLocales(LocalConfiguration.current).get(0)
+            ?: LocalLocale.current.platformLocale
     return String.format(locale, raw, *formatArgs)
 }

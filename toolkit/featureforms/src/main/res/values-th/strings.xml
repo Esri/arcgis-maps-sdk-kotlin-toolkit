@@ -91,12 +91,12 @@
     <string name="ff_time_picker_pm">PM</string>
 
     <string name="take_photo">ถ่ายภาพ</string>
-    <string name="add_from_gallery">เพิ่มจากแกลเลอรี</string>
+    <string name="choose_from_gallery">เพิ่มจากแกลเลอรี</string>
     <string name="rename">เปลี่ยนชื่อ</string>
     <string name="delete">ลบ</string>
     <string name="rename_attachment">เปลี่ยนชื่อไฟล์แนบ</string>
     <string name="name">ชื่อ</string>
-    <string name="add_file">เพิ่มจากไฟล์</string>
+    <string name="choose_from_files">เพิ่มจากไฟล์</string>
     <string name="attachment_error">ข้อผิดพลาดในการเพิ่มไฟล์แนบ</string>
     <string name="no_app_found">ไม่พบแอปพลิเคชันที่จะใช้เปิดไฟล์ประเภทนี้</string>
     <string name="attachment_too_large">ไฟล์ใหญ่เกินไป โปรดเพิ่มไฟล์ที่มีขนาดไม่เกิน 50 MB</string>

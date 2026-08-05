@@ -190,6 +190,8 @@ private fun ViewerActions(
                 }
             )
 
+            val saveSuccessfulMessage = stringResource(R.string.save_successful)
+            val saveFailedMessage = stringResource(R.string.save_failed)
             DropdownMenuItem(
                 text = {
                     Text(text = stringResource(id = R.string.save), color = MaterialTheme.colorScheme.onSurface)
@@ -199,10 +201,10 @@ private fun ViewerActions(
                     coroutineScope.launch {
                         val saveResult = viewableFile.saveToDevice(context)
                         saveResult.onSuccess {
-                            Toast.makeText(context, context.getString(R.string.save_successful), Toast.LENGTH_SHORT)
+                            Toast.makeText(context, saveSuccessfulMessage, Toast.LENGTH_SHORT)
                                 .show()
                         }.onFailure {
-                            Toast.makeText(context, context.getString(R.string.save_failed), Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, saveFailedMessage, Toast.LENGTH_SHORT).show()
                             Log.e("ArcGISMapsSDK", "Failed to save file: $it")
                         }
                     }

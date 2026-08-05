@@ -18,8 +18,8 @@
 
 plugins {
     alias(libs.plugins.android.library)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.kotlin.convention.plugin)
 }
 
 kotlin {
@@ -49,7 +49,7 @@ android {
     buildFeatures {
         compose = true
     }
-    @Suppress("UnstableApiUsage")
+
     testOptions {
         targetSdk = libs.versions.compileSdk.get().toInt()
     }

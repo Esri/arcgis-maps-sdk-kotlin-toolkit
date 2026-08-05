@@ -32,12 +32,13 @@ public fun Template(viewModel: TemplateInterface) {
     Text(text = text.value)
 }
 
+
+internal val viewModel = object: TemplateInterface {
+    private val _someProperty: MutableStateFlow<String> = MutableStateFlow("Hello Template Preview")
+    override val someProperty: StateFlow<String> = _someProperty.asStateFlow()
+}
 @Preview
 @Composable
 internal fun TemplatePreview() {
-    val viewModel = object: TemplateInterface {
-        private val _someProperty: MutableStateFlow<String> = MutableStateFlow("Hello Template Preview")
-        override val someProperty: StateFlow<String> = _someProperty.asStateFlow()
-    }
     Template(viewModel)
 }

@@ -18,15 +18,17 @@
 
 plugins {
     id("com.android.library")
-    id("org.jetbrains.kotlin.android")
+    alias(libs.plugins.android.integration.testing)
     id("org.jetbrains.kotlin.plugin.compose")
     id("artifact-deploy")
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
     id("kotlin-parcelize")
-    id("android-integration-testing")
+    alias(libs.plugins.kotlin.convention.plugin)
     alias(libs.plugins.binary.compatibility.validator) apply true
     alias(libs.plugins.kotlin.serialization) apply true
 }
+
+val toolkitTests = project.findProperty("toolkitTestDir") as String
 
 secrets {
     defaultPropertiesFileName = "secrets.defaults.properties"
@@ -68,6 +70,32 @@ android {
         compose = true
         buildConfig = true
     }
+
+    sourceSets {
+        var file = file("$toolkitTests/${project.name}/androidTest")
+        if (file.exists()) {
+            named("androidTest") {
+                kotlin {
+                    directories += "$toolkitTests/${project.name}/androidTest"
+                }
+                java {
+                    directories += "$toolkitTests/${project.name}/androidTest"
+                }
+            }
+        }
+
+        file = file("$toolkitTests/${project.name}/test")
+        if (file.exists()) {
+            named("test") {
+                kotlin {
+                    directories += "$toolkitTests/${project.name}/test"
+                }
+                java {
+                    directories += "$toolkitTests/${project.name}/test"
+                }
+            }
+        }
+    }
     // If this were not an android project, we would just write `explicitApi()` in the Kotlin scope.
     // but as an android project could write `freeCompilerArgs = listOf("-Xexplicit-api=strict")`
     // in the kotlinOptions above, but that would enforce api rules on the test code, which we don't want.
@@ -83,7 +111,6 @@ android {
      * Configures the test report for connected (instrumented) tests to be copied to a central
      * folder in the project's root directory.
      */
-    @Suppress("UnstableApiUsage")
     testOptions {
         targetSdk = libs.versions.compileSdk.get().toInt()
         val connectedTestReportsPath: String by project
@@ -93,20 +120,6 @@ android {
     publishing {
         singleVariant("release") {
             // This is the default variant.
-        }
-    }
-
-    val toolkitTests = project.findProperty("toolkitTestDir") as String
-    sourceSets.getByName("androidTest") {
-        var file = file("$toolkitTests/${project.name}/androidTest")
-        if (file.exists()) {
-            java.setSrcDirs(java.srcDirs.plus(file))
-        }
-    }
-    sourceSets.getByName("test") {
-        var file = file("$toolkitTests/${project.name}/test")
-        if (file.exists()) {
-            java.setSrcDirs(java.srcDirs.plus(file))
         }
     }
 }
@@ -182,6 +195,8 @@ dependencies {
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.bundles.composeTest)
     androidTestImplementation(libs.bundles.androidXTest)
+    androidTestImplementation(libs.androidx.test.espresso.core)
+    androidTestImplementation(libs.androidx.espresso.intents)
     debugImplementation(libs.bundles.debug)
 
     // Include only if internal tests are required

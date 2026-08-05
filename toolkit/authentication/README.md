@@ -79,16 +79,16 @@ To properly handle redirect intents from the browser during OAuth sign-in or IAP
 class MyAppViewModel(application: Application) : AndroidViewModel(application), ArcGISAuthenticationChallengeHandler {
 
     val authenticatorState = AuthenticatorState(
-        setAsArcGISAuthenticationChallengeHandler: Boolean = false,
-        setAsNetworkAuthenticationChallengeHandler: Boolean = true
+        setAsArcGISAuthenticationChallengeHandler = false,
+        setAsNetworkAuthenticationChallengeHandler = true
     )
 
-    override suspend fun handleArcGISAuthenticationChallenge(challenge: ArcGISAuthenticationChallenge): ArcGISAuthenticationChallengeResponse (
-        challenge: ArcGISAuthenticationChallenge
-    ): ArcGISAuthenticationChallengeResponse {
+    override suspend fun handleArcGISAuthenticationChallenge(challenge: ArcGISAuthenticationChallenge): ArcGISAuthenticationChallengeResponse {
         val shouldAuthenticatorHandleChallenge = someBusinessLogic(challenge)
-        if (shouldAuthenticatorHandleChallenge) {
-            return authenticatorState.handleArcGISAuthenticationChallenge(challenge)
+        return if (shouldAuthenticatorHandleChallenge) {
+            authenticatorState.handleArcGISAuthenticationChallenge(challenge)
+        } else { 
+            ArcGISAuthenticationChallengeResponse.ContinueAndFail
         }
     }
 }
@@ -167,12 +167,14 @@ If you want to launch a Custom Tab from your own app's activity, follow these st
 To display OAuth sign-in prompts in a private browser session (ephemeral mode), set the `preferPrivateWebBrowserSession` property to `true` in your `OAuthUserConfiguration`. This ensures that the browser does not use any cached credentials, which is important for enterprise security.
 
 ```kotlin
-authenticatorState.oAuthUserConfiguration = OAuthUserConfiguration(
+authenticatorState.oAuthUserConfigurations = listOf(
+   OAuthUserConfiguration(
         "https://www.arcgis.com/",
         "<your-client-id>",
         "my-ags-app://auth",
         preferPrivateWebBrowserSession = true
     )
+)
 ```
 Note: Private web browsing sessions (ephemeral mode) may not work in Chrome versions lower than 136, and support may vary across non-Chromium-based browsers. For best results, ensure your users have updated to a newer version of Chrome, and be aware that not all browsers may support this feature.
 

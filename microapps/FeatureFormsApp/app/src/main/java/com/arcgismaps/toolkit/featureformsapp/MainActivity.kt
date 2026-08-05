@@ -138,6 +138,7 @@ class MainActivity : ComponentActivity() {
                 this@MainActivity,
                 PortalSettingsFactory::class.java
             )
+
             loadCredentials(factory.getPortalSettings(), this@MainActivity.datastore)
         }
         // check for permissions
@@ -177,7 +178,7 @@ class MainActivity : ComponentActivity() {
                 if (json.isNullOrEmpty().not()) {
                     try {
                         Json.decodeFromString<PortalFolder>(json)
-                    } catch (e: Exception) {
+                    } catch (_: Exception) {
                         // if the json is invalid, return null
                         null
                     }
@@ -222,6 +223,7 @@ fun FeatureFormApp(
     if (showPermissionsDialog) {
         AlertDialog(
             onDismissRequest = {
+                @Suppress("AssignedValueIsNeverRead")
                 showPermissionsDialog = false
             },
             text = {
@@ -231,7 +233,10 @@ fun FeatureFormApp(
                 Icon(imageVector = Icons.Rounded.Warning, contentDescription = "Warning")
             },
             confirmButton = {
-                Button(onClick = { showPermissionsDialog = false }) {
+                Button(onClick = {
+                    @Suppress("AssignedValueIsNeverRead")
+                    showPermissionsDialog = false
+                }) {
                     Text(text = stringResource(id = R.string.okay))
                 }
             }

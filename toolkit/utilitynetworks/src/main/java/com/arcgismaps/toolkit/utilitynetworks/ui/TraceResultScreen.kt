@@ -236,8 +236,9 @@ private fun FunctionResult(functionResults: List<UtilityTraceFunctionOutput>) {
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    val function = functionResult.function
                     Text(
-                        text = functionResult.function.networkAttribute.name,
+                        text = if (function.functionName.isNotEmpty()) { function.functionName } else { function.networkAttribute.name },
                         style = MaterialTheme.typography.titleMedium
                     )
                     Column(horizontalAlignment = Alignment.End) {

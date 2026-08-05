@@ -52,8 +52,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.Info
@@ -61,6 +59,7 @@ import androidx.compose.material.icons.rounded.Warning
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
@@ -92,8 +91,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.platform.LocalResources
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -105,7 +104,6 @@ import androidx.window.core.layout.WindowSizeClass
 import androidx.window.core.layout.computeWindowSizeClass
 import androidx.window.layout.WindowMetricsCalculator
 import com.arcgismaps.data.ArcGISFeature
-import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.layers.ArcGISSublayer
 import com.arcgismaps.mapping.layers.FeatureLayer
 import com.arcgismaps.mapping.layers.SubtypeFeatureLayer
@@ -301,8 +299,11 @@ fun MapScreen(
             }
         )
     }
-    BackHandler(enabled = uiState !is UIState.Editing) {
-        onBackPressed()
+    BackHandler {
+        // Only allow back navigation when in the default state and not performing a task
+        if (uiState is UIState.NotEditing && isBusy.not()) {
+            onBackPressed()
+        }
     }
 }
 
@@ -450,7 +451,7 @@ fun FeatureFormSheet(
             expansionHeight = SheetExpansionHeight(0.5f),
             sheetSwipeEnabled = true,
             shape = RoundedCornerShape(5.dp),
-            containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+            containerColor = MaterialTheme.colorScheme.surface,
             layoutHeight = layoutHeight.toFloat(),
             sheetWidth = with(LocalDensity.current) { layoutWidth.toDp() },
             tonalElevation = (-1).dp
@@ -626,6 +627,18 @@ fun MessageDialog(
     AlertDialog(
         onDismissRequest = onDismissRequest,
         confirmButton = {
+            if (message.actionText != null) {
+                Button(
+                    onClick = message.action,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.error
+                    )
+                ) {
+                    Text(text = message.actionText)
+                }
+            }
+        },
+        dismissButton = {
             Button(onClick = onDismissRequest) {
                 Text(text = stringResource(R.string.okay))
             }

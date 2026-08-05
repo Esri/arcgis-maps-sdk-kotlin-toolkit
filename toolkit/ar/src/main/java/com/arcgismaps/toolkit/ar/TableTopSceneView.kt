@@ -29,6 +29,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.ArcGISScene
@@ -323,12 +324,13 @@ public fun TableTopSceneView(
     val initializationStatus = rememberTableTopSceneViewStatus()
 
     val context = LocalContext.current
+    val cameraPermissionNotGranted = stringResource(R.string.camera_permission_not_granted)
     val cameraPermissionGranted by rememberCameraPermission(requestCameraPermissionAutomatically) {
         // onNotGranted
         initializationStatus.update(
             TableTopSceneViewStatus.FailedToInitialize(
                 IllegalStateException(
-                    context.getString(R.string.camera_permission_not_granted)
+                    cameraPermissionNotGranted
                 )
             ),
             onInitializationStatusChanged
@@ -375,7 +377,7 @@ public fun TableTopSceneView(
             val identityMatrix = remember { TransformationMatrix.createIdentityMatrix() }
             ArCameraFeed(
                 session = arSessionWrapper,
-                onFrame = { frame, displayRotation, session ->
+                onFrame = { frame, displayRotation, _ ->
                     arCoreAnchor?.let { anchor ->
                         val anchorPosition = identityMatrix - anchor.pose.translation.let {
                             TransformationMatrix.createWithQuaternionAndTranslation(

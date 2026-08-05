@@ -117,7 +117,6 @@ function makeProjectPublishable {
 plugins {
     alias(libs.plugins.binary.compatibility.validator) apply true
     id("com.android.library")
-    id("org.jetbrains.kotlin.android")
     id("artifact-deploy")
 }
 EOM

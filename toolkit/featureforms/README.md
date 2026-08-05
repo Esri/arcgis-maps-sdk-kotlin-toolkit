@@ -3,7 +3,7 @@
 ## Description
 
 The `FeatureForm` toolkit component enables users to display and edit feature attributes and attachments in a layer using the `FeatureForm` API.
-FeatureForms can be authored as part of the web map using [Field Maps Designer](https://www.arcgis.com/apps/fieldmaps/) or using Map Viewer. This allows a simplified user experience to edit feature attribute data on the web map.
+A FeatureForm can be authored as part of the web map using [Field Maps Designer](https://www.arcgis.com/apps/fieldmaps/) or using Map Viewer. This allows a simplified user experience to edit feature attribute data on the web map.
 
 More information about editing attributes using forms can be found [here](https://developers.arcgis.com/kotlin/edit-features/overview-edit-using-feature-forms/).
 
@@ -17,7 +17,7 @@ The `FeatureForm` is a composable that can render a `FeatureForm` object with a 
 - Provides a DateTime picker and a picker for coded-value field types.
 - Shows Validation errors for any fields with errors.
 - Visibility behavior of validation errors can be customized. See [Changing the Validation Error Visibility policy](#changing-the-validation-error-visibility-policy).
-- Supports viewing and editing Utility Network Associations and navigating to associated features. See [section](#utility-associations-and-navigation) for more info.
+- Supports viewing and editing Utility Network Associations and navigating to associated features. See [section](#utility-associations) for more info.
 - Follows material 3 design system.
 
 ## Usage
@@ -85,13 +85,12 @@ fun MyComposable(viewModel : MyViewModel) {
 
 ### Changing the Validation Error Visibility policy
 
-By default validation errors for any fields are only visible after the fields gain focus. But this can be customized using the `validationErrorVisibility` parameter of the `FeatureForm`. This property can be changed at any time to show all the errors. It supports two modes of visibility.
+By default, validation errors for any fields are only visible after the fields gain focus. But this can be customized using the `validationErrorVisibility` parameter of the `FeatureForm`. This property can be changed at any time to show all the errors. It supports two modes of visibility.
 
 - **ValidationErrorVisibility.Automatic** : *Indicates that the validation errors are only visible for editable fields that have received focus.*
 - **ValidationErrorVisibility.Visible** : *Indicates the validation is run for all the editable fields, and errors are displayed regardless of the focus state.*
 
 ```kotlin
-@Composable
 FeatureForm(  
     featureFormState = state,  
     modifier = Modifier.fillMaxSize(),  
@@ -145,7 +144,8 @@ The `FeatureForm` component requires the following permissions to function corre
 ### [AttachmentsFormElement](https://developers.arcgis.com/kotlin/api-reference/arcgis-maps-kotlin/com.arcgismaps.mapping.featureforms/-attachments-form-element/index.html?query=class%20AttachmentsFormElement%20:%20FormElement)
 
 - The `AttachmentsFormElement` is used to display and manage attachments for a feature. It allows users to add, view, and delete attachments.
-- If camera permissions are not granted, the "Add" button will not be visible.
+- It provides photo capture, video capture, gallery selection and a file picker based on the configured options for the element.
+- If camera permissions are not granted, the appropriate camera capture options will be disabled.
 
 <img src="screenshots/attachments_form_element.png" width="250"/>
   
@@ -210,7 +210,7 @@ Once a valid value is selected, the "Unsupported Type" section will be hidden.
 
 #### Read-Only Fields
 
-- Any field that not editable as indicated by the [isEditable](https://developers.arcgis.com/kotlin/api-reference/arcgis-maps-kotlin/com.arcgismaps.mapping.featureforms/-field-form-element/index.html#279696009%2FProperties%2F-1844196645) property will be displayed as read-only field with
+- Any field that is not editable as indicated by the [isEditable](https://developers.arcgis.com/kotlin/api-reference/arcgis-maps-kotlin/com.arcgismaps.mapping.featureforms/-field-form-element/index.html#279696009%2FProperties%2F-1844196645) property will be displayed as read-only field with
 special styling.
 - If the field is backed by an arcade expression as indicated by [hasValueExpression](https://developers.arcgis.com/kotlin/api-reference/arcgis-maps-kotlin/com.arcgismaps.mapping.featureforms/-field-form-element/index.html#854459496%2FProperties%2F-1844196645), the icon `<>` will be displayed next to the field.
 
@@ -280,7 +280,7 @@ If the `UtilityAssociationsFormElement` is configured to allow editing associati
 
 ## Theming and Customization
 
-`FeatureForm` uses the material3 theming system. These styles and colors are customizable through the `FeatureForms` composable function's public API. The following `colors` and `typography` are used by the respective fields.
+`FeatureForm` uses the material3 theming system. These styles and colors are customizable through the `FeatureForm` composable function's public API. The following `colors` and `typography` are used by the respective fields.
 
 #### Text Fields
 - Outline color - `MaterialTheme.colorScheme.outline`
@@ -298,7 +298,7 @@ If the `UtilityAssociationsFormElement` is configured to allow editing associati
 
 #### Group Elements
 - Outline Color - `MaterialTheme.colorScheme.outline`
-- Header Color - `MaterialTheme.colorScheme.SurfaceVariant`
+- Header Color - `MaterialTheme.colorScheme.surfaceContainerHigh`
 - Content background Color - `MaterialTheme.colorScheme.background`
 - Label TextStyle - `MaterialTheme.typography.bodyMedium`
 - Description TextStyle - `MaterialTheme.typography.bodySmall`

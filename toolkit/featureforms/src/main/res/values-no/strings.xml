@@ -91,12 +91,12 @@
     <string name="ff_time_picker_pm">PM</string>
 
     <string name="take_photo">Ta bilde</string>
-    <string name="add_from_gallery">Legg til fra Galleriet</string>
+    <string name="choose_from_gallery">Legg til fra Galleriet</string>
     <string name="rename">Gi nytt navn</string>
     <string name="delete">Slett</string>
     <string name="rename_attachment">Endre navn på vedlegg</string>
     <string name="name">Navn</string>
-    <string name="add_file">Legg til fra Filer</string>
+    <string name="choose_from_files">Legg til fra Filer</string>
     <string name="attachment_error">Feil ved tillegging av vedlegg</string>
     <string name="no_app_found">Fant ingen applikasjon for å åpne denne filtypen.</string>
     <string name="attachment_too_large">Filen er for stor. Legg til en fil som er mindre enn 50 MB.</string>

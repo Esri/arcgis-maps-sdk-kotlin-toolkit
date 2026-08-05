@@ -91,12 +91,12 @@
     <string name="ff_time_picker_pm">PM</string>
 
     <string name="take_photo">Prendre une photo</string>
-    <string name="add_from_gallery">Ajouter à partir de la bibliothèque</string>
+    <string name="choose_from_gallery">Ajouter à partir de la bibliothèque</string>
     <string name="rename">Renommer</string>
     <string name="delete">Supprimer</string>
     <string name="rename_attachment">Renommer la pièce jointe</string>
     <string name="name">Nom</string>
-    <string name="add_file">Ajouter à partir de fichiers</string>
+    <string name="choose_from_files">Ajouter à partir de fichiers</string>
     <string name="attachment_error">Erreur lors de l’ajout de la pièce jointe</string>
     <string name="no_app_found">Aucune application trouvée pour ouvrir ce type de fichier.</string>
     <string name="attachment_too_large">Le fichier est trop volumineux. Ajoutez un fichier de moins de 50 Mo.</string>
