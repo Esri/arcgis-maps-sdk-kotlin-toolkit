@@ -35,7 +35,7 @@ Please see the [developer setup](doc/general/developer_setup.md) for a complete 
 other options for installing the SDK.
 * JDK 17
 
-The *ArcGIS Maps SDK for Kotlin Toolkit* has a *Minimum SDK* version of *26*, meaning that it can run on devices with *Android Oreo (8.0)* or newer.
+The *ArcGIS Maps SDK for Kotlin Toolkit* has a *Minimum SDK* version of *28*, meaning that it can run on devices with *Android Pie (9.0)* or newer.
 
 ## Installation
 
@@ -54,7 +54,7 @@ repositories {
 The *ArcGIS Maps SDK for Kotlin Toolkit* is released with a "bill of materials" (`BOM`). The releasable BOM is versioned and represents a set of versions of the toolkit components which are compatible with one another. You may specify dependencies as follows
 
 ```
-implementation(platform("com.esri:arcgis-maps-kotlin-toolkit-bom:300.0.0"))
+implementation(platform("com.esri:arcgis-maps-kotlin-toolkit-bom:300.1.0"))
 implementation("com.esri:arcgis-maps-kotlin-toolkit-authentication")
 implementation("com.esri:arcgis-maps-kotlin-toolkit-basemapgallery")
 implementation("com.esri:arcgis-maps-kotlin-toolkit-buildingexplorer")
@@ -172,7 +172,7 @@ The test reports for connected tests can be located under `arcgis-maps-sdk-kotli
 
 ## Licensing
 
-Copyright 2019-2025 Esri
+Copyright 2019-2026 Esri
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
 
