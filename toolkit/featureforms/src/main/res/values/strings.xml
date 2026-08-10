@@ -180,7 +180,6 @@
     <string name="filters_not_applied">Filters have not been applied</string>
     <string name="discard_changes_confirmation">Are you sure you want to discard the changes?</string>
     <string name="record_audio">Record Audio</string>
-    <string name="audio_permission_denied">Microphone permission is required to record audio. Please enable microphone permission in your device settings.</string>
     <string name="ready_to_record_audio">Ready to record audio.</string>
     <string name="recording_audio">Recording audio…</string>
     <string name="start_recording">Start Recording</string>
