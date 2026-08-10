@@ -49,6 +49,10 @@ public class ArOrientedImage internal constructor(private val frame: FrameState)
         frame.session.cameraConfig.cameraId
     }
 
+    public val cameraImage: android.media.Image? by lazy {
+        frame.frame.acquireCameraImage()
+    }
+
     private fun orientationPointer(): Polyline? =
         frame.localPose.moveForward(0.5f)?.let {
             Polyline(points = listOf(location, it))

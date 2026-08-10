@@ -2,9 +2,12 @@ package com.arcgismaps.toolkit.arrealitycaptureapp.screens
 
 import android.app.Application
 import android.content.Context
+import android.graphics.ImageFormat
 import android.graphics.Rect
+import android.graphics.YuvImage
 import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraManager
+import android.media.Image
 import android.util.Log
 import android.util.Size
 import android.util.SizeF
@@ -29,6 +32,11 @@ import com.arcgismaps.toolkit.arrealitycaptureapp.io.CamerasTable_OBJECT_ID
 import com.arcgismaps.toolkit.arrealitycaptureapp.io.FrameRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.io.ByteArrayOutputStream
+import java.io.File
+import java.io.FileOutputStream
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 const val TAG = "RealityCaptureApp"
 
@@ -36,6 +44,8 @@ class MainScreenViewModel(application: Application): AndroidViewModel(applicatio
     val frameRepository by lazy { FrameRepository(application) }
 
     val proxy = WorldScaleSceneViewProxy()
+
+    val capturedImages = mutableMapOf<String, android.media.Image?>()
 
     // The graphics overlay should have a surface placement of absolute to ensure
     // that graphics are placed correctly in 3D space if the user taps on a real object in the camera
@@ -62,10 +72,13 @@ class MainScreenViewModel(application: Application): AndroidViewModel(applicatio
                 )
             }
 
+            val imgFileName = "$currentFrameObjectId.jpg"
+            capturedImages[imgFileName] = it.cameraImage
+
             // populate the frames table with the captured oriented image
             frameRepository.appendFrame(
                 objectId = currentFrameObjectId,
-                raster = "$currentFrameObjectId.jpg",
+                raster = imgFileName,
                 cameraId = CamerasTable_CAMERA_ID,
                 perspectiveX = it.geospatialPose.longitude, // TODO - project from geographic to projected, add SRS to camera table
                 perspectiveY = it.geospatialPose.latitude, // TODO - project from geographic to projected
@@ -81,6 +94,31 @@ class MainScreenViewModel(application: Application): AndroidViewModel(applicatio
                 graphicsOverlays.first().addFrustumGraphic(it)
             }
         } ?: Log.d(TAG, "Failed to capture oriented image.")
+    }
+
+    fun saveCaptureSession() {
+        val rootDir = application.getExternalFilesDir(null) ?: throw IllegalStateException("External files directory is not available.")
+        val now = LocalDateTime.now().format(
+            DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss")
+        )
+        val dir = File(rootDir, "realitycapture/$now")
+
+        frameRepository.saveToCsv(dir)
+        saveCapturedImages(dir)
+    }
+
+    private fun saveCapturedImages(directory: File) {
+        viewModelScope.launch(Dispatchers.IO) {
+            capturedImages.forEach { (fileName, image) ->
+                image?.use {
+                    val outputFile = File(directory, fileName)
+                    FileOutputStream(outputFile).use {
+                        it.write(image.toJpgBytes())
+                    }
+                } ?: throw IllegalStateException("Image for $fileName is null.")
+            }
+            capturedImages.clear() // clear the map after saving to free up memory
+        }
     }
 }
 
@@ -176,3 +214,80 @@ private fun GraphicsOverlay.addFrustumGraphic(orientedImage: ArOrientedImage) {
     }
 }
 
+fun Image.toJpgBytes(jpegQuality: Int = 100): ByteArray {
+    require(format == ImageFormat.YUV_420_888) {
+        "Expected YUV_420_888, got format=${format}"
+    }
+
+    val nv21 = yuv420888ToNv21()
+    val yuvImage = YuvImage(nv21, ImageFormat.NV21, width, height, null)
+    return ByteArrayOutputStream().use { out ->
+        yuvImage.compressToJpeg(Rect(0, 0, width, height), jpegQuality, out)
+        out.toByteArray()
+    }
+}
+
+/**
+ * Converts android.media.Image in YUV_420_888 to NV21.
+ * Handles arbitrary rowStride/pixelStride from camera drivers.
+ */
+fun Image.yuv420888ToNv21(): ByteArray {
+    val width = width
+    val height = height
+    val ySize = width * height
+    val uvSize = width * height / 2
+    val nv21 = ByteArray(ySize + uvSize)
+
+    val yPlane = planes[0]
+    val uPlane = planes[1]
+    val vPlane = planes[2]
+
+    // Copy Y plane
+    var dstIndex = 0
+    val yBuffer = yPlane.buffer
+    val yRowStride = yPlane.rowStride
+    val yPixelStride = yPlane.pixelStride // usually 1
+    val yRow = ByteArray(yRowStride)
+
+    for (row in 0 until height) {
+        yBuffer.position(row * yRowStride)
+        yBuffer.get(yRow, 0, yRowStride)
+        var col = 0
+        while (col < width) {
+            nv21[dstIndex++] = yRow[col * yPixelStride]
+            col++
+        }
+    }
+
+    // Copy UV planes into NV21 layout: VU VU VU...
+    val uBuffer = uPlane.buffer
+    val vBuffer = vPlane.buffer
+    val uRowStride = uPlane.rowStride
+    val vRowStride = vPlane.rowStride
+    val uPixelStride = uPlane.pixelStride
+    val vPixelStride = vPlane.pixelStride
+
+    val uvHeight = height / 2
+    val uvWidth = width / 2
+
+    val uRow = ByteArray(uRowStride)
+    val vRow = ByteArray(vRowStride)
+
+    for (row in 0 until uvHeight) {
+        uBuffer.position(row * uRowStride)
+        vBuffer.position(row * vRowStride)
+        uBuffer.get(uRow, 0, uRowStride)
+        vBuffer.get(vRow, 0, vRowStride)
+
+        var col = 0
+        while (col < uvWidth) {
+            val u = uRow[col * uPixelStride]
+            val v = vRow[col * vPixelStride]
+            nv21[dstIndex++] = v
+            nv21[dstIndex++] = u
+            col++
+        }
+    }
+
+    return nv21
+}

@@ -55,17 +55,13 @@ class FrameRepository(private val context: Context) {
         camerasTable = camerasTable.concat(newRow)
     }
 
-    fun saveToCsv() {
-        val rootDir = context.getExternalFilesDir(null) ?: throw IllegalStateException("External files directory is not available.")
-        val now = LocalDateTime.now().format(
-            DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss")
-        )
-        val framesCsvFile = File(rootDir, "realitycapture/$now/frames.csv")
+    fun saveToCsv(directory: File) {
+        val framesCsvFile = File(directory, "frames.csv")
         framesCsvFile.parentFile?.mkdirs() ?: throw IllegalStateException("Failed to create parent directory for CSV file: ${framesCsvFile.absolutePath}")
         if (framesCsvFile.exists()) {
             framesCsvFile.delete()
         }
-        val camerasCsvFile = File(rootDir, "realitycapture/$now/cameras.csv")
+        val camerasCsvFile = File(directory, "cameras.csv")
         camerasCsvFile.parentFile?.mkdirs() ?: throw IllegalStateException("Failed to create parent directory for CSV file: ${camerasCsvFile.absolutePath}")
         if (camerasCsvFile.exists()) {
             camerasCsvFile.delete()

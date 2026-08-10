@@ -109,9 +109,9 @@ fun MainScreen(
                         onDismissRequest = { actionsExpanded = false }
                     ) {
                         DropdownMenuItem(
-                            text = { Text("Save to CSV") },
+                            text = { Text("Save") },
                             onClick = {
-                                viewModel.frameRepository.saveToCsv()
+                                viewModel.saveCaptureSession()
                             },
                             contentPadding = PaddingValues(end = 12.dp),
                         )
