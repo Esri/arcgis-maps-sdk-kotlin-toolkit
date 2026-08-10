@@ -62,6 +62,10 @@ class MainScreenViewModel(application: Application): AndroidViewModel(applicatio
     private var camerasTableInitialized = false
     private var currentFrameObjectId = 0
 
+    // Todos
+    // - projected CS
+    // - focal length x/y
+    // - sensor pixel size x/y
     fun captureOrientedImage() {
         viewModelScope.launch(Dispatchers.IO) {
             proxy.exportOrientedImage()?.let {
@@ -216,7 +220,7 @@ private fun GraphicsOverlay.addFrustumGraphic(orientedImage: ArOrientedImage) {
     }
 }
 
-val Context.rotation: Int
+val Context.deviceRotation: Int
     get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
         // API 30+
         display.rotation
@@ -227,7 +231,7 @@ val Context.rotation: Int
 
 
 fun ByteArray.adjustForDisplayOrientation(context: Context, cameraId: String): ByteArray {
-    val displayRotationDegrees = when (context.rotation ?: Surface.ROTATION_0) {
+    val displayRotationDegrees = when (context.deviceRotation ?: Surface.ROTATION_0) {
         Surface.ROTATION_0 -> 0f
         Surface.ROTATION_90 -> 90f
         Surface.ROTATION_180 -> 180f
