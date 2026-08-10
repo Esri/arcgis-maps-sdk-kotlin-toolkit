@@ -67,8 +67,8 @@ class MainScreenViewModel(application: Application): AndroidViewModel(applicatio
                 objectId = currentFrameObjectId,
                 raster = "$currentFrameObjectId.jpg",
                 cameraId = CamerasTable_CAMERA_ID,
-                perspectiveX = it.geospatialPose.longitude,
-                perspectiveY = it.geospatialPose.latitude,
+                perspectiveX = it.geospatialPose.longitude, // TODO - project from geographic to projected, add SRS to camera table
+                perspectiveY = it.geospatialPose.latitude, // TODO - project from geographic to projected
                 perspectiveZ = it.geospatialPose.altitude, /* orthometric height */
                 omega = it.cameraRotationAngles.omegaDeg,
                 phi = it.cameraRotationAngles.phiDeg,
