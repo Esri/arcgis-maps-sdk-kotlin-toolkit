@@ -43,6 +43,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -63,6 +64,7 @@ import com.arcgismaps.toolkit.arrealitycaptureapp.R
 fun MainScreen(
     viewModel: MainScreenViewModel = viewModel()
 ) {
+    val displayContext = LocalContext.current
     val arcGISScene = remember {
         val basemap = Basemap(BasemapStyle.ArcGISHumanGeography)
         ArcGISScene(basemap).apply {
@@ -111,7 +113,7 @@ fun MainScreen(
                         DropdownMenuItem(
                             text = { Text("Save") },
                             onClick = {
-                                viewModel.saveCaptureSession()
+                                viewModel.saveCaptureSession(displayContext)
                             },
                             contentPadding = PaddingValues(end = 12.dp),
                         )

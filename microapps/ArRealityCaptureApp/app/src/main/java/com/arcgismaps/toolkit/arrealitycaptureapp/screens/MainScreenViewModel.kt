@@ -2,12 +2,18 @@ package com.arcgismaps.toolkit.arrealitycaptureapp.screens
 
 import android.app.Application
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Matrix
 import android.graphics.Rect
 import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraManager
+import android.os.Build
 import android.util.Log
 import android.util.Size
 import android.util.SizeF
+import android.view.Surface
+import android.view.WindowManager
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.application
 import androidx.lifecycle.viewModelScope
@@ -29,6 +35,7 @@ import com.arcgismaps.toolkit.arrealitycaptureapp.io.CamerasTable_OBJECT_ID
 import com.arcgismaps.toolkit.arrealitycaptureapp.io.FrameRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
 import java.time.LocalDateTime
@@ -41,7 +48,7 @@ class MainScreenViewModel(application: Application): AndroidViewModel(applicatio
 
     val proxy = WorldScaleSceneViewProxy()
 
-    val capturedImages = mutableMapOf<String, ByteArray>()
+    val capturedImages = mutableMapOf<String, ArOrientedImage>()
 
     // The graphics overlay should have a surface placement of absolute to ensure
     // that graphics are placed correctly in 3D space if the user taps on a real object in the camera
@@ -70,7 +77,7 @@ class MainScreenViewModel(application: Application): AndroidViewModel(applicatio
                 }
 
                 val imgFileName = "$currentFrameObjectId.jpg"
-                capturedImages[imgFileName] = it.cameraImageBytes
+                capturedImages[imgFileName] = it
 
                 // populate the frames table with the captured oriented image
                 frameRepository.appendFrame(
@@ -91,7 +98,7 @@ class MainScreenViewModel(application: Application): AndroidViewModel(applicatio
         }
     }
 
-    fun saveCaptureSession() {
+    fun saveCaptureSession(displayContext: Context) {
         val rootDir = application.getExternalFilesDir(null) ?: throw IllegalStateException("External files directory is not available.")
         val now = LocalDateTime.now().format(
             DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss")
@@ -99,15 +106,17 @@ class MainScreenViewModel(application: Application): AndroidViewModel(applicatio
         val dir = File(rootDir, "realitycapture/$now")
 
         frameRepository.saveToCsv(dir)
-        saveCapturedImages(dir)
+        saveCapturedImages(displayContext, dir)
     }
 
-    private fun saveCapturedImages(directory: File) {
+    private fun saveCapturedImages(displayContext: Context, directory: File) {
         viewModelScope.launch(Dispatchers.IO) {
             capturedImages.forEach { (fileName, image) ->
                 val outputFile = File(directory, fileName)
                 FileOutputStream(outputFile).use {
-                    it.write(image)
+                    it.write(
+                        image.cameraImageBytes.adjustForDisplayOrientation(displayContext, image.cameraId)
+                    )
                 }
             }
             capturedImages.clear() // clear the map after saving to free up memory
@@ -204,5 +213,52 @@ private fun GraphicsOverlay.addFrustumGraphic(orientedImage: ArOrientedImage) {
         ).also {
             this.graphics.add(it)
         }
+    }
+}
+
+val Context.rotation: Int
+    get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        // API 30+
+        display.rotation
+    } else {
+        @Suppress("DEPRECATION")
+        (getSystemService(Context.WINDOW_SERVICE) as WindowManager).defaultDisplay.rotation
+    }
+
+
+fun ByteArray.adjustForDisplayOrientation(context: Context, cameraId: String): ByteArray {
+    val displayRotationDegrees = when (context.rotation ?: Surface.ROTATION_0) {
+        Surface.ROTATION_0 -> 0f
+        Surface.ROTATION_90 -> 90f
+        Surface.ROTATION_180 -> 180f
+        Surface.ROTATION_270 -> 270f
+        else -> 0f
+    }
+
+    // Camera sensor orientation.
+    val cameraManager = context.getSystemService(Context.CAMERA_SERVICE) as CameraManager
+    val characteristics = cameraManager.getCameraCharacteristics(cameraId)
+    val sensorOrientation = characteristics.get(CameraCharacteristics.SENSOR_ORIENTATION)!!
+
+    // Make sure we return 0, 90, 180, or 270 degrees.
+    val rotationDegrees = (sensorOrientation - displayRotationDegrees + 360) % 360
+
+    if (rotationDegrees == 0f) return this
+
+    val bitmap = BitmapFactory.decodeByteArray(this, 0, this.size)
+        ?: return this
+
+    val matrix = Matrix().apply { postRotate(rotationDegrees) }
+
+    val rotatedBitmap = Bitmap.createBitmap(
+        bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true
+    )
+
+    return ByteArrayOutputStream().use { out ->
+        rotatedBitmap.compress(Bitmap.CompressFormat.JPEG, 100, out)
+        val result = out.toByteArray()
+        bitmap.recycle()
+        if (rotatedBitmap !== bitmap) rotatedBitmap.recycle()
+        result
     }
 }
