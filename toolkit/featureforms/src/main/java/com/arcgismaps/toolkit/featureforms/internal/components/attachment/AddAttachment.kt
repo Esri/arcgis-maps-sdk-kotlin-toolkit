@@ -16,13 +16,9 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.components.attachment
 
-import android.Manifest
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
-import android.media.MediaRecorder
 import android.net.Uri
-import android.os.Build
 import android.provider.MediaStore
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
@@ -33,12 +29,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AudioFile
+import androidx.compose.material.icons.outlined.Mic
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Folder
 import androidx.compose.material.icons.rounded.Photo
 import androidx.compose.material.icons.rounded.PhotoCamera
 import androidx.compose.material.icons.rounded.Videocam
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -46,14 +42,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -65,7 +58,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import com.arcgismaps.mapping.featureforms.AttachmentInputMethod
 import com.arcgismaps.mapping.featureforms.AttachmentsFormInput
@@ -76,8 +68,8 @@ import com.arcgismaps.mapping.featureforms.VideoFormInput
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.internal.utils.AttachmentsFileProvider
 import com.arcgismaps.toolkit.featureforms.internal.utils.DialogType
-import com.arcgismaps.toolkit.featureforms.internal.utils.LocalDialogRequester
 import com.arcgismaps.toolkit.featureforms.internal.utils.FileUriReference
+import com.arcgismaps.toolkit.featureforms.internal.utils.LocalDialogRequester
 import kotlinx.coroutines.launch
 import java.io.File
 import java.time.Instant
@@ -91,6 +83,7 @@ internal fun AddAttachment(
     stateId: Int,
     inputs: List<AttachmentsFormInput>,
     hasCameraPermission: Boolean,
+    hasMicrophonePermission: Boolean,
     enabled: Boolean
 ) {
     var showMenu by remember { mutableStateOf(false) }
@@ -121,12 +114,12 @@ internal fun AddAttachment(
         ) {
             captureOptions.forEach { option ->
                 when (option) {
-                    is CaptureOptions.CaptureAudio -> {
+                    is CaptureOptions.CaptureAudio if hasMicrophonePermission -> {
                         DropdownMenuItem(
                             text = { Text(text = stringResource(R.string.record_audio)) },
                             trailingIcon = {
                                 Icon(
-                                    imageVector = Icons.Outlined.AudioFile,
+                                    imageVector = Icons.Outlined.Mic,
                                     contentDescription = stringResource(R.string.record_audio),
                                     modifier = Modifier.alpha(0.4f)
                                 )
@@ -233,237 +226,6 @@ internal fun AddAttachment(
             }
         }
     }
-}
-
-/**
- * Displays an in-app audio recorder. When audio is captured, the [onAudioCaptured] callback is
- * invoked with the URI of the captured audio. In case of a dismissal or if no audio is captured,
- * the [onDismissRequest] callback is invoked.
- *
- * @param maxDuration The maximum duration limit for the captured audio.
- * @param onDismissRequest A request to dismiss the audio recorder.
- * @param onAudioCaptured A callback to invoke when audio is captured.
- */
-@Composable
-internal fun AudioCapture(
-    maxDuration: Long?,
-    onDismissRequest: () -> Unit,
-    onAudioCaptured: (Uri) -> Unit
-) {
-    val context = LocalContext.current
-    var hasAudioPermission by remember {
-        mutableStateOf(context.hasRecordAudioPermission())
-    }
-    var hasRequestedPermission by rememberSaveable { mutableStateOf(false) }
-    val permissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission(),
-        onResult = { granted ->
-            hasAudioPermission = granted
-        }
-    )
-    LaunchedEffect(Unit) {
-        if (!hasAudioPermission && !hasRequestedPermission) {
-            hasRequestedPermission = true
-            permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
-        }
-    }
-
-    if (hasAudioPermission) {
-        AudioRecorderDialog(
-            maxDuration = maxDuration,
-            onDismissRequest = onDismissRequest,
-            onAudioCaptured = onAudioCaptured
-        )
-    } else if (hasRequestedPermission) {
-        AlertDialog(
-            onDismissRequest = onDismissRequest,
-            confirmButton = {
-                TextButton(onClick = onDismissRequest) {
-                    Text(text = stringResource(R.string.ok))
-                }
-            },
-            title = { Text(text = stringResource(R.string.record_audio)) },
-            text = { Text(text = stringResource(R.string.audio_permission_denied)) }
-        )
-    }
-}
-
-@Composable
-private fun AudioRecorderDialog(
-    maxDuration: Long?,
-    onDismissRequest: () -> Unit,
-    onAudioCaptured: (Uri) -> Unit
-) {
-    val context = LocalContext.current
-    val currentOnAudioCaptured by rememberUpdatedState(onAudioCaptured)
-    val audioRecorder = remember(context, maxDuration) {
-        AudioRecorder(
-            context = context,
-            maxDuration = maxDuration,
-            onMaxDurationReached = { currentOnAudioCaptured(it) }
-        )
-    }
-    var isRecording by rememberSaveable { mutableStateOf(false) }
-    var error by rememberSaveable { mutableStateOf<String?>(null) }
-
-    DisposableEffect(audioRecorder) {
-        onDispose {
-            audioRecorder.cancel()
-        }
-    }
-
-    AlertDialog(
-        onDismissRequest = {
-            audioRecorder.cancel()
-            onDismissRequest()
-        },
-        icon = {
-            Icon(
-                imageVector = Icons.Outlined.AudioFile,
-                contentDescription = null
-            )
-        },
-        title = { Text(text = stringResource(R.string.record_audio)) },
-        text = {
-            Text(
-                text = error ?: if (isRecording) {
-                    stringResource(R.string.recording_audio)
-                } else {
-                    stringResource(R.string.ready_to_record_audio)
-                }
-            )
-        },
-        confirmButton = {
-            TextButton(
-                onClick = {
-                    if (isRecording) {
-                        audioRecorder.stop().fold(
-                            onSuccess = { uri -> onAudioCaptured(uri) },
-                            onFailure = { ex ->
-                                isRecording = false
-                                error = ex.message
-                            }
-                        )
-                    } else {
-                        audioRecorder.start().fold(
-                            onSuccess = {
-                                isRecording = true
-                                error = null
-                            },
-                            onFailure = { ex -> error = ex.message }
-                        )
-                    }
-                }
-            ) {
-                Text(
-                    text = if (isRecording) {
-                        stringResource(R.string.stop_recording)
-                    } else {
-                        stringResource(R.string.start_recording)
-                    }
-                )
-            }
-        },
-        dismissButton = {
-            TextButton(
-                onClick = {
-                    audioRecorder.cancel()
-                    onDismissRequest()
-                }
-            ) {
-                Text(text = stringResource(R.string.cancel))
-            }
-        }
-    )
-}
-
-private class AudioRecorder(
-    private val context: Context,
-    private val maxDuration: Long?,
-    private val onMaxDurationReached: (Uri) -> Unit
-) {
-    private var recorder: MediaRecorder? = null
-    private var outputFile: File? = null
-    private var outputUri: Uri? = null
-    private var isRecording = false
-
-    fun start(): Result<Unit> = runCatching {
-        val timeStamp = Instant.now().toEpochMilli()
-        val file = File.createTempFile("AUDIO_$timeStamp", ".m4a", context.cacheDir).apply {
-            deleteOnExit()
-        }
-        val uri = AttachmentsFileProvider.getUriForFile(file, context)
-        outputFile = file
-        outputUri = uri
-
-        recorder = context.createMediaRecorder().apply {
-            setAudioSource(MediaRecorder.AudioSource.MIC)
-            setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
-            setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
-            setOutputFile(file.absolutePath)
-            maxDuration?.let { duration ->
-                if (duration > 0) {
-                    setMaxDuration(duration.toMillisecondsIntClamped())
-                }
-            }
-            setOnInfoListener { _, what, _ ->
-                if (what == MediaRecorder.MEDIA_RECORDER_INFO_MAX_DURATION_REACHED) {
-                    this@AudioRecorder.stop().onSuccess(onMaxDurationReached)
-                }
-            }
-            prepare()
-            start()
-        }
-        isRecording = true
-    }
-
-    fun stop(): Result<Uri> = runCatching {
-        check(isRecording) { "Audio recording has not started." }
-        val uri = checkNotNull(outputUri) { "Audio recording URI is unavailable." }
-        recorder?.stop()
-        releaseRecorder()
-        isRecording = false
-        uri
-    }.onFailure {
-        cancel()
-    }
-
-    fun cancel() {
-        if (isRecording) {
-            runCatching { recorder?.stop() }
-        }
-        releaseRecorder()
-        isRecording = false
-        outputFile?.delete()
-        outputFile = null
-        outputUri = null
-    }
-
-    private fun releaseRecorder() {
-        recorder?.reset()
-        recorder?.release()
-        recorder = null
-    }
-}
-
-private fun Context.hasRecordAudioPermission(): Boolean =
-    ContextCompat.checkSelfPermission(
-        this,
-        Manifest.permission.RECORD_AUDIO
-    ) == PackageManager.PERMISSION_GRANTED
-
-@Suppress("DEPRECATION")
-private fun Context.createMediaRecorder(): MediaRecorder =
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-        MediaRecorder(this)
-    } else {
-        MediaRecorder()
-    }
-
-private fun Long.toMillisecondsIntClamped(): Int = when {
-    this > Int.MAX_VALUE / 1_000L -> Int.MAX_VALUE
-    this < Int.MIN_VALUE / 1_000L -> Int.MIN_VALUE
-    else -> (this * 1_000L).toInt()
 }
 
 /**

@@ -144,7 +144,7 @@ internal sealed class DialogType {
      * Indicates an audio capture dialog.
      *
      * @param stateId The id of the [AttachmentElementState] that requested the dialog.
-     * @param maxDuration The maximum duration limit for the captured audio.
+     * @param maxDuration The maximum duration limit for the captured audio in seconds.
      */
     data class AudioCaptureDialog(
         val stateId: Int,
@@ -326,9 +326,12 @@ internal fun FeatureFormDialog(states: FormStateCollection) {
             AudioCapture(
                 maxDuration = maxDuration,
                 onDismissRequest = dialogRequester::dismissDialog
-            ) { uri ->
+            ) { file ->
                 scope.launch {
-                    state.addAttachmentFromUri(uri, context).onFailure {
+                    state.addAttachmentFromFile(
+                        file = file,
+                        source = AttachmentSource.Capture
+                    ).onFailure {
                         errorMessage = it.message ?: attachmentError
                     }
                     dialogRequester.dismissDialog()

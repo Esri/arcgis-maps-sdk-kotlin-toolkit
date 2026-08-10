@@ -16,7 +16,6 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.components.attachment
 
-import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
@@ -336,11 +335,11 @@ internal class AttachmentElementState(
     }
 
     /**
-     * Checks if the camera permissions are granted.
+     * Checks if the provided permission is granted.
      */
-    fun hasCameraPermissions(context: Context): Boolean = ContextCompat.checkSelfPermission(
+    fun hasPermission(context: Context, permission: String): Boolean = ContextCompat.checkSelfPermission(
         context,
-        Manifest.permission.CAMERA
+        permission
     ) == PackageManager.PERMISSION_GRANTED
 }
 
