@@ -1,5 +1,9 @@
 package com.arcgismaps.toolkit.ar.internal
 
+import android.graphics.ImageFormat
+import android.graphics.Rect
+import android.graphics.YuvImage
+import android.media.Image
 import com.arcgismaps.geometry.GeometryEngine
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.toolkit.ar.ArCoreAuthorizationException
@@ -12,6 +16,8 @@ import com.google.ar.core.Pose
 import com.google.ar.core.Session
 import com.google.ar.core.TrackingState
 import com.google.ar.core.exceptions.NotTrackingException
+import com.google.ar.core.exceptions.NotYetAvailableException
+import java.io.ByteArrayOutputStream
 
 /**
  * State that has been derived/calculated from a [Frame] such as the [projectedLocation] of
@@ -21,7 +27,8 @@ import com.google.ar.core.exceptions.NotTrackingException
 internal class FrameState(
     val frame: Frame,
     val session: Session,
-    private val calibrationState: CalibrationState) {
+    private val calibrationState: CalibrationState
+) {
 
     init {
         initialize()
@@ -37,6 +44,12 @@ internal class FrameState(
         private set
 
     lateinit var localPose: Pose
+        private set
+
+    /**
+     * The camera image bytes in JPG format.
+     */
+    lateinit var cameraImageBytes: ByteArray
         private set
 
     private fun initialize() {
@@ -78,6 +91,15 @@ internal class FrameState(
                 return@let
             }
         }
+
+        cameraImageBytes = try {
+            frame.acquireCameraImage().use {
+                it.toJpgBytes()
+            }
+        } catch (_: NotYetAvailableException) {
+            // Sometimes the camera image is not yet available, so we just return an empty byte array in that case.
+            ByteArray(0)
+        }
     }
 
     private fun checkForEarthStateErrors(earth: Earth) {
@@ -108,3 +130,89 @@ internal class FrameState(
         }
     }
 }
+
+private fun Image.toJpgBytes(jpegQuality: Int = 100): ByteArray {
+    require(format == ImageFormat.YUV_420_888) {
+        "Expected YUV_420_888, got format=${format}"
+    }
+
+    val nv21 = yuv420888ToNv21()
+    val yuvImage = YuvImage(nv21, ImageFormat.NV21, width, height, null)
+    return ByteArrayOutputStream().use { out ->
+        yuvImage.compressToJpeg(Rect(0, 0, width, height), jpegQuality, out)
+        out.toByteArray()
+    }
+}
+
+/**
+ * Converts android.media.Image in YUV_420_888 to NV21.
+ * Handles arbitrary rowStride/pixelStride from camera drivers.
+ */
+private fun Image.yuv420888ToNv21(): ByteArray {
+    require(format == ImageFormat.YUV_420_888) {
+        "Expected YUV_420_888, got format=$format"
+    }
+
+    val imageWidth = width
+    val imageHeight = height
+    val ySize = imageWidth * imageHeight
+    val uvSize = imageWidth * imageHeight / 2
+    val nv21 = ByteArray(ySize + uvSize)
+
+    val yPlane = planes[0]
+    val uPlane = planes[1]
+    val vPlane = planes[2]
+
+    val yBuffer = yPlane.buffer.duplicate()
+    val uBuffer = uPlane.buffer.duplicate()
+    val vBuffer = vPlane.buffer.duplicate()
+
+    val yRowStride = yPlane.rowStride
+    val yPixelStride = yPlane.pixelStride
+
+    val uRowStride = uPlane.rowStride
+    val uPixelStride = uPlane.pixelStride
+
+    val vRowStride = vPlane.rowStride
+    val vPixelStride = vPlane.pixelStride
+
+    var dstIndex = 0
+
+    // Copy Y plane
+    for (row in 0 until imageHeight) {
+        val rowStart = row * yRowStride
+        for (col in 0 until imageWidth) {
+            val index = rowStart + col * yPixelStride
+            require(index < yBuffer.limit()) {
+                "Y plane index out of bounds: index=$index limit=${yBuffer.limit()} row=$row col=$col rowStride=$yRowStride pixelStride=$yPixelStride"
+            }
+            nv21[dstIndex++] = yBuffer.get(index)
+        }
+    }
+
+    // Copy UV planes into NV21 layout: VU VU VU...
+    val uvWidth = imageWidth / 2
+    val uvHeight = imageHeight / 2
+
+    for (row in 0 until uvHeight) {
+        val uRowStart = row * uRowStride
+        val vRowStart = row * vRowStride
+        for (col in 0 until uvWidth) {
+            val uIndex = uRowStart + col * uPixelStride
+            val vIndex = vRowStart + col * vPixelStride
+
+            require(uIndex < uBuffer.limit()) {
+                "U plane index out of bounds: index=$uIndex limit=${uBuffer.limit()} row=$row col=$col rowStride=$uRowStride pixelStride=$uPixelStride"
+            }
+            require(vIndex < vBuffer.limit()) {
+                "V plane index out of bounds: index=$vIndex limit=${vBuffer.limit()} row=$row col=$col rowStride=$vRowStride pixelStride=$vPixelStride"
+            }
+
+            nv21[dstIndex++] = vBuffer.get(vIndex)
+            nv21[dstIndex++] = uBuffer.get(uIndex)
+        }
+    }
+
+    return nv21
+}
+
