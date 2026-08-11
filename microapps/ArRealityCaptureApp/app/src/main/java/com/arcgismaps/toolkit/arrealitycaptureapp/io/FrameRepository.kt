@@ -44,13 +44,15 @@ class FrameRepository(private val context: Context) {
         objectId: Int,
         cameraId: String,
         focalLength: Double,
-        pixelSize: Double
+        pixelSize: Double,
+        srs: String
     ) {
         val newRow = dataFrameOf(
             "ObjectID" to listOf(objectId),
             "CameraID" to listOf(cameraId),
             "FocalLength" to listOf(focalLength),
-            "PixelSize" to listOf(pixelSize)
+            "PixelSize" to listOf(pixelSize),
+            "SRS" to listOf(srs)
         ).cast<CamerasTable>()
         camerasTable = camerasTable.concat(newRow)
     }

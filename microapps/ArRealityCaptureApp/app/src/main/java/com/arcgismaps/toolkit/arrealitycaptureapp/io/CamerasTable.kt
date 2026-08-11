@@ -13,6 +13,7 @@ interface CamerasTable {
     val CameraID: String
     val FocalLength: Double
     val PixelSize: Double
+    val SRS: String
 }
 
 fun CamerasTable(): DataFrame<CamerasTable> = emptyDataFrame()

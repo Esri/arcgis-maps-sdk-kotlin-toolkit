@@ -18,6 +18,9 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.application
 import androidx.lifecycle.viewModelScope
 import com.arcgismaps.Color
+import com.arcgismaps.geometry.GeometryEngine
+import com.arcgismaps.geometry.Point
+import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.symbology.SceneSymbolAnchorPosition
 import com.arcgismaps.mapping.symbology.SimpleLineSymbol
 import com.arcgismaps.mapping.symbology.SimpleLineSymbolMarkerPlacement
@@ -33,6 +36,7 @@ import com.arcgismaps.toolkit.ar.WorldScaleSceneViewProxy
 import com.arcgismaps.toolkit.arrealitycaptureapp.io.CamerasTable_CAMERA_ID
 import com.arcgismaps.toolkit.arrealitycaptureapp.io.CamerasTable_OBJECT_ID
 import com.arcgismaps.toolkit.arrealitycaptureapp.io.FrameRepository
+import com.google.ar.core.GeospatialPose
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.ByteArrayOutputStream
@@ -42,8 +46,13 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 const val TAG = "RealityCaptureApp"
+const val WKID_WGS84 = 4326
+const val WKID_WGS84_VERTICAL = 115700
 
 class MainScreenViewModel(application: Application): AndroidViewModel(application) {
+    val sRWebMercator = SpatialReference.webMercator()
+    val sRWgs84WgsVertical = SpatialReference(WKID_WGS84, WKID_WGS84_VERTICAL)
+
     val frameRepository by lazy { FrameRepository(application) }
 
     val proxy = WorldScaleSceneViewProxy()
@@ -63,9 +72,9 @@ class MainScreenViewModel(application: Application): AndroidViewModel(applicatio
     private var currentFrameObjectId = 0
 
     // Todos
-    // - projected CS
     // - focal length x/y
     // - sensor pixel size x/y
+    // - image format -> jpg ok??
     fun captureOrientedImage() {
         viewModelScope.launch(Dispatchers.IO) {
             proxy.exportOrientedImage()?.let {
@@ -76,20 +85,23 @@ class MainScreenViewModel(application: Application): AndroidViewModel(applicatio
                         objectId = CamerasTable_OBJECT_ID,
                         cameraId = CamerasTable_CAMERA_ID,
                         focalLength = it.focalLength.toMicrons(application.pixelPitch(it.cameraId)), // in microns
-                        pixelSize = application.sensorSize(it.cameraId).toDouble() // in microns
+                        pixelSize = application.sensorSize(it.cameraId).toDouble(), // in microns
+                        srs = "${sRWebMercator.wkid};$WKID_WGS84_VERTICAL"
                     )
                 }
 
                 val imgFileName = "$currentFrameObjectId.jpg"
                 capturedImages[imgFileName] = it
 
+                val perspectivePointWebMercator = it.geospatialPose.toWebMercator()
+
                 // populate the frames table with the captured oriented image
                 frameRepository.appendFrame(
                     objectId = currentFrameObjectId,
                     raster = imgFileName,
                     cameraId = CamerasTable_CAMERA_ID,
-                    perspectiveX = it.geospatialPose.longitude, // TODO - project from geographic to projected, add SRS to camera table
-                    perspectiveY = it.geospatialPose.latitude, // TODO - project from geographic to projected
+                    perspectiveX = perspectivePointWebMercator.x,
+                    perspectiveY = perspectivePointWebMercator.y,
                     perspectiveZ = it.geospatialPose.altitude, /* orthometric height */
                     omega = it.cameraRotationAngles.omegaDeg,
                     phi = it.cameraRotationAngles.phiDeg,
@@ -100,6 +112,11 @@ class MainScreenViewModel(application: Application): AndroidViewModel(applicatio
                 graphicsOverlays.first().addFrustumGraphic(it)
             } ?: Log.d(TAG, "Failed to capture oriented image.")
         }
+    }
+
+    private fun GeospatialPose.toWebMercator(): Point {
+        val pointWgs84 = Point(this.longitude, this.latitude, this.altitude, sRWgs84WgsVertical)
+        return GeometryEngine.projectOrNull(pointWgs84, sRWebMercator) as Point
     }
 
     fun saveCaptureSession(displayContext: Context) {
