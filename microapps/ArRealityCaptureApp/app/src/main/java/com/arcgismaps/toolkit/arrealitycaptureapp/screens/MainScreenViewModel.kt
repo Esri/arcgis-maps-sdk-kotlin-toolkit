@@ -193,6 +193,10 @@ private fun Context.pixelPitch(cameraId: String): Double {
     return (pitchXUm + pitchYUm) / 2.0
 }
 
+/**
+ * Converts a focal length x and y components in pixels to microns using the pixel pitch.
+ * Returns the average of the two components.
+ */
 private fun FloatArray.toMicrons(pixelPitch: Double): Double {
     val fxUm = this[0] * pixelPitch
     val fyUm = this[1] * pixelPitch
