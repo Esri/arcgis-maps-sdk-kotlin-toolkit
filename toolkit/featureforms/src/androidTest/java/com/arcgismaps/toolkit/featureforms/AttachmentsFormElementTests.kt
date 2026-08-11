@@ -24,7 +24,6 @@ import android.graphics.Bitmap
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isDialog
@@ -44,6 +43,7 @@ import androidx.test.espresso.intent.Intents.intending
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasAction
 import androidx.test.espresso.intent.rule.IntentsRule
 import androidx.test.platform.app.InstrumentationRegistry
+import androidx.test.rule.GrantPermissionRule
 import com.arcgismaps.exceptions.FeatureFormValidationException
 import com.arcgismaps.mapping.featureforms.AttachmentsFormElement
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.AttachmentElementState
@@ -79,6 +79,11 @@ class AttachmentsFormElementTests : FeatureFormTestRunner(
 
     @get:Rule
     val intentsTestRule = IntentsRule()
+
+    @get:Rule
+    val permissionRule: GrantPermissionRule = GrantPermissionRule.grant(
+        android.Manifest.permission.RECORD_AUDIO
+    )
 
     /**
      * The test [Context].
@@ -609,10 +614,10 @@ class AttachmentsFormElementTests : FeatureFormTestRunner(
         // Assert all the appropriate options are displayed in the menu
         var menu = composeTestRule.onNode(isPopup())
         menu.assertIsDisplayed()
-        // Recording audio is not currently supported in the toolkit
         assertValidCaptureOptions(
             node = menu,
             visibleOptions = listOf(
+                context.getString(R.string.record_audio),
                 context.getString(R.string.choose_from_files)
             ),
             nonVisibleOptions = listOf(
@@ -638,10 +643,25 @@ class AttachmentsFormElementTests : FeatureFormTestRunner(
         // Assert that the add attachment button is displayed and enabled
         addAttachmentButton =
             attachmentsNode.onChildWithContentDescription(context.getString(R.string.add_attachment))
-        addAttachmentButton.assertIsDisplayed()
-        // Recording audio is not currently supported in the toolkit and hence the add option
-        // is disabled
-        addAttachmentButton.assertIsNotEnabled()
+        addAttachmentButton.assertIsDisplayed().performClick()
+
+        // Assert all the appropriate options are displayed in the menu
+        menu = composeTestRule.onNode(isPopup())
+        menu.assertIsDisplayed()
+        assertValidCaptureOptions(
+            node = menu,
+            visibleOptions = listOf(
+                context.getString(R.string.record_audio),
+            ),
+            nonVisibleOptions = listOf(
+                context.getString(R.string.take_video),
+                context.getString(R.string.choose_from_gallery),
+                context.getString(R.string.take_photo),
+                context.getString(R.string.choose_from_files)
+            )
+        )
+        // Dismiss the menu
+        Espresso.pressBack()
 
         // Find the "Media - Audio - Upload" attachments form element
         attachmentsFormElement = featureForm.elements.firstOrNull {
