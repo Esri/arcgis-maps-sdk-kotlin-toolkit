@@ -72,8 +72,6 @@ class MainScreenViewModel(application: Application): AndroidViewModel(applicatio
     private var currentFrameObjectId = 0
 
     // Todos
-    // - focal length x/y
-    // - sensor pixel size x/y
     // - image format -> jpg ok??
     fun captureOrientedImage() {
         viewModelScope.launch(Dispatchers.IO) {
@@ -155,8 +153,8 @@ private fun Context.sensorSize(cameraId: String): Float {
     val physicalSize: SizeF =
         chars.get(CameraCharacteristics.SENSOR_INFO_PHYSICAL_SIZE) ?: throw IllegalStateException("Camera characteristics not found for cameraId: $cameraId")
 
-    // TODO: x vs y ??
-    return physicalSize.width * 1000f // convert mm to microns
+    // return average of width and height
+    return ((physicalSize.width + physicalSize.height) / 2f) * 1000f // convert mm to microns
 }
 
 /**
@@ -191,16 +189,16 @@ private fun Context.pixelPitch(cameraId: String): Double {
     val pitchXUm = (physicalSize.width.toDouble() * 1000.0) / pixelWidth.toDouble()
     val pitchYUm = (physicalSize.height.toDouble() * 1000.0) / pixelHeight.toDouble()
 
-    // TODO pitchXUm vs pitchYUm ??
-    return pitchXUm
+    // return average
+    return (pitchXUm + pitchYUm) / 2.0
 }
 
 private fun FloatArray.toMicrons(pixelPitch: Double): Double {
     val fxUm = this[0] * pixelPitch
     val fyUm = this[1] * pixelPitch
 
-    // TODO: fxUm vs fyUm ??
-    return fxUm
+    // return average
+    return (fxUm + fyUm) / 2.0
 }
 
 private fun GraphicsOverlay.addFrustumGraphic(orientedImage: ArOrientedImage) {
