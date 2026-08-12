@@ -83,7 +83,7 @@ class MainScreenViewModel(application: Application): AndroidViewModel(applicatio
                         objectId = CamerasTable_OBJECT_ID,
                         cameraId = CamerasTable_CAMERA_ID,
                         focalLength = it.focalLength.toMicrons(application.pixelPitch(it.cameraId)), // in microns
-                        pixelSize = application.sensorSize(it.cameraId).toDouble(), // in microns
+                        pixelSize = application.pixelPitch(it.cameraId), //application.sensorSize(it.cameraId).toDouble(), // in microns
                         srs = "${sRWebMercator.wkid};$WKID_WGS84_VERTICAL"
                     )
                 }
@@ -174,6 +174,11 @@ private fun Context.pixelPitch(cameraId: String): Double {
     val activeRect: Rect? =
         chars.get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE)
 
+    val focalLengthMilli = chars.get(CameraCharacteristics.LENS_INFO_AVAILABLE_FOCAL_LENGTHS)?.firstOrNull() ?: throw IllegalStateException("Camera characteristics do not contain available focal lengths for cameraId: $cameraId")
+    Log.d("ABC", "Camera $cameraId: focal length in mm = $focalLengthMilli")
+    val lensIntrinsicCalibration = chars.get(CameraCharacteristics.LENS_INTRINSIC_CALIBRATION) ?: throw IllegalStateException("Camera characteristics do not contain lens intrinsic calibration for cameraId: $cameraId")
+    Log.d("ABC", "Camera $cameraId: lens intrinsic calibration = ${lensIntrinsicCalibration.joinToString(",")}")
+
     val pixelWidth: Int
     val pixelHeight: Int
     if (pixelArraySize != null) {
@@ -200,6 +205,8 @@ private fun Context.pixelPitch(cameraId: String): Double {
 private fun FloatArray.toMicrons(pixelPitch: Double): Double {
     val fxUm = this[0] * pixelPitch
     val fyUm = this[1] * pixelPitch
+
+    Log.d("ABC", "Focal length in pixels: fx=${this[0]}, fy=${this[1]}, pixel pitch: $pixelPitch, fxUm=$fxUm, fyUm=$fyUm")
 
     // return average
     return (fxUm + fyUm) / 2.0
