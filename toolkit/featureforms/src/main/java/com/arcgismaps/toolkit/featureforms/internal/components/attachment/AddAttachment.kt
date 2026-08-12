@@ -28,6 +28,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.AudioFile
+import androidx.compose.material.icons.outlined.Mic
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Folder
 import androidx.compose.material.icons.rounded.Photo
@@ -81,6 +83,7 @@ internal fun AddAttachment(
     stateId: Int,
     inputs: List<AttachmentsFormInput>,
     hasCameraPermission: Boolean,
+    hasMicrophonePermission: Boolean,
     enabled: Boolean
 ) {
     var showMenu by remember { mutableStateOf(false) }
@@ -111,8 +114,26 @@ internal fun AddAttachment(
         ) {
             captureOptions.forEach { option ->
                 when (option) {
-                    is CaptureOptions.CaptureAudio -> {
-                        // not supported yet
+                    is CaptureOptions.CaptureAudio if hasMicrophonePermission -> {
+                        DropdownMenuItem(
+                            text = { Text(text = stringResource(R.string.record_audio)) },
+                            trailingIcon = {
+                                Icon(
+                                    imageVector = Icons.Outlined.Mic,
+                                    contentDescription = stringResource(R.string.record_audio),
+                                    modifier = Modifier.alpha(0.4f)
+                                )
+                            },
+                            onClick = {
+                                dialogRequester.requestDialog(
+                                    DialogType.AudioCaptureDialog(
+                                        stateId = stateId,
+                                        maxDuration = option.maxDuration
+                                    )
+                                )
+                                showMenu = false
+                            }
+                        )
                     }
 
                     is CaptureOptions.CaptureImage if hasCameraPermission -> {
@@ -402,7 +423,7 @@ private fun List<AttachmentsFormInput>.getCaptureOptions(): List<CaptureOptions>
         when (input) {
             is AudioFormInput -> {
                 when (input.inputMethod) {
-                    AttachmentInputMethod.Capture -> emptyList() // not supported yet
+                    AttachmentInputMethod.Capture -> listOf(CaptureOptions.CaptureAudio(input.maxDuration))
                     AttachmentInputMethod.Upload -> listOf(
                         CaptureOptions.File(allowedMimeTypes = input.getMimeTypes())
                     )

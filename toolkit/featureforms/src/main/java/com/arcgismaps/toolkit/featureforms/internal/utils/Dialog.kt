@@ -52,6 +52,7 @@ import com.arcgismaps.mapping.featureforms.VideoFormInput
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.AttachmentElementState
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.AttachmentErrorDialog
+import com.arcgismaps.toolkit.featureforms.internal.components.attachment.AudioCapture
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.AttachmentSource
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.DeleteAttachmentDialog
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.FilePicker
@@ -137,6 +138,17 @@ internal sealed class DialogType {
      */
     data class ImageCaptureDialog(
         val stateId: Int
+    ) : DialogType()
+
+    /**
+     * Indicates an audio capture dialog.
+     *
+     * @param stateId The id of the [AttachmentElementState] that requested the dialog.
+     * @param maxDuration The maximum duration limit for the captured audio in seconds.
+     */
+    data class AudioCaptureDialog(
+        val stateId: Int,
+        val maxDuration: Long?
     ) : DialogType()
 
     /**
@@ -294,7 +306,31 @@ internal fun FeatureFormDialog(states: FormStateCollection) {
                 scope.launch {
                     state.addAttachmentFromFile(
                         file = file,
-                        source = AttachmentSource.Camera
+                        source = AttachmentSource.Capture
+                    ).onFailure {
+                        errorMessage = it.message ?: attachmentError
+                    }
+                    dialogRequester.dismissDialog()
+                }
+            }
+        }
+
+        is DialogType.AudioCaptureDialog -> {
+            val stateId = (dialogType as DialogType.AudioCaptureDialog).stateId
+            val maxDuration = (dialogType as DialogType.AudioCaptureDialog).maxDuration
+            val state = states[stateId] as? AttachmentElementState
+            if (state == null) {
+                dialogRequester.dismissDialog()
+                return
+            }
+            AudioCapture(
+                maxDuration = maxDuration,
+                onDismissRequest = dialogRequester::dismissDialog
+            ) { file ->
+                scope.launch {
+                    state.addAttachmentFromFile(
+                        file = file,
+                        source = AttachmentSource.Capture
                     ).onFailure {
                         errorMessage = it.message ?: attachmentError
                     }
@@ -318,7 +354,7 @@ internal fun FeatureFormDialog(states: FormStateCollection) {
                 scope.launch {
                     state.addAttachmentFromFile(
                         file = file,
-                        source = AttachmentSource.Camera
+                        source = AttachmentSource.Capture
                     ).onFailure {
                         errorMessage = it.message ?: attachmentError
                     }
