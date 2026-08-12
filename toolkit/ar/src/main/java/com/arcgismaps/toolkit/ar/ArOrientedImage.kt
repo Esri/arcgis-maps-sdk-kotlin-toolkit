@@ -111,11 +111,22 @@ private fun mul(a: Mat3, b: Mat3): Mat3 {
 
 private fun radToDeg(x: Double) = x * 180.0 / Math.PI
 
+/**
+ * Converts ARCore geospatial pose quaternion to OPK angles in degrees.
+ *
+ * @param eusQ The east-up-south quaternion from ARCore geospatial pose. Represents the camera/device
+ * orientation in the local geospatial EUS frame, where `+X = East`, `+Y = Up`, and `+Z = South`.
+ * The array contains the quaternion components `[x, y, z, w]`.
+ *
+ * @return An Opk object containing omega, phi, and kappa angles in degrees.
+ */
 private fun arcoreGeospatialToOpk(eusQ: FloatArray): Opk {
+    // convert quaternion to rotation matrix
     val rCamToEus = quatToMat3(
         eusQ[0].toDouble(), eusQ[1].toDouble(), eusQ[2].toDouble(), eusQ[3].toDouble()
     )
 
+    // EUS (ast-Up-South frame) to ENU (East-North-Up frame) rotation matrix
     val rEusToEnu = Mat3(arrayOf(
         doubleArrayOf(1.0, 0.0, 0.0),
         doubleArrayOf(0.0, 0.0,-1.0),
