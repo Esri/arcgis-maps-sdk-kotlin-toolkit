@@ -166,10 +166,12 @@ private fun Context.pixelPitch(cameraId: String): Double {
 
     val physicalSize: SizeF =
         chars.get(CameraCharacteristics.SENSOR_INFO_PHYSICAL_SIZE) ?: throw IllegalStateException("Camera characteristics not found for cameraId: $cameraId")
+    Log.d("ABC", "Camera $cameraId: physical size in mm = ${physicalSize.width} x ${physicalSize.height}")
 
     // Prefer full pixel array; fallback to active array.
     val pixelArraySize: Size? =
         chars.get(CameraCharacteristics.SENSOR_INFO_PIXEL_ARRAY_SIZE)
+    Log.d("ABC", "Camera $cameraId: pixel array size = ${pixelArraySize?.width} x ${pixelArraySize?.height}")
 
     val activeRect: Rect? =
         chars.get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE)
