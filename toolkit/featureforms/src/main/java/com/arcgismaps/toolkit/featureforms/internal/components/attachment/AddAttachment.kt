@@ -79,6 +79,7 @@ import java.time.Instant
  */
 @Composable
 internal fun AddAttachment(
+    onAudioCaptureRequest: (Long?) -> Unit,
     onFocused: () -> Unit,
     stateId: Int,
     inputs: List<AttachmentsFormInput>,
@@ -125,12 +126,13 @@ internal fun AddAttachment(
                                 )
                             },
                             onClick = {
-                                dialogRequester.requestDialog(
-                                    DialogType.AudioCaptureDialog(
-                                        stateId = stateId,
-                                        maxDuration = option.maxDuration
-                                    )
-                                )
+                                onAudioCaptureRequest(option.maxDuration)
+//                                dialogRequester.requestDialog(
+//                                    DialogType.AudioCaptureDialog(
+//                                        stateId = stateId,
+//                                        maxDuration = option.maxDuration
+//                                    )
+//                                )
                                 showMenu = false
                             }
                         )

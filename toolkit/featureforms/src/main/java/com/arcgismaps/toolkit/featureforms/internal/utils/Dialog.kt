@@ -323,20 +323,20 @@ internal fun FeatureFormDialog(states: FormStateCollection) {
                 dialogRequester.dismissDialog()
                 return
             }
-            AudioCapture(
-                maxDuration = maxDuration,
-                onDismissRequest = dialogRequester::dismissDialog
-            ) { file ->
-                scope.launch {
-                    state.addAttachmentFromFile(
-                        file = file,
-                        source = AttachmentSource.Capture
-                    ).onFailure {
-                        errorMessage = it.message ?: attachmentError
-                    }
-                    dialogRequester.dismissDialog()
-                }
-            }
+//            AudioCapture(
+//                maxDuration = maxDuration,
+//                onDismissRequest = dialogRequester::dismissDialog
+//            ) { file ->
+//                scope.launch {
+//                    state.addAttachmentFromFile(
+//                        file = file,
+//                        source = AttachmentSource.Capture
+//                    ).onFailure {
+//                        errorMessage = it.message ?: attachmentError
+//                    }
+//                    dialogRequester.dismissDialog()
+//                }
+//            }
         }
 
         is DialogType.VideoCaptureDialog -> {

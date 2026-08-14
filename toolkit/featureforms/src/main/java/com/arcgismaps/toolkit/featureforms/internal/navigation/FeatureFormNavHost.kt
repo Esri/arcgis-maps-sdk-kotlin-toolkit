@@ -61,7 +61,10 @@ internal fun FeatureFormNavHost(
             onBarcodeButtonClick = onBarcodeButtonClick,
             onUtilityFilterSelected = navController::navigateToUNAssociationsFilterResult,
             onNavigationEvent = onNavigationEvent,
-            validationErrorVisibility = validationErrorVisibility
+            validationErrorVisibility = validationErrorVisibility,
+            onAudioCaptureRequest = { backStackEntry, maxDuration, stateId ->
+                navController.navigateToAudioCapture(backStackEntry, maxDuration, stateId)
+            }
         )
 
         associationsFilterResultDestination(
@@ -95,6 +98,11 @@ internal fun FeatureFormNavHost(
             },
             onNavigationEvent = onNavigationEvent,
             state = state,
+        )
+
+        audioCaptureDestination(
+            onDismissRequest = state::popBackStack,
+            state = state
         )
 
         navigation<NavigationRoute.AddUNAssociationFromSource>(

@@ -29,17 +29,21 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.navigation.FloatingWindow
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.ComposeNavigator
 import androidx.navigation.compose.DialogNavigator
@@ -54,9 +58,9 @@ import com.arcgismaps.mapping.featureforms.FormElement
 import com.arcgismaps.mapping.featureforms.FormInput
 import com.arcgismaps.mapping.featureforms.GroupFormElement
 import com.arcgismaps.mapping.featureforms.TextFormElement
-import com.arcgismaps.mapping.featureforms.UtilityAssociationsFormElement
 import com.arcgismaps.mapping.featureforms.UtilityAssociationFeatureCandidate
 import com.arcgismaps.mapping.featureforms.UtilityAssociationFeatureSource
+import com.arcgismaps.mapping.featureforms.UtilityAssociationsFormElement
 import com.arcgismaps.toolkit.featureforms.internal.components.text.TextFormElement
 import com.arcgismaps.toolkit.featureforms.internal.navigation.FeatureFormNavHost
 import com.arcgismaps.toolkit.featureforms.internal.screens.ContentAwareTopBar
@@ -414,15 +418,39 @@ public fun FeatureForm(
     }
     // Get the current back stack entry as state
     val backStackEntry by navController.currentBackStackEntryAsState()
+    // Track if the content has a back stack entry.
+    var contentHasBackStack by rememberSaveable {
+        mutableStateOf(false)
+    }
     // Get the form data for the active entry (destination) in the back stack
     val formData = remember(backStackEntry) { state.getActiveFormStateData() }
     FeatureFormLayout(
         topBar = {
+            val isDialogDestination = backStackEntry?.destination is FloatingWindow
+            // Get the appropriate back stack entry based on whether the current destination is a
+            // dialog or not. Dialog destinations should not be considered for the top bar content,
+            // so we use the previous back stack entry instead.
+            val contentEntry = if (isDialogDestination) {
+                navController.previousBackStackEntry
+            } else {
+                backStackEntry
+            }
             // Track if there is a back stack entry
-            val hasBackStack = remember(backStackEntry) {
+            val hasBackStack = if (isDialogDestination) {
+                contentHasBackStack
+            } else {
                 navController.previousBackStackEntry != null
             }
-            backStackEntry?.let { entry ->
+
+            SideEffect {
+                // update the retained value only for regular content destinations.
+                // A dialog's own previous entry must not alter it.
+                if (!isDialogDestination) {
+                    contentHasBackStack = hasBackStack
+                }
+            }
+
+            contentEntry?.let { entry ->
                 ContentAwareTopBar(
                     backStackEntry = entry,
                     state = state,
