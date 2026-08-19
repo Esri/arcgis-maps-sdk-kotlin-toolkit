@@ -16,7 +16,6 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.navigation
 
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavBackStackEntry
@@ -30,9 +29,6 @@ import com.arcgismaps.toolkit.featureforms.internal.components.attachment.Attach
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.AudioCapture
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.AudioCaptureViewModel
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.addAttachmentFromFile
-import com.arcgismaps.toolkit.featureforms.internal.utils.DialogType
-import com.arcgismaps.toolkit.featureforms.internal.utils.LocalDialogRequester
-import kotlinx.coroutines.launch
 
 internal fun NavGraphBuilder.audioCaptureDestination(
     onDismissRequest: (NavBackStackEntry) -> Unit,
@@ -44,7 +40,6 @@ internal fun NavGraphBuilder.audioCaptureDestination(
             dismissOnClickOutside = false
         )
     ) { backStackEntry ->
-        val scope = rememberCoroutineScope()
         val route = backStackEntry.toRoute<NavigationRoute.AudioCapture>()
         val formData = state.getActiveFormStateData()
         val states = formData.stateCollection
@@ -52,7 +47,7 @@ internal fun NavGraphBuilder.audioCaptureDestination(
         if (attachmentElementState != null) {
             val viewModel = viewModel<AudioCaptureViewModel>(
                 factory = AudioCaptureViewModel.Factory(
-                    maxDuration = route.maxDuration ?: Long.MAX_VALUE,
+                    maxDuration = route.maxDuration,
                     onAudioCaptured = { file ->
                         attachmentElementState.addAttachmentFromFile(
                             file = file,

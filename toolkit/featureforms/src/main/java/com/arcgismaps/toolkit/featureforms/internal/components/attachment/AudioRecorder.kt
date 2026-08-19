@@ -40,7 +40,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -57,9 +56,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arcgismaps.toolkit.featureforms.R
 
 /**
- * Displays an in-app audio recorder. When audio is captured, the [onAudioCaptured] callback is
- * invoked with the URI of the captured audio. In case of a dismissal or if no audio is captured,
- * the [onDismissRequest] callback is invoked.
+ * Displays an in-app audio recorder.
  *
  * @param viewModel The [AudioCaptureViewModel] that manages the state and logic for audio recording.
  * @param onDismissRequest A request to dismiss the audio recorder.
@@ -77,12 +74,11 @@ internal fun AudioCapture(
 
     LaunchedEffect(Unit) {
         viewModel.initialize(context)
-        viewModel.setOnAudioCaptureCompleteAction(onDismiss)
     }
 
-    DisposableEffect(Unit) {
-        onDispose {
-            viewModel.setOnAudioCaptureCompleteAction(null)
+    LaunchedEffect(state) {
+        if (state is AudioCaptureState.Stopped) {
+            onDismiss()
         }
     }
 
@@ -117,10 +113,7 @@ internal fun AudioCapture(
                 is AudioCaptureState.Ready -> {
                     ReadyToRecord(
                         onStartRecording = viewModel::startRecording,
-                        onCancel = {
-                            viewModel.cancelRecording()
-                            onDismiss()
-                        }
+                        onCancel = onDismiss
                     )
                 }
 
@@ -131,10 +124,7 @@ internal fun AudioCapture(
                 is AudioCaptureState.Recording -> {
                     Recording(
                         onStopRecording = viewModel::stopRecording,
-                        onCancel = {
-                            viewModel.cancelRecording()
-                            onDismiss()
-                        },
+                        onCancel = viewModel::cancelRecording,
                         elapsedSecondsProvider = { viewModel.elapsedSeconds },
                         maxDuration = viewModel.maxDuration,
                     )
@@ -166,7 +156,6 @@ private fun ReadyToRecord(
         }
         TextButton(
             onClick = onStartRecording,
-            //modifier = Modifier.align(Alignment.CenterHorizontally)
         ) {
             Icon(
                 imageVector = Icons.Filled.FiberManualRecord,
@@ -224,7 +213,7 @@ private fun Error(
 @Composable
 private fun TimerTextProvider(maxDuration: Long?, textProvider: () -> Long) {
     val locale = LocalLocale.current.platformLocale
-    val maxDurationText = remember(maxDuration) {
+    val maxDurationText = remember(maxDuration, locale) {
         maxDuration
             ?.takeIf { it > 0 }
             ?.let {
