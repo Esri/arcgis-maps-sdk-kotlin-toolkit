@@ -28,7 +28,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.AudioFile
 import androidx.compose.material.icons.outlined.Mic
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Folder
@@ -127,12 +126,6 @@ internal fun AddAttachment(
                             },
                             onClick = {
                                 onAudioCaptureRequest(option.maxDuration)
-//                                dialogRequester.requestDialog(
-//                                    DialogType.AudioCaptureDialog(
-//                                        stateId = stateId,
-//                                        maxDuration = option.maxDuration
-//                                    )
-//                                )
                                 showMenu = false
                             }
                         )
