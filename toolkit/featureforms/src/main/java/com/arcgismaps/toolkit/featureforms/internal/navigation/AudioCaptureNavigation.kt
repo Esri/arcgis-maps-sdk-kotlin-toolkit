@@ -63,11 +63,9 @@ internal fun NavGraphBuilder.audioCaptureDestination(
             )
             AudioCapture(
                 viewModel = viewModel,
-                maxDuration = null,
                 onDismissRequest = {
                     onDismissRequest(backStackEntry)
-                },
-                onAudioCaptured = {}
+                }
             )
         }
     }

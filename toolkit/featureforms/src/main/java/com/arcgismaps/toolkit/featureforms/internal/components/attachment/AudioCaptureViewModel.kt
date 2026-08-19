@@ -19,10 +19,8 @@ package com.arcgismaps.toolkit.featureforms.internal.components.attachment
 import android.content.Context
 import android.media.MediaRecorder
 import android.os.Build
-import android.util.Log
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -30,16 +28,80 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.arcgismaps.toolkit.featureforms.internal.utils.AttachmentsFileProvider
 import com.arcgismaps.toolkit.featureforms.internal.utils.FileUriReference
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.time.Instant
 
+/**
+ * Represents the state of the audio capture process.
+ */
+internal sealed class AudioCaptureState {
+
+    /**
+     * Indicates that the audio capture is not ready to start recording. This state represents the
+     * initial state before the audio capture is initialized and prepared for recording.
+     */
+    object NotReady : AudioCaptureState()
+
+    /**
+     * Indicates that the audio capture is ready to start recording.
+     */
+    object Ready : AudioCaptureState()
+
+    /**
+     * Indicates that the audio capture is currently recording audio.
+     *
+     * See [AudioCaptureViewModel.elapsedSeconds] for tracking the duration of the recording.
+     */
+    object Recording : AudioCaptureState()
+
+    /**
+     * Indicates that the audio capture is currently saving the recorded audio to a file.
+     */
+    object Saving : AudioCaptureState()
+
+    /**
+     * Indicates that the audio capture has stopped recording and is no longer active. This state
+     * is the final state and the audio capture cannot be reused for another recording session.
+     */
+    object Stopped : AudioCaptureState()
+
+    /**
+     * Indicates that an error occurred during the audio capture process. The [message] provides
+     * details about the error that occurred.
+     *
+     * @param message A string describing the error that occurred during audio capture.
+     */
+    data class Error(val message: String) : AudioCaptureState()
+}
+
+/**
+ * A viewmodel that manages a single audio recording session. [initialize] must be called before
+ * starting the recording. This only supports a single recording session and hence cannot be reused
+ * for multiple recordings. Create a new instance of this viewmodel for each recording session.
+ *
+ * [startRecording] starts the recording and [stopRecording] stops the recording. [onAudioCaptured]
+ * is called when the recording is stopped and the audio file is successfully captured. This can be
+ * used to process the captured audio file, such as adding it to an attachment form element. The
+ * [maxDuration] parameter can be used to specify the maximum duration of the recording in milliseconds.
+ *
+ * [setOnAudioCaptureCompleteAction] can be used to set a callback that is invoked when the audio
+ * capture is complete and the processing of the captured audio file is done. For ex, this can be
+ * used to dismiss the audio capture dialog after the audio is captured and processed.
+ *
+ * @param maxDuration The maximum duration of the recording in milliseconds. If null, there is no limit.
+ * @param onAudioCaptured A suspend function that is called when the audio is captured. It receives
+ * the captured audio file and returns a Result indicating success or failure.
+ */
 internal class AudioCaptureViewModel(
     val maxDuration: Long?,
     private val onAudioCaptured: suspend (File) -> Result<Unit>
@@ -49,31 +111,41 @@ internal class AudioCaptureViewModel(
      * The [MediaRecorder] instance used for audio recording. It is initialized in the [initialize]
      * method and released in the [onCleared] method.
      */
-    private lateinit var recorder: MediaRecorder
+    private var recorder: MediaRecorder? = null
 
     /**
      * The [FileUriReference] instance that holds the reference to the file where the audio recording
      * will be saved. It is expected to be initialized before starting the recording.
      */
-    private lateinit var fileUriReference: FileUriReference
+    private var fileUriReference: FileUriReference? = null
 
     /**
-     * A flag indicating whether the audio recording is currently in progress.
+     * A [Job] that represents the coroutine responsible for tracking the elapsed time of the audio
+     * recording.
      */
-    private var _isRecording = mutableStateOf(false)
-
     private var timerJob: Job? = null
-
-    /**
-     * Backing state for [elapsedSeconds].
-     */
-    private var _elapsedSeconds = mutableLongStateOf(0L)
 
     /**
      * A callback function that is invoked when the audio capture is complete and the [onAudioCaptured]
      * callback has been executed.
      */
     private var onAudioCaptureCompleteAction: (() -> Unit)? = null
+
+    /**
+     * A [Mutex] used to synchronize access to the audio recording process.
+     */
+    private val mutex = Mutex()
+
+    /**
+     * A flag indicating whether the audio recorder has been initialized. This is used to ensure that
+     * the recorder is only initialized once and prevents multiple initializations.
+     */
+    private var isInitialized: Boolean = false
+
+    /**
+     * Backing state for [elapsedSeconds].
+     */
+    private var _elapsedSeconds = mutableLongStateOf(0L)
 
     /**
      * The elapsed time in seconds since the start of the audio recording. This value is updated
@@ -83,19 +155,18 @@ internal class AudioCaptureViewModel(
     val elapsedSeconds: Long
         get() = _elapsedSeconds.longValue
 
-    init {
-        Log.e("TAG", "AudioCaptureViewModel:init: ")
-        viewModelScope.launch {
-            snapshotFlow {
-                _isRecording.value
-            }.collectLatest {
-                if (it) {
-                    _elapsedSeconds.longValue = 0
-                    startRecordingTimer()
-                }
-            }
-        }
-    }
+    /**
+     * Backing property for [state].
+     */
+    private var _state = mutableStateOf<AudioCaptureState>(AudioCaptureState.NotReady)
+
+    /**
+     * The current state of the audio capture process. This state can be used to determine the
+     * readiness of the audio capture, whether it is recording, saving, stopped, or if an error has
+     * occurred. The state is updated based on the actions performed in the view model.
+     */
+    val state: AudioCaptureState
+        get() = _state.value
 
     /**
      * Initializes the view model and prepares it for audio recording. This method should be called
@@ -103,35 +174,49 @@ internal class AudioCaptureViewModel(
      *
      * @param context The [Context] required for the initialization.
      */
-    fun initialize(context: Context) {
-        // Return early if the recorder is already initialized
-        if (::recorder.isInitialized) return
-        viewModelScope.launch(Dispatchers.IO) {
-            val timeStamp = Instant.now().toEpochMilli()
-            fileUriReference = AttachmentsFileProvider.createTempFileWithUri(
-                "AUDIO_$timeStamp",
-                ".m4a",
-                context
-            )
-            recorder = context.createMediaRecorder().apply {
-                setAudioSource(MediaRecorder.AudioSource.MIC)
-                setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
-                setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
-                setOutputFile(fileUriReference.file.absolutePath)
-                maxDuration?.let { duration ->
-                    if (duration > 0) {
-                        // The max duration is set to 1 second less than the specified maxDuration
-                        // to ensure that the recording stops just before reaching the limit.
-                        val dur = duration.minus(1).toMillisecondsIntClamped()
-                        setMaxDuration(dur)
+    fun initialize(context: Context) = viewModelScope.launch {
+        // Ensure init is thread safe
+        mutex.withLock {
+            // Return early if the recorder is already initialized
+            if (isInitialized) return@launch
+            withContext(Dispatchers.IO) {
+                try {
+                    val timeStamp = Instant.now().toEpochMilli()
+                    fileUriReference = AttachmentsFileProvider.createTempFileWithUri(
+                        "AUDIO_$timeStamp",
+                        ".m4a",
+                        context
+                    )
+                    recorder = context.createMediaRecorder().apply {
+                        setAudioSource(MediaRecorder.AudioSource.MIC)
+                        setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
+                        setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
+                        setOutputFile(fileUriReference!!.file.absolutePath)
+                        maxDuration?.let { duration ->
+                            if (duration > 0) {
+                                // The max duration is set to 1 second less than the specified maxDuration
+                                // to ensure that the recording stops just before reaching the limit.
+                                val dur = duration.minus(1).toMillisecondsIntClamped()
+                                setMaxDuration(dur)
+                            }
+                        }
+                        setOnInfoListener { _, what, _ ->
+                            if (what == MediaRecorder.MEDIA_RECORDER_INFO_MAX_DURATION_REACHED) {
+                                stopRecording()
+                            }
+                        }
+                        prepare()
                     }
+                    // Update the state to Ready after successful initialization
+                    isInitialized = true
+                    _state.value = AudioCaptureState.Ready
+                } catch (e: Exception) {
+                    _state.value = AudioCaptureState.Error(
+                        message = "Failed to initialize audio recorder: ${e.message}"
+                    )
+                    cleanup()
+                    if (e is CancellationException) throw e
                 }
-                setOnInfoListener { _, what, _ ->
-                    if (what == MediaRecorder.MEDIA_RECORDER_INFO_MAX_DURATION_REACHED) {
-                        stopRecording()
-                    }
-                }
-                prepare()
             }
         }
     }
@@ -141,17 +226,20 @@ internal class AudioCaptureViewModel(
      * recording. This method should be called after [initialize].
      */
     fun startRecording(): Result<Unit> = runCatching {
-        require(::recorder.isInitialized) {
+        require(isInitialized) {
             "Recorder is not initialized. Call initialize() first."
         }
         try {
-            recorder.start()
-        } catch (e: IllegalStateException) {
+            recorder!!.start()
+            startRecordingTimer()
+            _state.value = AudioCaptureState.Recording
+        } catch (e: Exception) {
+            _state.value = AudioCaptureState.Error(
+                message = "Failed to start audio recording: ${e.message}"
+            )
             cleanup()
             throw e
         }
-
-        _isRecording.value = true
     }
 
     /**
@@ -159,18 +247,23 @@ internal class AudioCaptureViewModel(
      * is successfully captured, the resulting file is added to the AttachmentsFormElement.
      */
     fun stopRecording(): Result<Unit> = runCatching {
-        require(::recorder.isInitialized) {
+        require(isInitialized) {
             "Recorder is not initialized. Call initialize() first."
         }
         try {
-            recorder.stop()
-            _isRecording.value = false
+            recorder!!.stop()
+            timerJob?.cancel()
             viewModelScope.launch(start = CoroutineStart.UNDISPATCHED) {
-                onAudioCaptured(fileUriReference.file).onSuccess {
+                _state.value = AudioCaptureState.Saving
+                onAudioCaptured(fileUriReference!!.file).onSuccess {
                     onAudioCaptureCompleteAction?.invoke()
+                    _state.value = AudioCaptureState.Stopped
                 }
             }
-        } catch (e: IllegalStateException) {
+        } catch (e: Exception) {
+            _state.value = AudioCaptureState.Error(
+                message = "Failed to stop audio recording: ${e.message}"
+            )
             cleanup()
             throw e
         }
@@ -182,34 +275,42 @@ internal class AudioCaptureViewModel(
      */
     fun cancelRecording() {
         try {
-            if (::recorder.isInitialized) {
-                recorder.stop()
-                _isRecording.value = false
+            if (recorder != null) {
+                recorder!!.stop()
             }
-        } catch (e: IllegalStateException) {
-            Log.e("AudioCaptureViewModel", "Error stopping recorder: ${e.message}")
+            _state.value = AudioCaptureState.Stopped
+        } catch (e: Exception) {
+            _state.value = AudioCaptureState.Error(
+                message = "Failed to cancel audio recording: ${e.message}"
+            )
         } finally {
             cleanup()
         }
     }
 
+    /**
+     * Sets a callback action that will be invoked when the audio capture is complete and the
+     * [onAudioCaptured] callback has been executed.
+     */
     fun setOnAudioCaptureCompleteAction(action: (() -> Unit)?) {
         onAudioCaptureCompleteAction = action
     }
 
     override fun onCleared() {
-        Log.e("TAG", "AudioCaptureViewModel::onCleared")
-        super.onCleared()
         cleanup()
+        super.onCleared()
     }
 
     private fun cleanup() {
         timerJob?.cancel()
-        if (::recorder.isInitialized) {
-            recorder.release()
+        timerJob = null
+        if (recorder != null) {
+            recorder!!.release()
+            recorder = null
         }
-        if (::fileUriReference.isInitialized) {
-            fileUriReference.file.delete()
+        if (fileUriReference != null) {
+            fileUriReference!!.file.delete()
+            fileUriReference = null
         }
     }
 
@@ -220,7 +321,7 @@ internal class AudioCaptureViewModel(
 
         timerJob = viewModelScope.launch {
             while (isActive) {
-                delay(1000L)
+                delay(100L)
                 _elapsedSeconds.longValue = (System.currentTimeMillis() - startTime) / 1000L
             }
         }

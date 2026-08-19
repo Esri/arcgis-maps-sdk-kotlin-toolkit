@@ -17,20 +17,24 @@
 package com.arcgismaps.toolkit.featureforms.internal.components.attachment
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FiberManualRecord
+import androidx.compose.material.icons.filled.Stop
+import androidx.compose.material.icons.outlined.Error
 import androidx.compose.material.icons.outlined.GraphicEq
 import androidx.compose.material3.AlertDialogDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -39,11 +43,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -54,7 +55,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arcgismaps.toolkit.featureforms.R
-import kotlinx.coroutines.launch
 
 /**
  * Displays an in-app audio recorder. When audio is captured, the [onAudioCaptured] callback is
@@ -72,10 +72,8 @@ internal fun AudioCapture(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
     val onDismiss by rememberUpdatedState(onDismissRequest)
-    var isRecording by remember { mutableStateOf(false) }
-    var error by remember { mutableStateOf<String?>(null) }
+    val state = viewModel.state
 
     LaunchedEffect(Unit) {
         viewModel.initialize(context)
@@ -102,56 +100,124 @@ internal fun AudioCapture(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Icon(
-                imageVector = Icons.Outlined.GraphicEq,
-                contentDescription = null
+                imageVector = if (state is AudioCaptureState.Error) {
+                    Icons.Outlined.Error
+                } else {
+                    Icons.Outlined.GraphicEq
+                },
+                contentDescription = null,
+                tint = if (state is AudioCaptureState.Error) {
+                    MaterialTheme.colorScheme.error
+                } else {
+                    LocalContentColor.current
+                },
             )
-            Text(
-                text = stringResource(R.string.record_audio),
-                style = MaterialTheme.typography.headlineSmall
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-            Box(
-                //modifier = Modifier.fillMaxWidth(),
-                contentAlignment = Alignment.Center
-            ) {
-                when {
-                    error != null -> Text(text = error!!)
-                    isRecording -> TimerTextProvider(viewModel.maxDuration) { viewModel.elapsedSeconds }
-                    else -> {
-                        Text(text = stringResource(R.string.ready_to_record_audio))
-                    }
-                }
-            }
-            Row() {
-                TextButton(
-                    onClick = {
-                        viewModel.cancelRecording()
-                        onDismissRequest()
-                    }
-                ) {
-                    Text(text = stringResource(R.string.cancel))
-                }
-                TextButton(
-                    onClick = {
-                        if (isRecording) {
-                            viewModel.stopRecording()
-                        } else {
-                            scope.launch {
-                                viewModel.startRecording()
-                            }
-                        }
-                    }
-                ) {
-                    Text(
-                        text = if (isRecording) {
-                            stringResource(R.string.stop_recording)
-                        } else {
-                            stringResource(R.string.start_recording)
+            when (state) {
+
+                is AudioCaptureState.Ready -> {
+                    ReadyToRecord(
+                        onStartRecording = viewModel::startRecording,
+                        onCancel = {
+                            viewModel.cancelRecording()
+                            onDismiss()
                         }
                     )
                 }
+
+                is AudioCaptureState.Error -> {
+                    Error(onDismissRequest = onDismiss, message = state.message)
+                }
+
+                is AudioCaptureState.Recording -> {
+                    Recording(
+                        onStopRecording = viewModel::stopRecording,
+                        onCancel = {
+                            viewModel.cancelRecording()
+                            onDismiss()
+                        },
+                        elapsedSecondsProvider = { viewModel.elapsedSeconds },
+                        maxDuration = viewModel.maxDuration,
+                    )
+                }
+
+                AudioCaptureState.NotReady, AudioCaptureState.Saving -> {
+                    CircularProgressIndicator()
+                }
+
+                else -> {}
             }
         }
+    }
+}
+
+@Composable
+private fun ReadyToRecord(
+    onStartRecording: () -> Unit,
+    onCancel: () -> Unit
+) {
+    Text(
+        text = stringResource(R.string.ready_to_record_audio),
+        style = MaterialTheme.typography.bodyMedium
+    )
+    Spacer(modifier = Modifier.height(12.dp))
+    Row {
+        TextButton(onClick = onCancel) {
+            Text(text = stringResource(R.string.cancel))
+        }
+        TextButton(
+            onClick = onStartRecording,
+            //modifier = Modifier.align(Alignment.CenterHorizontally)
+        ) {
+            Icon(
+                imageVector = Icons.Filled.FiberManualRecord,
+                contentDescription = null,
+                tint = Color.Red
+            )
+            Spacer(modifier = Modifier.width(4.dp))
+            Text(text = stringResource(R.string.start_recording))
+        }
+    }
+}
+
+@Composable
+private fun Recording(
+    onStopRecording: () -> Unit,
+    onCancel: () -> Unit,
+    elapsedSecondsProvider: () -> Long,
+    maxDuration: Long?,
+) {
+    TimerTextProvider(maxDuration, elapsedSecondsProvider)
+    Spacer(modifier = Modifier.height(12.dp))
+    Row {
+        TextButton(onClick = onCancel) {
+            Text(text = stringResource(R.string.cancel))
+        }
+        TextButton(
+            onClick = onStopRecording,
+        ) {
+            Icon(
+                imageVector = Icons.Filled.Stop,
+                contentDescription = null,
+                tint = Color.Red
+            )
+            Spacer(modifier = Modifier.width(4.dp))
+            Text(text = stringResource(R.string.stop_recording))
+        }
+    }
+}
+
+@Composable
+private fun Error(
+    onDismissRequest: () -> Unit,
+    message: String
+) {
+    Text(
+        text = message,
+        style = MaterialTheme.typography.bodyMedium,
+        color = MaterialTheme.colorScheme.error
+    )
+    TextButton(onClick = onDismissRequest) {
+        Text(text = stringResource(R.string.ok))
     }
 }
 
@@ -181,6 +247,7 @@ private fun TimerTextProvider(maxDuration: Long?, textProvider: () -> Long) {
             contentDescription = "Recording",
             tint = Color.Red
         )
+        Spacer(modifier = Modifier.width(4.dp))
         Text(text = maxDurationText?.let { "$text / $it" } ?: text)
     }
 }
@@ -195,7 +262,6 @@ private fun AudioCapturePreview() {
                 onAudioCaptured = { Result.success(Unit) }
             )
         ),
-        maxDuration = 10_000L,
         onDismissRequest = {},
     )
 }
