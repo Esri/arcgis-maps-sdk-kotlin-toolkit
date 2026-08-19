@@ -165,7 +165,7 @@ internal class AudioCaptureViewModel(
         // Ensure init is thread safe
         mutex.withLock {
             // Return early if the recorder has already been initialized
-            if (_state.value is AudioCaptureState.Ready) {
+            if (_state.value.isInitialised()) {
                 return@launch
             }
             var candidateReference: FileUriReference? = null
@@ -215,7 +215,6 @@ internal class AudioCaptureViewModel(
                 _state.value = AudioCaptureState.Error(
                     message = "Failed to initialize audio recorder: ${e.message}"
                 )
-                cleanup()
             } finally {
                 // Release the candidate recorder and delete the candidate file if they were not
                 // used
@@ -355,4 +354,12 @@ private fun Long.toMillisecondsIntClamped(): Int = when {
     this > Int.MAX_VALUE / 1_000L -> Int.MAX_VALUE
     this < Int.MIN_VALUE / 1_000L -> Int.MIN_VALUE
     else -> (this * 1_000L).toInt()
+}
+
+/**
+ * Indicates if the state has been initialised.
+ */
+private fun AudioCaptureState.isInitialised(): Boolean = when (this) {
+    AudioCaptureState.NotReady -> false
+    else -> true
 }

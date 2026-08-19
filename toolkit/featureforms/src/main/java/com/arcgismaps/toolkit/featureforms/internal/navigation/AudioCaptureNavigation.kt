@@ -16,6 +16,7 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.navigation
 
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavBackStackEntry
@@ -62,6 +63,10 @@ internal fun NavGraphBuilder.audioCaptureDestination(
                     onDismissRequest(backStackEntry)
                 }
             )
+        } else {
+            LaunchedEffect(backStackEntry) {
+                onDismissRequest(backStackEntry)
+            }
         }
     }
 }

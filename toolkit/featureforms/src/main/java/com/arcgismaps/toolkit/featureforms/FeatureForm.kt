@@ -290,8 +290,9 @@ public sealed class FeatureFormNavigationRoute {
  * barcode scanning experience. Simply call [FieldFormElement.updateValue] with the scanned barcode
  * value to update the field value.
  *
- * For adding any attachments, camera permissions are required. If the permissions are not granted,
- * then the specific functionality is disabled in the form.
+ * Capturing photo or video attachments requires [Manifest.permission.CAMERA]. Capturing audio
+ * attachments requires [Manifest.permission.RECORD_AUDIO]. Capture options whose required permission
+ * has not been granted are disabled.
  *
  * If any [UtilityAssociationsFormElement] is part of the [FeatureForm.elements] collection, the
  * Form will display [UtilityAssociation]s that are associated with the selected feature and allow
