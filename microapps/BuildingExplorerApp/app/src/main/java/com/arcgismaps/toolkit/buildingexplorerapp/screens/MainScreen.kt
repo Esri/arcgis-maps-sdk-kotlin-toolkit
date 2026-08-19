@@ -21,9 +21,15 @@ package com.arcgismaps.toolkit.buildingexplorerapp.screens
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -52,15 +58,37 @@ fun MainScreen() {
             CircularProgressIndicator()
         }
     } else {
+        var showErrorDialog by remember { mutableStateOf(false) }
+        var criticalError: Throwable? by remember { mutableStateOf(null) }
+
         Column {
             LocalSceneView(
                 scene = viewModel.scene,
-                modifier = Modifier.weight(0.5f)
+                modifier = Modifier.weight(0.5f),
+                onCriticalErrorChanged = { throwable ->
+                    throwable?.let {
+                        showErrorDialog = true
+                        criticalError = throwable
+                    }
+                }
             )
             BuildingExplorer(
                 state = viewModel.buildingExplorerState,
                 modifier = Modifier.weight(0.5f)
             )
+
+            if (showErrorDialog) {
+                AlertDialog(
+                    onDismissRequest = { showErrorDialog = false },
+                    title = { Text(text = "Critical Error") },
+                    text = { Text(text = criticalError?.message.toString()) },
+                    confirmButton = {
+                        Button(onClick = { showErrorDialog = false }) {
+                            Text("OK")
+                        }
+                    }
+                )
+            }
         }
     }
 }
