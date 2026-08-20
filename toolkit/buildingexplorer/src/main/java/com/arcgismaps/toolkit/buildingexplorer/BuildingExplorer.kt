@@ -301,8 +301,7 @@ private fun CategorySelector(
                             showSubCategories -> Icons.Default.ArrowDropUp
                             else -> Icons.Default.ArrowDropDown
                         },
-                        contentDescription = "Show sub-categories",
-                        modifier = Modifier
+                        contentDescription = "Show sub-categories"
                     )
                 }
             }
