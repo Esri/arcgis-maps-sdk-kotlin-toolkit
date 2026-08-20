@@ -176,9 +176,9 @@ internal class AudioCaptureViewModel(
                     candidateReference = AttachmentsFileProvider.createTempFileWithUri(
                         "AUDIO_$timeStamp",
                         ".m4a",
-                        context
+                        context.applicationContext
                     )
-                    candidateRecorder = context.createMediaRecorder()
+                    candidateRecorder = context.applicationContext.createMediaRecorder()
                     candidateRecorder.apply {
                         setAudioSource(MediaRecorder.AudioSource.MIC)
                         setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
@@ -218,7 +218,7 @@ internal class AudioCaptureViewModel(
             } finally {
                 // Release the candidate recorder and delete the candidate file if they were not
                 // used
-                candidateRecorder?.release()
+                runCatching { candidateRecorder?.release() }
                 candidateReference?.file?.deleteIfExists()
             }
         }
@@ -304,14 +304,15 @@ internal class AudioCaptureViewModel(
     private fun cleanup() {
         timerJob?.cancel()
         timerJob = null
-        if (recorder != null) {
-            recorder!!.release()
-            recorder = null
-        }
-        if (fileUriReference != null) {
-            fileUriReference!!.file.delete()
-            fileUriReference = null
-        }
+
+        val recorderToRelease = recorder
+        recorder = null
+
+        val fileToDelete = fileUriReference?.file
+        fileUriReference = null
+
+        runCatching { recorderToRelease?.release() }
+        runCatching { fileToDelete?.delete() }
     }
 
     private fun startRecordingTimer() {
