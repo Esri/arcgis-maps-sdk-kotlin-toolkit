@@ -18,6 +18,7 @@
 
 package com.arcgismaps.toolkit.buildingexplorer
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -29,11 +30,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowDropUp
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuAnchorType
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -59,7 +57,6 @@ import com.arcgismaps.mapping.layers.buildingscene.BuildingSublayer
  *
  * @since 300.1.0
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 public fun BuildingExplorer(
     state: BuildingExplorerState,
@@ -73,27 +70,31 @@ public fun BuildingExplorer(
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(8.dp)) {
                 if (state.buildingSceneLayerStates.size > 1) {
                     var buildingSceneLayerExpanded by remember { mutableStateOf(false) }
-                    ExposedDropdownMenuBox(
-                        expanded = buildingSceneLayerExpanded,
-                        onExpandedChange = {
-                            buildingSceneLayerExpanded = !buildingSceneLayerExpanded
-                        },
-                        modifier = Modifier.padding(8.dp)
-                    ) {
+
+                    Box(modifier = Modifier.padding(8.dp)) {
                         TextField(
                             value = state.buildingSceneLayerState.name,
                             onValueChange = {},
                             readOnly = true,
                             trailingIcon = {
-                                ExposedDropdownMenuDefaults.TrailingIcon(
-                                    expanded = buildingSceneLayerExpanded
+                                Icon(
+                                    imageVector = if (buildingSceneLayerExpanded) {
+                                        Icons.Default.ArrowDropUp
+                                    } else {
+                                        Icons.Default.ArrowDropDown
+                                    },
+                                    contentDescription = null
                                 )
-                            },
-                            modifier = Modifier.menuAnchor(
-                                type = ExposedDropdownMenuAnchorType.PrimaryNotEditable
-                            )
+                            }
                         )
-                        ExposedDropdownMenu(
+
+                        Box(
+                            modifier = Modifier
+                                .matchParentSize()
+                                .clickable { buildingSceneLayerExpanded = true }
+                        )
+
+                        DropdownMenu(
                             expanded = buildingSceneLayerExpanded,
                             onDismissRequest = { buildingSceneLayerExpanded = false }
                         ) {
@@ -123,7 +124,6 @@ public fun BuildingExplorer(
  *
  * @since 300.1.0
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun BuildingExplorer(
     buildingSceneLayerState: BuildingSceneLayerState,
@@ -160,39 +160,51 @@ private fun BuildingExplorer(
                     Row {
                         Text(
                             text = stringResource(R.string.level),
-                            modifier = Modifier.padding(8.dp).weight(0.5f)
+                            modifier = Modifier.padding(8.dp)//.weight(0.5f)
                         )
-                        Spacer(modifier = Modifier.weight(0.75f))
-                        ExposedDropdownMenuBox(
-                            expanded = levelsExpanded,
-                            onExpandedChange = { levelsExpanded = !levelsExpanded },
-                            modifier = Modifier.padding(8.dp).weight(0.5f)
+                        Spacer(modifier = Modifier.weight(1f))
+                        Box(
+                            modifier = Modifier
+                                .padding(8.dp)//.weight(0.5f)
                         ) {
                             TextField(
-                                value = if (buildingSceneLayerState.selectedLevel == "All") stringResource(
-                                    R.string.all
-                                ) else buildingSceneLayerState.selectedLevel,
+                                value = if (buildingSceneLayerState.selectedLevel == "All") {
+                                    stringResource(R.string.all)
+                                } else {
+                                    buildingSceneLayerState.selectedLevel
+                                },
                                 onValueChange = {},
                                 readOnly = true,
                                 trailingIcon = {
-                                    ExposedDropdownMenuDefaults.TrailingIcon(
-                                        expanded = levelsExpanded
+                                    Icon(
+                                        imageVector = if (levelsExpanded) {
+                                            Icons.Default.ArrowDropUp
+                                        } else {
+                                            Icons.Default.ArrowDropDown
+                                        },
+                                        contentDescription = null
                                     )
-                                },
-                                modifier = Modifier.menuAnchor(
-                                    type = ExposedDropdownMenuAnchorType.PrimaryNotEditable
-                                )
+                                }
                             )
-                            ExposedDropdownMenu(
+
+                            Box(
+                                modifier = Modifier
+                                    .matchParentSize()
+                                    .clickable { levelsExpanded = true }
+                            )
+
+                            DropdownMenu(
                                 expanded = levelsExpanded,
                                 onDismissRequest = { levelsExpanded = false }
                             ) {
                                 buildingSceneLayerState.levels.forEachIndexed { index, level ->
                                     DropdownMenuItem(
                                         text = {
-                                            if (level == "All") Text(stringResource(R.string.all)) else Text(
-                                                level
-                                            )
+                                            if (level == "All") {
+                                                Text(stringResource(R.string.all))
+                                            } else {
+                                                Text(level)
+                                            }
                                         },
                                         onClick = {
                                             buildingSceneLayerState.onLevelSelected(index)
@@ -209,30 +221,38 @@ private fun BuildingExplorer(
                         Row {
                             Text(
                                 text = stringResource(R.string.construction_phase),
-                                modifier = Modifier.padding(8.dp).weight(0.5f)
+                                modifier = Modifier
+                                    .padding(8.dp) //.weight(0.5f)
                             )
-                            Spacer(modifier = Modifier.weight(0.75f))
-                            ExposedDropdownMenuBox(
-                                expanded = constructionPhasesExpanded,
-                                onExpandedChange = {
-                                    constructionPhasesExpanded = !constructionPhasesExpanded
-                                },
-                                modifier = Modifier.padding(8.dp).weight(0.5f)
+                            Spacer(modifier = Modifier.weight(/*0.75f*/1f))
+
+                            Box(
+                                modifier = Modifier
+                                    .padding(8.dp)//.weight(0.5f)
                             ) {
                                 TextField(
                                     value = buildingSceneLayerState.selectedConstructionPhase,
                                     onValueChange = {},
                                     readOnly = true,
                                     trailingIcon = {
-                                        ExposedDropdownMenuDefaults.TrailingIcon(
-                                            expanded = constructionPhasesExpanded
+                                        Icon(
+                                            imageVector = if (constructionPhasesExpanded) {
+                                                Icons.Default.ArrowDropUp
+                                            } else {
+                                                Icons.Default.ArrowDropDown
+                                            },
+                                            contentDescription = null
                                         )
-                                    },
-                                    modifier = Modifier.menuAnchor(
-                                        type = ExposedDropdownMenuAnchorType.PrimaryNotEditable
-                                    )
+                                    }
                                 )
-                                ExposedDropdownMenu(
+
+                                Box(
+                                    modifier = Modifier
+                                        .matchParentSize()
+                                        .clickable { constructionPhasesExpanded = true }
+                                )
+
+                                DropdownMenu(
                                     expanded = constructionPhasesExpanded,
                                     onDismissRequest = { constructionPhasesExpanded = false }
                                 ) {
@@ -240,9 +260,7 @@ private fun BuildingExplorer(
                                         DropdownMenuItem(
                                             text = { Text(phase) },
                                             onClick = {
-                                                buildingSceneLayerState.onConstructionPhaseSelected(
-                                                    index
-                                                )
+                                                buildingSceneLayerState.onConstructionPhaseSelected(index)
                                                 constructionPhasesExpanded = false
                                             }
                                         )
