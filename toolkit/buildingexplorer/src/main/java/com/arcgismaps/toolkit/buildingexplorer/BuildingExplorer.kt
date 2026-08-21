@@ -24,8 +24,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowDropUp
@@ -64,58 +63,67 @@ public fun BuildingExplorer(
     modifier: Modifier = Modifier
 ) {
     Box(modifier = modifier) {
-        Column(
+        LazyColumn(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.verticalScroll(rememberScrollState())
+            //modifier = Modifier.verticalScroll(rememberScrollState())
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(8.dp)) {
-                if (state.buildingSceneLayerStates.size > 1) {
-                    var buildingSceneLayerExpanded by remember { mutableStateOf(false) }
+            item {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(8.dp)
+                ) {
+                    if (state.buildingSceneLayerStates.size > 1) {
+                        var buildingSceneLayerExpanded by remember { mutableStateOf(false) }
 
-                    Box(modifier = Modifier.padding(8.dp)) {
-                        TextField(
-                            value = state.buildingSceneLayerState.name,
-                            onValueChange = {},
-                            readOnly = true,
-                            trailingIcon = {
-                                Icon(
-                                    imageVector = if (buildingSceneLayerExpanded) {
-                                        Icons.Default.ArrowDropUp
-                                    } else {
-                                        Icons.Default.ArrowDropDown
-                                    },
-                                    contentDescription = null
-                                )
-                            }
-                        )
+                        Box(modifier = Modifier.padding(8.dp)) {
+                            TextField(
+                                value = state.buildingSceneLayerState.name,
+                                onValueChange = {},
+                                readOnly = true,
+                                trailingIcon = {
+                                    Icon(
+                                        imageVector = if (buildingSceneLayerExpanded) {
+                                            Icons.Default.ArrowDropUp
+                                        } else {
+                                            Icons.Default.ArrowDropDown
+                                        },
+                                        contentDescription = null
+                                    )
+                                }
+                            )
 
-                        Box(
-                            modifier = Modifier
-                                .matchParentSize()
-                                .clickable { buildingSceneLayerExpanded = true }
-                        )
+                            Box(
+                                modifier = Modifier
+                                    .matchParentSize()
+                                    .clickable { buildingSceneLayerExpanded = true }
+                            )
 
-                        DropdownMenu(
-                            expanded = buildingSceneLayerExpanded,
-                            onDismissRequest = { buildingSceneLayerExpanded = false }
-                        ) {
-                            state.buildingSceneLayerStates.forEachIndexed { index, buildingSceneLayerState ->
-                                DropdownMenuItem(
-                                    text = { Text(buildingSceneLayerState.name) },
-                                    onClick = {
-                                        state.onBuildingSceneLayerSelected(index)
-                                        buildingSceneLayerExpanded = false
-                                    }
-                                )
+                            DropdownMenu(
+                                expanded = buildingSceneLayerExpanded,
+                                onDismissRequest = { buildingSceneLayerExpanded = false }
+                            ) {
+                                state.buildingSceneLayerStates.forEachIndexed { index, buildingSceneLayerState ->
+                                    DropdownMenuItem(
+                                        text = { Text(buildingSceneLayerState.name) },
+                                        onClick = {
+                                            state.onBuildingSceneLayerSelected(index)
+                                            buildingSceneLayerExpanded = false
+                                        }
+                                    )
+                                }
                             }
                         }
+                    } else {
+                        Text(text = state.buildingSceneLayerState.name)
                     }
-                } else {
-                    Text(text = state.buildingSceneLayerState.name)
                 }
             }
-            HorizontalDivider()
-            BuildingExplorer(buildingSceneLayerState = state.buildingSceneLayerState)
+            item {
+                HorizontalDivider()
+            }
+            item {
+                BuildingExplorer(buildingSceneLayerState = state.buildingSceneLayerState)
+            }
         }
     }
 }
@@ -132,7 +140,10 @@ private fun BuildingExplorer(
 ) {
     Surface(modifier = modifier) {
         Column {
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(8.dp)) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(8.dp)
+            ) {
                 Text(stringResource(R.string.visible))
                 Spacer(modifier = Modifier.weight(1f))
                 Switch(
