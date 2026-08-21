@@ -122,8 +122,9 @@ class MicroappConventionPlugin : Plugin<Project> {
                 implementation(libs.findBundle("core").get())
                 implementation(libs.findLibrary("androidx-activity-compose").get())
                 implementation(libs.findLibrary("androidx-lifecycle-viewmodel-compose").get())
+
+                add("androidTestImplementation", libs.findBundle("androidXTest").get())
             }
         }
     }
 }
-    
