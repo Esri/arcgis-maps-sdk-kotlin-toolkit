@@ -78,6 +78,13 @@ internal sealed class NavigationRoute {
     data class UNAssociationDetails(
         val stateId: Int
     ) : NavigationRoute()
+
+    @Serializable
+    data class AudioCapture(
+        val maxDuration: Long?,
+        val stateId: Int
+    ) : NavigationRoute()
+
 }
 
 /**
