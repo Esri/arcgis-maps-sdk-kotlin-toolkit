@@ -329,6 +329,15 @@ internal class AudioCaptureViewModel(
     }
 
     companion object {
+
+        /**
+         * Creates a new instance of [AudioCaptureViewModel] with the provided [onAudioCaptured] callback.
+         *
+         * @param maxDuration The maximum duration of the recording in seconds. If null, there is no limit.
+         * This must be greater than 1 second, if specified.
+         * @param onAudioCaptured A suspend function that is called when the audio is captured. It receives
+         * the captured audio file and returns a Result indicating success or failure.
+         */
         fun Factory(
             maxDuration: Long?,
             onAudioCaptured: suspend (File) -> Result<Unit>

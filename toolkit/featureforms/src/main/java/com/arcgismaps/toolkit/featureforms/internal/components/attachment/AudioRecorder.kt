@@ -247,7 +247,7 @@ private fun AudioCapturePreview() {
     AudioCapture(
         viewModel = viewModel<AudioCaptureViewModel>(
             factory = AudioCaptureViewModel.Factory(
-                maxDuration = 10_000L,
+                maxDuration = 10L,
                 onAudioCaptured = { Result.success(Unit) }
             )
         ),
