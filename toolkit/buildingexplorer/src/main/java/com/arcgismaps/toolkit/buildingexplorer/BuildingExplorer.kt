@@ -35,6 +35,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -55,7 +56,7 @@ import com.arcgismaps.mapping.layers.buildingscene.BuildingSublayer
  * Building Explorer is a composable for browsing the levels and sublayers of building scene
  * layers.
  *
- * @since 300.1.0
+ * @since 300.2.0
  */
 @Composable
 public fun BuildingExplorer(
@@ -122,14 +123,14 @@ public fun BuildingExplorer(
 /**
  * Building explorer composable for browsing a single building scene layer.
  *
- * @since 300.1.0
+ * @since 300.2.0
  */
 @Composable
 private fun BuildingExplorer(
     buildingSceneLayerState: BuildingSceneLayerState,
     modifier: Modifier = Modifier
 ) {
-    Box(modifier = modifier) {
+    Surface(modifier = modifier) {
         Column {
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(8.dp)) {
                 Text(stringResource(R.string.visible))
@@ -222,10 +223,9 @@ private fun BuildingExplorer(
                             Text(
                                 text = stringResource(R.string.construction_phase),
                                 modifier = Modifier
-                                    .padding(8.dp) //.weight(0.5f)
+                                    .padding(8.dp)//.weight(0.5f)
                             )
                             Spacer(modifier = Modifier.weight(/*0.75f*/1f))
-
                             Box(
                                 modifier = Modifier
                                     .padding(8.dp)//.weight(0.5f)
@@ -290,7 +290,7 @@ private fun BuildingExplorer(
 /**
  * Composable for selecting a building sublayer category e.g. architectural features
  *
- * @since 300.1.0
+ * @since 300.2.0
  */
 @Composable
 private fun CategorySelector(
@@ -348,7 +348,7 @@ private fun CategorySelector(
 /**
  * Composable for selecting building sublayer category subcategories e.g. doors
  *
- * @since 300.1.0
+ * @since 300.2.0
  */
 @Composable
 private fun SubCategorySelector(

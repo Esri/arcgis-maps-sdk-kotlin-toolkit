@@ -38,7 +38,7 @@ import com.esri.microappslib.theme.MicroAppTheme
 /**
  * The main activity of the application.
  *
- * @since 300.1.0
+ * @since 300.2.0
  */
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

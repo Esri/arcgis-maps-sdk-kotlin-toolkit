@@ -38,7 +38,7 @@ import kotlinx.coroutines.launch
 /**
  * The state of a [BuildingExplorer].
  *
- * @since 300.1.0
+ * @since 300.2.0
  */
 public class BuildingExplorerState(
     buildingSceneLayers: PersistentList<BuildingSceneLayer>,
@@ -69,7 +69,7 @@ public class BuildingExplorerState(
 /**
  * The state for a single [BuildingSceneLayer] in a [BuildingExplorerState].
  *
- * @since 300.1.0
+ * @since 300.2.0
  */
 internal class BuildingSceneLayerState(
     private val buildingSceneLayer: BuildingSceneLayer,

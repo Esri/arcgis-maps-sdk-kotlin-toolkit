@@ -41,7 +41,7 @@ import com.arcgismaps.toolkit.geoviewcompose.LocalSceneView
 /**
  * The main screen of the application consisting of a [LocalSceneView] and a [BuildingExplorer].
  *
- * @since 300.1.0
+ * @since 300.2.0
  */
 @Composable
 fun MainScreen() {
