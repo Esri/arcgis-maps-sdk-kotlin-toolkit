@@ -65,10 +65,3 @@ fun BuildingExplorerApp() {
 
 }
 
-@Preview(showBackground = true)
-@Composable
-fun AppPreview() {
-    MicroAppTheme {
-        BuildingExplorerApp()
-    }
-}
