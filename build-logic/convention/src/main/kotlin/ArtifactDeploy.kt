@@ -45,7 +45,7 @@ class ArtifactPublisher : Plugin<Project> {
         val artifactoryUsername = requiredProperty("artifactoryUsername")
         val artifactoryPassword = requiredProperty("artifactoryPassword")
         val versionNumber = requiredProperty("versionNumber")
-        val finalBuild = project.findProperty("finalBuild")?.toString() == "true"
+        val finalBuild = project.findProperty("finalBuild")?.toString()?.lowercase() == "true"
         val artifactVersion: String = if (finalBuild) {
             versionNumber
         } else {
