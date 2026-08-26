@@ -76,15 +76,19 @@ class MainScreenViewModel(application: Application): AndroidViewModel(applicatio
     fun captureOrientedImage() {
         viewModelScope.launch(Dispatchers.IO) {
             proxy.exportOrientedImage()?.let {
+                val focalLength = it.focalLength.toMicrons(application.pixelPitch(it.cameraId))
+                val pixelSize = application.pixelPitch(it.cameraId)
+                val srs = "${sRWebMercator.wkid};$WKID_WGS84_VERTICAL"
+
                 // populate the cameras table with the camera parameters only once, since they are the same for all frames
                 if (!camerasTableInitialized) {
                     camerasTableInitialized = true
                     frameRepository.appendCamera(
                         objectId = CamerasTable_OBJECT_ID,
                         cameraId = CamerasTable_CAMERA_ID,
-                        focalLength = it.focalLength.toMicrons(application.pixelPitch(it.cameraId)), // in microns
-                        pixelSize = application.pixelPitch(it.cameraId), //application.sensorSize(it.cameraId).toDouble(), // in microns
-                        srs = "${sRWebMercator.wkid};$WKID_WGS84_VERTICAL"
+                        focalLength = focalLength, // in microns
+                        pixelSize = pixelSize, //application.sensorSize(it.cameraId).toDouble(), // in microns
+                        srs = srs
                     )
                 }
 
@@ -105,6 +109,21 @@ class MainScreenViewModel(application: Application): AndroidViewModel(applicatio
                     phi = it.cameraRotationAngles.phiDeg,
                     kappa = it.cameraRotationAngles.kappaDeg
                 )
+
+                // populate the oriented imagery table as an alternative persistence format
+                frameRepository.appendOrientedImagery(
+                    focalLength = focalLength, // in microns
+                    pixelSize = pixelSize, //application.sensorSize(it.cameraId).toDouble(), // in microns
+                    srs = srs,
+                    imagePath = imgFileName,
+                    x = perspectivePointWebMercator.x,
+                    y = perspectivePointWebMercator.y,
+                    z = it.geospatialPose.altitude, /* orthometric height */
+                    omega = it.cameraRotationAngles.omegaDeg,
+                    phi = it.cameraRotationAngles.phiDeg,
+                    kappa = it.cameraRotationAngles.kappaDeg
+                )
+
                 currentFrameObjectId++
 
                 graphicsOverlays.first().addFrustumGraphic(it)
@@ -175,6 +194,7 @@ private fun Context.pixelPitch(cameraId: String): Double {
 
     val activeRect: Rect? =
         chars.get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE)
+    Log.d("ABC", "Camera $cameraId: active array size = ${activeRect?.width()} x ${activeRect?.height()}")
 
     val focalLengthMilli = chars.get(CameraCharacteristics.LENS_INFO_AVAILABLE_FOCAL_LENGTHS)?.firstOrNull() ?: throw IllegalStateException("Camera characteristics do not contain available focal lengths for cameraId: $cameraId")
     Log.d("ABC", "Camera $cameraId: focal length in mm = $focalLengthMilli")

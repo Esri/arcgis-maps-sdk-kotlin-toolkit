@@ -7,13 +7,12 @@ import org.jetbrains.kotlinx.dataframe.api.dataFrameOf
 import org.jetbrains.kotlinx.dataframe.api.emptyDataFrame
 import org.jetbrains.kotlinx.dataframe.io.writeCsv
 import java.io.File
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 class FrameRepository(private val context: Context) {
 
     private var framesTable = emptyDataFrame<FramesTable>()
     private var camerasTable = emptyDataFrame<CamerasTable>()
+    private var orientedImageryTable = emptyDataFrame<OrientedImageryTable>()
 
     fun appendFrame(
         objectId: Int,
@@ -57,6 +56,33 @@ class FrameRepository(private val context: Context) {
         camerasTable = camerasTable.concat(newRow)
     }
 
+    fun appendOrientedImagery(
+        focalLength: Double,
+        pixelSize: Double,
+        srs: String,
+        imagePath: String,
+        x: Double,
+        y: Double,
+        z: Double,
+        omega: Double,
+        phi: Double,
+        kappa: Double
+    ) {
+        val newRow = dataFrameOf(
+            "FocalLength" to listOf(focalLength),
+            "PixelSize" to listOf(pixelSize),
+            "SRS" to listOf(srs),
+            "ImagePath" to listOf(imagePath),
+            "X" to listOf(x),
+            "Y" to listOf(y),
+            "Z" to listOf(z),
+            "Omega" to listOf(omega),
+            "Phi" to listOf(phi),
+            "Kappa" to listOf(kappa)
+        ).cast<OrientedImageryTable>()
+        orientedImageryTable = orientedImageryTable.concat(newRow)
+    }
+
     fun saveToCsv(directory: File) {
         val framesCsvFile = File(directory, "frames.csv")
         framesCsvFile.parentFile?.mkdirs() ?: throw IllegalStateException("Failed to create parent directory for CSV file: ${framesCsvFile.absolutePath}")
@@ -68,7 +94,13 @@ class FrameRepository(private val context: Context) {
         if (camerasCsvFile.exists()) {
             camerasCsvFile.delete()
         }
+        val orientedImageryCsvFile = File(directory, "oriented_imagery.csv")
+        orientedImageryCsvFile.parentFile?.mkdirs() ?: throw IllegalStateException("Failed to create parent directory for CSV file: ${orientedImageryCsvFile.absolutePath}")
+        if (orientedImageryCsvFile.exists()) {
+            orientedImageryCsvFile.delete()
+        }
         framesTable.writeCsv(framesCsvFile)
         camerasTable.writeCsv(camerasCsvFile)
+        orientedImageryTable.writeCsv(orientedImageryCsvFile)
     }
 }
