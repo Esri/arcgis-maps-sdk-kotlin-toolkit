@@ -28,7 +28,7 @@ ksp = "2.3.11"
 materialIcons = "1.7.8"
 media3Exoplayer = "1.11.0"
 #noinspection UnusedVersionCatalogEntry
-minSdk = "28"
+minSdk = "29"
 mlkitBarcodeScanning = "17.3.0"
 mockingjay = "2.0.1"
 kotlinxCoroutinesTest = "1.11.0"
