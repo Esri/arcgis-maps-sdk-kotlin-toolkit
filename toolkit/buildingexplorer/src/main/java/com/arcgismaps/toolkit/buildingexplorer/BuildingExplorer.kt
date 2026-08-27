@@ -64,8 +64,7 @@ public fun BuildingExplorer(
 ) {
     Box(modifier = modifier) {
         LazyColumn(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            //modifier = Modifier.verticalScroll(rememberScrollState())
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             item {
                 Row(
@@ -173,12 +172,11 @@ private fun BuildingExplorer(
                         Row {
                             Text(
                                 text = stringResource(R.string.level),
-                                modifier = Modifier.padding(8.dp)//.weight(0.5f)
+                                modifier = Modifier.padding(8.dp)
                             )
                             Spacer(modifier = Modifier.weight(1f))
                             Box(
-                                modifier = Modifier
-                                    .padding(8.dp)//.weight(0.5f)
+                                modifier = Modifier.padding(8.dp)
                             ) {
                                 TextField(
                                     value = if (buildingSceneLayerState.selectedLevel == "All") {
@@ -235,13 +233,11 @@ private fun BuildingExplorer(
                         Row {
                             Text(
                                 text = stringResource(R.string.construction_phase),
-                                modifier = Modifier
-                                    .padding(8.dp)//.weight(0.5f)
+                                modifier = Modifier.padding(8.dp)
                             )
                             Spacer(modifier = Modifier.weight(/*0.75f*/1f))
                             Box(
-                                modifier = Modifier
-                                    .padding(8.dp)//.weight(0.5f)
+                                modifier = Modifier.padding(8.dp)
                             ) {
                                 TextField(
                                     value = buildingSceneLayerState.selectedConstructionPhase,
