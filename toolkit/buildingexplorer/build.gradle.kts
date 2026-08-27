@@ -107,7 +107,6 @@ dependencies {
     implementation(libs.bundles.composeCore)
     implementation(libs.bundles.core)
     implementation(libs.androidx.activity.compose)
-    implementation(libs.kotlinx.collections.immutable)
     implementation(libs.bundles.icons)
     testImplementation(libs.bundles.unitTest)
     androidTestImplementation(libs.bundles.composeTest)

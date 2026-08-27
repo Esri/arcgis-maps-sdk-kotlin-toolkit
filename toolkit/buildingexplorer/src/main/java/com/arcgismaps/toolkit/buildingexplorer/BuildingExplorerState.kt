@@ -30,8 +30,6 @@ import com.arcgismaps.mapping.layers.buildingscene.BuildingGroupSublayer
 import com.arcgismaps.mapping.layers.buildingscene.BuildingSolidFilterMode
 import com.arcgismaps.mapping.layers.buildingscene.BuildingSublayer
 import com.arcgismaps.mapping.layers.buildingscene.BuildingXrayFilterMode
-import kotlinx.collections.immutable.PersistentList
-import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -41,7 +39,7 @@ import kotlinx.coroutines.launch
  * @since 300.2.0
  */
 public class BuildingExplorerState(
-    buildingSceneLayers: PersistentList<BuildingSceneLayer>,
+    buildingSceneLayers: List<BuildingSceneLayer>,
     coroutineScope: CoroutineScope
 ) {
     init {
@@ -52,7 +50,7 @@ public class BuildingExplorerState(
 
     internal val buildingSceneLayerStates = buildingSceneLayers.map {
         BuildingSceneLayerState(it, coroutineScope)
-    }.sortedBy { it.name }.toPersistentList()
+    }.sortedBy { it.name }
 
     private var _buildingSceneLayerState by mutableStateOf(
         buildingSceneLayerStates.first()

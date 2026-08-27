@@ -24,7 +24,6 @@ import androidx.lifecycle.viewModelScope
 import com.arcgismaps.mapping.ArcGISScene
 import com.arcgismaps.mapping.layers.BuildingSceneLayer
 import com.arcgismaps.toolkit.buildingexplorer.BuildingExplorerState
-import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -53,7 +52,6 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
                 .onSuccess {
                     val layers =
                         scene.operationalLayers.filterIsInstance<BuildingSceneLayer>()
-                            .toPersistentList()
 
                     buildingExplorerState = BuildingExplorerState(
                         buildingSceneLayers = layers,
