@@ -42,7 +42,7 @@ import kotlinx.coroutines.launch
  */
 public class BuildingExplorerState(
     buildingSceneLayers: PersistentList<BuildingSceneLayer>,
-    internal val coroutineScope: CoroutineScope
+    coroutineScope: CoroutineScope
 ) {
     init {
         require(buildingSceneLayers.isNotEmpty()) {
@@ -94,6 +94,9 @@ internal class BuildingSceneLayerState(
     private val _levels = mutableStateListOf(selectedLevel)
     private val levelsState by derivedStateOf { _levels.toList() }
     val levels: List<String> get() = levelsState
+
+    // Levels elements should only show if there are more than 2 levels
+    val isShowLevels by derivedStateOf { levels.size > 2 }
 
     // the index of the selected construction phase
     var selectedConstructionPhase by mutableStateOf("")

@@ -168,61 +168,63 @@ private fun BuildingExplorer(
                 }
 
                 if (buildingSceneLayerState.showFullModel) {
-                    var levelsExpanded by remember { mutableStateOf(false) }
-                    Row {
-                        Text(
-                            text = stringResource(R.string.level),
-                            modifier = Modifier.padding(8.dp)//.weight(0.5f)
-                        )
-                        Spacer(modifier = Modifier.weight(1f))
-                        Box(
-                            modifier = Modifier
-                                .padding(8.dp)//.weight(0.5f)
-                        ) {
-                            TextField(
-                                value = if (buildingSceneLayerState.selectedLevel == "All") {
-                                    stringResource(R.string.all)
-                                } else {
-                                    buildingSceneLayerState.selectedLevel
-                                },
-                                onValueChange = {},
-                                readOnly = true,
-                                trailingIcon = {
-                                    Icon(
-                                        imageVector = if (levelsExpanded) {
-                                            Icons.Default.ArrowDropUp
-                                        } else {
-                                            Icons.Default.ArrowDropDown
-                                        },
-                                        contentDescription = null
-                                    )
-                                }
+                    if (buildingSceneLayerState.isShowLevels) {
+                        var levelsExpanded by remember { mutableStateOf(false) }
+                        Row {
+                            Text(
+                                text = stringResource(R.string.level),
+                                modifier = Modifier.padding(8.dp)//.weight(0.5f)
                             )
-
+                            Spacer(modifier = Modifier.weight(1f))
                             Box(
                                 modifier = Modifier
-                                    .matchParentSize()
-                                    .clickable { levelsExpanded = true }
-                            )
-
-                            DropdownMenu(
-                                expanded = levelsExpanded,
-                                onDismissRequest = { levelsExpanded = false }
+                                    .padding(8.dp)//.weight(0.5f)
                             ) {
-                                buildingSceneLayerState.levels.forEachIndexed { index, level ->
-                                    DropdownMenuItem(
-                                        text = {
-                                            if (level == "All") {
-                                                Text(stringResource(R.string.all))
+                                TextField(
+                                    value = if (buildingSceneLayerState.selectedLevel == "All") {
+                                        stringResource(R.string.all)
+                                    } else {
+                                        buildingSceneLayerState.selectedLevel
+                                    },
+                                    onValueChange = {},
+                                    readOnly = true,
+                                    trailingIcon = {
+                                        Icon(
+                                            imageVector = if (levelsExpanded) {
+                                                Icons.Default.ArrowDropUp
                                             } else {
-                                                Text(level)
+                                                Icons.Default.ArrowDropDown
+                                            },
+                                            contentDescription = null
+                                        )
+                                    }
+                                )
+
+                                Box(
+                                    modifier = Modifier
+                                        .matchParentSize()
+                                        .clickable { levelsExpanded = true }
+                                )
+
+                                DropdownMenu(
+                                    expanded = levelsExpanded,
+                                    onDismissRequest = { levelsExpanded = false }
+                                ) {
+                                    buildingSceneLayerState.levels.forEachIndexed { index, level ->
+                                        DropdownMenuItem(
+                                            text = {
+                                                if (level == "All") {
+                                                    Text(stringResource(R.string.all))
+                                                } else {
+                                                    Text(level)
+                                                }
+                                            },
+                                            onClick = {
+                                                buildingSceneLayerState.onLevelSelected(index)
+                                                levelsExpanded = false
                                             }
-                                        },
-                                        onClick = {
-                                            buildingSceneLayerState.onLevelSelected(index)
-                                            levelsExpanded = false
-                                        }
-                                    )
+                                        )
+                                    }
                                 }
                             }
                         }
