@@ -96,7 +96,7 @@ internal class BuildingSceneLayerState(
     val levels: List<String> get() = levelsState
 
     // Levels elements should only show if there are more than 2 levels
-    val isShowLevels by derivedStateOf { levels.size > 2 }
+    val isShowLevels by derivedStateOf { levels.size > 1 }
 
     // the index of the selected construction phase
     var selectedConstructionPhase by mutableStateOf("")
@@ -109,7 +109,7 @@ internal class BuildingSceneLayerState(
     val constructionPhases: List<String> get() = constructionPhasesState
 
     // construction phase elements should only show if there are more than 2 phases
-    val isShowConstructionPhases by derivedStateOf { constructionPhases.size > 2 }
+    val isShowConstructionPhases by derivedStateOf { constructionPhases.size > 1 }
 
     // The list of building sublayer categories
     private val _categories = mutableStateListOf<BuildingSublayer>()
