@@ -75,14 +75,6 @@ fun UtilityNetworkTraceApp(traceViewModel: TraceViewModel) {
 
     LaunchedEffect(Unit) {
         try {
-            val tokenCred =
-                TokenCredential.create(
-                    "https://sampleserver7.arcgisonline.com/portal/sharing/rest",
-                    username = BuildConfig.traceToolUser,
-                    password = BuildConfig.traceToolPassword
-                ).getOrThrow()
-
-            ArcGISEnvironment.authenticationManager.arcGISCredentialStore.add(tokenCred)
             initialized = true
         } catch (e: Exception) {
             isInitializationError = true
