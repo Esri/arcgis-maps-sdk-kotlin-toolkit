@@ -29,9 +29,6 @@ plugins {
 
 kotlin {
     jvmToolchain(17)
-    compilerOptions {
-        freeCompilerArgs.add("-Xannotation-default-target=param-property")
-    }
 }
 
 android {
@@ -70,7 +67,7 @@ android {
      */
     testOptions {
         targetSdk = libs.versions.compileSdk.get().toInt()
-        val connectedTestReportsPath: String by project
+        val connectedTestReportsPath: String = rootProject.extra["connectedTestReportsPath"] as String
         reportDir = "$connectedTestReportsPath/${project.name}"
     }
 

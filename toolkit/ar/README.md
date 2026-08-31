@@ -350,7 +350,7 @@ fun MainScreen() {
     val meshLayer =
         IntegratedMeshLayer("https://tiles.arcgis.com/tiles/z2tnIkrLQ2BRzr6P/arcgis/rest/services/Girona_Spain/SceneServer")
 
-    val arcGISScene by remember { 
+    val arcGISScene = remember { 
         ArcGISScene(BasemapStyle.ArcGISImagery).apply { 
             baseSurface.elevationSources.add(elevationSource)
             operationalLayers.add(meshLayer)

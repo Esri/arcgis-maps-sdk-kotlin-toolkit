@@ -22,7 +22,6 @@ import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin
 import org.gradle.kotlin.dsl.configure
-import org.gradle.kotlin.dsl.provideDelegate
 import java.net.URI
 
 /**
@@ -35,22 +34,22 @@ import java.net.URI
  *
  * @since 200.2.0
  */
-@Suppress("UNUSED")
 class ArtifactPublisher : Plugin<Project> {
     override fun apply(project: Project) {
-        val artifactoryGroupId: String by project
-        val artifactoryArtifactBaseId: String by project
-        val artifactoryUrl: String by project
-        val artifactoryUsername: String by project
-        val artifactoryPassword: String by project
-        val versionNumber: String by project
-        val finalBuild: Boolean = (project.properties["finalBuild"] ?: "false")
-            .run { this == "true" }
-        val buildNumber: String by project
+        fun requiredProperty(name: String): String = project.findProperty(name)?.toString()
+            ?: error("Missing required project property '$name'")
+
+        val artifactoryGroupId = requiredProperty("artifactoryGroupId")
+        val artifactoryArtifactBaseId = requiredProperty("artifactoryArtifactBaseId")
+        val artifactoryUrl = requiredProperty("artifactoryUrl")
+        val artifactoryUsername = requiredProperty("artifactoryUsername")
+        val artifactoryPassword = requiredProperty("artifactoryPassword")
+        val versionNumber = requiredProperty("versionNumber")
+        val finalBuild = project.findProperty("finalBuild")?.toString()?.lowercase() == "true"
         val artifactVersion: String = if (finalBuild) {
             versionNumber
         } else {
-            "$versionNumber-$buildNumber"
+            "$versionNumber-${requiredProperty("buildNumber")}"
         }
         val artifactoryArtifactId = "$artifactoryArtifactBaseId-${project.name}"
         

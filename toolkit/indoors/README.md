@@ -19,14 +19,14 @@ Box(
     contentAlignment = Alignment.BottomStart
 ) {
     MapView(
-        arcgGISMap = floorAwareMap,
+        arcGISMap = floorAwareMap,
         modifier = Modifier.fillMaxSize(),
     )
     FloorFilter(floorFilterState = mapViewModel.floorFilterState)
 }
 ```
 
-Optionally, the default UI settings of the `FloorFilter` may be overridden by modifying `UIProperties` defined in the [FloorFilterState].
+Optionally, the default UI settings of the `FloorFilter` may be overridden by modifying `UIProperties` defined in the `FloorFilterState`.
 The `UIProperties` enable the customization of the colors, visibility, typography, and more.
 
 ```kotlin
