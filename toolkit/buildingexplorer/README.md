@@ -17,7 +17,7 @@ The Building Explorer provides a tool for browsing the levels and sublayers of b
 
 ### Basic usage for displaying a Building Explorer
 
-Create a `BuildingExplorerState` with a list of `BuildingSceneLauyers`
+Create a `BuildingExplorerState` with a list of `BuildingSceneLayers`
 
 ```kotlin
     lateinit var buildingExplorerState: BuildingExplorerState
