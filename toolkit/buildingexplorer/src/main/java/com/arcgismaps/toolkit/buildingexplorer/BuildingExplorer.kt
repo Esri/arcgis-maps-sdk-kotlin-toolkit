@@ -62,6 +62,45 @@ import com.arcgismaps.mapping.layers.buildingscene.BuildingSublayer
  * Building Explorer is a composable for browsing the levels and sublayers of building scene
  * layers.
  *
+ * _Workflow example:_
+ * 
+ * Create a `BuildingExplorerState` with a list of `BuildingSceneLayers`
+ *
+ * ```
+ *     lateinit var buildingExplorerState: BuildingExplorerState
+ *
+ *     init {
+ *         viewModelScope.launch {
+ *             scene.load()
+ *                 .onFailure { throw it }
+ *                 .onSuccess {
+ *                     val layers =
+ *                         scene.operationalLayers.filterIsInstance<BuildingSceneLayer>()
+ *                             .toPersistentList()
+ *
+ *                     buildingExplorerState = BuildingExplorerState(
+ *                         buildingSceneLayers = layers,
+ *                         coroutineScope = viewModelScope
+ *                     )
+ *                 }
+ *         }
+ *     }
+ * ```
+ *
+ * Create a `BuildingExplorer` taking the `BuildingExploereState` and add it to the UI
+ *
+ * ```
+ * Column {
+ *     LocalSceneView(
+ *         scene = viewModel.scene,
+ *         modifier = Modifier.weight(0.5f))
+ *     BuildingExplorer(
+ *         state = viewModel.buildingExplorerState,
+ *         modifier = Modifier.weight(0.5f)
+ *     )
+ * }
+ * ```
+ *
  * @since 300.2.0
  */
 @Composable
