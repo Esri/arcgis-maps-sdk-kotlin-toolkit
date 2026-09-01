@@ -19,12 +19,18 @@
 package com.arcgismaps.toolkit.buildingexplorerapp.screens
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberBottomSheetScaffoldState
+import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -43,6 +49,7 @@ import com.arcgismaps.toolkit.geoviewcompose.LocalSceneView
  *
  * @since 300.2.0
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen() {
     val viewModel: ViewModel = viewModel()
@@ -58,23 +65,33 @@ fun MainScreen() {
             CircularProgressIndicator()
         }
     } else {
+        val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(
+            bottomSheetState = rememberStandardBottomSheetState(
+                initialValue = SheetValue.Expanded
+            )
+        )
+
         var showErrorDialog by remember { mutableStateOf(false) }
         var criticalError: Throwable? by remember { mutableStateOf(null) }
 
-        Column {
+        BottomSheetScaffold(
+            sheetContent = {
+                BuildingExplorer(
+                    state = viewModel.buildingExplorerState,
+                    modifier = Modifier.fillMaxHeight(fraction = 0.5f)
+                )
+            },
+            scaffoldState = bottomSheetScaffoldState
+        ) { paddingValues ->
             LocalSceneView(
                 scene = viewModel.scene,
-                modifier = Modifier.weight(0.5f),
+                modifier = Modifier.padding(paddingValues),
                 onCriticalErrorChanged = { throwable ->
                     throwable?.let {
                         showErrorDialog = true
                         criticalError = throwable
                     }
                 }
-            )
-            BuildingExplorer(
-                state = viewModel.buildingExplorerState,
-                modifier = Modifier.weight(0.5f)
             )
 
             if (showErrorDialog) {
