@@ -943,31 +943,32 @@ class AttachmentsFormElementTests : FeatureFormTestRunner(
             // parent nested dir must match the path in the file provider XML
             File(context.cacheDir, "feature_forms_attachments"),
             // the test file
-            fileName //"test_document.txt"
+            fileName
         )
         // Create the mock document file with some content
         file.parentFile?.mkdirs()
         // If the file already exists, we don't need to create it again
-        if (file.exists()) return
-        when (contentType) {
-            "image/png" -> {
-                val bitmap = Bitmap.createBitmap(50, 50, Bitmap.Config.ARGB_8888)
-                file.outputStream().use { outputStream ->
-                    bitmap.compress(Bitmap.CompressFormat.PNG, 0, outputStream)
+        if (file.exists().not()) {
+            when (contentType) {
+                "image/png" -> {
+                    val bitmap = Bitmap.createBitmap(50, 50, Bitmap.Config.ARGB_8888)
+                    file.outputStream().use { outputStream ->
+                        bitmap.compress(Bitmap.CompressFormat.PNG, 0, outputStream)
+                    }
+                    bitmap.recycle()
                 }
-                bitmap.recycle()
-            }
 
-            "text/plain" -> {
-                FileWriter(file).use { writer ->
-                    writer.write("Mock file content for testing.")
-                    writer.flush()
+                "text/plain" -> {
+                    FileWriter(file).use { writer ->
+                        writer.write("Mock file content for testing.")
+                        writer.flush()
+                    }
                 }
-            }
 
-            else -> {
-                // If the content type is not supported, throw an exception
-                throw UnsupportedOperationException("Unsupported content type: $contentType")
+                else -> {
+                    // If the content type is not supported, throw an exception
+                    throw UnsupportedOperationException("Unsupported content type: $contentType")
+                }
             }
         }
         // Set up the intent response with the file URI
