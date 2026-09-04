@@ -181,6 +181,11 @@ dependencyResolutionManagement {
             library("popup", "com.esri", "arcgis-maps-kotlin-toolkit-popup").versionRef("mapsSdk")
             library("scalebar", "com.esri", "arcgis-maps-kotlin-toolkit-scalebar").versionRef("mapsSdk")
             library("utilitynetworks", "com.esri", "arcgis-maps-kotlin-toolkit-utilitynetworks").versionRef("mapsSdk")
+            library(
+                "buildingexplorer",
+                "com.esri",
+                "arcgis-maps-kotlin-toolkit-buildingexplorer"
+            ).versionRef("mapsSdk")
         }
     }
 }
@@ -268,3 +273,7 @@ include(":ar-flyover-app")
 project(":ar-flyover-app").projectDir = File(rootDir, "microapps/ArFlyoverApp/app")
 include(":localsceneview-app")
 project(":localsceneview-app").projectDir = File(rootDir, "microapps/LocalSceneViewApp/app")
+include(":buildingexplorer-app")
+project(":buildingexplorer-app").projectDir = File(rootDir, "microapps/BuildingExplorerApp/app")
+include(":buildingexplorer")
+project(":buildingexplorer").projectDir = File(rootDir, "toolkit/buildingexplorer")
