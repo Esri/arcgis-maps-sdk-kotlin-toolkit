@@ -31,6 +31,8 @@ import com.arcgismaps.mapping.layers.buildingscene.BuildingSolidFilterMode
 import com.arcgismaps.mapping.layers.buildingscene.BuildingSublayer
 import com.arcgismaps.mapping.layers.buildingscene.BuildingXrayFilterMode
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 /**
@@ -73,6 +75,9 @@ internal class BuildingSceneLayerState(
     private val buildingSceneLayer: BuildingSceneLayer,
     coroutineScope: CoroutineScope
 ) {
+    private val _stateLoaded = MutableStateFlow(false)
+    val stateLoaded = _stateLoaded.asStateFlow()
+
     // the name of the building layer
     val name = buildingSceneLayer.name
 
@@ -89,9 +94,8 @@ internal class BuildingSceneLayerState(
         private set
 
     // The list of available levels
-    private val _levels = mutableStateListOf(selectedLevel)
-    private val levelsState by derivedStateOf { _levels.toList() }
-    val levels: List<String> get() = levelsState
+    private val _levels = mutableListOf(selectedLevel)
+    val levels: List<String> get() = _levels
 
     // Levels elements should only show if there are more than 1 level (so 2 when counting "All")
     val isShowLevels by derivedStateOf { levels.size > 2 }
@@ -101,18 +105,15 @@ internal class BuildingSceneLayerState(
         private set
 
     // the list of construction phases
-    //val constructionPhases: MutableList<String> = mutableStateListOf()
-    private val _constructionPhases = mutableStateListOf<String>()
-    private val constructionPhasesState by derivedStateOf { _constructionPhases.toList() }
-    val constructionPhases: List<String> get() = constructionPhasesState
+    private val _constructionPhases = mutableListOf<String>()
+    val constructionPhases: List<String> get() = _constructionPhases
 
     // construction phase elements should only show if there is more than 1 phase
     val isShowConstructionPhases by derivedStateOf { constructionPhases.size > 1 }
 
     // The list of building sublayer categories
     private val _categories = mutableStateListOf<BuildingSublayer>()
-    private val categoriesState by derivedStateOf { _categories.toList() }
-    val categories: List<BuildingSublayer> get() = categoriesState
+    val categories: List<BuildingSublayer> get() = _categories
 
     private var overviewSublayer: BuildingSublayer? = null
     private var fullModelSublayer: BuildingSublayer? = null
@@ -159,6 +160,8 @@ internal class BuildingSceneLayerState(
 
                 // clear any preset filter on the layer
                 filter()
+
+                _stateLoaded.emit(true)
             }
         }
     }
