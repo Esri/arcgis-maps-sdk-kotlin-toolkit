@@ -212,7 +212,7 @@ public fun BuildingExplorer(
  * @since 300.2.0
  */
 @Composable
-private fun BuildingExplorer(
+internal fun BuildingExplorer(
     buildingSceneLayerState: BuildingSceneLayerState,
     modifier: Modifier = Modifier
 ) {
