@@ -18,17 +18,14 @@
 
 package com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet
 
-import android.content.res.Configuration
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.SubcomposeLayout
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Constraints.Companion.Infinity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.window.core.layout.WindowSizeClass
-import androidx.window.core.layout.WindowWidthSizeClass
 import kotlin.math.roundToInt
 
 /**
@@ -53,9 +50,8 @@ fun SheetLayout(
     maxWidth: Dp = Infinity.dp,
     sheetContent: @Composable (Int, Int) -> Unit
 ) {
-    val configuration = LocalConfiguration.current
-    val showAsSideSheet = windowSizeClass.windowWidthSizeClass == WindowWidthSizeClass.EXPANDED
-        && configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+    // Show as a side sheet if the current width is at least the EXPANDED breakpoint.
+    val showAsSideSheet = windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND)
     // convert the max width from dp into pixels
     val maxWidthInPx = with(LocalDensity.current) {
         maxWidth.roundToPx()
