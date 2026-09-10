@@ -99,6 +99,24 @@ android {
         val connectedTestReportsPath: String by project
         reportDir = "$connectedTestReportsPath/${project.name}"
     }
+
+    publishing {
+        singleVariant("release") {
+            // This is the default variant.
+        }
+    }
+}
+
+apiValidation {
+    ignoredClasses.add("com.arcgismaps.toolkit.buildingexplorer.BuildConfig")
+    // todo: remove when this is resolved https://github.com/Kotlin/binary-compatibility-validator/issues/74
+    // compose compiler generates public singletons for internal compose functions. this may be resolved in the compose
+    // compiler.
+    val composableSingletons = listOf(
+        "com.arcgismaps.toolkit.buildingexplorer.internal.components.base.ComposableSingletons\$BuildingExplorerKt"
+    )
+
+    ignoredClasses.addAll(composableSingletons)
 }
 
 dependencies {
