@@ -29,17 +29,16 @@ import androidx.window.core.layout.WindowSizeClass
 import kotlin.math.roundToInt
 
 /**
- * A custom layout that places the [sheetContent] in the center of the screen if the current
- * orientation is portrait. The [sheetContent] is shown as a side sheet on the right side of the
- * screen if the orientation is landscape and the [WindowSizeClass.windowWidthSizeClass] is
- * [WindowWidthSizeClass.EXPANDED] as provided by [windowSizeClass].
+ * A custom layout that places the [sheetContent] in the center of the screen if the [windowSizeClass]
+ * is less than Expanded. The [sheetContent] is shown as a side sheet on the right side of the
+ * screen if the [windowSizeClass] is Expanded or greater.
  *
  * @param windowSizeClass The current [WindowSizeClass].
  * @param sheetOffsetY An offset in pixels for the [sheetContent] in the Y axis.
  * @param modifier The [Modifier]
- * @param maxWidth A maximum width if specified will be enforced only when the orientation is portrait
- * and the [WindowSizeClass.windowWidthSizeClass] is not [WindowWidthSizeClass.EXPANDED]. Otherwise
- * this is set to [Infinity] which indicates to the maximum width available.
+ * @param maxWidth A maximum width if specified will be enforced only when the [windowSizeClass] is
+ * less than Expanded. For Expanded or greater, the width will be set to 40% of the available width.
+ * The default value is [Infinity] which indicates to the maximum width available.
  * @param sheetContent The sheet content lambda which is passed the width and height of the layout in pixels.
  */
 @Composable
