@@ -18,31 +18,27 @@
 
 package com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet
 
-import android.content.res.Configuration
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.SubcomposeLayout
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Constraints.Companion.Infinity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.window.core.layout.WindowSizeClass
-import androidx.window.core.layout.WindowWidthSizeClass
 import kotlin.math.roundToInt
 
 /**
- * A custom layout that places the [sheetContent] in the center of the screen if the current
- * orientation is portrait. The [sheetContent] is shown as a side sheet on the right side of the
- * screen if the orientation is landscape and the [WindowSizeClass.windowWidthSizeClass] is
- * [WindowWidthSizeClass.EXPANDED] as provided by [windowSizeClass].
+ * A custom layout that places the [sheetContent] in the center of the screen if the [windowSizeClass]
+ * is less than Expanded. The [sheetContent] is shown as a side sheet on the right side of the
+ * screen if the [windowSizeClass] is Expanded or greater.
  *
  * @param windowSizeClass The current [WindowSizeClass].
  * @param sheetOffsetY An offset in pixels for the [sheetContent] in the Y axis.
  * @param modifier The [Modifier]
- * @param maxWidth A maximum width if specified will be enforced only when the orientation is portrait
- * and the [WindowSizeClass.windowWidthSizeClass] is not [WindowWidthSizeClass.EXPANDED]. Otherwise
- * this is set to [Infinity] which indicates to the maximum width available.
+ * @param maxWidth A maximum width if specified will be enforced only when the [windowSizeClass] is
+ * less than Expanded. For Expanded or greater, the width will be set to 40% of the available width.
+ * The default value is [Infinity] which indicates to the maximum width available.
  * @param sheetContent The sheet content lambda which is passed the width and height of the layout in pixels.
  */
 @Composable
@@ -53,9 +49,8 @@ fun SheetLayout(
     maxWidth: Dp = Infinity.dp,
     sheetContent: @Composable (Int, Int) -> Unit
 ) {
-    val configuration = LocalConfiguration.current
-    val showAsSideSheet = windowSizeClass.windowWidthSizeClass == WindowWidthSizeClass.EXPANDED
-        && configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+    // Show as a side sheet if the current width is at least the EXPANDED breakpoint.
+    val showAsSideSheet = windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND)
     // convert the max width from dp into pixels
     val maxWidthInPx = with(LocalDensity.current) {
         maxWidth.roundToPx()
