@@ -21,13 +21,16 @@ package com.arcgismaps.toolkit.basemapgallery
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Badge
 import androidx.compose.material3.MaterialTheme
@@ -49,6 +52,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -67,6 +71,7 @@ internal fun BasemapGalleryItem(
 ) {
     val placeholder = painterResource(R.drawable.basemap)
     val thumbnail: MutableState<Painter> = remember { mutableStateOf(placeholder) }
+    val itemShape = RoundedCornerShape(8.dp)
     LaunchedEffect(thumbnail) {
         basemapGalleryItem.thumbnailProvider()?.let { bitmap ->
             bitmap.asImageBitmap().let { imageBitmap ->
@@ -83,6 +88,18 @@ internal fun BasemapGalleryItem(
                     MaterialTheme.colorScheme.secondaryContainer
                 } else {
                     Color.Transparent
+                },
+                shape = itemShape
+            )
+            .then(
+                if (selected) {
+                    Modifier.border(
+                        width = 2.dp,
+                        color = MaterialTheme.colorScheme.onSecondaryContainer,
+                        shape = itemShape
+                    )
+                } else {
+                    Modifier
                 }
             )
             .padding(8.dp)
@@ -91,10 +108,10 @@ internal fun BasemapGalleryItem(
         Box {
             Image(
                 painter = thumbnail.value,
-                contentDescription = basemapGalleryItem.title,
+                contentDescription = null,
                 modifier = Modifier
                     .padding(8.dp)
-                    .clip(RoundedCornerShape(8.dp))
+                    .clip(itemShape)
             )
             if (basemapGalleryItem.is3D) {
                 Badge(modifier = Modifier.align(Alignment.TopEnd)) {
@@ -122,17 +139,25 @@ public fun BasemapGallery(
 ) {
     var selection by rememberSaveable { mutableIntStateOf(-1) }
 
-    LazyVerticalGrid(modifier = modifier, columns = GridCells.Adaptive(minSize = 128.dp)) {
+    LazyVerticalGrid(
+        modifier = modifier.selectableGroup(),
+        columns = GridCells.Adaptive(minSize = 128.dp)
+    ) {
         basemapGalleryItems.forEachIndexed { index, basemapGalleryItem ->
             item {
                 BasemapGalleryItem(
                     basemapGalleryItem,
                     modifier = Modifier
                         .padding(8.dp)
-                        .clickable {
-                            selection = index
-                            onItemClick(basemapGalleryItem)
-                        },
+                        .sizeIn(minWidth = 48.dp, minHeight = 48.dp)
+                        .selectable(
+                            selected = index == selection,
+                            role = Role.RadioButton,
+                            onClick = {
+                                selection = index
+                                onItemClick(basemapGalleryItem)
+                            }
+                        ),
                     index == selection
                 )
             }

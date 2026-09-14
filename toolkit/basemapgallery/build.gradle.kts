@@ -64,6 +64,16 @@ android {
         enabled = false
     }
 
+    /**
+     * Configures the test report for connected (instrumented) tests to be copied to a central
+     * folder in the project's root directory.
+     */
+    testOptions {
+        targetSdk = libs.versions.compileSdk.get().toInt()
+        val connectedTestReportsPath: String = rootProject.extra["connectedTestReportsPath"] as String
+        reportDir = "$connectedTestReportsPath/${project.name}"
+    }
+
     publishing {
         singleVariant("release") {
             // This is the default variant.
