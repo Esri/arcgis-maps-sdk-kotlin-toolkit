@@ -106,7 +106,7 @@ internal fun SelectAssetTypeScreen(
                         },
                         supportingContent = {
                             Text(
-                                text = assetType.assetGroup.name,
+                                text = assetType.assetGroup?.name.orEmpty(),
                                 modifier = Modifier.padding(start = 16.dp)
                             )
                         },
