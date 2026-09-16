@@ -70,6 +70,9 @@ class FloorFilterTests {
                 .fetchSemanticsNodes().size == 1
         }
 
+        // Perform a11y checks on root content
+        composeTestRule.checkAccessibility(failOnViolation = false)
+
         // get the semantic node of the site facility dialog selector button
         val siteFacilityButton = composeTestRule.onNodeWithContentDescription(
             label = "Sites and facilities button"
@@ -81,6 +84,9 @@ class FloorFilterTests {
         // open the site facility dialog selector
         siteFacilityButton.performClick()
         composeTestRule.waitForIdle()
+
+        // Perform a11y checks on root content
+        composeTestRule.checkAccessibility(failOnViolation = false)
 
         // get the semantic node of the second site displayed in the list of sites ("Research Annex")
         val researchAnnexSiteItem = composeTestRule.onAllNodesWithContentDescription(
@@ -94,6 +100,9 @@ class FloorFilterTests {
         researchAnnexSiteItem.performClick()
         composeTestRule.waitForIdle()
 
+        // Perform a11y checks on root content
+        composeTestRule.checkAccessibility(failOnViolation = false)
+
         // get the semantic node of the first facility of the selected site ("Lattice")
         val latticeFacilityItem = composeTestRule.onAllNodesWithContentDescription(
             label = "Facility item"
@@ -105,6 +114,9 @@ class FloorFilterTests {
         // select the facility "Lattice"
         latticeFacilityItem.performClick()
         composeTestRule.waitForIdle()
+
+        // Perform a11y checks on root content
+        composeTestRule.checkAccessibility(failOnViolation = false)
 
         // get the collection of semantic node of all floor levels of the selected facility
         val floorLevelButtons = composeTestRule.onAllNodesWithContentDescription(
@@ -135,6 +147,9 @@ class FloorFilterTests {
         eighthFloorLevelButton.performClick()
         composeTestRule.waitForIdle()
 
+        // Perform a11y checks on root content
+        composeTestRule.checkAccessibility(failOnViolation = false)
+
         // collapse the floor level list
         floorListCollapseButton.performClick()
         composeTestRule.waitForIdle()
@@ -143,6 +158,9 @@ class FloorFilterTests {
         floorListCollapseButton.assertExists()
         eighthFloorLevelButton.assertIsNotDisplayed()
         firstFloorLevelButton.assertIsDisplayed()
+
+        // Perform a11y checks on root content
+        composeTestRule.checkAccessibility(failOnViolation = false)
     }
 }
 
