@@ -266,6 +266,20 @@ public class FeatureFormState private constructor(
         return true
     }
 
+    internal fun navigateToForm(featureForm: FeatureForm) {
+        val navigateTo = navigateToRoute ?: return
+        // Check if the backStackEntry is in the resumed state.
+        //if (backStackEntry.lifecycleIsResumed().not()) return
+
+        store.find {
+            it.featureForm.feature == featureForm.feature
+        }?.let { formStateData ->
+            store.add(formStateData)
+        }
+        // Navigate to the form view.
+        navigateTo(NavigationRoute.Form)
+    }
+
     /**
      * Based on the current destination given by the [backStackEntry], this function navigates back
      * to the previous view and pops the current [FeatureForm] from the stack (if required).

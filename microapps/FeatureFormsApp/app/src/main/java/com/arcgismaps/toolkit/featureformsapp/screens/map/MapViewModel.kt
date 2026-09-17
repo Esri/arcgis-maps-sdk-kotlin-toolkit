@@ -53,6 +53,7 @@ import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 import com.arcgismaps.tasks.geodatabase.SyncDirection
 import com.arcgismaps.tasks.offlinemaptask.OfflineMapSyncTask
 import com.arcgismaps.tasks.offlinemaptask.PreplannedScheduledUpdatesOption
+import com.arcgismaps.toolkit.featureforms.FeatureFormBrowserState
 import com.arcgismaps.toolkit.featureforms.FeatureFormState
 import com.arcgismaps.toolkit.featureformsapp.R
 import com.arcgismaps.toolkit.featureformsapp.data.PortalItemRepository
@@ -116,7 +117,7 @@ sealed class UIState {
      * In editing state with the [featureFormState].
      */
     data class Editing(
-        val featureFormState: FeatureFormState
+        val featureFormState: FeatureFormBrowserState
     ) : UIState()
 
     /**
@@ -411,10 +412,10 @@ class MapViewModel @Inject constructor(
         when (_uiState.value) {
             is UIState.SelectFeature, UIState.NotEditing -> {
                 // if the current state is selecting a feature or not editing then select the feature
-                val featureForm = FeatureForm(feature)
-                val featureFormState = FeatureFormState(
-                    featureForm = featureForm,
-                    coroutineScope = scope
+                //val featureForm = FeatureForm(feature)
+                val featureFormState = FeatureFormBrowserState(
+                    features = listOf(feature),
+                    scope = scope
                 )
                 // set the UI to an editing state with the FeatureForm
                 _uiState.value = UIState.Editing(featureFormState)
@@ -537,7 +538,7 @@ class MapViewModel @Inject constructor(
         }
         table.addFeature(feature).onSuccess {
             // create a FeatureForm
-            val featureForm = FeatureForm(feature)
+            //val featureForm = FeatureForm(feature)
             if (location != null) {
                 // set the viewpoint to the feature location
                 proxy.setViewpointCenter(location)
@@ -547,9 +548,9 @@ class MapViewModel @Inject constructor(
                 }
             }
             _uiState.value = UIState.Editing(
-                FeatureFormState(
-                    featureForm = featureForm,
-                    coroutineScope = scope
+                FeatureFormBrowserState(
+                    features = listOf(feature),
+                    scope = scope
                 )
             )
         }.onFailure {
