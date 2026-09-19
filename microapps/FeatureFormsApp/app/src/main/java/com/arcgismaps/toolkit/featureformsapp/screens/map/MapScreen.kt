@@ -36,11 +36,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
@@ -82,7 +80,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -107,13 +104,12 @@ import androidx.window.core.layout.WindowSizeClass
 import androidx.window.core.layout.computeWindowSizeClass
 import androidx.window.layout.WindowMetricsCalculator
 import com.arcgismaps.data.ArcGISFeature
-import com.arcgismaps.mapping.Surface
 import com.arcgismaps.mapping.layers.ArcGISSublayer
 import com.arcgismaps.mapping.layers.FeatureLayer
 import com.arcgismaps.mapping.layers.SubtypeFeatureLayer
 import com.arcgismaps.toolkit.featureforms.FeatureForm
-import com.arcgismaps.toolkit.featureforms.FeatureFormBrowser
-import com.arcgismaps.toolkit.featureforms.FeatureFormBrowserState
+import com.arcgismaps.toolkit.featureforms.FeatureFormManager
+import com.arcgismaps.toolkit.featureforms.FeatureFormManagerState
 import com.arcgismaps.toolkit.featureforms.FeatureFormState
 import com.arcgismaps.toolkit.featureforms.internal.editor.FeatureFormNavigationBar
 import com.arcgismaps.toolkit.featureformsapp.R
@@ -429,7 +425,7 @@ fun FeatureItem(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FeatureFormBrowserSheet(
-    state: FeatureFormBrowserState,
+    state: FeatureFormManagerState,
     isNavigationEnabled: Boolean,
     onShowOnMapRequest: (ArcGISFeature) -> Unit,
     onDismiss: () -> Unit,
@@ -461,7 +457,6 @@ fun FeatureFormBrowserSheet(
                         modifier = Modifier
                             .fillMaxWidth(),
                             //.navigationBarsPadding()
-                        onShowOnMapRequest = onShowOnMapRequest,
                     )
                 }
             }
@@ -472,13 +467,13 @@ fun FeatureFormBrowserSheet(
             peekHeight = 40.dp,
             expansionHeight = SheetExpansionHeight(0.5f),
             sheetSwipeEnabled = true,
-            shape = RoundedCornerShape(topStart = 25.dp, topEnd = 25.dp),
+            shape = RoundedCornerShape(topStart = 18.dp, topEnd = 18.dp),
             containerColor = MaterialTheme.colorScheme.surface,
             layoutHeight = layoutHeight.toFloat(),
             sheetWidth = with(LocalDensity.current) { layoutWidth.toDp() },
             tonalElevation = (-1).dp
         ) {
-            FeatureFormBrowser(
+            FeatureFormManager(
                 state = state,
                 modifier = Modifier.fillMaxWidth(),
                 showNavigationBar = false,

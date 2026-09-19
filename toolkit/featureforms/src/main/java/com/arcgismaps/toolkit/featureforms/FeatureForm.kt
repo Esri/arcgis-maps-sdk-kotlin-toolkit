@@ -20,6 +20,7 @@ package com.arcgismaps.toolkit.featureforms
 
 import android.Manifest
 import android.content.Context
+import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxSize
@@ -486,7 +487,9 @@ internal fun FeatureForm(
     navController: NavHostController,
     modifier: Modifier = Modifier,
     showCloseIcon: Boolean = true,
+    showBackAction: Boolean = true,
     showFormActions: Boolean = true,
+    showTopBar: Boolean = true,
     isNavigationEnabled: Boolean = true,
     allowNavigationWithEdits: Boolean = false,
     validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.Automatic,
@@ -501,6 +504,13 @@ internal fun FeatureForm(
     val state by rememberUpdatedState(featureFormState)
     state.setNavigationCallback { route ->
         navController.navigate(route)
+    }
+    state.setNavigationPopupToCallback { route ->
+        navController.navigate(route) {
+            popUpTo(navController.graph.id) {
+                inclusive = true
+            }
+        }
     }
     state.setNavigateBack {
         navController.navigateUp()
@@ -530,12 +540,14 @@ internal fun FeatureForm(
                 onDismiss = {
                     state.validateAllFields()
                 },
+                onAction = null,
                 title = validationErrorMessage,
                 body = res.getQuantityString(
                     R.plurals.you_have_errors_that_must_be_fixed_before_saving,
                     errorCount,
                     errorCount
-                )
+                ),
+                actionText = ""
             )
             dialogRequester.requestDialog(errorDialog)
             Result.failure(Exception("Validation errors found"))
@@ -561,58 +573,62 @@ internal fun FeatureForm(
     // Get the form data for the active entry (destination) in the back stack
     val formData = remember(backStackEntry) { state.getActiveFormStateData() }
     FeatureFormLayout(
-        topBar = {
-            val isDialogDestination = backStackEntry?.destination is FloatingWindow
-            // Get the appropriate back stack entry based on whether the current destination is a
-            // dialog or not. Dialog destinations should not be considered for the top bar content,
-            // so we use the previous back stack entry instead.
-            val contentEntry = if (isDialogDestination) {
-                navController.previousBackStackEntry
-            } else {
-                backStackEntry
-            }
-            // Track if there is a back stack entry
-            val hasBackStack = if (isDialogDestination) {
-                contentHasBackStack
-            } else {
-                navController.previousBackStackEntry != null
-            }
+        topBar = if (showTopBar) {
+            {
+                val isDialogDestination = backStackEntry?.destination is FloatingWindow
+                // Get the appropriate back stack entry based on whether the current destination is a
+                // dialog or not. Dialog destinations should not be considered for the top bar content,
+                // so we use the previous back stack entry instead.
+                val contentEntry = if (isDialogDestination) {
+                    navController.previousBackStackEntry
+                } else {
+                    backStackEntry
+                }
+                // Track if there is a back stack entry
+                val hasBackStack = if (isDialogDestination) {
+                    contentHasBackStack
+                } else {
+                    navController.previousBackStackEntry != null
+                }
+                SideEffect {
+                    // update the retained value only for regular content destinations.
+                    // A dialog's own previous entry must not alter it.
+                    if (!isDialogDestination) {
+                        contentHasBackStack = hasBackStack
+                    }
+                }
 
-            SideEffect {
-                // update the retained value only for regular content destinations.
-                // A dialog's own previous entry must not alter it.
-                if (!isDialogDestination) {
-                    contentHasBackStack = hasBackStack
+                contentEntry?.let { entry ->
+                    ContentAwareTopBar(
+                        backStackEntry = entry,
+                        state = state,
+                        onSaveForm = { willNavigate ->
+                            saveForm(state, willNavigate)
+                        },
+                        onDiscardForm = ::discardForm,
+                        onDismissRequest = onDismiss,
+                        hasBackStack = hasBackStack,
+                        showBackAction = showBackAction,
+                        showFormActions = showFormActions,
+                        showCloseIcon = showCloseIcon,
+                        isNavigationEnabled = isNavigationEnabled,
+                        modifier = Modifier
+                            .padding(
+                                vertical = 8.dp,
+                                horizontal = if (hasBackStack) 8.dp else 16.dp
+                            )
+                            .fillMaxWidth(),
+                    )
                 }
             }
-
-            contentEntry?.let { entry ->
-                ContentAwareTopBar(
-                    backStackEntry = entry,
-                    state = state,
-                    onSaveForm = { willNavigate ->
-                        saveForm(state, willNavigate)
-                    },
-                    onDiscardForm = ::discardForm,
-                    onDismissRequest = onDismiss,
-                    hasBackStack = hasBackStack,
-                    showFormActions = showFormActions,
-                    showCloseIcon = showCloseIcon,
-                    isNavigationEnabled = isNavigationEnabled,
-                    modifier = Modifier
-                        .padding(
-                            vertical = 8.dp,
-                            horizontal = if (hasBackStack) 8.dp else 16.dp
-                        )
-                        .fillMaxWidth(),
-                )
-            }
-        },
+        } else null,
         content = {
             FeatureFormNavHost(
                 navController = navController,
                 state = state,
                 isNavigationEnabled = isNavigationEnabled,
+                allowNavigationWithEdits = allowNavigationWithEdits,
+                showTopBar = showTopBar,
                 validationErrorVisibility = validationErrorVisibility,
                 onSaveForm = { willNavigate ->
                     saveForm(state, willNavigate)
@@ -633,6 +649,7 @@ internal fun FeatureForm(
         onDispose {
             // Clear the navigation actions when the composition is disposed
             state.setNavigationCallback(null)
+            state.setNavigationPopupToCallback(null)
             state.setNavigateBack(null)
         }
     }
@@ -640,7 +657,7 @@ internal fun FeatureForm(
 
 @Composable
 internal fun FeatureFormLayout(
-    topBar: @Composable ColumnScope.() -> Unit,
+    topBar: (@Composable ColumnScope.() -> Unit)?,
     content: @Composable ColumnScope.() -> Unit,
     modifier: Modifier = Modifier,
     colorScheme: FeatureFormColorScheme,
@@ -651,7 +668,7 @@ internal fun FeatureFormLayout(
         typography = typography
     ) {
         Column(modifier = modifier) {
-            topBar()
+            topBar?.invoke(this)
             content()
         }
     }

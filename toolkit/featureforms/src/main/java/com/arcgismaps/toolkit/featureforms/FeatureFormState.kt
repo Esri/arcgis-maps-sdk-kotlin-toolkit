@@ -16,10 +16,12 @@
 
 package com.arcgismaps.toolkit.featureforms
 
+import android.util.Log
 import androidx.annotation.MainThread
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
@@ -67,12 +69,19 @@ import com.arcgismaps.toolkit.featureforms.internal.components.text.FormTextFiel
 import com.arcgismaps.toolkit.featureforms.internal.components.text.TextFieldProperties
 import com.arcgismaps.toolkit.featureforms.internal.components.text.TextFormElementState
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationsElementState
+import com.arcgismaps.toolkit.featureforms.internal.editor.objectId
 import com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationRoute
 import com.arcgismaps.toolkit.featureforms.internal.navigation.lifecycleIsResumed
 import com.arcgismaps.toolkit.featureforms.internal.utils.fieldIsNullable
 import com.arcgismaps.toolkit.featureforms.internal.utils.toMap
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.launch
 
 /**
@@ -109,11 +118,15 @@ public class FeatureFormState private constructor(
      */
     private var navigateToRoute: ((NavigationRoute) -> Unit)? = null
 
+    private var navigatePopUpToRoute: ((NavigationRoute) -> Unit)? = null
+
     /**
      * A navigation callback that is called when navigating back to a previous [FeatureForm]. This
      * should be set by the composition that uses the NavController to navigate back.
      */
     private var navigateBack: (() -> Boolean)? = null
+
+    private var onFeatureFormAddedCallback: ((FormStateData) -> Unit) = {}
 
     /**
      * The currently active [FeatureForm]. This property is updated when navigating between forms.
@@ -161,6 +174,15 @@ public class FeatureFormState private constructor(
         coroutineScope.launch(start = CoroutineStart.UNDISPATCHED) {
             formStateData.evaluateExpressions()
         }
+    }
+
+    internal constructor(
+        featureForm: FeatureForm,
+        coroutineScope: CoroutineScope,
+        onFeatureFormAddedCallback: ((FormStateData) -> Unit)
+    ) : this(featureForm, coroutineScope) {
+        this.onFeatureFormAddedCallback = onFeatureFormAddedCallback
+        this.onFeatureFormAddedCallback(getActiveFormStateData())
     }
 
     /**
@@ -213,6 +235,10 @@ public class FeatureFormState private constructor(
         this.navigateToRoute = navigateToRoute
     }
 
+    internal fun setNavigationPopupToCallback(navigatePopUpToRoute: ((NavigationRoute) -> Unit)?) {
+        this.navigatePopUpToRoute = navigatePopUpToRoute
+    }
+
     /**
      * Sets the navigation callback to the provided [navigateBack] function. This function is
      * called when navigating back to a previous [FeatureForm]. Set this to null when the composition
@@ -233,7 +259,10 @@ public class FeatureFormState private constructor(
         if (_activeFeatureForm.value != formStateData.featureForm) {
             _activeFeatureForm.value = formStateData.featureForm
             // refresh the feature to ensure the latest data is loaded.
-            formStateData.featureForm.feature.refresh()
+            if (!formStateData.featureForm.hasEdits.value) {
+                // only refresh the feature if there are no edits, otherwise the edits will be lost.
+                formStateData.featureForm.feature.refresh()
+            }
             if (formStateData.initialEvaluation.not()) {
                 formStateData.evaluateExpressions()
             }
@@ -259,23 +288,24 @@ public class FeatureFormState private constructor(
             elements = form.elements,
             scope = coroutineScope
         )
+        val formStateData = FormStateData(form, states)
         // Add the new form to the stack.
-        store.addLast(FormStateData(form, states))
+        store.addLast(formStateData)
+        onFeatureFormAddedCallback(formStateData)
         // Navigate to the form view.
         navigateTo(NavigationRoute.Form)
         return true
     }
 
-    internal fun navigateToForm(featureForm: FeatureForm) {
-        val navigateTo = navigateToRoute ?: return
+    internal fun navigateToForm(formStateData: FormStateData) {
+        //Log.e("TAG", "navigateToForm: ${navigateToRoute}")
+        val navigateTo = navigatePopUpToRoute ?: return
         // Check if the backStackEntry is in the resumed state.
         //if (backStackEntry.lifecycleIsResumed().not()) return
 
-        store.find {
-            it.featureForm.feature == featureForm.feature
-        }?.let { formStateData ->
-            store.add(formStateData)
-        }
+        store.clear()
+        store.addLast(formStateData)
+        Log.e("TAG", "navigateToForm: ${formStateData.featureForm.id()}_${formStateData.featureForm}")
         // Navigate to the form view.
         navigateTo(NavigationRoute.Form)
     }
@@ -330,27 +360,7 @@ public class FeatureFormState private constructor(
      */
     internal fun validateAllFields() {
         // Force validation of all the states in the current form.
-        getActiveFormStateData().stateCollection.forEach { entry ->
-            when (entry.formElement) {
-                // validate attachments
-                is AttachmentsFormElement -> {
-                    (entry.getState<AttachmentElementState>()).forceValidation()
-                }
-                // validate all fields
-                is FieldFormElement -> {
-                    entry.getState<BaseFieldState<*>>().forceValidation()
-                }
-
-                // validate any fields that are within a group
-                is GroupFormElement -> {
-                    entry.getState<BaseGroupState>().fieldStates.forEach { childEntry ->
-                        childEntry.getState<BaseFieldState<*>>().forceValidation()
-                    }
-                }
-
-                else -> {}
-            }
-        }
+        getActiveFormStateData().validateAllFields()
     }
 }
 
@@ -367,6 +377,10 @@ internal data class FormStateData(
     val featureForm: FeatureForm,
     val stateCollection: FormStateCollection
 ) {
+    var firstVisibleItemIndex by mutableIntStateOf(0)
+
+    var firstVisibleItemScrollOffset by mutableIntStateOf(0)
+
     /**
      * Indicates if the expressions for the [featureForm] have been evaluated at least once.
      */
@@ -393,6 +407,34 @@ internal data class FormStateData(
             }
         } finally {
             isEvaluatingExpressions = false
+        }
+    }
+
+    /**
+     * Validates all the fields in the form.
+     */
+    fun validateAllFields() {
+        // Force validation of all the states in the current form.
+        stateCollection.forEach { entry ->
+            when (entry.formElement) {
+                // validate attachments
+                is AttachmentsFormElement -> {
+                    (entry.getState<AttachmentElementState>()).forceValidation()
+                }
+                // validate all fields
+                is FieldFormElement -> {
+                    entry.getState<BaseFieldState<*>>().forceValidation()
+                }
+
+                // validate any fields that are within a group
+                is GroupFormElement -> {
+                    entry.getState<BaseGroupState>().fieldStates.forEach { childEntry ->
+                        childEntry.getState<BaseFieldState<*>>().forceValidation()
+                    }
+                }
+
+                else -> {}
+            }
         }
     }
 }

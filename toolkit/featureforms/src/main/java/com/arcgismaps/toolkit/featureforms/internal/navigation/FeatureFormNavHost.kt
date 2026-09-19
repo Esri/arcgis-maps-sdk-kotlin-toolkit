@@ -38,6 +38,8 @@ internal fun FeatureFormNavHost(
     navController: NavHostController,
     state: FeatureFormState,
     isNavigationEnabled: Boolean,
+    allowNavigationWithEdits: Boolean,
+    showTopBar: Boolean,
     validationErrorVisibility: ValidationErrorVisibility,
     onSaveForm: suspend (Boolean) -> Result<Unit>,
     onDiscardForm: suspend (Boolean) -> Unit,
@@ -58,6 +60,7 @@ internal fun FeatureFormNavHost(
 
         featureFormDestination(
             state = state,
+            showTopBar = showTopBar,
             onBarcodeButtonClick = onBarcodeButtonClick,
             onUtilityFilterSelected = navController::navigateToUNAssociationsFilterResult,
             onNavigationEvent = onNavigationEvent,
@@ -71,7 +74,8 @@ internal fun FeatureFormNavHost(
             onGroupSelected = navController::navigateToUNAssociationGroupResult,
             onAddFromSourceClick = navController::navigateToAddUNAssociationFromSource,
             onNavigationEvent = onNavigationEvent,
-            state = state
+            state = state,
+            showTopBar = showTopBar
         )
 
         associationGroupResultDestination(
@@ -79,6 +83,8 @@ internal fun FeatureFormNavHost(
             onSave = onSaveForm,
             onDiscard = onDiscardForm,
             isNavigationEnabled = isNavigationEnabled,
+            allowNavigationWithEdits = allowNavigationWithEdits,
+            showTopBar = showTopBar,
             onNavigateToAssociation = navController::navigateToUNAssociationDetails,
             onNavigateToFeature = state::navigateTo,
             onNavigationEvent = onNavigationEvent,

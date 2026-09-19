@@ -16,7 +16,9 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.screens
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -57,6 +59,8 @@ internal fun UNAssociationGroupResultScreen(
     state: UtilityAssociationsElementState,
     featureForm: FeatureForm,
     isNavigationEnabled: Boolean,
+    allowNavigationWithEdits: Boolean,
+    showTopBar: Boolean,
     onSave: suspend (Boolean) -> Result<Unit>,
     onDiscard: suspend (Boolean) -> Unit,
     onNavigateToAssociation : () -> Unit,
@@ -82,37 +86,56 @@ internal fun UNAssociationGroupResultScreen(
             }
         }
     }
-    UtilityAssociationGroupResult(
-        groupResult = groupResult,
-        isEditable = isEditable,
-        isNavigationEnabled = isNavigationEnabled,
-        onAssociatedFeatureLocateRequest = onAssociatedFeatureLocateRequest,
-        onItemClick = { index ->
-            if (hasEdits) {
-                pendingNavigationAction = NavigationAction.NavigateToFeature(index)
-            } else {
-                val feature = groupResult.associationResults[index].associatedFeature
-                // Navigate to the next form if there are no edits.
-                onNavigateToFeature(feature)
-            }
-        },
-        onDetailsClick = { index ->
-            val association = groupResult.associationResults[index]
-            state.setSelectedAssociationResult(association)
-            // show the details sheet
-            // showDetails = true
-            onNavigateToAssociation()
-        },
-        onDelete = { isGroupEmpty ->
-            if (isGroupEmpty) {
-                // If the group is empty after deletion, navigate back to the filter view
-                onBack()
-            }
-        },
-        modifier = modifier
-            .padding(16.dp)
-            .fillMaxSize()
-    )
+    Column(modifier = modifier.fillMaxSize()) {
+        // Show the top bar if the flag is set to true
+        if (showTopBar.not()) {
+            FeatureFormTitle(
+                title = groupResult.name,
+                subTitle = state.selectedFilterResult?.filter?.title ?: "",
+                hasEdits = false,
+                showCloseIcon = false,
+                showBackIcon = false,
+                isNavigationEnabled = true,
+                onBackPressed = {},
+                onClose = {},
+                onSave = {},
+                onDiscard = {},
+                modifier = Modifier.padding(horizontal = 16.dp).fillMaxWidth()
+            )
+        }
+
+        UtilityAssociationGroupResult(
+            groupResult = groupResult,
+            isEditable = isEditable,
+            isNavigationEnabled = isNavigationEnabled,
+            onAssociatedFeatureLocateRequest = onAssociatedFeatureLocateRequest,
+            onItemClick = { index ->
+                // only set the action to navigate if there are unsaved edits and navigation with edits
+                // is not allowed
+                if (hasEdits && !allowNavigationWithEdits) {
+                    pendingNavigationAction = NavigationAction.NavigateToFeature(index)
+                } else {
+                    val feature = groupResult.associationResults[index].associatedFeature
+                    // Navigate to the next form if there are no edits.
+                    onNavigateToFeature(feature)
+                }
+            },
+            onDetailsClick = { index ->
+                val association = groupResult.associationResults[index]
+                state.setSelectedAssociationResult(association)
+                // show the details sheet
+                // showDetails = true
+                onNavigateToAssociation()
+            },
+            onDelete = { isGroupEmpty ->
+                if (isGroupEmpty) {
+                    // If the group is empty after deletion, navigate back to the filter view
+                    onBack()
+                }
+            },
+            modifier = Modifier.padding(16.dp)
+        )
+    }
     if (pendingNavigationAction != NavigationAction.None) {
         SaveEditsDialog(
             onDismissRequest = {

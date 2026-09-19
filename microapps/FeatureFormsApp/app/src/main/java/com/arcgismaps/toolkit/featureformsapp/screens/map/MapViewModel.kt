@@ -53,8 +53,7 @@ import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 import com.arcgismaps.tasks.geodatabase.SyncDirection
 import com.arcgismaps.tasks.offlinemaptask.OfflineMapSyncTask
 import com.arcgismaps.tasks.offlinemaptask.PreplannedScheduledUpdatesOption
-import com.arcgismaps.toolkit.featureforms.FeatureFormBrowserState
-import com.arcgismaps.toolkit.featureforms.FeatureFormState
+import com.arcgismaps.toolkit.featureforms.FeatureFormManagerState
 import com.arcgismaps.toolkit.featureformsapp.R
 import com.arcgismaps.toolkit.featureformsapp.data.PortalItemRepository
 import com.arcgismaps.toolkit.featureformsapp.di.ApplicationScope
@@ -117,7 +116,7 @@ sealed class UIState {
      * In editing state with the [featureFormState].
      */
     data class Editing(
-        val featureFormState: FeatureFormBrowserState
+        val featureFormState: FeatureFormManagerState
     ) : UIState()
 
     /**
@@ -413,8 +412,8 @@ class MapViewModel @Inject constructor(
             is UIState.SelectFeature, UIState.NotEditing -> {
                 // if the current state is selecting a feature or not editing then select the feature
                 //val featureForm = FeatureForm(feature)
-                val featureFormState = FeatureFormBrowserState(
-                    features = listOf(feature),
+                val featureFormState = FeatureFormManagerState(
+                    forms = listOf(FeatureForm(feature)),
                     scope = scope
                 )
                 // set the UI to an editing state with the FeatureForm
@@ -548,8 +547,8 @@ class MapViewModel @Inject constructor(
                 }
             }
             _uiState.value = UIState.Editing(
-                FeatureFormBrowserState(
-                    features = listOf(feature),
+                FeatureFormManagerState(
+                    forms = listOf(FeatureForm(feature)),
                     scope = scope
                 )
             )
