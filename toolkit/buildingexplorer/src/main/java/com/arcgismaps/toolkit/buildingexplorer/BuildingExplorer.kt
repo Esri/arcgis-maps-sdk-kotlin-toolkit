@@ -225,13 +225,13 @@ internal fun BuildingExplorer(
                 Text(stringResource(R.string.visible))
                 Spacer(modifier = Modifier.weight(1f))
                 Switch(
-                    checked = buildingSceneLayerState.visible,
+                    checked = buildingSceneLayerState.visible.value,
                     onCheckedChange = buildingSceneLayerState::toggleVisibility
                 )
             }
 
-            if (buildingSceneLayerState.visible) {
-                if (buildingSceneLayerState.isShowFullModelSwitch) {
+            if (buildingSceneLayerState.visible.value) {
+                if (buildingSceneLayerState.isShowFullModelSwitch.value) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.padding(8.dp)
@@ -239,7 +239,7 @@ internal fun BuildingExplorer(
                         Text(stringResource(R.string.show_full_model))
                         Spacer(modifier = Modifier.weight(1f))
                         Switch(
-                            checked = buildingSceneLayerState.showFullModel,
+                            checked = buildingSceneLayerState.showFullModel.value,
                             onCheckedChange = buildingSceneLayerState::toggleFullModel
                         )
                     }
@@ -248,7 +248,7 @@ internal fun BuildingExplorer(
                 val stateLoaded by buildingSceneLayerState.stateLoaded.collectAsStateWithLifecycle()
 
                 if (stateLoaded) {
-                    if (buildingSceneLayerState.showFullModel) {
+                    if (buildingSceneLayerState.showFullModel.value) {
                         if (buildingSceneLayerState.isShowLevels) {
                             var levelsExpanded by remember { mutableStateOf(false) }
                             Row {
@@ -261,10 +261,10 @@ internal fun BuildingExplorer(
                                     modifier = Modifier.padding(8.dp)
                                 ) {
                                     TextField(
-                                        value = if (buildingSceneLayerState.selectedLevel == "All") {
+                                        value = if (buildingSceneLayerState.selectedLevel.value == "All") {
                                             stringResource(R.string.all)
                                         } else {
-                                            buildingSceneLayerState.selectedLevel
+                                            buildingSceneLayerState.selectedLevel.value
                                         },
                                         onValueChange = {},
                                         readOnly = true,
@@ -322,7 +322,7 @@ internal fun BuildingExplorer(
                                     modifier = Modifier.padding(8.dp)
                                 ) {
                                     TextField(
-                                        value = buildingSceneLayerState.selectedConstructionPhase,
+                                        value = buildingSceneLayerState.selectedConstructionPhase.value,
                                         onValueChange = {},
                                         readOnly = true,
                                         trailingIcon = {
