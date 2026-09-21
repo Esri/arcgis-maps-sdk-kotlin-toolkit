@@ -128,7 +128,7 @@ public fun BuildingExplorer(
 
                         Box(modifier = Modifier.padding(8.dp)) {
                             TextField(
-                                value = state.buildingSceneLayerState.name,
+                                value = state.buildingSceneLayerState.value.name,
                                 onValueChange = {},
                                 readOnly = true,
                                 trailingIcon = {
@@ -165,7 +165,7 @@ public fun BuildingExplorer(
                             }
                         }
                     } else {
-                        Text(text = state.buildingSceneLayerState.name)
+                        Text(text = state.buildingSceneLayerState.value.name)
                     }
                 }
             }
@@ -173,7 +173,7 @@ public fun BuildingExplorer(
                 HorizontalDivider()
             }
             item {
-                BuildingExplorer(buildingSceneLayerState = state.buildingSceneLayerState)
+                BuildingExplorer(buildingSceneLayerState = state.buildingSceneLayerState.value)
             }
         }
         // show a fade to indicate that there is scrollable content

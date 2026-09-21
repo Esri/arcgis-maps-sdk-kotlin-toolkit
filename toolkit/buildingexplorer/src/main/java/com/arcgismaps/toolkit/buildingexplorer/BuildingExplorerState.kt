@@ -18,11 +18,12 @@
 
 package com.arcgismaps.toolkit.buildingexplorer
 
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.State
 import com.arcgismaps.mapping.layers.BuildingSceneLayer
 import com.arcgismaps.mapping.layers.buildingscene.BuildingFilter
 import com.arcgismaps.mapping.layers.buildingscene.BuildingFilterBlock
@@ -40,6 +41,7 @@ import kotlinx.coroutines.launch
  *
  * @since 300.2.0
  */
+@Stable
 public class BuildingExplorerState(
     buildingSceneLayers: List<BuildingSceneLayer>,
     coroutineScope: CoroutineScope
@@ -54,15 +56,15 @@ public class BuildingExplorerState(
         BuildingSceneLayerState(it, coroutineScope)
     }.sortedBy { it.name }
 
-    private var _buildingSceneLayerState by mutableStateOf(
+    private val _buildingSceneLayerState = mutableStateOf(
         buildingSceneLayerStates.first()
     )
 
-    internal val buildingSceneLayerState: BuildingSceneLayerState
-        get() = _buildingSceneLayerState
+    internal val buildingSceneLayerState: State<BuildingSceneLayerState> =
+        _buildingSceneLayerState
 
     internal fun onBuildingSceneLayerSelected(index: Int) {
-        _buildingSceneLayerState = buildingSceneLayerStates.getOrNull(index) ?: return
+        _buildingSceneLayerState.value = buildingSceneLayerStates.getOrNull(index) ?: return
     }
 }
 
@@ -112,7 +114,7 @@ internal class BuildingSceneLayerState(
     val isShowConstructionPhases by derivedStateOf { constructionPhases.size > 1 }
 
     // The list of building sublayer categories
-    private val _categories = mutableStateListOf<BuildingSublayer>()
+    private val _categories = mutableListOf<BuildingSublayer>()
     val categories: List<BuildingSublayer> get() = _categories
 
     private var overviewSublayer: BuildingSublayer? = null
