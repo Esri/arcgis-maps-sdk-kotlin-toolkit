@@ -16,6 +16,11 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.navigation
 
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -35,6 +40,7 @@ internal fun NavGraphBuilder.associationsFilterResultDestination(
     onAddFromSourceClick: (NavBackStackEntry, Int) -> Unit,
     onNavigationEvent: (FeatureFormNavigationRoute) -> Unit,
     state: FeatureFormState,
+    showTopBar: Boolean
 ) {
     composable<NavigationRoute.UNAssociationsFilterResult> { backStackEntry ->
         val route = backStackEntry.toRoute<NavigationRoute.UNAssociationsFilterResult>()
@@ -50,6 +56,7 @@ internal fun NavGraphBuilder.associationsFilterResultDestination(
         if (filterResult != null) {
             UNAssociationsFilterResultScreen(
                 state = utilityAssociationsElementState,
+                showTopBar = showTopBar,
                 onGroupSelected = { stateId ->
                     onGroupSelected(backStackEntry, stateId)
                 },
@@ -58,6 +65,11 @@ internal fun NavGraphBuilder.associationsFilterResultDestination(
                 },
                 modifier = Modifier.fillMaxSize()
             )
+            LaunchedEffect(formData) {
+                // Update the active feature form when we navigate back to this screen from another
+                // form.
+                state.updateActiveFeatureForm()
+            }
             LaunchedEffect(filterResult) {
                 val eventData = FeatureFormNavigationRoute.AssociationsFilterResult(
                     element = utilityAssociationsElementState.element,

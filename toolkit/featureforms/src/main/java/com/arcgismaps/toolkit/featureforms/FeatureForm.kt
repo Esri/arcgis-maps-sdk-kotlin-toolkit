@@ -20,6 +20,7 @@ package com.arcgismaps.toolkit.featureforms
 
 import android.Manifest
 import android.content.Context
+import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxSize
@@ -63,6 +64,7 @@ import com.arcgismaps.mapping.featureforms.UtilityAssociationFeatureSource
 import com.arcgismaps.mapping.featureforms.UtilityAssociationsFormElement
 import com.arcgismaps.toolkit.featureforms.internal.components.text.TextFormElement
 import com.arcgismaps.toolkit.featureforms.internal.navigation.FeatureFormNavHost
+import com.arcgismaps.toolkit.featureforms.internal.navigation.lifecycleIsResumed
 import com.arcgismaps.toolkit.featureforms.internal.screens.ContentAwareTopBar
 import com.arcgismaps.toolkit.featureforms.internal.utils.DialogType
 import com.arcgismaps.toolkit.featureforms.internal.utils.FeatureFormDialog
@@ -192,7 +194,7 @@ public sealed class FeatureFormNavigationRoute {
      */
     public data class SelectAssociationFeatureSource(
         val element: UtilityAssociationsFormElement,
-        val filter : UtilityAssociationsFilter
+        val filter: UtilityAssociationsFilter
     ) : FeatureFormNavigationRoute()
 
     /**
@@ -207,7 +209,7 @@ public sealed class FeatureFormNavigationRoute {
      */
     public data class SelectUtilityAssetType(
         val element: UtilityAssociationsFormElement,
-        val filter : UtilityAssociationsFilter,
+        val filter: UtilityAssociationsFilter,
         val featureSource: UtilityAssociationFeatureSource
     ) : FeatureFormNavigationRoute()
 
@@ -224,7 +226,7 @@ public sealed class FeatureFormNavigationRoute {
      */
     public data class SelectAssociationFeatureCandidate(
         val element: UtilityAssociationsFormElement,
-        val filter : UtilityAssociationsFilter,
+        val filter: UtilityAssociationsFilter,
         val featureSource: UtilityAssociationFeatureSource,
         val assetType: UtilityAssetType
     ) : FeatureFormNavigationRoute()
@@ -242,7 +244,7 @@ public sealed class FeatureFormNavigationRoute {
      */
     public data class CreateAssociation(
         val element: UtilityAssociationsFormElement,
-        val filter : UtilityAssociationsFilter,
+        val filter: UtilityAssociationsFilter,
         val featureSource: UtilityAssociationFeatureSource,
         val candidate: UtilityAssociationFeatureCandidate
     ) : FeatureFormNavigationRoute()
@@ -352,10 +354,148 @@ public fun FeatureForm(
     modifier: Modifier = Modifier,
     showCloseIcon: Boolean = true,
     showFormActions: Boolean = true,
-    isNavigationEnabled : Boolean = true,
+    isNavigationEnabled: Boolean = true,
     validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.Automatic,
     onBarcodeButtonClick: ((FieldFormElement) -> Unit)? = null,
-    onShowOnMapRequest : (ArcGISFeature) -> Unit = {},
+    onShowOnMapRequest: (ArcGISFeature) -> Unit = {},
+    onDismiss: () -> Unit = {},
+    onEditingEvent: (FeatureFormEditingEvent) -> Unit = {},
+    onNavigationEvent: (FeatureFormNavigationRoute) -> Unit = {},
+    colorScheme: FeatureFormColorScheme = FeatureFormDefaults.colorScheme(),
+    typography: FeatureFormTypography = FeatureFormDefaults.typography(),
+) {
+    val navController = rememberNavController(featureFormState)
+    FeatureForm(
+        featureFormState = featureFormState,
+        navController = navController,
+        modifier = modifier,
+        showCloseIcon = showCloseIcon,
+        showFormActions = showFormActions,
+        isNavigationEnabled = isNavigationEnabled,
+        validationErrorVisibility = validationErrorVisibility,
+        onBarcodeButtonClick = onBarcodeButtonClick,
+        onShowOnMapRequest = onShowOnMapRequest,
+        onDismiss = onDismiss,
+        onEditingEvent = onEditingEvent,
+        onNavigationEvent = onNavigationEvent,
+        colorScheme = colorScheme,
+        typography = typography
+    )
+}
+
+/**
+ * A composable Form toolkit component that enables users to edit field values of features in a
+ * layer using a [FeatureForm] that has been configured externally. Forms may be configured in the [Web Map Viewer](https://www.arcgis.com/home/webmap/viewer.html)
+ * or [Fields Maps Designer](https://www.arcgis.com/apps/fieldmaps/)) and can be obtained from either
+ * an `ArcGISFeature`, `ArcGISFeatureTable`, `FeatureLayer` or `SubtypeSublayer`.
+ *
+ * The [FeatureForm] component supports the following [FormElement] types as part of its configuration.
+ * - [AttachmentsFormElement]
+ * - [FieldFormElement] with the following [FormInput] types -
+ *     * [BarcodeScannerFormInput]
+ *     * [com.arcgismaps.mapping.featureforms.ComboBoxFormInput]
+ *     * [com.arcgismaps.mapping.featureforms.DateTimePickerFormInput]
+ *     * [com.arcgismaps.mapping.featureforms.RadioButtonsFormInput]
+ *     * [com.arcgismaps.mapping.featureforms.SwitchFormInput]
+ *     * [com.arcgismaps.mapping.featureforms.TextAreaFormInput]
+ *     * [com.arcgismaps.mapping.featureforms.TextBoxFormInput]
+ * - [GroupFormElement]
+ * - [TextFormElement]
+ * - [UtilityAssociationsFormElement]
+ *
+ * If there are any edits on the current [FeatureForm] as indicated by [FeatureForm.hasEdits] and
+ * the [showFormActions] is true, an action bar is displayed at the top of the form with save and
+ * discard buttons. The save button will save the edits using [FeatureForm.finishEditing] and the
+ * discard button will discard the edits using [FeatureForm.discardEdits]. The save or discard
+ * actions will also trigger the [onEditingEvent] callback with the appropriate event type.
+ *
+ * If you are providing your own save and discard buttons, be sure to use the [FeatureFormState.discardEdits]
+ * to discard the edits. This will ensure the data and attachments in the form are updated correctly.
+ *
+ * The Form is visible as long as it is part of the composition hierarchy. In order to let the user
+ * dismiss the Form, the implementation of [onDismiss] should contain a way to remove the form from
+ * the composition hierarchy. If the form has edits when the close icon is clicked, the user will be
+ * prompted to save or discard the edits before the callback is invoked. The callback is also not
+ * invoked if there are validation errors in the form.
+ *
+ * For any elements of input type [BarcodeScannerFormInput], a default barcode scanner based on MLKit
+ * is provided. The scanner requires the [Manifest.permission.CAMERA] permission to be granted.
+ * A callback is also provided via the [onBarcodeButtonClick] parameter, which is invoked with
+ * the [FieldFormElement] when its barcode accessory is clicked. This can be used to provide a custom
+ * barcode scanning experience. Simply call [FieldFormElement.updateValue] with the scanned barcode
+ * value to update the field value.
+ *
+ * Capturing photo or video attachments requires [Manifest.permission.CAMERA]. Capturing audio
+ * attachments requires [Manifest.permission.RECORD_AUDIO]. Capture options whose required permission
+ * has not been granted are disabled.
+ *
+ * If any [UtilityAssociationsFormElement] is part of the [FeatureForm.elements] collection, the
+ * Form will display [UtilityAssociation]s that are associated with the selected feature and allow
+ * the user to navigate to the associated feature on the other end of the association. The Android
+ * system's back action can be used to navigate back to the previous [FeatureForm] screen. The
+ * [FeatureFormState.activeFeatureForm] will be updated when the user navigates forward or back
+ * through the associations. If there are any edits on the current [FeatureForm], the user will be
+ * prompted to save or discard the edits before navigating to the next [FeatureForm]. [UtilityAssociation]s
+ * can also be created or deleted when the [UtilityAssociationsFormElement.isEditable] property is
+ * true.
+ *
+ * The colors and typography for the Form can use customized using [FeatureFormColorScheme] and
+ * [FeatureFormTypography]. This customization is built on top of [MaterialTheme].
+ * If a custom color is specified in both the color scheme and the typography, the color from the
+ * color scheme will take precedence and will be merged with the text style, if one is provided.
+ *
+ * @param featureFormState the [FeatureFormState] object that contains the state of the form.
+ * @param navController the [NavHostController] that manages the navigation within the form.
+ * @param modifier the modifier to apply to this layout.
+ * @param showCloseIcon Indicates if the close icon should be displayed. If true, the [onDismiss]
+ * callback will be invoked when the close icon is clicked. Default is true.
+ * @param showFormActions Indicates if the form actions (save and discard buttons) should be displayed.
+ * Default is true.
+ * @param isNavigationEnabled Indicates if the navigation is enabled for the form when there are
+ * [UtilityAssociationsFormElement]s present. When true, the user can navigate to associated features
+ * and back. If false, this navigation is disabled. If there are geometry edits on the feature,
+ * this flag can be set to false to prevent navigation until the geometry edits are saved or discarded.
+ * Default is true.
+ * @param validationErrorVisibility The [ValidationErrorVisibility] that determines the behavior of
+ * when the validation errors are visible. Default is [ValidationErrorVisibility.Automatic] which
+ * indicates errors are only visible once the respective field gains focus.
+ * @param onBarcodeButtonClick A callback that is invoked when the barcode accessory is clicked.
+ * The callback is invoked with the [FieldFormElement] that has the barcode accessory. If null, the
+ * default barcode scanner is used.
+ * @param onShowOnMapRequest A callback that is invoked when a request to highlight a feature is made.
+ * Invoked when the locate icon is tapped on a [UtilityAssociationFeatureCandidate] inside a
+ * [UtilityAssociationsFormElement] during new association candidate selection. This can be used to
+ * highlight the feature in the map view, helping visually confirm the correct feature to associate.
+ * Note that this in only invoked for spatial features that have a geometry.
+ * @param onDismiss A callback that is invoked when the close icon is visible and is clicked.
+ * @param onEditingEvent A callback that is invoked when an editing event occurs in the form. This
+ * is triggered when the edits are saved or discarded using the save or discard buttons, respectively.
+ * If the edit action is triggered by navigating to another form, the `willNavigate` parameter will
+ * be true. Note that if the action happens due to the close button, the `willNavigate` parameter
+ * will be false.
+ * @param onNavigationEvent A callback that is invoked when a navigation event occurs in the form.
+ * This is triggered when the user navigates to different screens within the form, currently when
+ * dealing with [UtilityAssociation]s. The specific [FeatureFormNavigationRoute] is provided which
+ * contains the relevant data for the route.
+ * @param colorScheme The [FeatureFormColorScheme] to use for the FeatureForm.
+ * @param typography The [FeatureFormTypography] to use for the FeatureForm.
+ *
+ * @since 300.2.0
+ */
+@Composable
+internal fun FeatureForm(
+    featureFormState: FeatureFormState,
+    navController: NavHostController,
+    modifier: Modifier = Modifier,
+    showCloseIcon: Boolean = true,
+    showBackAction: Boolean = true,
+    showFormActions: Boolean = true,
+    showTopBar: Boolean = true,
+    isNavigationEnabled: Boolean = true,
+    allowNavigationWithEdits: Boolean = false,
+    validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.Automatic,
+    onBarcodeButtonClick: ((FieldFormElement) -> Unit)? = null,
+    onShowOnMapRequest: (ArcGISFeature) -> Unit = {},
     onDismiss: () -> Unit = {},
     onEditingEvent: (FeatureFormEditingEvent) -> Unit = {},
     onNavigationEvent: (FeatureFormNavigationRoute) -> Unit = {},
@@ -363,9 +503,25 @@ public fun FeatureForm(
     typography: FeatureFormTypography = FeatureFormDefaults.typography(),
 ) {
     val state by rememberUpdatedState(featureFormState)
-    val navController = rememberNavController(state)
     state.setNavigationCallback { route ->
         navController.navigate(route)
+    }
+    state.setNavigationPopupToCallback callback@{ route, beforeNavigateAction ->
+        val entry = navController.currentBackStackEntry ?: return@callback false
+
+        if (!entry.lifecycleIsResumed()) {
+            return@callback false
+        }
+        // Run the beforeNavigateAction callback to allow the caller to perform any necessary
+        // actions before navigating.
+        beforeNavigateAction()
+
+        navController.navigate(route) {
+            popUpTo(navController.graph.id) {
+                inclusive = true
+            }
+        }
+        true
     }
     state.setNavigateBack {
         navController.navigateUp()
@@ -395,12 +551,14 @@ public fun FeatureForm(
                 onDismiss = {
                     state.validateAllFields()
                 },
+                onAction = null,
                 title = validationErrorMessage,
                 body = res.getQuantityString(
                     R.plurals.you_have_errors_that_must_be_fixed_before_saving,
                     errorCount,
                     errorCount
-                )
+                ),
+                actionText = ""
             )
             dialogRequester.requestDialog(errorDialog)
             Result.failure(Exception("Validation errors found"))
@@ -426,58 +584,62 @@ public fun FeatureForm(
     // Get the form data for the active entry (destination) in the back stack
     val formData = remember(backStackEntry) { state.getActiveFormStateData() }
     FeatureFormLayout(
-        topBar = {
-            val isDialogDestination = backStackEntry?.destination is FloatingWindow
-            // Get the appropriate back stack entry based on whether the current destination is a
-            // dialog or not. Dialog destinations should not be considered for the top bar content,
-            // so we use the previous back stack entry instead.
-            val contentEntry = if (isDialogDestination) {
-                navController.previousBackStackEntry
-            } else {
-                backStackEntry
-            }
-            // Track if there is a back stack entry
-            val hasBackStack = if (isDialogDestination) {
-                contentHasBackStack
-            } else {
-                navController.previousBackStackEntry != null
-            }
+        topBar = if (showTopBar) {
+            {
+                val isDialogDestination = backStackEntry?.destination is FloatingWindow
+                // Get the appropriate back stack entry based on whether the current destination is a
+                // dialog or not. Dialog destinations should not be considered for the top bar content,
+                // so we use the previous back stack entry instead.
+                val contentEntry = if (isDialogDestination) {
+                    navController.previousBackStackEntry
+                } else {
+                    backStackEntry
+                }
+                // Track if there is a back stack entry
+                val hasBackStack = if (isDialogDestination) {
+                    contentHasBackStack
+                } else {
+                    navController.previousBackStackEntry != null
+                }
+                SideEffect {
+                    // update the retained value only for regular content destinations.
+                    // A dialog's own previous entry must not alter it.
+                    if (!isDialogDestination) {
+                        contentHasBackStack = hasBackStack
+                    }
+                }
 
-            SideEffect {
-                // update the retained value only for regular content destinations.
-                // A dialog's own previous entry must not alter it.
-                if (!isDialogDestination) {
-                    contentHasBackStack = hasBackStack
+                contentEntry?.let { entry ->
+                    ContentAwareTopBar(
+                        backStackEntry = entry,
+                        state = state,
+                        onSaveForm = { willNavigate ->
+                            saveForm(state, willNavigate)
+                        },
+                        onDiscardForm = ::discardForm,
+                        onDismissRequest = onDismiss,
+                        hasBackStack = hasBackStack,
+                        showBackAction = showBackAction,
+                        showFormActions = showFormActions,
+                        showCloseIcon = showCloseIcon,
+                        isNavigationEnabled = isNavigationEnabled,
+                        modifier = Modifier
+                            .padding(
+                                vertical = 8.dp,
+                                horizontal = if (hasBackStack) 8.dp else 16.dp
+                            )
+                            .fillMaxWidth(),
+                    )
                 }
             }
-
-            contentEntry?.let { entry ->
-                ContentAwareTopBar(
-                    backStackEntry = entry,
-                    state = state,
-                    onSaveForm = { willNavigate ->
-                        saveForm(state, willNavigate)
-                    },
-                    onDiscardForm = ::discardForm,
-                    onDismissRequest = onDismiss,
-                    hasBackStack = hasBackStack,
-                    showFormActions = showFormActions,
-                    showCloseIcon = showCloseIcon,
-                    isNavigationEnabled = isNavigationEnabled,
-                    modifier = Modifier
-                        .padding(
-                            vertical = 8.dp,
-                            horizontal = if (hasBackStack) 8.dp else 16.dp
-                        )
-                        .fillMaxWidth(),
-                )
-            }
-        },
+        } else null,
         content = {
             FeatureFormNavHost(
                 navController = navController,
                 state = state,
                 isNavigationEnabled = isNavigationEnabled,
+                allowNavigationWithEdits = allowNavigationWithEdits,
+                showTopBar = showTopBar,
                 validationErrorVisibility = validationErrorVisibility,
                 onSaveForm = { willNavigate ->
                     saveForm(state, willNavigate)
@@ -498,6 +660,7 @@ public fun FeatureForm(
         onDispose {
             // Clear the navigation actions when the composition is disposed
             state.setNavigationCallback(null)
+            state.setNavigationPopupToCallback(null)
             state.setNavigateBack(null)
         }
     }
@@ -505,7 +668,7 @@ public fun FeatureForm(
 
 @Composable
 internal fun FeatureFormLayout(
-    topBar: @Composable ColumnScope.() -> Unit,
+    topBar: (@Composable ColumnScope.() -> Unit)?,
     content: @Composable ColumnScope.() -> Unit,
     modifier: Modifier = Modifier,
     colorScheme: FeatureFormColorScheme,
@@ -516,7 +679,7 @@ internal fun FeatureFormLayout(
         typography = typography
     ) {
         Column(modifier = modifier) {
-            topBar()
+            topBar?.invoke(this)
             content()
         }
     }

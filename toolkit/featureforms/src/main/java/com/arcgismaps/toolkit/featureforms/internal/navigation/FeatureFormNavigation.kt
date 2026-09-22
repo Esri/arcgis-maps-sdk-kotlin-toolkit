@@ -32,13 +32,15 @@ internal fun NavGraphBuilder.featureFormDestination(
     onBarcodeButtonClick: ((FieldFormElement) -> Unit)?,
     onUtilityFilterSelected: (NavBackStackEntry, Int) -> Unit,
     onNavigationEvent: (FeatureFormNavigationRoute) -> Unit,
-    state : FeatureFormState,
-    validationErrorVisibility : ValidationErrorVisibility
+    state: FeatureFormState,
+    showTopBar: Boolean,
+    validationErrorVisibility: ValidationErrorVisibility
 ) {
     composable<NavigationRoute.Form> { backStackEntry ->
         val formData = remember(backStackEntry) { state.getActiveFormStateData() }
         FeatureFormScreen(
             formStateData = formData,
+            showTopBar = showTopBar,
             onAudioCaptureRequest = { maxDuration, stateId ->
                 onAudioCaptureRequest(backStackEntry, maxDuration, stateId)
             },

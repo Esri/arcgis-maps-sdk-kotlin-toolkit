@@ -108,7 +108,10 @@ import com.arcgismaps.mapping.layers.ArcGISSublayer
 import com.arcgismaps.mapping.layers.FeatureLayer
 import com.arcgismaps.mapping.layers.SubtypeFeatureLayer
 import com.arcgismaps.toolkit.featureforms.FeatureForm
+import com.arcgismaps.toolkit.featureforms.FeatureFormManager
+import com.arcgismaps.toolkit.featureforms.FeatureFormManagerState
 import com.arcgismaps.toolkit.featureforms.FeatureFormState
+import com.arcgismaps.toolkit.featureforms.internal.editor.FeatureFormToolbar
 import com.arcgismaps.toolkit.featureformsapp.R
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.BottomSheetMaxWidth
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.SheetExpansionHeight
@@ -224,7 +227,7 @@ fun MapScreen(
                 val rememberedForm = remember(this) {
                     featureFormState!!
                 }
-                FeatureFormSheet(
+                FeatureFormBrowserSheet(
                     state = rememberedForm,
                     isNavigationEnabled = mapViewModel.navigationEnabled,
                     onShowOnMapRequest = { feature ->
@@ -416,6 +419,69 @@ fun FeatureItem(
 
     LaunchedEffect(feature) {
         bitmap = feature.getSymbol(resources)
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun FeatureFormBrowserSheet(
+    state: FeatureFormManagerState,
+    isNavigationEnabled: Boolean,
+    onShowOnMapRequest: (ArcGISFeature) -> Unit,
+    onDismiss: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val windowSize = getWindowSize(LocalContext.current)
+    // determine if the device is in compact width
+    val isCompact = windowSize.isWidthAtLeastBreakpoint(
+        WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND
+    ).not()
+    val bottomSheetState = rememberStandardBottomSheetState(
+        initialValue = if (isCompact) SheetValue.PartiallyExpanded else SheetValue.Expanded,
+        confirmValueChange = { it != SheetValue.Hidden },
+        skipHiddenState = false
+    )
+    val scope = rememberCoroutineScope()
+    SheetLayout(
+        windowSizeClass = windowSize,
+        sheetOffsetY = { bottomSheetState.requireOffset() },
+        modifier = modifier,
+        maxWidth = BottomSheetMaxWidth,
+        anchoredContent =
+            {
+            Surface {
+                AnimatedVisibility(
+                    visible = bottomSheetState.currentValue == SheetValue.Expanded || bottomSheetState.currentValue == SheetValue.PartiallyExpanded
+                ) {
+                    FeatureFormToolbar(
+                        state = state,
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                            //.navigationBarsPadding()
+                    )
+                }
+            }
+        }
+    ) { layoutWidth, layoutHeight ->
+        StandardBottomSheet(
+            state = bottomSheetState,
+            peekHeight = 40.dp,
+            expansionHeight = SheetExpansionHeight(0.5f),
+            sheetSwipeEnabled = true,
+            shape = RoundedCornerShape(topStart = 18.dp, topEnd = 18.dp),
+            containerColor = MaterialTheme.colorScheme.surface,
+            layoutHeight = layoutHeight.toFloat(),
+            sheetWidth = with(LocalDensity.current) { layoutWidth.toDp() },
+            tonalElevation = (-1).dp
+        ) {
+            FeatureFormManager(
+                state = state,
+                modifier = Modifier.fillMaxWidth(),
+                showToolbar = false,
+                onShowOnMapRequest = onShowOnMapRequest,
+                onDismiss = onDismiss
+            )
+        }
     }
 }
 
