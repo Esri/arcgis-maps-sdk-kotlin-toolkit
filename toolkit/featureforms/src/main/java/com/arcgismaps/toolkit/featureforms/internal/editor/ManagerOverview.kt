@@ -79,11 +79,6 @@ internal fun ManagerOverview(
                     style = MaterialTheme.typography.headlineSmall,
                     modifier = Modifier.padding(12.dp)
                 )
-                Text(
-                    text = "Errors $errorCount",
-                    style = MaterialTheme.typography.headlineSmall,
-                    modifier = Modifier.padding(12.dp)
-                )
                 IconButton(
                     onClick = onDismiss,
                     modifier = Modifier.padding(12.dp)

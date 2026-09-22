@@ -111,7 +111,7 @@ import com.arcgismaps.toolkit.featureforms.FeatureForm
 import com.arcgismaps.toolkit.featureforms.FeatureFormManager
 import com.arcgismaps.toolkit.featureforms.FeatureFormManagerState
 import com.arcgismaps.toolkit.featureforms.FeatureFormState
-import com.arcgismaps.toolkit.featureforms.internal.editor.FeatureFormNavigationBar
+import com.arcgismaps.toolkit.featureforms.internal.editor.FeatureFormToolbar
 import com.arcgismaps.toolkit.featureformsapp.R
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.BottomSheetMaxWidth
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.SheetExpansionHeight
@@ -447,12 +447,13 @@ fun FeatureFormBrowserSheet(
         sheetOffsetY = { bottomSheetState.requireOffset() },
         modifier = modifier,
         maxWidth = BottomSheetMaxWidth,
-        anchoredContent = {
+        anchoredContent =
+            {
             Surface {
                 AnimatedVisibility(
                     visible = bottomSheetState.currentValue == SheetValue.Expanded || bottomSheetState.currentValue == SheetValue.PartiallyExpanded
                 ) {
-                    FeatureFormNavigationBar(
+                    FeatureFormToolbar(
                         state = state,
                         modifier = Modifier
                             .fillMaxWidth(),
@@ -476,7 +477,7 @@ fun FeatureFormBrowserSheet(
             FeatureFormManager(
                 state = state,
                 modifier = Modifier.fillMaxWidth(),
-                showNavigationBar = false,
+                showToolbar = false,
                 onShowOnMapRequest = onShowOnMapRequest,
                 onDismiss = onDismiss
             )

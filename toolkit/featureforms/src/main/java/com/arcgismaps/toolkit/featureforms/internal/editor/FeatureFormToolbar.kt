@@ -16,7 +16,6 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.editor
 
-import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -31,6 +30,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBackIos
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.automirrored.outlined.Article
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -38,26 +39,57 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.data.ArcGISFeature
-import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.toolkit.featureforms.FeatureFormManagerState
-import com.arcgismaps.toolkit.featureforms.id
+
+public object FeatureFormToolbarDefaults {
+
+    /**
+     * The default shape for the [FeatureFormToolbar].
+     */
+    public val shape: Shape = RoundedCornerShape(
+        topStart = 25.dp,
+        topEnd = 25.dp
+    )
+
+    @Composable
+    public fun colors(): FeatureFormToolbarColors = FeatureFormToolbarColors(
+        backgroundColor = MaterialTheme.colorScheme.surfaceVariant,
+        contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+    )
+
+    @Composable
+    public fun colors(
+        backgroundColor: Color = MaterialTheme.colorScheme.surfaceVariant,
+        contentColor: Color = MaterialTheme.colorScheme.onSurfaceVariant
+    ): FeatureFormToolbarColors = FeatureFormToolbarColors(
+        backgroundColor = backgroundColor,
+        contentColor = contentColor
+    )
+}
+
+@Immutable
+public data class FeatureFormToolbarColors(
+    public val backgroundColor: Color,
+    public val contentColor: Color
+)
 
 @Composable
-public fun FeatureFormNavigationBar(
+public fun FeatureFormToolbar(
     state: FeatureFormManagerState,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    shape: Shape = FeatureFormToolbarDefaults.shape,
+    colors: FeatureFormToolbarColors = FeatureFormToolbarDefaults.colors()
 ) {
     val activeForm = state.activeFeatureForm
     val forms = remember(activeForm) {
@@ -65,67 +97,58 @@ public fun FeatureFormNavigationBar(
         // recompositions
         state.featureForms.value
     }
+    val (activeIndex, count) = remember(activeForm) {
+        Pair(
+            forms.indexOfFirst {
+                it.feature == activeForm.feature
+            },
+            forms.size
+        )
+    }
+    val previousForm = remember(forms) {
+        forms.getOrNull((activeIndex - 1).mod(count))
+    }
+    val nextForm = remember(forms) {
+        forms.getOrNull((activeIndex + 1).mod(count))
+    }
     AnimatedVisibility(state.showNavigationBar) {
-        FeatureFormNavigationBar(
-            activeForm = state.activeFeatureForm,
-            featureForms = forms,
-            onFeatureFormSelected = state::navigateToForm,
+        FeatureFormToolbarContent(
+            activeIndex = activeIndex,
+            formCount = forms.size,
+            onPrevious = { previousForm?.let(state::navigateToForm) },
+            onNext = { nextForm?.let(state::navigateToForm) },
             onExpand = state::showOverview,
+            shape = shape,
+            colors = colors,
             modifier = modifier
         )
     }
-}
+    Card(
+        colors = CardDefaults.cardColors().copy(
 
-@Composable
-private fun FeatureFormNavigationBar(
-    activeForm: FeatureForm,
-    featureForms: List<FeatureForm>,
-    onFeatureFormSelected: (FeatureForm) -> Unit,
-    onExpand: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Log.e("TAG", "FeatureFormNavigationBar: ${activeForm.id()} - ${activeForm}")
-    val (activeIndex, count) = remember(activeForm) {
-        Pair(
-            featureForms.indexOfFirst {
-                it.feature == activeForm.feature
-            },
-            featureForms.size
         )
-    }
-    val previousForm = featureForms.getOrNull((activeIndex - 1).mod(count))
-    val nextForm = featureForms.getOrNull((activeIndex + 1).mod(count))
-    //Log.e("TAG", "FeatureFormNavigationBar: prev:$previousForm, next$nextForm", )
-
-    FeatureFormNavigationBarContent(
-        activeIndex = activeIndex,
-        formCount = featureForms.size,
-        onPrevious = { previousForm?.let(onFeatureFormSelected) },
-        onNext = { nextForm?.let(onFeatureFormSelected) },
-        onExpand = onExpand,
-        modifier = modifier
-    )
+    ) { }
 }
 
 @Composable
-private fun FeatureFormNavigationBarContent(
+private fun FeatureFormToolbarContent(
     activeIndex: Int,
     formCount: Int,
     onPrevious: () -> Unit,
     onNext: () -> Unit,
     onExpand: () -> Unit,
+    shape: Shape,
+    colors: FeatureFormToolbarColors,
     modifier: Modifier = Modifier
 ) {
+    // HorizontalFloatingToolbar()
     Surface(
         modifier = modifier.clickable {
             onExpand()
         },
-        color = MaterialTheme.colorScheme.surfaceVariant,
-        contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-        shape = RoundedCornerShape(
-            topStart = 25.dp,
-            topEnd = 25.dp
-        ),
+        color = colors.backgroundColor,
+        contentColor = colors.contentColor,
+        shape = shape,
         tonalElevation = 3.dp
     ) {
         Row(
@@ -210,12 +233,14 @@ internal val ArcGISFeature.objectId: String
 
 @Preview
 @Composable
-private fun FeatureFormNavigationBarPreview() {
-    FeatureFormNavigationBarContent(
+private fun FeatureFormToolbarPreview() {
+    FeatureFormToolbarContent(
         activeIndex = 1,
         formCount = 3,
         onPrevious = {},
         onNext = {},
-        onExpand = {}
+        onExpand = {},
+        shape = FeatureFormToolbarDefaults.shape,
+        colors = FeatureFormToolbarDefaults.colors(),
     )
 }

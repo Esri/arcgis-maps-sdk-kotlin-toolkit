@@ -21,6 +21,7 @@ package com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.layout.Placeable
 import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Constraints.Companion.Infinity
@@ -48,7 +49,7 @@ fun SheetLayout(
     sheetOffsetY: () -> Float,
     modifier: Modifier = Modifier,
     maxWidth: Dp = Infinity.dp,
-    anchoredContent: @Composable () -> Unit = {},
+    anchoredContent: (@Composable () -> Unit)? = null,
     sheetContent: @Composable (Int, Int) -> Unit,
 ) {
     // Show as a side sheet if the current width is at least the EXPANDED breakpoint.
@@ -68,20 +69,23 @@ fun SheetLayout(
         }
         // use all the available height
         val layoutHeight = constraints.maxHeight
-
-        val anchoredContentPlaceable = subcompose(0) {
-            anchoredContent()
-        }[0].measure(
-            constraints
-                .copy(
-                minWidth = layoutWidth,
-                maxWidth = layoutWidth,
-                minHeight = 0,
-                maxHeight = layoutHeight
+        var anchoredContentPlaceable: Placeable? = null
+        anchoredContent?.let {
+            anchoredContentPlaceable = subcompose(0) {
+                anchoredContent()
+            }[0].measure(
+                constraints
+                    .copy(
+                        minWidth = layoutWidth,
+                        maxWidth = layoutWidth,
+                        minHeight = 0,
+                        maxHeight = layoutHeight
+                    )
             )
-        )
+        }
 
-        val bodyHeight = layoutHeight - anchoredContentPlaceable.height
+        val anchoredContentHeight = anchoredContentPlaceable?.height ?: 0
+        val bodyHeight = layoutHeight - anchoredContentHeight
         // measure the sheet content with the constraints
         val sheetPlaceable = subcompose(1) {
             sheetContent(layoutWidth, bodyHeight)
@@ -93,14 +97,14 @@ fun SheetLayout(
         )
         val sheetOffsetX = if (showAsSideSheet) {
             // anchor on right edge of the screen
-            Integer.max(0, (constraints.maxWidth - anchoredContentPlaceable.width))
+            Integer.max(0, (constraints.maxWidth - sheetPlaceable.width))
         } else {
             // anchor in the center of the screen
-            Integer.max(0, (constraints.maxWidth - anchoredContentPlaceable.width) / 2)
+            Integer.max(0, (constraints.maxWidth - sheetPlaceable.width) / 2)
         }
         layout(constraints.maxWidth, layoutHeight) {
             sheetPlaceable.place(sheetOffsetX, sheetOffsetY().roundToInt())
-            anchoredContentPlaceable.place(sheetOffsetX, layoutHeight  - anchoredContentPlaceable.height)
+            anchoredContentPlaceable?.place(sheetOffsetX, layoutHeight  - anchoredContentHeight)
         }
     }
 }

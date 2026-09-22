@@ -64,6 +64,7 @@ import com.arcgismaps.mapping.featureforms.UtilityAssociationFeatureSource
 import com.arcgismaps.mapping.featureforms.UtilityAssociationsFormElement
 import com.arcgismaps.toolkit.featureforms.internal.components.text.TextFormElement
 import com.arcgismaps.toolkit.featureforms.internal.navigation.FeatureFormNavHost
+import com.arcgismaps.toolkit.featureforms.internal.navigation.lifecycleIsResumed
 import com.arcgismaps.toolkit.featureforms.internal.screens.ContentAwareTopBar
 import com.arcgismaps.toolkit.featureforms.internal.utils.DialogType
 import com.arcgismaps.toolkit.featureforms.internal.utils.FeatureFormDialog
@@ -505,12 +506,22 @@ internal fun FeatureForm(
     state.setNavigationCallback { route ->
         navController.navigate(route)
     }
-    state.setNavigationPopupToCallback { route ->
+    state.setNavigationPopupToCallback callback@{ route, beforeNavigateAction ->
+        val entry = navController.currentBackStackEntry ?: return@callback false
+
+        if (!entry.lifecycleIsResumed()) {
+            return@callback false
+        }
+        // Run the beforeNavigateAction callback to allow the caller to perform any necessary
+        // actions before navigating.
+        beforeNavigateAction()
+
         navController.navigate(route) {
             popUpTo(navController.graph.id) {
                 inclusive = true
             }
         }
+        true
     }
     state.setNavigateBack {
         navController.navigateUp()

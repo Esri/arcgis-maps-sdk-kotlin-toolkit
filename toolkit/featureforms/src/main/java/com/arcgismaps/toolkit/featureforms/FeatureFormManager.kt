@@ -25,22 +25,16 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalResources
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.toolkit.featureforms.internal.editor.FeatureFormManagerActionBar
+import com.arcgismaps.toolkit.featureforms.internal.editor.FeatureFormToolbar
 import com.arcgismaps.toolkit.featureforms.internal.editor.ManagerOverview
-import com.arcgismaps.toolkit.featureforms.internal.editor.FeatureFormNavigationBar
 import com.arcgismaps.toolkit.featureforms.internal.editor.ModalSheet
 import com.arcgismaps.toolkit.featureforms.internal.screens.shouldEnableTopBar
 import com.arcgismaps.toolkit.featureforms.internal.utils.DialogType
@@ -51,7 +45,7 @@ import kotlinx.coroutines.launch
 public fun FeatureFormManager(
     state: FeatureFormManagerState,
     modifier: Modifier = Modifier,
-    showNavigationBar: Boolean = true,
+    showToolbar: Boolean = true,
     validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.Automatic,
     onDismiss: () -> Unit = {},
     onShowOnMapRequest: (ArcGISFeature) -> Unit = {},
@@ -61,7 +55,6 @@ public fun FeatureFormManager(
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
     val dialogRequester = LocalDialogRequester.current
     val scope = rememberCoroutineScope()
-    val resources = LocalResources.current
     val hasBackStack = currentBackStackEntry != null && navController.previousBackStackEntry != null
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
@@ -118,8 +111,8 @@ public fun FeatureFormManager(
                 onNavigationEvent = state::setCurrentFeatureFormRoute,
                 validationErrorVisibility = validationErrorVisibility
             )
-            if (showNavigationBar) {
-                FeatureFormNavigationBar(
+            if (showToolbar) {
+                FeatureFormToolbar(
                     state = state,
                     modifier = Modifier.fillMaxWidth()
                 )

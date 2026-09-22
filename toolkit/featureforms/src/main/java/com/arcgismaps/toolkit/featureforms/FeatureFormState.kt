@@ -118,7 +118,7 @@ public class FeatureFormState private constructor(
      */
     private var navigateToRoute: ((NavigationRoute) -> Unit)? = null
 
-    private var navigatePopUpToRoute: ((NavigationRoute) -> Unit)? = null
+    private var navigatePopUpToRoute: ((NavigationRoute, () -> Unit) -> Boolean)? = null
 
     /**
      * A navigation callback that is called when navigating back to a previous [FeatureForm]. This
@@ -127,6 +127,8 @@ public class FeatureFormState private constructor(
     private var navigateBack: (() -> Boolean)? = null
 
     private var onFeatureFormAddedCallback: ((FormStateData) -> Unit) = {}
+
+    private var onFetchStateDataForFeatureCallback: ((ArcGISFeature) -> FormStateData?) = { null }
 
     /**
      * The currently active [FeatureForm]. This property is updated when navigating between forms.
@@ -164,24 +166,12 @@ public class FeatureFormState private constructor(
 
     internal constructor(
         featureForm: FeatureForm,
-        stateCollection: FormStateCollection,
-        coroutineScope: CoroutineScope
-    ) : this(featureForm) {
-        this.coroutineScope = coroutineScope
-        // Add the provided state collection to the store.
-        val formStateData = FormStateData(this.featureForm, stateCollection)
-        store.addLast(formStateData)
-        coroutineScope.launch(start = CoroutineStart.UNDISPATCHED) {
-            formStateData.evaluateExpressions()
-        }
-    }
-
-    internal constructor(
-        featureForm: FeatureForm,
         coroutineScope: CoroutineScope,
-        onFeatureFormAddedCallback: ((FormStateData) -> Unit)
+        onFeatureFormAddedCallback: ((FormStateData) -> Unit),
+        onFetchStateDataForFeatureCallback: ((ArcGISFeature) -> FormStateData?)
     ) : this(featureForm, coroutineScope) {
         this.onFeatureFormAddedCallback = onFeatureFormAddedCallback
+        this.onFetchStateDataForFeatureCallback = onFetchStateDataForFeatureCallback
         this.onFeatureFormAddedCallback(getActiveFormStateData())
     }
 
@@ -235,8 +225,8 @@ public class FeatureFormState private constructor(
         this.navigateToRoute = navigateToRoute
     }
 
-    internal fun setNavigationPopupToCallback(navigatePopUpToRoute: ((NavigationRoute) -> Unit)?) {
-        this.navigatePopUpToRoute = navigatePopUpToRoute
+    internal fun setNavigationPopupToCallback(callback: ((NavigationRoute, () -> Unit) -> Boolean)?) {
+        this.navigatePopUpToRoute = callback
     }
 
     /**
@@ -282,14 +272,30 @@ public class FeatureFormState private constructor(
         val navigateTo = navigateToRoute ?: return false
         // Check if the backStackEntry is in the resumed state.
         if (backStackEntry.lifecycleIsResumed().not()) return false
-        val form = FeatureForm(feature)
-        val states = createStates(
-            form = form,
-            elements = form.elements,
-            scope = coroutineScope
+        Log.e(
+            "TAG",
+            "navigateTo: Store - ${
+                store.joinToString(separator = "->") {
+                    "${it.featureForm}"
+                }
+            }",
         )
-        val formStateData = FormStateData(form, states)
-        // Add the new form to the stack.
+        Log.e("TAG", "navigateTo: feature - ${feature.id()}")
+        // Check if the feature is already in the cache/stack, if so, navigate to it.
+        // If not, create a new form data for the feature and add it to the stack.
+        val formStateData = onFetchStateDataForFeatureCallback(feature)
+            ?: store.find { feature.id() != null && it.featureForm.id == feature.id() }
+            ?: run {
+                // Create a new form data for the feature
+                val form = FeatureForm(feature)
+                val states = createStates(
+                    form = form,
+                    elements = form.elements,
+                    scope = coroutineScope
+                )
+                FormStateData(form, states)
+            }
+        // Add the form to the stack.
         store.addLast(formStateData)
         onFeatureFormAddedCallback(formStateData)
         // Navigate to the form view.
@@ -297,17 +303,28 @@ public class FeatureFormState private constructor(
         return true
     }
 
-    internal fun navigateToForm(formStateData: FormStateData) {
+    /**
+     * Adds a new [FeatureForm] to the local stack and navigates to it. [updateActiveFeatureForm]
+     * must be called after this to update the [activeFeatureForm], preferably after the navigation
+     * is complete. This will clear the stack and add the new form to the stack.
+     *
+     * [setNavigationPopupToCallback] must be set before calling this function to ensure that the
+     * navigation is valid.
+     */
+    internal fun navigateToForm(formStateData: FormStateData): Boolean {
         //Log.e("TAG", "navigateToForm: ${navigateToRoute}")
-        val navigateTo = navigatePopUpToRoute ?: return
-        // Check if the backStackEntry is in the resumed state.
-        //if (backStackEntry.lifecycleIsResumed().not()) return
-
-        store.clear()
-        store.addLast(formStateData)
-        Log.e("TAG", "navigateToForm: ${formStateData.featureForm.id()}_${formStateData.featureForm}")
+        val navigateTo = navigatePopUpToRoute ?: return false
         // Navigate to the form view.
-        navigateTo(NavigationRoute.Form)
+        return navigateTo(NavigationRoute.Form) {
+            // This is only invoked after the NavHost owner confirms that navigation is valid but
+            // before the navigation is actually performed. This is a good place to update the stack.
+            store.clear()
+            store.addLast(formStateData)
+            Log.e(
+                "TAG",
+                "navigateToForm: ${formStateData.featureForm.id}_${formStateData.featureForm}"
+            )
+        }
     }
 
     /**

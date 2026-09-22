@@ -17,7 +17,11 @@
 package com.arcgismaps.toolkit.featureforms
 
 import android.util.Log
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.mutableStateOf
+import androidx.navigation.NavBackStackEntry
+import com.arcgismaps.data.ArcGISFeature
+import com.arcgismaps.data.ArcGISFeatureTable
 import com.arcgismaps.data.FeatureEditResult
 import com.arcgismaps.data.ServiceFeatureTable
 import com.arcgismaps.mapping.featureforms.FeatureForm
@@ -69,6 +73,7 @@ internal class FeatureFormBrowser(
     }
 }
 
+@Stable
 public class FeatureFormManagerState(
     forms: List<FeatureForm>,
     public val isEditable: Boolean = true,
@@ -80,15 +85,29 @@ public class FeatureFormManagerState(
 
     private var _showNavigationBar = mutableStateOf(true)
 
-    private val store: MutableMap<String, FormStateData> = mutableMapOf()
+    /**
+     * A map that stores the [FormStateData] for each [FeatureForm]. This provides a way to retrieve
+     * the state data associated with a specific feature form outside the [FeatureFormState] context,
+     * allowing for navigation and state management across different forms.
+     */
+    private val store: MutableMap<FeatureForm, FormStateData> = mutableMapOf()
 
     internal val featureFormState = FeatureFormState(
         featureForm = featureForms.value.first(),
         coroutineScope = scope,
         onFeatureFormAddedCallback = {
-            Log.e("TAG", "Added ${it.featureForm.id()} - ${it.featureForm}: ")
-            addFeatureForm(it.featureForm)
-            store[it.featureForm.id()] = it
+            if (!store.containsKey(it.featureForm)) {
+                addFeatureForm(it.featureForm)
+                store[it.featureForm] = it
+                Log.e("TAG", "Editor, added ${it.featureForm.id} - ${it.featureForm}: ")
+            }
+        },
+        onFetchStateDataForFeatureCallback = { feature ->
+            feature.id()?.let { id ->
+                store.entries.find { (form, _) ->
+                    form.id == id
+                }?.value
+            }
         }
     )
 
@@ -180,7 +199,7 @@ public class FeatureFormManagerState(
     }
 
     internal fun navigateToForm(featureForm: FeatureForm) {
-        store[featureForm.id()]?.let { formStateData ->
+        store[featureForm]?.let { formStateData ->
             featureFormState.navigateToForm(formStateData)
         }
     }
@@ -202,9 +221,19 @@ public class FeatureFormManagerState(
     }
 }
 
-internal fun FeatureForm.id(): String {
-    return "${feature.globalId}_${feature.objectId}"
+internal fun ArcGISFeature.id(): String? {
+    val table = featureTable as ArcGISFeatureTable
+    val globalId = attributes[table.globalIdField]
+    val objectId = attributes[table.objectIdField]
+    return if (globalId == null && objectId == null) {
+        null
+    } else {
+        "${globalId}_${objectId}"
+    }
 }
+
+internal val FeatureForm.id: String?
+    get() = feature.id()
 
 /**
  * Applies the edits in the feature form to the service feature table if it is a service feature

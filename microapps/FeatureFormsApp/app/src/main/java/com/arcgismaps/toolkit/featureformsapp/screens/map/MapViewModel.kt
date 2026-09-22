@@ -535,9 +535,7 @@ class MapViewModel @Inject constructor(
             // create a default feature
             table.createFeature(emptyMap(), location) as ArcGISFeature
         }
-        table.addFeature(feature).onSuccess {
-            // create a FeatureForm
-            //val featureForm = FeatureForm(feature)
+        val featureForm = FeatureForm(feature)
             if (location != null) {
                 // set the viewpoint to the feature location
                 proxy.setViewpointCenter(location)
@@ -546,15 +544,32 @@ class MapViewModel @Inject constructor(
                     proxy.setViewpointScale(scale)
                 }
             }
-            _uiState.value = UIState.Editing(
-                FeatureFormManagerState(
-                    forms = listOf(FeatureForm(feature)),
-                    scope = scope
-                )
+        _uiState.value = UIState.Editing(
+            FeatureFormManagerState(
+                forms = listOf(featureForm),
+                scope = scope
             )
-        }.onFailure {
-            Log.e("MapViewModel", "Failed to add feature", it)
-        }
+        )
+//        table.addFeature(feature).onSuccess {
+//            // create a FeatureForm
+//            //val featureForm = FeatureForm(feature)
+//            if (location != null) {
+//                // set the viewpoint to the feature location
+//                proxy.setViewpointCenter(location)
+//                // set the viewpoint scale if the layer has a min scale
+//                layer.minScale?.let { scale ->
+//                    proxy.setViewpointScale(scale)
+//                }
+//            }
+//            _uiState.value = UIState.Editing(
+//                FeatureFormManagerState(
+//                    forms = listOf(FeatureForm(feature)),
+//                    scope = scope
+//                )
+//            )
+//        }.onFailure {
+//            Log.e("MapViewModel", "Failed to add feature", it)
+//        }
     }
 
     /**
