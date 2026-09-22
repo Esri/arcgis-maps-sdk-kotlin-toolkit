@@ -36,6 +36,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
@@ -118,7 +119,7 @@ private fun PopupBody(
     val lazyListState = rememberLazyListState()
     val states = popupStateData.stateCollection
     LazyColumn(
-        modifier = Modifier.semantics { contentDescription = "lazy column" },
+        modifier = Modifier.testTag("PopupBody").semantics { contentDescription = "lazy column" },
         state = lazyListState
     ) {
         states.forEach { entry ->
