@@ -59,7 +59,7 @@ class PopupTests {
      * @since 300.2.0
      */
     @Test
-    fun testPopupAlly() = runTest(timeout = 2.minutes) {
+    fun testPopupA11y() = runTest(timeout = 2.minutes) {
         // Load a popup using the web map.
         val mapViewModel = MapViewModel(itemId = "9f3a674e998f461580006e626611f9ad")
         val popupState = mapViewModel.load().first()
