@@ -216,6 +216,102 @@ public fun SceneView(
     )
 }
 
+@Deprecated(
+    message = "Use the SceneView function with `useSystemTextScale` instead. This deprecated function remains to maintain binary compatibility",
+    level = DeprecationLevel.HIDDEN,
+)
+@Composable
+public fun SceneView(
+    arcGISScene: ArcGISScene,
+    modifier: Modifier = Modifier,
+    onViewpointChangedForCenterAndScale: ((Viewpoint) -> Unit)? = null,
+    onViewpointChangedForBoundingGeometry: ((Viewpoint) -> Unit)? = null,
+    graphicsOverlays: List<GraphicsOverlay> = remember { emptyList() },
+    sceneViewProxy: SceneViewProxy? = null,
+    sceneViewInteractionOptions: SceneViewInteractionOptions = remember { SceneViewInteractionOptions() },
+    viewLabelProperties: ViewLabelProperties = remember { ViewLabelProperties() },
+    selectionProperties: SelectionProperties = remember { SelectionProperties() },
+    grid: Grid? = null,
+    isAttributionBarVisible: Boolean = true,
+    onAttributionTextChanged: ((String) -> Unit)? = null,
+    onAttributionBarLayoutChanged: ((AttributionBarLayoutChangeEvent) -> Unit)? = null,
+    cameraController: CameraController = remember { GlobeCameraController() },
+    analysisOverlays: List<AnalysisOverlay> = remember { emptyList() },
+    imageOverlays: List<ImageOverlay> = remember { emptyList() },
+    atmosphereEffect: AtmosphereEffect = AtmosphereEffect.HorizonOnly,
+    timeExtent: TimeExtent? = null,
+    onTimeExtentChanged: ((TimeExtent?) -> Unit)? = null,
+    spaceEffect: SpaceEffect = SpaceEffect.Stars,
+    sunTime: Instant = SceneViewDefaults.DefaultSunTime,
+    sunLighting: LightingMode = LightingMode.NoLight,
+    ambientLightColor: Color = SceneViewDefaults.DefaultAmbientLightColor,
+    onNavigationChanged: ((isNavigating: Boolean) -> Unit)? = null,
+    onSpatialReferenceChanged: ((spatialReference: SpatialReference?) -> Unit)? = null,
+    onLayerViewStateChanged: ((GeoView.GeoViewLayerViewStateChanged) -> Unit)? = null,
+    onAnalysisViewStatusChanged: ((GeoView.GeoViewAnalysisViewStatusChanged) -> Unit)? = null,
+    onInteractingChanged: ((isInteracting: Boolean) -> Unit)? = null,
+    onCurrentViewpointCameraChanged: ((camera: Camera) -> Unit)? = null,
+    onRotate: ((RotationChangeEvent) -> Unit)? = null,
+    onScale: ((ScaleChangeEvent) -> Unit)? = null,
+    onUp: ((UpEvent) -> Unit)? = null,
+    onDown: ((DownEvent) -> Unit)? = null,
+    onSingleTapConfirmed: ((SingleTapConfirmedEvent) -> Unit)? = null,
+    onDoubleTap: ((DoubleTapEvent) -> Unit)? = null,
+    onLongPress: ((LongPressEvent) -> Unit)? = null,
+    onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)? = null,
+    onPan: ((PanChangeEvent) -> Unit)? = null,
+    onInteractiveZooming: ((InteractiveZoomingChangeEvent) -> Unit)? = null,
+    onDrawStatusChanged: ((DrawStatus) -> Unit)? = null,
+    canFocus: Boolean = true,
+    onGeoModelErrorChanged: ((Throwable?) -> Unit)? = null,
+    content: (@Composable SceneViewScope.() -> Unit)? = null,
+) {
+    SceneView(
+        arcGISScene = arcGISScene,
+        modifier = modifier,
+        onViewpointChangedForCenterAndScale = onViewpointChangedForCenterAndScale,
+        onViewpointChangedForBoundingGeometry = onViewpointChangedForBoundingGeometry,
+        graphicsOverlays = graphicsOverlays,
+        sceneViewProxy = sceneViewProxy,
+        sceneViewInteractionOptions = sceneViewInteractionOptions,
+        viewLabelProperties = viewLabelProperties,
+        selectionProperties = selectionProperties,
+        grid = grid,
+        isAttributionBarVisible = isAttributionBarVisible,
+        onAttributionTextChanged = onAttributionTextChanged,
+        onAttributionBarLayoutChanged = onAttributionBarLayoutChanged,
+        cameraController = cameraController,
+        analysisOverlays = analysisOverlays,
+        imageOverlays = imageOverlays,
+        atmosphereEffect = atmosphereEffect,
+        timeExtent = timeExtent,
+        onTimeExtentChanged = onTimeExtentChanged,
+        spaceEffect = spaceEffect,
+        sunTime = sunTime,
+        sunLighting = sunLighting,
+        ambientLightColor = ambientLightColor,
+        onNavigationChanged = onNavigationChanged,
+        onSpatialReferenceChanged = onSpatialReferenceChanged,
+        onLayerViewStateChanged = onLayerViewStateChanged,
+        onAnalysisViewStatusChanged = onAnalysisViewStatusChanged,
+        onInteractingChanged = onInteractingChanged,
+        onCurrentViewpointCameraChanged = onCurrentViewpointCameraChanged,
+        onRotate = onRotate,
+        onScale = onScale,
+        onUp = onUp,
+        onDown = onDown,
+        onSingleTapConfirmed = onSingleTapConfirmed,
+        onDoubleTap = onDoubleTap,
+        onLongPress = onLongPress,
+        onTwoPointerTap = onTwoPointerTap,
+        onPan = onPan,
+        onInteractiveZooming = onInteractiveZooming,
+        canFocus = canFocus,
+        useSystemTextScale = true,
+        content = content
+    )
+}
+
 /**
  * A composable UI element that displays three-dimensional (3D) geographic content defined by an `ArcGISScene`.
  *
@@ -296,6 +392,7 @@ public fun SceneView(
  * @param canFocus pass true if the SceneView should receive focus. Note that specifying a modifier property `Modifier.focusProperties { canFocus = true/false }` on the SceneView composable has no effect.
  * @param onGeoModelErrorChanged lambda invoked when the GeoModel error state of the composable
  * LocalSceneView changes
+ * @param useSystemTextScale true to apply the system font scale to supported text rendered by the SceneView
  * @param content the content of the composable SceneView
  * @sample com.arcgismaps.toolkit.geoviewcompose.samples.SceneViewSample
  * @see
@@ -347,6 +444,7 @@ public fun SceneView(
     onDrawStatusChanged: ((DrawStatus) -> Unit)? = null,
     canFocus: Boolean = true,
     onGeoModelErrorChanged: ((Throwable?) -> Unit)? = null,
+    useSystemTextScale: Boolean = true,
     content: (@Composable SceneViewScope.() -> Unit)? = null
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -372,6 +470,7 @@ public fun SceneView(
             factory = { sceneView },
             update = {
                 it.scene = arcGISScene
+                it.useSystemTextScale = useSystemTextScale
                 it.isFocusable = isGeoViewFocusable
                 it.interactionOptions = sceneViewInteractionOptions
                 it.labeling = viewLabelProperties
@@ -692,14 +791,16 @@ private fun ViewpointHandler(
                     currentOnCurrentViewpointCameraChanged?.invoke(currentViewpointCamera)
                 }
                 currentOnViewpointChangedForCenterAndScale?.let { callback ->
-                    sceneView.getCurrentViewpoint(ViewpointType.CenterAndScale)?.let { currentViewpointCenterAndScale ->
-                        callback.invoke(currentViewpointCenterAndScale)
-                    }
+                    sceneView.getCurrentViewpoint(ViewpointType.CenterAndScale)
+                        ?.let { currentViewpointCenterAndScale ->
+                            callback.invoke(currentViewpointCenterAndScale)
+                        }
                 }
                 currentOnViewpointChangedForBoundingGeometry?.let { callback ->
-                    sceneView.getCurrentViewpoint(ViewpointType.BoundingGeometry)?.let { currentViewpointBoundingGeometry ->
-                        callback.invoke(currentViewpointBoundingGeometry)
-                    }
+                    sceneView.getCurrentViewpoint(ViewpointType.BoundingGeometry)
+                        ?.let { currentViewpointBoundingGeometry ->
+                            callback.invoke(currentViewpointBoundingGeometry)
+                        }
                 }
             }
         }

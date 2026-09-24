@@ -292,7 +292,7 @@ public fun MapView(
  */
 @Deprecated(
     message = "Use the MapView function with `insetsViewpointAdjustment` instead. This deprecated function " +
-        "remains to maintain binary compatibility",
+            "remains to maintain binary compatibility",
     level = DeprecationLevel.HIDDEN,
 )
 @Composable
@@ -390,7 +390,115 @@ public fun MapView(
         onDrawStatusChanged = onDrawStatusChanged,
         canFocus = canFocus,
         onGeoModelErrorChanged = onGeoModelErrorChanged,
+        useSystemTextScale = true,
         content = content
+    )
+}
+
+@Deprecated(
+    message = "Use the MapView function with `useSystemTextScale` instead. This deprecated function remains to maintain binary compatibility",
+    level = DeprecationLevel.HIDDEN,
+)
+@Composable
+public fun MapView(
+    arcGISMap: ArcGISMap,
+    modifier: Modifier = Modifier,
+    onViewpointChangedForCenterAndScale: ((Viewpoint) -> Unit)? = null,
+    onViewpointChangedForBoundingGeometry: ((Viewpoint) -> Unit)? = null,
+    onVisibleAreaChanged: ((Polygon) -> Unit)? = null,
+    viewpointPersistence: ViewpointPersistence = MapViewDefaults.DefaultViewpointPersistence,
+    graphicsOverlays: List<GraphicsOverlay> = remember { emptyList() },
+    imageOverlays: List<ImageOverlay> = remember { emptyList() },
+    analysisOverlays: List<AnalysisOverlay> = remember { emptyList() },
+    locationDisplay: LocationDisplay = rememberLocationDisplay(),
+    geometryEditor: GeometryEditor? = null,
+    mapViewProxy: MapViewProxy? = null,
+    mapViewInteractionOptions: MapViewInteractionOptions = remember { MapViewInteractionOptions() },
+    viewLabelProperties: ViewLabelProperties = remember { ViewLabelProperties() },
+    selectionProperties: SelectionProperties = remember { SelectionProperties() },
+    insets: PaddingValues = MapViewDefaults.DefaultInsets,
+    insetsViewpointAdjustment: InsetsViewpointAdjustmentType = InsetsViewpointAdjustmentType.NoAdjustment,
+    grid: Grid? = null,
+    backgroundGrid: BackgroundGrid = remember { BackgroundGrid() },
+    wrapAroundMode: WrapAroundMode = WrapAroundMode.EnabledWhenSupported,
+    isAttributionBarVisible: Boolean = true,
+    onAttributionTextChanged: ((String) -> Unit)? = null,
+    onAttributionBarLayoutChanged: ((AttributionBarLayoutChangeEvent) -> Unit)? = null,
+    timeExtent: TimeExtent? = null,
+    onTimeExtentChanged: ((TimeExtent?) -> Unit)? = null,
+    onNavigationChanged: ((isNavigating: Boolean) -> Unit)? = null,
+    onMapRotationChanged: ((Double) -> Unit)? = null,
+    onMapScaleChanged: ((Double) -> Unit)? = null,
+    onUnitsPerDipChanged: ((Double) -> Unit)? = null,
+    onSpatialReferenceChanged: ((spatialReference: SpatialReference?) -> Unit)? = null,
+    onLayerViewStateChanged: ((GeoView.GeoViewLayerViewStateChanged) -> Unit)? = null,
+    onAnalysisViewStatusChanged: ((GeoView.GeoViewAnalysisViewStatusChanged) -> Unit)? = null,
+    onInteractingChanged: ((isInteracting: Boolean) -> Unit)? = null,
+    onRotate: ((RotationChangeEvent) -> Unit)? = null,
+    onScale: ((ScaleChangeEvent) -> Unit)? = null,
+    onUp: ((UpEvent) -> Unit)? = null,
+    onDown: ((DownEvent) -> Unit)? = null,
+    onSingleTapConfirmed: ((SingleTapConfirmedEvent) -> Unit)? = null,
+    onDoubleTap: ((DoubleTapEvent) -> Unit)? = null,
+    onLongPress: ((LongPressEvent) -> Unit)? = null,
+    onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)? = null,
+    onPan: ((PanChangeEvent) -> Unit)? = null,
+    onInteractiveZooming: ((InteractiveZoomingChangeEvent) -> Unit)? = null,
+    onDrawStatusChanged: ((DrawStatus) -> Unit)? = null,
+    canFocus: Boolean = true,
+    onGeoModelErrorChanged: ((Throwable?) -> Unit)? = null,
+    content: (@Composable MapViewScope.() -> Unit)? = null,
+    useSystemTextScale: Boolean = true
+) {
+    MapView(
+        arcGISMap = arcGISMap,
+        modifier = modifier,
+        onViewpointChangedForCenterAndScale = onViewpointChangedForCenterAndScale,
+        onViewpointChangedForBoundingGeometry = onViewpointChangedForBoundingGeometry,
+        onVisibleAreaChanged = onVisibleAreaChanged,
+        viewpointPersistence = viewpointPersistence,
+        graphicsOverlays = graphicsOverlays,
+        imageOverlays = imageOverlays,
+        analysisOverlays = analysisOverlays,
+        locationDisplay = locationDisplay,
+        geometryEditor = geometryEditor,
+        mapViewProxy = mapViewProxy,
+        mapViewInteractionOptions = mapViewInteractionOptions,
+        viewLabelProperties = viewLabelProperties,
+        selectionProperties = selectionProperties,
+        insets = insets,
+        insetsViewpointAdjustment = insetsViewpointAdjustment,
+        grid = grid,
+        backgroundGrid = backgroundGrid,
+        wrapAroundMode = wrapAroundMode,
+        isAttributionBarVisible = isAttributionBarVisible,
+        onAttributionTextChanged = onAttributionTextChanged,
+        onAttributionBarLayoutChanged = onAttributionBarLayoutChanged,
+        timeExtent = timeExtent,
+        onTimeExtentChanged = onTimeExtentChanged,
+        onNavigationChanged = onNavigationChanged,
+        onMapRotationChanged = onMapRotationChanged,
+        onMapScaleChanged = onMapScaleChanged,
+        onUnitsPerDipChanged = onUnitsPerDipChanged,
+        onSpatialReferenceChanged = onSpatialReferenceChanged,
+        onLayerViewStateChanged = onLayerViewStateChanged,
+        onAnalysisViewStatusChanged = onAnalysisViewStatusChanged,
+        onInteractingChanged = onInteractingChanged,
+        onRotate = onRotate,
+        onScale = onScale,
+        onUp = onUp,
+        onDown = onDown,
+        onSingleTapConfirmed = onSingleTapConfirmed,
+        onDoubleTap = onDoubleTap,
+        onLongPress = onLongPress,
+        onTwoPointerTap = onTwoPointerTap,
+        onPan = onPan,
+        onInteractiveZooming = onInteractiveZooming,
+        onDrawStatusChanged = onDrawStatusChanged,
+        canFocus = canFocus,
+        onGeoModelErrorChanged = onGeoModelErrorChanged,
+        content = content,
+        useSystemTextScale = true
     )
 }
 
@@ -449,6 +557,8 @@ public fun MapView(
  * @param canFocus pass true if the MapView should receive focus. Note that specifying a modifier property `Modifier.focusProperties { canFocus = true/false }` on the MapView composable has no effect.
  * @param onGeoModelErrorChanged lambda invoked when the GeoModel error state of the composable
  * mapView changes
+ * @param useSystemTextScale true to apply the system font scale to supported text rendered by the MapView, default is true.
+ * If false, the MapView will ignore the system font scale and render text at its default size.
  * @param content the content of the composable MapView
  * @sample com.arcgismaps.toolkit.geoviewcompose.samples.MapViewSample
  * @see
@@ -505,6 +615,7 @@ public fun MapView(
     onDrawStatusChanged: ((DrawStatus) -> Unit)? = null,
     canFocus: Boolean = true,
     onGeoModelErrorChanged: ((Throwable?) -> Unit)? = null,
+    useSystemTextScale: Boolean = true,
     content: (@Composable MapViewScope.() -> Unit)? = null
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -532,6 +643,7 @@ public fun MapView(
             factory = { mapView },
             update = {
                 it.map = arcGISMap
+                it.useSystemTextScale = useSystemTextScale
                 it.isFocusable = isGeoViewFocusable
                 it.selectionProperties = selectionProperties
                 it.interactionOptions = mapViewInteractionOptions
