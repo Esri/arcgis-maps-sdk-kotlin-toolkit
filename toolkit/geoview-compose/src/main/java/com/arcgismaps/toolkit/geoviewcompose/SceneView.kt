@@ -306,7 +306,9 @@ public fun SceneView(
         onTwoPointerTap = onTwoPointerTap,
         onPan = onPan,
         onInteractiveZooming = onInteractiveZooming,
+        onDrawStatusChanged = onDrawStatusChanged,
         canFocus = canFocus,
+        onGeoModelErrorChanged = onGeoModelErrorChanged,
         useSystemTextScale = true,
         content = content
     )
