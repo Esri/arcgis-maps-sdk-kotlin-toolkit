@@ -447,7 +447,6 @@ public fun MapView(
     onDrawStatusChanged: ((DrawStatus) -> Unit)? = null,
     canFocus: Boolean = true,
     onGeoModelErrorChanged: ((Throwable?) -> Unit)? = null,
-    useSystemTextScale: Boolean = true,
     content: (@Composable MapViewScope.() -> Unit)? = null
 ) {
     MapView(
