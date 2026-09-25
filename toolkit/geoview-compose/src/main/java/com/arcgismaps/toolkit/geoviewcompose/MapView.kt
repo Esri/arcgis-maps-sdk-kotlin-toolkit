@@ -447,8 +447,8 @@ public fun MapView(
     onDrawStatusChanged: ((DrawStatus) -> Unit)? = null,
     canFocus: Boolean = true,
     onGeoModelErrorChanged: ((Throwable?) -> Unit)? = null,
-    content: (@Composable MapViewScope.() -> Unit)? = null,
-    useSystemTextScale: Boolean = true
+    useSystemTextScale: Boolean = true,
+    content: (@Composable MapViewScope.() -> Unit)? = null
 ) {
     MapView(
         arcGISMap = arcGISMap,
@@ -497,8 +497,8 @@ public fun MapView(
         onDrawStatusChanged = onDrawStatusChanged,
         canFocus = canFocus,
         onGeoModelErrorChanged = onGeoModelErrorChanged,
-        content = content,
-        useSystemTextScale = true
+        useSystemTextScale = true,
+        content = content
     )
 }
 

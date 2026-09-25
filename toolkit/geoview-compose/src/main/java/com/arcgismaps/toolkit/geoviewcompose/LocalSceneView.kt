@@ -131,6 +131,9 @@ public fun LocalSceneView(
         onInteractiveZooming = onInteractiveZooming,
         onDrawStatusChanged = onDrawStatusChanged,
         canFocus = canFocus,
+        onGeoModelErrorChanged  = onGeoModelErrorChanged,
+        onCriticalErrorChanged = onCriticalErrorChanged,
+        onWarningsChanged = onWarningsChanged,
         useSystemTextScale = true,
         content = content
     )
@@ -250,8 +253,8 @@ public fun LocalSceneView(
     onGeoModelErrorChanged: ((Throwable?) -> Unit)? = null,
     onCriticalErrorChanged: ((Throwable?) -> Unit)? = null,
     onWarningsChanged: ((List<Throwable>) -> Unit)? = null,
-    content: (@Composable LocalSceneViewScope.() -> Unit)? = null,
-    useSystemTextScale: Boolean = true
+    useSystemTextScale: Boolean = true,
+    content: (@Composable LocalSceneViewScope.() -> Unit)? = null
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
