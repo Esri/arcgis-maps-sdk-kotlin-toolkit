@@ -177,29 +177,6 @@ public final class com/arcgismaps/toolkit/featureforms/ValidationErrorVisibility
 	public static final field INSTANCE Lcom/arcgismaps/toolkit/featureforms/ValidationErrorVisibility$Visible;
 }
 
-public final class com/arcgismaps/toolkit/featureforms/internal/components/attachment/ComposableSingletons$AddAttachmentKt {
-	public static final field INSTANCE Lcom/arcgismaps/toolkit/featureforms/internal/components/attachment/ComposableSingletons$AddAttachmentKt;
-	public fun <init> ()V
-	public final fun getLambda$-1482054932$featureforms ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda$-1785912467$featureforms ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda$-2089770002$featureforms ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda$1033528817$featureforms ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda$1337386352$featureforms ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda$1901339759$featureforms ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda$367235258$featureforms ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda$425813747$featureforms ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda$626346545$featureforms ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda$729671282$featureforms ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda$764328596$featureforms ()Lkotlin/jvm/functions/Function2;
-}
-
-public final class com/arcgismaps/toolkit/featureforms/internal/utils/ComposableSingletons$DialogKt {
-	public static final field INSTANCE Lcom/arcgismaps/toolkit/featureforms/internal/utils/ComposableSingletons$DialogKt;
-	public fun <init> ()V
-	public final fun getLambda$-1539216093$featureforms ()Lkotlin/jvm/functions/Function3;
-	public final fun getLambda$-1575178839$featureforms ()Lkotlin/jvm/functions/Function2;
-}
-
 public final class com/arcgismaps/toolkit/featureforms/theme/AttachmentsElementColors {
 	public static final field $stable I
 	public synthetic fun <init> (JJJJJJLkotlin/jvm/internal/DefaultConstructorMarker;)V
