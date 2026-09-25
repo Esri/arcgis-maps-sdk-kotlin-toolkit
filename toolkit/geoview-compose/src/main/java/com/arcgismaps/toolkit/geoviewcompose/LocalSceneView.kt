@@ -65,6 +65,80 @@ import com.arcgismaps.mapping.view.UpEvent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
+@Deprecated(
+    message = "Use LocalSceneView with useSystemTextScale parameter instead. This deprecated function remains to maintain binary compatibility",
+    level = DeprecationLevel.HIDDEN,
+)
+@Composable
+public fun LocalSceneView(
+    scene: ArcGISScene,
+    modifier: Modifier = Modifier,
+    localSceneViewProxy: LocalSceneViewProxy? = null,
+    onViewpointChangedForCenterAndScale: ((Viewpoint) -> Unit)? = null,
+    onViewpointChangedForBoundingGeometry: ((Viewpoint) -> Unit)? = null,
+    interactionOptions: LocalSceneViewInteractionOptions = remember { LocalSceneViewInteractionOptions() },
+    selectionProperties: SelectionProperties = remember { SelectionProperties() },
+    isAttributionBarVisible: Boolean = true,
+    onAttributionTextChanged: ((String) -> Unit)? = null,
+    onAttributionBarLayoutChanged: ((AttributionBarLayoutChangeEvent) -> Unit)? = null,
+    onNavigationChanged: ((isNavigating: Boolean) -> Unit)? = null,
+    onSpatialReferenceChanged: ((spatialReference: SpatialReference?) -> Unit)? = null,
+    onLayerViewStateChanged: ((GeoView.GeoViewLayerViewStateChanged) -> Unit)? = null,
+    onInteractingChanged: ((isInteracting: Boolean) -> Unit)? = null,
+    onCurrentViewpointCameraChanged: ((camera: Camera) -> Unit)? = null,
+    onRotate: ((RotationChangeEvent) -> Unit)? = null,
+    onScale: ((ScaleChangeEvent) -> Unit)? = null,
+    onUp: ((UpEvent) -> Unit)? = null,
+    onDown: ((DownEvent) -> Unit)? = null,
+    onSingleTapConfirmed: ((SingleTapConfirmedEvent) -> Unit)? = null,
+    onDoubleTap: ((DoubleTapEvent) -> Unit)? = null,
+    onLongPress: ((LongPressEvent) -> Unit)? = null,
+    onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)? = null,
+    onPan: ((PanChangeEvent) -> Unit)? = null,
+    onInteractiveZooming: ((InteractiveZoomingChangeEvent) -> Unit)? = null,
+    onDrawStatusChanged: ((DrawStatus) -> Unit)? = null,
+    canFocus: Boolean = true,
+    onGeoModelErrorChanged: ((Throwable?) -> Unit)? = null,
+    onCriticalErrorChanged: ((Throwable?) -> Unit)? = null,
+    onWarningsChanged: ((List<Throwable>) -> Unit)? = null,
+    content: (@Composable LocalSceneViewScope.() -> Unit)? = null,
+) {
+    LocalSceneView(
+        scene = scene,
+        modifier = modifier,
+        localSceneViewProxy = localSceneViewProxy,
+        onViewpointChangedForCenterAndScale = onViewpointChangedForCenterAndScale,
+        onViewpointChangedForBoundingGeometry = onViewpointChangedForBoundingGeometry,
+        interactionOptions = interactionOptions,
+        selectionProperties = selectionProperties,
+        isAttributionBarVisible = isAttributionBarVisible,
+        onAttributionTextChanged = onAttributionTextChanged,
+        onAttributionBarLayoutChanged = onAttributionBarLayoutChanged,
+        onNavigationChanged = onNavigationChanged,
+        onSpatialReferenceChanged = onSpatialReferenceChanged,
+        onLayerViewStateChanged = onLayerViewStateChanged,
+        onInteractingChanged = onInteractingChanged,
+        onCurrentViewpointCameraChanged = onCurrentViewpointCameraChanged,
+        onRotate = onRotate,
+        onScale = onScale,
+        onUp = onUp,
+        onDown = onDown,
+        onSingleTapConfirmed = onSingleTapConfirmed,
+        onDoubleTap = onDoubleTap,
+        onLongPress = onLongPress,
+        onTwoPointerTap = onTwoPointerTap,
+        onPan = onPan,
+        onInteractiveZooming = onInteractiveZooming,
+        onDrawStatusChanged = onDrawStatusChanged,
+        canFocus = canFocus,
+        onGeoModelErrorChanged  = onGeoModelErrorChanged,
+        onCriticalErrorChanged = onCriticalErrorChanged,
+        onWarningsChanged = onWarningsChanged,
+        useSystemTextScale = true,
+        content = content
+    )
+}
+
 /**
  * A user interface control that displays geographic content defined by a local [ArcGISScene].
  * A local scene view is a user interface that displays layers and graphics. It controls the area of
@@ -142,6 +216,7 @@ import kotlinx.coroutines.launch
  * LocalSceneView changes
  * @param onWarningsChanged lambda invoked when the warning status of the composable LocalSceneView
  * is changed
+ * @param useSystemTextScale true to apply the system font scale to supported text rendered by the LocalSceneView
  * @param content the content of the composable LocalSceneView
  *
  * @since 300.0.0
@@ -178,6 +253,7 @@ public fun LocalSceneView(
     onGeoModelErrorChanged: ((Throwable?) -> Unit)? = null,
     onCriticalErrorChanged: ((Throwable?) -> Unit)? = null,
     onWarningsChanged: ((List<Throwable>) -> Unit)? = null,
+    useSystemTextScale: Boolean = true,
     content: (@Composable LocalSceneViewScope.() -> Unit)? = null
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -201,6 +277,7 @@ public fun LocalSceneView(
             factory = { localSceneView },
             update = {
                 it.scene = scene
+                it.useSystemTextScale = useSystemTextScale
                 it.isFocusable = isGeoViewFocusable
                 it.interactionOptions = interactionOptions
                 it.isAttributionBarVisible = isAttributionBarVisible
