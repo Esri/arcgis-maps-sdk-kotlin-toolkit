@@ -27,6 +27,7 @@ import com.arcgismaps.data.ServiceFeatureTable
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.globalId
 import com.arcgismaps.toolkit.featureforms.internal.editor.objectId
+import com.arcgismaps.toolkit.featureforms.internal.navigation.FormNavigationDirection
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -89,6 +90,11 @@ public class FeatureFormManagerState(
      * A map that stores the [FormStateData] for each [FeatureForm]. This provides a way to retrieve
      * the state data associated with a specific feature form outside the [FeatureFormState] context,
      * allowing for navigation and state management across different forms.
+     *
+     * For efficiency, the required [FormStateData] for a [FeatureForm] is created and stored on
+     * demand when navigating to that form. If the state data already exists in the store, it is
+     * used, otherwise, a new instance will be created and added to the store. See [navigateToForm]
+     * for more details.
      */
     private val store: MutableMap<FeatureForm, FormStateData> = mutableMapOf()
 
@@ -96,6 +102,9 @@ public class FeatureFormManagerState(
         featureForm = featureForms.value.first(),
         coroutineScope = scope,
         onFeatureFormAddedCallback = {
+            // When a new feature form is added, cache its FormStateData in the store if it doesn't
+            // already exist. This callback is only invoked when the nested FeatureForm component
+            // navigates to a new/existing form, for ex, during UtilityNetwork Association navigation.
             if (!store.containsKey(it.featureForm)) {
                 addFeatureForm(it.featureForm)
                 store[it.featureForm] = it
@@ -103,6 +112,10 @@ public class FeatureFormManagerState(
             }
         },
         onFetchStateDataForFeatureCallback = { feature ->
+            // When the nested FeatureForm component needs to fetch the FormStateData for a specific
+            // feature, it will invoke this callback. If null is returned, the FeatureForm component
+            // will create a new FormStateData for the feature and pass it back via the
+            // onFeatureFormAddedCallback above.
             feature.id()?.let { id ->
                 store.entries.find { (form, _) ->
                     form.id == id
@@ -198,10 +211,26 @@ public class FeatureFormManagerState(
         _showNavigationBar.value = true
     }
 
-    internal fun navigateToForm(featureForm: FeatureForm) {
-        store[featureForm]?.let { formStateData ->
-            featureFormState.navigateToForm(formStateData)
+    /**
+     * Navigates to the specified [featureForm] in the given [direction].
+     *
+     * Any [FormStateData] associated with the [featureForm] will be retrieved from the store if it
+     * exists; otherwise, a new [FormStateData] will be created and stored on demand.
+     */
+    internal fun navigateToForm(featureForm: FeatureForm, direction: FormNavigationDirection) {
+        // Check if the form state data for the feature form already exists in the store
+        val formStateData = store[featureForm] ?: run {
+            // If it doesn't exist, create a new FormStateData for the feature form and store it
+            val states = createStates(
+                form = featureForm,
+                elements = featureForm.allElements,
+                scope = scope
+            )
+            FormStateData(featureForm, states).also {
+                store[featureForm] = it
+            }
         }
+        featureFormState.navigateToForm(formStateData, direction)
     }
 
     internal fun validateAllForms() {

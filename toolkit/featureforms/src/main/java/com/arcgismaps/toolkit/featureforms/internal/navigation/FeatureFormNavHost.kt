@@ -50,7 +50,7 @@ internal fun FeatureFormNavHost(
 ) {
     NavHost(
         navController,
-        startDestination = NavigationRoute.Form,
+        startDestination = NavigationRoute.Form(),
         modifier = modifier,
         enterTransition = { slideInHorizontally { h -> h } },
         exitTransition = { fadeOut() },

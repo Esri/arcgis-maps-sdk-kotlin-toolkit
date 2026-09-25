@@ -16,6 +16,7 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.editor
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -68,7 +69,7 @@ internal fun ManagerOverview(
         modifier = modifier,
         color = MaterialTheme.colorScheme.surfaceVariant,
     ) {
-        Column(modifier = Modifier.padding(horizontal = 12.dp)) {
+        Column(modifier = Modifier.fillMaxWidth()) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -100,8 +101,9 @@ internal fun ManagerOverview(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         width = 4.dp,
                         offsetX = 0.dp,
-                        autoHide = false
-                    )
+                        autoHide = true
+                    ),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 items(forms) { featureForm ->
                     val errors by featureForm.elementValidationErrors.collectAsState()
@@ -121,6 +123,9 @@ internal fun ManagerOverview(
                 }
             }
         }
+    }
+    BackHandler(enabled = true) {
+        onDismiss()
     }
 }
 

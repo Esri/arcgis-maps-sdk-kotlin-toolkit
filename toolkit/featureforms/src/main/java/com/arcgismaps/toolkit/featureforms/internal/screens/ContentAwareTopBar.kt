@@ -93,7 +93,6 @@ internal fun ContentAwareTopBar(
     backStackEntry: NavBackStackEntry,
     state: FeatureFormState,
     hasBackStack: Boolean,
-    showBackAction: Boolean,
     showFormActions: Boolean,
     showCloseIcon: Boolean,
     isNavigationEnabled: Boolean,
@@ -160,7 +159,7 @@ internal fun ContentAwareTopBar(
                 subTitle = subTitle,
                 hasEdits = if (showFormActions) hasEdits else false,
                 showCloseIcon = showCloseIcon,
-                showBackIcon = hasBackStack && showBackAction,
+                showBackIcon = hasBackStack,
                 isNavigationEnabled = navigationEnabled,
                 onBackPressed = {
                     onBackAction(backStackEntry)

@@ -169,7 +169,6 @@ private fun DismissConfirmationDialog(
         onDismissRequest = onDismissRequest,
         title = {
             Row(
-                modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -181,7 +180,10 @@ private fun DismissConfirmationDialog(
         },
         confirmButton = {
             TextButton(onClick = onDiscard) {
-                Text("Discard")
+                Text(
+                    text = "Discard",
+                    color = MaterialTheme.colorScheme.error
+                )
             }
         },
         dismissButton = {

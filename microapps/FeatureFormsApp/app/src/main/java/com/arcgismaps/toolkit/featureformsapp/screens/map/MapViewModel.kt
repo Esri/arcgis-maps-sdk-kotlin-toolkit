@@ -481,6 +481,7 @@ class MapViewModel @Inject constructor(
      */
     suspend fun addNewFeature() {
         val map = mapState.map
+        map.operationalLayers.add(GroupLayer())
         val layers = map.operationalLayers.filterIsInstance<FeatureLayer>()
         val layerTemplates = mutableListOf<LayerTemplates>()
         layers.forEach { layer ->
@@ -536,14 +537,14 @@ class MapViewModel @Inject constructor(
             table.createFeature(emptyMap(), location) as ArcGISFeature
         }
         val featureForm = FeatureForm(feature)
-            if (location != null) {
-                // set the viewpoint to the feature location
-                proxy.setViewpointCenter(location)
-                // set the viewpoint scale if the layer has a min scale
-                layer.minScale?.let { scale ->
-                    proxy.setViewpointScale(scale)
-                }
+        if (location != null) {
+            // set the viewpoint to the feature location
+            proxy.setViewpointCenter(location)
+            // set the viewpoint scale if the layer has a min scale
+            layer.minScale?.let { scale ->
+                proxy.setViewpointScale(scale)
             }
+        }
         _uiState.value = UIState.Editing(
             FeatureFormManagerState(
                 forms = listOf(featureForm),

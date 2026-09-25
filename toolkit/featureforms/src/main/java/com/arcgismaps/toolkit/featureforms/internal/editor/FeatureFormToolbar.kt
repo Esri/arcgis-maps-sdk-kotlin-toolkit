@@ -51,6 +51,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.toolkit.featureforms.FeatureFormManagerState
+import com.arcgismaps.toolkit.featureforms.internal.navigation.FormNavigationDirection
 
 public object FeatureFormToolbarDefaults {
 
@@ -97,7 +98,7 @@ public fun FeatureFormToolbar(
         // recompositions
         state.featureForms.value
     }
-    val (activeIndex, count) = remember(activeForm) {
+    val (activeIndex, count) = remember(activeForm, forms) {
         Pair(
             forms.indexOfFirst {
                 it.feature == activeForm.feature
@@ -105,18 +106,26 @@ public fun FeatureFormToolbar(
             forms.size
         )
     }
-    val previousForm = remember(forms) {
+    val previousForm = remember(activeForm, forms) {
         forms.getOrNull((activeIndex - 1).mod(count))
     }
-    val nextForm = remember(forms) {
+    val nextForm = remember(activeForm, forms) {
         forms.getOrNull((activeIndex + 1).mod(count))
     }
-    AnimatedVisibility(state.showNavigationBar) {
+    AnimatedVisibility(state.showNavigationBar && forms.size > 1) {
         FeatureFormToolbarContent(
             activeIndex = activeIndex,
             formCount = forms.size,
-            onPrevious = { previousForm?.let(state::navigateToForm) },
-            onNext = { nextForm?.let(state::navigateToForm) },
+            onPrevious = {
+                previousForm?.let { form ->
+                    state.navigateToForm(form, FormNavigationDirection.Previous)
+                }
+            },
+            onNext = {
+                nextForm?.let { form ->
+                    state.navigateToForm(form, FormNavigationDirection.Next)
+                }
+            },
             onExpand = state::showOverview,
             shape = shape,
             colors = colors,

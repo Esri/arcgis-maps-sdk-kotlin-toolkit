@@ -70,6 +70,7 @@ import com.arcgismaps.toolkit.featureforms.internal.components.text.TextFieldPro
 import com.arcgismaps.toolkit.featureforms.internal.components.text.TextFormElementState
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationsElementState
 import com.arcgismaps.toolkit.featureforms.internal.editor.objectId
+import com.arcgismaps.toolkit.featureforms.internal.navigation.FormNavigationDirection
 import com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationRoute
 import com.arcgismaps.toolkit.featureforms.internal.navigation.lifecycleIsResumed
 import com.arcgismaps.toolkit.featureforms.internal.utils.fieldIsNullable
@@ -148,12 +149,10 @@ public class FeatureFormState private constructor(
         coroutineScope: CoroutineScope
     ) : this(featureForm) {
         this.coroutineScope = coroutineScope
-        val formElements: List<FormElement> =
-            featureForm.elements + listOfNotNull(featureForm.defaultAttachmentsElement)
         // create state objects for all the supported element types that are part of the provided FeatureForm
         val states = createStates(
             form = this.featureForm,
-            elements = formElements,
+            elements = this.featureForm.allElements,
             scope = coroutineScope
         )
         val formStateData = FormStateData(featureForm, states)
@@ -290,7 +289,7 @@ public class FeatureFormState private constructor(
                 val form = FeatureForm(feature)
                 val states = createStates(
                     form = form,
-                    elements = form.elements,
+                    elements = form.allElements,
                     scope = coroutineScope
                 )
                 FormStateData(form, states)
@@ -299,7 +298,7 @@ public class FeatureFormState private constructor(
         store.addLast(formStateData)
         onFeatureFormAddedCallback(formStateData)
         // Navigate to the form view.
-        navigateTo(NavigationRoute.Form)
+        navigateTo(NavigationRoute.Form(FormNavigationDirection.Next))
         return true
     }
 
@@ -311,11 +310,11 @@ public class FeatureFormState private constructor(
      * [setNavigationPopupToCallback] must be set before calling this function to ensure that the
      * navigation is valid.
      */
-    internal fun navigateToForm(formStateData: FormStateData): Boolean {
+    internal fun navigateToForm(formStateData: FormStateData, direction: FormNavigationDirection): Boolean {
         //Log.e("TAG", "navigateToForm: ${navigateToRoute}")
         val navigateTo = navigatePopUpToRoute ?: return false
         // Navigate to the form view.
-        return navigateTo(NavigationRoute.Form) {
+        return navigateTo(NavigationRoute.Form(direction)) {
             // This is only invoked after the NavHost owner confirms that navigation is valid but
             // before the navigation is actually performed. This is a good place to update the stack.
             store.clear()
@@ -380,6 +379,13 @@ public class FeatureFormState private constructor(
         getActiveFormStateData().validateAllFields()
     }
 }
+
+/**
+ * Returns a list of all the elements in the [FeatureForm], including the default attachments element
+ * if it exists.
+ */
+internal val FeatureForm.allElements: List<FormElement>
+    get() = elements + listOfNotNull(defaultAttachmentsElement)
 
 /**
  * A structure that holds the [FeatureForm] and its associated [FormStateCollection].
