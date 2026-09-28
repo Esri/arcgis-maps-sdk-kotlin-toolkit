@@ -65,6 +65,87 @@ import com.arcgismaps.mapping.view.UpEvent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
+/**
+ * A user interface control that displays geographic content defined by a local [ArcGISScene].
+ * A local scene view is a user interface that displays layers and graphics. It controls the area of
+ * the local scene that is visible and supports user interactions such as pan and zoom. The local
+ * scene view also provides access to the underlying layer data in a local scene.
+ *
+ * To display a local scene, add this view to the composition and pass a local `ArcGISScene` to it
+ * via the [scene] parameter. This loads the scene and its content, such as a [Basemap] and a
+ * collection of operational layers, and displays this content on screen.
+ *
+ * User interactions such as pan, zoom, rotate, and identify or selection are supported in the
+ * [LocalSceneView] using touch interaction.
+ *
+ * The visible area ([Viewpoint]) of the local scene view is defined by the visible extent of the
+ * scene. To determine the current visible area or the center point and scale of the view, make sure
+ * that any user-initiated or programmatic navigation is complete before getting the current
+ * [Viewpoint] by listening to the [onNavigationChanged] callback.
+ *
+ * You can programmatically set the visible area by specifying a viewpoint. For example,
+ * [GeoViewProxy.setViewpoint] sets the visible area to the extent of a provided geometry, and
+ * [LocalSceneViewProxy.setViewpointCamera] centers the local scene view at a given point. Any
+ * geometries passed to these methods are automatically projected to match the [SpatialReference] of
+ * the [scene], if required.
+ *
+ * [FloorAware] is not yet supported in the local scene view, and any layer [FloorAware] configurations
+ * will not be honored.
+ *
+ * In an MVC architecture, the local scene view represents the View tier. The Model tier is
+ * represented by the [ArcGISScene] object which can provide a collection of operational layers and
+ * a [Basemap]. You can only set one local scene per local scene view, but you can replace the
+ * [scene] with another when the application is running.
+ *
+ * @param scene the [ArcGISScene] to be rendered by this composable LocalSceneView
+ * @param modifier modifier to be applied to the composable LocalSceneView
+ * @param localSceneViewProxy the [LocalSceneViewProxy] to associate with the composable LocalSceneView
+ * @param onViewpointChangedForCenterAndScale lambda invoked when the viewpoint changes, passing a
+ * viewpoint type of [ViewpointType.CenterAndScale]
+ * @param onViewpointChangedForBoundingGeometry lambda invoked when the viewpoint changes, passing a
+ * viewpoint type of [ViewpointType.BoundingGeometry]
+ * @param interactionOptions the [LocalSceneViewInteractionOptions] used by this composable LocalSceneView
+ * @param selectionProperties the [SelectionProperties] used by the composable LocalSceneView
+ * @param isAttributionBarVisible true if attribution bar is visible in the composable LocalSceneView,
+ * false otherwise
+ * @param onAttributionTextChanged lambda invoked when the attribution text of the composable
+ * LocalSceneView has changed
+ * @param onAttributionBarLayoutChanged lambda invoked when the attribution bar's position or size
+ * changes
+ * @param onNavigationChanged lambda invoked when the navigation status of the composable LocalSceneView
+ * has changed
+ * @param onSpatialReferenceChanged lambda invoked when the spatial reference of the composable
+ * LocalSceneView has changed
+ * @param onLayerViewStateChanged lambda invoked when the composable LocalSceneView's layer view state
+ * is changed
+ * @param onInteractingChanged lambda invoked when the user starts and ends interacting with the
+ * composable LocalSceneView
+ * @param onCurrentViewpointCameraChanged lambda invoked when the viewpoint camera of the composable
+ * LocalSceneView has changed
+ * @param onRotate lambda invoked when a user performs a rotation gesture on the composable LocalSceneView
+ * @param onScale lambda invoked when a user performs a pinch gesture on the composable LocalSceneView
+ * @param onUp lambda invoked when the user removes all their pointers from the composable LocalSceneView
+ * @param onDown lambda invoked when the user first presses on the composable LocalSceneView
+ * @param onSingleTapConfirmed lambda invoked when the user taps once on the composable LocalSceneView
+ * @param onDoubleTap lambda invoked the user double taps on the composable LocalSceneView
+ * @param onLongPress lambda invoked when a user holds a pointer on the composable LocalSceneView
+ * @param onTwoPointerTap lambda invoked when a user taps two pointers on the composable LocalSceneView
+ * @param onPan lambda invoked when a user drags a pointer or pointers across composable LocalSceneView
+ * @param onInteractiveZooming lambda invoked when a user performs a pinch or double-tap-drag gesture
+ *  on the composable LocalSceneView
+ * @param onDrawStatusChanged lambda invoked when the draw status of the composable LocalSceneView
+ * changes
+ * @param canFocus pass true if the LocalSceneView should receive focus. Note that specifying a modifier property `Modifier.focusProperties { canFocus = true/false }` on the LocalSceneView composable has no effect.
+ * @param onGeoModelErrorChanged lambda invoked when the GeoModel error state of the composable
+ * LocalSceneView changes
+ * @param onCriticalErrorChanged lambda invoked when the critical error state of the composable
+ * LocalSceneView changes
+ * @param onWarningsChanged lambda invoked when the warning status of the composable LocalSceneView
+ * is changed
+ * @param content the content of the composable LocalSceneView
+ *
+ * @since 300.0.0
+ */
 @Deprecated(
     message = "Use LocalSceneView with useSystemTextScale parameter instead. This deprecated function remains to maintain binary compatibility",
     level = DeprecationLevel.HIDDEN,
@@ -101,7 +182,7 @@ public fun LocalSceneView(
     onGeoModelErrorChanged: ((Throwable?) -> Unit)? = null,
     onCriticalErrorChanged: ((Throwable?) -> Unit)? = null,
     onWarningsChanged: ((List<Throwable>) -> Unit)? = null,
-    content: (@Composable LocalSceneViewScope.() -> Unit)? = null,
+    content: (@Composable LocalSceneViewScope.() -> Unit)? = null
 ) {
     LocalSceneView(
         scene = scene,
@@ -182,6 +263,7 @@ public fun LocalSceneView(
  * @param selectionProperties the [SelectionProperties] used by the composable LocalSceneView
  * @param isAttributionBarVisible true if attribution bar is visible in the composable LocalSceneView,
  * false otherwise
+ * @param useSystemTextScale true to apply the system font scale to supported text rendered by the LocalSceneView
  * @param onAttributionTextChanged lambda invoked when the attribution text of the composable
  * LocalSceneView has changed
  * @param onAttributionBarLayoutChanged lambda invoked when the attribution bar's position or size
@@ -216,10 +298,9 @@ public fun LocalSceneView(
  * LocalSceneView changes
  * @param onWarningsChanged lambda invoked when the warning status of the composable LocalSceneView
  * is changed
- * @param useSystemTextScale true to apply the system font scale to supported text rendered by the LocalSceneView
  * @param content the content of the composable LocalSceneView
  *
- * @since 300.0.0
+ * @since 300.2.0
  */
 @Composable
 public fun LocalSceneView(
@@ -231,6 +312,7 @@ public fun LocalSceneView(
     interactionOptions: LocalSceneViewInteractionOptions = remember { LocalSceneViewInteractionOptions() },
     selectionProperties: SelectionProperties = remember { SelectionProperties() },
     isAttributionBarVisible: Boolean = true,
+    useSystemTextScale: Boolean = true,
     onAttributionTextChanged: ((String) -> Unit)? = null,
     onAttributionBarLayoutChanged: ((AttributionBarLayoutChangeEvent) -> Unit)? = null,
     onNavigationChanged: ((isNavigating: Boolean) -> Unit)? = null,
@@ -253,7 +335,6 @@ public fun LocalSceneView(
     onGeoModelErrorChanged: ((Throwable?) -> Unit)? = null,
     onCriticalErrorChanged: ((Throwable?) -> Unit)? = null,
     onWarningsChanged: ((List<Throwable>) -> Unit)? = null,
-    useSystemTextScale: Boolean = true,
     content: (@Composable LocalSceneViewScope.() -> Unit)? = null
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
