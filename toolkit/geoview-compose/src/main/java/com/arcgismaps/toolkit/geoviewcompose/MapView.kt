@@ -292,7 +292,7 @@ public fun MapView(
  */
 @Deprecated(
     message = "Use the MapView function with `insetsViewpointAdjustment` instead. This deprecated function " +
-            "remains to maintain binary compatibility",
+        "remains to maintain binary compatibility",
     level = DeprecationLevel.HIDDEN,
 )
 @Composable
