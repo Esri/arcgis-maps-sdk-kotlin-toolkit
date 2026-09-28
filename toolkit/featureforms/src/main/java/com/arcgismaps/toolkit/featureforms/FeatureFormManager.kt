@@ -29,16 +29,22 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.arcgismaps.data.ArcGISFeature
+import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.toolkit.featureforms.internal.editor.FeatureFormManagerActionBar
 import com.arcgismaps.toolkit.featureforms.internal.editor.FeatureFormToolbar
 import com.arcgismaps.toolkit.featureforms.internal.editor.ManagerOverview
 import com.arcgismaps.toolkit.featureforms.internal.editor.ModalSheet
+import com.arcgismaps.toolkit.featureforms.internal.navigation.FormNavigationDirection
 import com.arcgismaps.toolkit.featureforms.internal.screens.shouldEnableTopBar
 import com.arcgismaps.toolkit.featureforms.internal.utils.DialogType
 import com.arcgismaps.toolkit.featureforms.internal.utils.LocalDialogRequester
+import com.arcgismaps.toolkit.featureforms.theme.FeatureFormColorScheme
+import com.arcgismaps.toolkit.featureforms.theme.FeatureFormDefaults
+import com.arcgismaps.toolkit.featureforms.theme.FeatureFormTypography
 import kotlinx.coroutines.launch
 
 @Composable
@@ -48,13 +54,18 @@ public fun FeatureFormManager(
     showToolbar: Boolean = true,
     validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.Automatic,
     onDismiss: () -> Unit = {},
+    onBarcodeButtonClick: ((FieldFormElement) -> Unit)? = null,
     onShowOnMapRequest: (ArcGISFeature) -> Unit = {},
+    onEditingEvent: (FeatureFormEditingEvent) -> Unit = {},
+    colorScheme: FeatureFormColorScheme = FeatureFormDefaults.colorScheme(),
+    typography: FeatureFormTypography = FeatureFormDefaults.typography()
 ) {
     val featureFormState by rememberUpdatedState(state.featureFormState)
     val navController = rememberNavController(featureFormState)
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
     val dialogRequester = LocalDialogRequester.current
     val scope = rememberCoroutineScope()
+    val resources = LocalResources.current
     val hasBackStack = currentBackStackEntry != null && navController.previousBackStackEntry != null
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
@@ -62,25 +73,36 @@ public fun FeatureFormManager(
                 isVisible = currentBackStackEntry?.shouldEnableTopBar() == true,
                 state = state,
                 hasBackStack = hasBackStack,
-                modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp),
                 onBack = {
                     currentBackStackEntry?.let {
                         featureFormState.popBackStack(it)
                     }
                 },
                 onSave = {
-                    if (state.formsWithErrors.value > 0) {
+                    if (state.formsWithErrors.value > 0 && state.featureForms.value.size > 1) {
                         val errorCount = state.formsWithErrors.value
                         val errorDialog = DialogType.ValidationErrorsDialog(
                             onDismiss = state::validateAllForms,
                             onAction = {
                                 state.showOverview()
                             },
-                            title = "There are validation errors",
-                            body = "There are $errorCount forms with validation errors. Please correct the errors before saving.",
-                            actionText = "View Errors",
+                            title = resources.getString(R.string.there_are_validation_errors),
+                            body = resources.getQuantityString(
+                                R.plurals.form_manager_has_validation_errors,
+                                errorCount,
+                                errorCount
+                            ),
+                            actionText = resources.getString(R.string.view_errors),
                         )
                         dialogRequester.requestDialog(errorDialog)
+                    } else if (state.formsWithErrors.value > 0) {
+                        // If there are validation errors and only one form, show a dialog to inform
+                        // the user that they need to fix the errors before saving.
+                        val errorCount = state.featureForms.value.first().elementValidationErrors.value.size
+                        state.validateAllForms()
                     } else {
                         Log.e("TAG", "FeatureFormManager: saving form", )
                         scope.launch {
@@ -102,14 +124,18 @@ public fun FeatureFormManager(
                 navController = navController,
                 modifier = Modifier.weight(1f),
                 showCloseIcon = false,
-                showBackAction = false,
                 showFormActions = false,
                 showTopBar = false,
                 allowNavigationWithEdits = true,
                 onShowOnMapRequest = onShowOnMapRequest,
                 onDismiss = onDismiss,
                 onNavigationEvent = state::setCurrentFeatureFormRoute,
-                validationErrorVisibility = validationErrorVisibility
+                validationErrorVisibility = validationErrorVisibility,
+                isNavigationEnabled = true,
+                onBarcodeButtonClick = onBarcodeButtonClick,
+                onEditingEvent = onEditingEvent,
+                colorScheme = colorScheme,
+                typography = typography
             )
             if (showToolbar) {
                 FeatureFormToolbar(
@@ -130,7 +156,7 @@ public fun FeatureFormManager(
                 onShowOnMapRequest = onShowOnMapRequest,
                 onDismiss = state::hideOverview,
                 onNavigateToForm = { featureForm ->
-                    state.navigateToForm(featureForm)
+                    state.navigateToForm(featureForm, FormNavigationDirection.Default)
                     state.hideOverview()
                 },
                 onRemoveForm = { featureForm -> }

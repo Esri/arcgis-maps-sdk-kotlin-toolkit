@@ -545,32 +545,26 @@ class MapViewModel @Inject constructor(
                 proxy.setViewpointScale(scale)
             }
         }
-        _uiState.value = UIState.Editing(
-            FeatureFormManagerState(
-                forms = listOf(featureForm),
-                scope = scope
+        table.addFeature(feature).onSuccess {
+            // create a FeatureForm
+            //val featureForm = FeatureForm(feature)
+            if (location != null) {
+                // set the viewpoint to the feature location
+                proxy.setViewpointCenter(location)
+                // set the viewpoint scale if the layer has a min scale
+                layer.minScale?.let { scale ->
+                    proxy.setViewpointScale(scale)
+                }
+            }
+            _uiState.value = UIState.Editing(
+                FeatureFormManagerState(
+                    forms = listOf(FeatureForm(feature)),
+                    scope = scope
+                )
             )
-        )
-//        table.addFeature(feature).onSuccess {
-//            // create a FeatureForm
-//            //val featureForm = FeatureForm(feature)
-//            if (location != null) {
-//                // set the viewpoint to the feature location
-//                proxy.setViewpointCenter(location)
-//                // set the viewpoint scale if the layer has a min scale
-//                layer.minScale?.let { scale ->
-//                    proxy.setViewpointScale(scale)
-//                }
-//            }
-//            _uiState.value = UIState.Editing(
-//                FeatureFormManagerState(
-//                    forms = listOf(FeatureForm(feature)),
-//                    scope = scope
-//                )
-//            )
-//        }.onFailure {
-//            Log.e("MapViewModel", "Failed to add feature", it)
-//        }
+        }.onFailure {
+            Log.e("MapViewModel", "Failed to add feature", it)
+        }
     }
 
     /**

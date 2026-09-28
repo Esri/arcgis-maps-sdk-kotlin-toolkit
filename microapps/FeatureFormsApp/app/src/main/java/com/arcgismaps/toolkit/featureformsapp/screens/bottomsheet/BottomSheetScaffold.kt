@@ -400,11 +400,6 @@ private fun BottomSheetScaffoldAnchorChangeHandler(
     snapTo: (target: SheetValue) -> Unit,
 ) = AnchorChangeHandler<SheetValue> { previousTarget, previousAnchors, newAnchors ->
     val previousTargetOffset = previousAnchors[previousTarget]
-//    val newTarget = when (previousTarget) {
-//        SheetValue.Minimized -> SheetValue.PartiallyExpanded
-//        SheetValue.Hidden, SheetValue.PartiallyExpanded -> SheetValue.PartiallyExpanded
-//        SheetValue.Expanded -> if (newAnchors.containsKey(SheetValue.Expanded)) SheetValue.Expanded else SheetValue.PartiallyExpanded
-//    }
     val newTarget = when {
         newAnchors.containsKey(previousTarget) -> previousTarget
         newAnchors.containsKey(SheetValue.PartiallyExpanded) -> SheetValue.PartiallyExpanded
