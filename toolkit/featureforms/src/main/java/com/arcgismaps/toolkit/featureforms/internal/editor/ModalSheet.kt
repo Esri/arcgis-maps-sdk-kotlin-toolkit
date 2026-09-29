@@ -41,9 +41,6 @@ internal fun BoxScope.ModalSheet(
     visible: Boolean,
     content: @Composable () -> Unit
 ) {
-    val cachedContent = remember {
-        movableContentOf { content() }
-    }
     // Scrim background
     AnimatedVisibility(
         visible = visible,
@@ -66,14 +63,12 @@ internal fun BoxScope.ModalSheet(
         visible = visible,
         modifier = Modifier.align(Alignment.BottomCenter),
         enter = slideInVertically { h -> h },
-        //exit = slideOutVertically(
-        //    targetOffsetY = { sheetHeight -> sheetHeight },
-        //)
+        exit = slideOutVertically { h -> h }
     ) {
         Surface(
             modifier = Modifier.fillMaxSize(),
         ) {
-            cachedContent()
+            content()
         }
     }
 }

@@ -30,8 +30,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBackIos
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.automirrored.outlined.Article
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -40,9 +38,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -52,7 +48,6 @@ import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.data.ArcGISFeature
-import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.toolkit.featureforms.FeatureFormManagerState
 import com.arcgismaps.toolkit.featureforms.internal.navigation.FormNavigationDirection
 
@@ -99,12 +94,12 @@ public fun FeatureFormToolbar(
     val forms = remember(activeForm) {
         // Read an immutable snapshot only when the active form changes to avoid unnecessary
         // recompositions.
-        state.featureForms.toList()
+        state.featureFormStates.toList()
     }
     val (activeIndex, count) = remember(activeForm, forms) {
         Pair(
             forms.indexOfFirst {
-                it.feature == activeForm.feature
+                it.featureForm == activeForm
             },
             forms.size
         )
@@ -115,18 +110,18 @@ public fun FeatureFormToolbar(
     val nextForm = remember(activeForm, forms) {
         forms.getOrNull((activeIndex + 1).mod(count))
     }
-    AnimatedVisibility(state.showNavigationBar && forms.size > 1) {
+    AnimatedVisibility(state.showToolbar && forms.size > 1) {
         FeatureFormToolbarContent(
             activeIndex = activeIndex,
             formCount = forms.size,
             onPrevious = {
-                previousForm?.let { form ->
-                    state.navigateToForm(form, FormNavigationDirection.Previous)
+                previousForm?.let { formStateData ->
+                    state.navigateToForm(formStateData, FormNavigationDirection.Previous)
                 }
             },
             onNext = {
-                nextForm?.let { form ->
-                    state.navigateToForm(form, FormNavigationDirection.Next)
+                nextForm?.let { formStateData ->
+                    state.navigateToForm(formStateData, FormNavigationDirection.Next)
                 }
             },
             onExpand = state::showOverview,

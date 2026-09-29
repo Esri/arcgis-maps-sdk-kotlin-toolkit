@@ -16,7 +16,6 @@
 
 package com.arcgismaps.toolkit.featureforms
 
-import android.util.Log
 import androidx.annotation.MainThread
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.Stable
@@ -125,16 +124,10 @@ public class FeatureFormState private constructor(
     private var navigateBack: (() -> Boolean)? = null
 
     /**
-     * A callback that is called when a new [FeatureForm] is added to the stack. This is used to
-     * notify the master [FeatureFormManagerState] for record keeping and state tracking.
-     */
-    private var onFeatureFormAddedCallback: ((FormStateData) -> Unit) = {}
-
-    /**
      * A callback to resolve a [FormStateData] for a given [ArcGISFeature]. This is used to determine
      * if a [FormStateData] is already cached or needs to be created for a given [ArcGISFeature].
      */
-    private var resolveFormStateData: ((ArcGISFeature) -> FormStateDataResolution)? = null
+    private var resolveFormStateData: ((ArcGISFeature) -> FormStateData)? = null
 
     /**
      * The currently active [FeatureForm]. This property is updated when navigating between forms.
@@ -169,14 +162,13 @@ public class FeatureFormState private constructor(
     }
 
     internal constructor(
-        featureForm: FeatureForm,
+        formStateData: FormStateData,
         coroutineScope: CoroutineScope,
-        onFeatureFormAddedCallback: ((FormStateData) -> Unit),
-        onResolveFormStateData: ((ArcGISFeature) -> FormStateDataResolution)?
-    ) : this(featureForm, coroutineScope) {
-        this.onFeatureFormAddedCallback = onFeatureFormAddedCallback
+        onResolveFormStateData: ((ArcGISFeature) -> FormStateData)?
+    ) : this(formStateData.featureForm) {
+        this.coroutineScope = coroutineScope
+        store.addLast(formStateData)
         this.resolveFormStateData = onResolveFormStateData
-        this.onFeatureFormAddedCallback(getActiveFormStateData())
     }
 
     /**
@@ -188,17 +180,8 @@ public class FeatureFormState private constructor(
     public suspend fun discardEdits(): Result<List<FormExpressionEvaluationError>> {
         val formData = getActiveFormStateData()
         formData.featureForm.discardEdits()
-        formData.stateCollection.forEach {
-            when (it.state) {
-                is AttachmentElementState -> {
-                    (it.state as AttachmentElementState).refreshAttachments()
-                }
-
-                is UtilityAssociationsElementState -> {
-                    (it.state as UtilityAssociationsElementState).refreshResults()
-                }
-            }
-        }
+        formData.refreshAttachments()
+        formData.refreshUtilityAssociations()
         return formData.evaluateExpressions()
     }
 
@@ -211,11 +194,7 @@ public class FeatureFormState private constructor(
         val formData = getActiveFormStateData()
         val result = formData.featureForm.finishEditing().onSuccess {
             // After a successful save, refresh the associations
-            formData.stateCollection.forEach { entry ->
-                if (entry.state is UtilityAssociationsElementState) {
-                    (entry.state as UtilityAssociationsElementState).refreshResults()
-                }
-            }
+            formData.refreshUtilityAssociations()
         }
         return result
     }
@@ -281,49 +260,24 @@ public class FeatureFormState private constructor(
         // Check if the backStackEntry is in the resumed state.
         if (backStackEntry.lifecycleIsResumed().not()) return false
         // Get a resolution for the form state data for the feature.
-        // Check if the feature is already in the cache/stack, if so, navigate to it.
-        // If not, create a new form data for the feature and add it to the stack.
-        val formStateData = when (val resolution = resolveFormStateData?.invoke(feature)) {
-            is FormStateDataResolution.Cached -> {
-                resolution.formStateData
-            }
-
-            is FormStateDataResolution.Create -> {
+        val formStateData = resolveFormStateData?.invoke(feature) ?: run {
+            // Existing standalone FeatureForm behavior. Check if the feature is already in the
+            // local cache/stack, if so, navigate to it.
+            store.find {
+                feature.id() != null && it.featureForm.feature.id() == feature.id()
+            } ?: run {
+                // If the feature is not in the stack, create a new form data.
+                val form = FeatureForm(feature)
                 val states = createStates(
-                    form = resolution.form,
-                    elements = resolution.form.allElements,
+                    form = form,
+                    elements = form.elements,
                     scope = coroutineScope
                 )
-                FormStateData(resolution.form, states)
-            }
-
-            is FormStateDataResolution.Unknown -> {
-                Log.w(
-                    "FeatureFormState",
-                    "Unable to resolve a managed FeatureForm for ${feature.id()}; navigation ignored."
-                )
-                return false
-            }
-
-            null -> {
-                // Existing standalone FeatureForm behavior.
-                store.find {
-                    feature.id() != null && it.featureForm.id == feature.id()
-                } ?: run {
-                    // If the feature is not in the stack, create a new form data.
-                    val form = FeatureForm(feature)
-                    val states = createStates(
-                        form = form,
-                        elements = form.elements,
-                        scope = coroutineScope
-                    )
-                    FormStateData(form, states)
-                }
+                FormStateData(form, states)
             }
         }
         // Add the form to the stack.
         store.addLast(formStateData)
-        onFeatureFormAddedCallback(formStateData)
         // Navigate to the form view.
         navigateTo(NavigationRoute.Form(FormNavigationDirection.Next))
         return true
@@ -486,33 +440,28 @@ internal data class FormStateData(
             }
         }
     }
-}
-
-/**
- * A type that represents the resolution of a [FormStateData] for a given [FeatureForm]. This is used
- * to determine if a [FormStateData] is already cached or needs to be created for a given [FeatureForm].
- */
-internal sealed interface FormStateDataResolution {
 
     /**
-     * Represents a cached [FormStateData] that is already available for a given [FeatureForm].
+     * Refreshes the utility associations for all the [UtilityAssociationsElementState] in the form.
      */
-    data class Cached(
-        val formStateData: FormStateData
-    ) : FormStateDataResolution
+    suspend fun refreshUtilityAssociations() {
+        stateCollection.forEach { entry ->
+            if (entry.state is UtilityAssociationsElementState) {
+                (entry.state as UtilityAssociationsElementState).refreshResults()
+            }
+        }
+    }
 
     /**
-     * Represents a new [FormStateData] that needs to be created for a given [FeatureForm].
+     * Refreshes the attachments for all the [AttachmentElementState] in the form.
      */
-    data class Create(
-        val form: FeatureForm
-    ) : FormStateDataResolution
-
-    /**
-     * Represents an unknown resolution for a given [FeatureForm]. This is a theoretical case that
-     * should not happen in practice, but is included for completeness.
-     */
-    data object Unknown : FormStateDataResolution
+    fun refreshAttachments() {
+        stateCollection.forEach { entry ->
+            if (entry.state is AttachmentElementState) {
+                (entry.state as AttachmentElementState).refreshAttachments()
+            }
+        }
+    }
 }
 
 /**

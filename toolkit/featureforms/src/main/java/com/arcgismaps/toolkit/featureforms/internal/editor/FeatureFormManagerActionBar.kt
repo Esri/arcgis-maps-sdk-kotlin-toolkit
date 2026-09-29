@@ -16,8 +16,6 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.editor
 
-import android.util.Log
-import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -91,6 +89,7 @@ internal fun FeatureFormManagerActionBar(
         DismissConfirmationDialog(
             onDismissRequest = { showConfirmationDialog = false },
             onDiscard = {
+                onDiscard()
                 showConfirmationDialog = false
                 onDismiss()
             }

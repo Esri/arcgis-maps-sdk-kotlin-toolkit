@@ -51,19 +51,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.data.ArcGISFeature
-import com.arcgismaps.mapping.featureforms.FeatureForm
+import com.arcgismaps.toolkit.featureforms.FormStateData
 import com.arcgismaps.toolkit.featureforms.internal.screens.verticalScrollbar
 
 @Composable
 internal fun ManagerOverview(
-    forms: List<FeatureForm>,
+    forms: List<FormStateData>,
     editable: Boolean,
     errorCount: Int,
     modifier: Modifier = Modifier,
     onShowOnMapRequest: (ArcGISFeature) -> Unit,
     onDismiss: () -> Unit,
-    onNavigateToForm: (FeatureForm) -> Unit,
-    onRemoveForm: (FeatureForm) -> Unit
+    onNavigateToForm: (FormStateData) -> Unit,
+    onRemoveForm: (FormStateData) -> Unit
 ) {
     val lazyListState = rememberLazyListState()
     Surface(
@@ -106,17 +106,18 @@ internal fun ManagerOverview(
                     ),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                items(forms) { featureForm ->
+                items(forms) { formStateData ->
+                    val featureForm = formStateData.featureForm
                     val errors by featureForm.elementValidationErrors.collectAsState()
                     FeatureFormRow(
                         onClick = {
-                            onNavigateToForm(featureForm)
+                            onNavigateToForm(formStateData)
                         },
                         onShowOnMapRequest = {
                             onShowOnMapRequest(featureForm.feature)
                         },
                         onRemove = {
-                            onRemoveForm(featureForm)
+                            onRemoveForm(formStateData)
                         },
                         title = featureForm.title.collectAsState().value,
                         editable = editable,

@@ -88,7 +88,7 @@ public fun FeatureFormManager(
     val scope = rememberCoroutineScope()
     val resources = LocalResources.current
     val hasBackStack = currentBackStackEntry != null && navController.previousBackStackEntry != null
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(modifier = modifier) {
         Column(modifier = Modifier.fillMaxSize()) {
             FeatureFormManagerActionBar(
                 isVisible = currentBackStackEntry?.shouldEnableTopBar() == true,
@@ -105,7 +105,7 @@ public fun FeatureFormManager(
                 onSave = {
                     // If there are validation errors and more than one form, show a dialog with
                     // the option to view the errors in the overview screen.
-                    if (state.formsWithErrors.value > 0 && state.featureForms.size > 1) {
+                    if (state.formsWithErrors.value > 0 && state.featureFormStates.size > 1) {
                         val errorCount = state.formsWithErrors.value
                         val errorDialog = DialogType.ValidationErrorsDialog(
                             onDismiss = state::validateAllForms,
@@ -124,7 +124,7 @@ public fun FeatureFormManager(
                     } else if (state.formsWithErrors.value > 0) {
                         // If there are validation errors and only one form, show a dialog to inform
                         // the user that they need to fix the errors before saving.
-                        val errorCount = state.featureForms.first().elementValidationErrors.value.size
+                        val errorCount = state.featureFormStates.first().featureForm.elementValidationErrors.value.size
                         val errorDialog = DialogType.ValidationErrorsDialog(
                             onDismiss = state::validateAllForms,
                             onAction = null,
@@ -140,7 +140,7 @@ public fun FeatureFormManager(
                     } else {
                         Log.e("TAG", "FeatureFormManager: saving form", )
                         scope.launch {
-                            state.saveForm().onSuccess {
+                            state.finishEditing().onSuccess {
                                 Log.e("TAG", "FeatureFormManager: saved", )
                                 onEditingEvent(FeatureFormManagerEditingEvent.SavedEdits)
                             }.onFailure {
@@ -195,7 +195,7 @@ public fun FeatureFormManager(
             visible = state.showOverview,
             onDismiss = state::hideOverview
         ) {
-            val forms = state.featureForms
+            val forms = state.featureFormStates
             ManagerOverview(
                 forms = forms,
                 editable = state.isEditable,
@@ -207,9 +207,7 @@ public fun FeatureFormManager(
                     state.navigateToForm(featureForm, FormNavigationDirection.Default)
                     state.hideOverview()
                 },
-                onRemoveForm = { featureForm ->
-                    state.removeFeatureForm(featureForm)
-                }
+                onRemoveForm = { TODO() }
             )
         }
     }
