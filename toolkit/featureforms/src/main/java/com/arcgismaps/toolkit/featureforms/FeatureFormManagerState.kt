@@ -244,7 +244,11 @@ public class FeatureFormManagerState(
         _featureFormManager.evaluateExpressions()
     }
 
-    public suspend fun finishEditing(): Result<Unit> {
+    public suspend fun finishEditing(): Result<Unit> = runCatching {
+        validateAllForms()
+        require(formsWithErrors.value == 0) {
+            "Cannot finish editing because there are validation errors in one or more forms."
+        }
         return _featureFormManager.finishEditing().onSuccess {
             _featureFormStates.forEach {
                 it.refreshUtilityAssociations()
