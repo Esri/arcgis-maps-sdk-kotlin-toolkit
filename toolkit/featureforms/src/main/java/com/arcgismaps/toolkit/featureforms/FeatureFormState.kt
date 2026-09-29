@@ -69,7 +69,6 @@ import com.arcgismaps.toolkit.featureforms.internal.components.text.FormTextFiel
 import com.arcgismaps.toolkit.featureforms.internal.components.text.TextFieldProperties
 import com.arcgismaps.toolkit.featureforms.internal.components.text.TextFormElementState
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationsElementState
-import com.arcgismaps.toolkit.featureforms.internal.editor.objectId
 import com.arcgismaps.toolkit.featureforms.internal.navigation.FormNavigationDirection
 import com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationRoute
 import com.arcgismaps.toolkit.featureforms.internal.navigation.lifecycleIsResumed
@@ -77,12 +76,6 @@ import com.arcgismaps.toolkit.featureforms.internal.utils.fieldIsNullable
 import com.arcgismaps.toolkit.featureforms.internal.utils.toMap
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
-import kotlinx.coroutines.channels.BufferOverflow
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.launch
 
 /**
@@ -119,6 +112,10 @@ public class FeatureFormState private constructor(
      */
     private var navigateToRoute: ((NavigationRoute) -> Unit)? = null
 
+    /**
+     * A navigation callback that is designed to pop all destinations before navigating
+     * to the new [FeatureForm]. This should be set by the composition.
+     */
     private var navigatePopUpToRoute: ((NavigationRoute, () -> Unit) -> Boolean)? = null
 
     /**
@@ -127,9 +124,17 @@ public class FeatureFormState private constructor(
      */
     private var navigateBack: (() -> Boolean)? = null
 
+    /**
+     * A callback that is called when a new [FeatureForm] is added to the stack. This is used to
+     * notify the master [FeatureFormManagerState] for record keeping and state tracking.
+     */
     private var onFeatureFormAddedCallback: ((FormStateData) -> Unit) = {}
 
-    private var onFetchStateDataForFeatureCallback: ((ArcGISFeature) -> FormStateData?) = { null }
+    /**
+     * A callback to resolve a [FormStateData] for a given [ArcGISFeature]. This is used to determine
+     * if a [FormStateData] is already cached or needs to be created for a given [ArcGISFeature].
+     */
+    private var resolveFormStateData: ((ArcGISFeature) -> FormStateDataResolution)? = null
 
     /**
      * The currently active [FeatureForm]. This property is updated when navigating between forms.
@@ -167,10 +172,10 @@ public class FeatureFormState private constructor(
         featureForm: FeatureForm,
         coroutineScope: CoroutineScope,
         onFeatureFormAddedCallback: ((FormStateData) -> Unit),
-        onFetchStateDataForFeatureCallback: ((ArcGISFeature) -> FormStateData?)
+        onResolveFormStateData: ((ArcGISFeature) -> FormStateDataResolution)?
     ) : this(featureForm, coroutineScope) {
         this.onFeatureFormAddedCallback = onFeatureFormAddedCallback
-        this.onFetchStateDataForFeatureCallback = onFetchStateDataForFeatureCallback
+        this.resolveFormStateData = onResolveFormStateData
         this.onFeatureFormAddedCallback(getActiveFormStateData())
     }
 
@@ -224,6 +229,10 @@ public class FeatureFormState private constructor(
         this.navigateToRoute = navigateToRoute
     }
 
+    /**
+     * Sets the navigation callback to the provided [navigatePopUpToRoute] function. This function is
+     * called when navigating to a new [FeatureForm] and popping all destinations before navigating.
+     */
     internal fun setNavigationPopupToCallback(callback: ((NavigationRoute, () -> Unit) -> Boolean)?) {
         this.navigatePopUpToRoute = callback
     }
@@ -271,29 +280,47 @@ public class FeatureFormState private constructor(
         val navigateTo = navigateToRoute ?: return false
         // Check if the backStackEntry is in the resumed state.
         if (backStackEntry.lifecycleIsResumed().not()) return false
-        Log.e(
-            "TAG",
-            "navigateTo: Store - ${
-                store.joinToString(separator = "->") {
-                    "${it.featureForm}"
-                }
-            }",
-        )
-        Log.e("TAG", "navigateTo: feature - ${feature.id()}")
+        // Get a resolution for the form state data for the feature.
         // Check if the feature is already in the cache/stack, if so, navigate to it.
         // If not, create a new form data for the feature and add it to the stack.
-        val formStateData = onFetchStateDataForFeatureCallback(feature)
-            ?: store.find { feature.id() != null && it.featureForm.id == feature.id() }
-            ?: run {
-                // Create a new form data for the feature
-                val form = FeatureForm(feature)
+        val formStateData = when (val resolution = resolveFormStateData?.invoke(feature)) {
+            is FormStateDataResolution.Cached -> {
+                resolution.formStateData
+            }
+
+            is FormStateDataResolution.Create -> {
                 val states = createStates(
-                    form = form,
-                    elements = form.allElements,
+                    form = resolution.form,
+                    elements = resolution.form.allElements,
                     scope = coroutineScope
                 )
-                FormStateData(form, states)
+                FormStateData(resolution.form, states)
             }
+
+            is FormStateDataResolution.Unknown -> {
+                Log.w(
+                    "FeatureFormState",
+                    "Unable to resolve a managed FeatureForm for ${feature.id()}; navigation ignored."
+                )
+                return false
+            }
+
+            null -> {
+                // Existing standalone FeatureForm behavior.
+                store.find {
+                    feature.id() != null && it.featureForm.id == feature.id()
+                } ?: run {
+                    // If the feature is not in the stack, create a new form data.
+                    val form = FeatureForm(feature)
+                    val states = createStates(
+                        form = form,
+                        elements = form.elements,
+                        scope = coroutineScope
+                    )
+                    FormStateData(form, states)
+                }
+            }
+        }
         // Add the form to the stack.
         store.addLast(formStateData)
         onFeatureFormAddedCallback(formStateData)
@@ -310,8 +337,11 @@ public class FeatureFormState private constructor(
      * [setNavigationPopupToCallback] must be set before calling this function to ensure that the
      * navigation is valid.
      */
-    internal fun navigateToForm(formStateData: FormStateData, direction: FormNavigationDirection): Boolean {
-        //Log.e("TAG", "navigateToForm: ${navigateToRoute}")
+    @MainThread
+    internal fun navigateToForm(
+        formStateData: FormStateData,
+        direction: FormNavigationDirection
+    ): Boolean {
         val navigateTo = navigatePopUpToRoute ?: return false
         // Navigate to the form view.
         return navigateTo(NavigationRoute.Form(direction)) {
@@ -319,10 +349,6 @@ public class FeatureFormState private constructor(
             // before the navigation is actually performed. This is a good place to update the stack.
             store.clear()
             store.addLast(formStateData)
-            Log.e(
-                "TAG",
-                "navigateToForm: ${formStateData.featureForm.id}_${formStateData.featureForm}"
-            )
         }
     }
 
@@ -460,6 +486,33 @@ internal data class FormStateData(
             }
         }
     }
+}
+
+/**
+ * A type that represents the resolution of a [FormStateData] for a given [FeatureForm]. This is used
+ * to determine if a [FormStateData] is already cached or needs to be created for a given [FeatureForm].
+ */
+internal sealed interface FormStateDataResolution {
+
+    /**
+     * Represents a cached [FormStateData] that is already available for a given [FeatureForm].
+     */
+    data class Cached(
+        val formStateData: FormStateData
+    ) : FormStateDataResolution
+
+    /**
+     * Represents a new [FormStateData] that needs to be created for a given [FeatureForm].
+     */
+    data class Create(
+        val form: FeatureForm
+    ) : FormStateDataResolution
+
+    /**
+     * Represents an unknown resolution for a given [FeatureForm]. This is a theoretical case that
+     * should not happen in practice, but is included for completeness.
+     */
+    data object Unknown : FormStateDataResolution
 }
 
 /**

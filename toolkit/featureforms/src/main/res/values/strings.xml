@@ -192,6 +192,8 @@
     <string name="add_attachment">Add Attachment</string>
     <string name="there_are_validation_errors">There are validation errors</string>
     <string name="view_errors">View Errors</string>
+    <string name="error_saving_edits">Error savings edits</string>
+    <string name="an_error_occurred_while_saving_the_edits">An error occurred while saving the edits: %1$s</string>
     <plurals name="min_attachments_required">
         <item quantity="zero">At least %1$d attachments are required</item>
         <item quantity="one">At least %1$d attachment is required</item>

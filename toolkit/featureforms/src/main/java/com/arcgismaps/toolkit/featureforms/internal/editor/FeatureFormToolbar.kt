@@ -40,7 +40,9 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -50,6 +52,7 @@ import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.data.ArcGISFeature
+import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.toolkit.featureforms.FeatureFormManagerState
 import com.arcgismaps.toolkit.featureforms.internal.navigation.FormNavigationDirection
 
@@ -94,9 +97,9 @@ public fun FeatureFormToolbar(
 ) {
     val activeForm = state.activeFeatureForm
     val forms = remember(activeForm) {
-        // Read the forms from the state only when the active form changes to avoid unnecessary
-        // recompositions
-        state.featureForms.value
+        // Read an immutable snapshot only when the active form changes to avoid unnecessary
+        // recompositions.
+        state.featureForms.toList()
     }
     val (activeIndex, count) = remember(activeForm, forms) {
         Pair(
@@ -132,11 +135,6 @@ public fun FeatureFormToolbar(
             modifier = modifier
         )
     }
-    Card(
-        colors = CardDefaults.cardColors().copy(
-
-        )
-    ) { }
 }
 
 @Composable
@@ -150,7 +148,6 @@ private fun FeatureFormToolbarContent(
     colors: FeatureFormToolbarColors,
     modifier: Modifier = Modifier
 ) {
-    // HorizontalFloatingToolbar()
     Surface(
         modifier = modifier.clickable {
             onExpand()

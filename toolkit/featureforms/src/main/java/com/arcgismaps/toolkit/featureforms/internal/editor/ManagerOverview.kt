@@ -57,6 +57,7 @@ import com.arcgismaps.toolkit.featureforms.internal.screens.verticalScrollbar
 @Composable
 internal fun ManagerOverview(
     forms: List<FeatureForm>,
+    editable: Boolean,
     errorCount: Int,
     modifier: Modifier = Modifier,
     onShowOnMapRequest: (ArcGISFeature) -> Unit,
@@ -118,6 +119,7 @@ internal fun ManagerOverview(
                             onRemoveForm(featureForm)
                         },
                         title = featureForm.title.collectAsState().value,
+                        editable = editable,
                         hasErrors = errors.isNotEmpty()
                     )
                 }
@@ -135,6 +137,7 @@ private fun FeatureFormRow(
     onShowOnMapRequest: () -> Unit,
     onRemove: () -> Unit,
     title: String,
+    editable: Boolean,
     hasErrors: Boolean,
     modifier: Modifier = Modifier
 ) {
@@ -191,13 +194,15 @@ private fun FeatureFormRow(
                         onShowOnMapRequest()
                     }
                 )
-                DropdownMenuItem(
-                    text = { Text("Remove") },
-                    onClick = {
-                        showMenu = false
-                        onRemove()
-                    }
-                )
+                if (editable) {
+                    DropdownMenuItem(
+                        text = { Text("Remove") },
+                        onClick = {
+                            showMenu = false
+                            onRemove()
+                        }
+                    )
+                }
             }
         }
     }

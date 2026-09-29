@@ -47,6 +47,27 @@ import com.arcgismaps.toolkit.featureforms.theme.FeatureFormDefaults
 import com.arcgismaps.toolkit.featureforms.theme.FeatureFormTypography
 import kotlinx.coroutines.launch
 
+/**
+ * Indicates an event that occurs during the editing session of a [FeatureFormManager].
+ *
+ * @since 300.2.0
+ */
+public sealed class FeatureFormManagerEditingEvent {
+
+    /**
+     * Indicates that the edits have been discarded.
+     */
+    public data object DiscardedEdits: FeatureFormManagerEditingEvent()
+
+    /**
+     * Indicates that the edits have been saved successfully.
+     */
+    public data object SavedEdits: FeatureFormManagerEditingEvent()
+}
+
+/**
+ * TODO: Add documentation for FeatureFormManager
+ */
 @Composable
 public fun FeatureFormManager(
     state: FeatureFormManagerState,
@@ -56,7 +77,7 @@ public fun FeatureFormManager(
     onDismiss: () -> Unit = {},
     onBarcodeButtonClick: ((FieldFormElement) -> Unit)? = null,
     onShowOnMapRequest: (ArcGISFeature) -> Unit = {},
-    onEditingEvent: (FeatureFormEditingEvent) -> Unit = {},
+    onEditingEvent: (FeatureFormManagerEditingEvent) -> Unit = {},
     colorScheme: FeatureFormColorScheme = FeatureFormDefaults.colorScheme(),
     typography: FeatureFormTypography = FeatureFormDefaults.typography()
 ) {
@@ -82,7 +103,9 @@ public fun FeatureFormManager(
                     }
                 },
                 onSave = {
-                    if (state.formsWithErrors.value > 0 && state.featureForms.value.size > 1) {
+                    // If there are validation errors and more than one form, show a dialog with
+                    // the option to view the errors in the overview screen.
+                    if (state.formsWithErrors.value > 0 && state.featureForms.size > 1) {
                         val errorCount = state.formsWithErrors.value
                         val errorDialog = DialogType.ValidationErrorsDialog(
                             onDismiss = state::validateAllForms,
@@ -101,13 +124,37 @@ public fun FeatureFormManager(
                     } else if (state.formsWithErrors.value > 0) {
                         // If there are validation errors and only one form, show a dialog to inform
                         // the user that they need to fix the errors before saving.
-                        val errorCount = state.featureForms.value.first().elementValidationErrors.value.size
-                        state.validateAllForms()
+                        val errorCount = state.featureForms.first().elementValidationErrors.value.size
+                        val errorDialog = DialogType.ValidationErrorsDialog(
+                            onDismiss = state::validateAllForms,
+                            onAction = null,
+                            title = resources.getString(R.string.there_are_validation_errors),
+                            body = resources.getQuantityString(
+                                R.plurals.you_have_errors_that_must_be_fixed_before_saving,
+                                errorCount,
+                                errorCount
+                            ),
+                            actionText = "",
+                        )
+                        dialogRequester.requestDialog(errorDialog)
                     } else {
                         Log.e("TAG", "FeatureFormManager: saving form", )
                         scope.launch {
-                            state.saveForm().onFailure {
-
+                            state.saveForm().onSuccess {
+                                Log.e("TAG", "FeatureFormManager: saved", )
+                                onEditingEvent(FeatureFormManagerEditingEvent.SavedEdits)
+                            }.onFailure {
+                                val errorDialog = DialogType.ValidationErrorsDialog(
+                                    onDismiss = {},
+                                    onAction = null,
+                                    title = resources.getString(R.string.error_saving_edits),
+                                    body = resources.getString(
+                                        R.string.an_error_occurred_while_saving_the_edits,
+                                        it.localizedMessage
+                                    ),
+                                    actionText = "",
+                                )
+                                dialogRequester.requestDialog(errorDialog)
                             }
                         }
                     }
@@ -115,6 +162,7 @@ public fun FeatureFormManager(
                 onDiscard = {
                     scope.launch {
                         state.discardEdits()
+                        onEditingEvent(FeatureFormManagerEditingEvent.DiscardedEdits)
                     }
                 },
                 onDismiss = onDismiss
@@ -133,7 +181,6 @@ public fun FeatureFormManager(
                 validationErrorVisibility = validationErrorVisibility,
                 isNavigationEnabled = true,
                 onBarcodeButtonClick = onBarcodeButtonClick,
-                onEditingEvent = onEditingEvent,
                 colorScheme = colorScheme,
                 typography = typography
             )
@@ -148,9 +195,10 @@ public fun FeatureFormManager(
             visible = state.showOverview,
             onDismiss = state::hideOverview
         ) {
-            val forms by state.featureForms.collectAsState()
+            val forms = state.featureForms
             ManagerOverview(
                 forms = forms,
+                editable = state.isEditable,
                 errorCount = state.formsWithErrors.collectAsState().value,
                 modifier = Modifier.fillMaxSize(),
                 onShowOnMapRequest = onShowOnMapRequest,
@@ -159,14 +207,15 @@ public fun FeatureFormManager(
                     state.navigateToForm(featureForm, FormNavigationDirection.Default)
                     state.hideOverview()
                 },
-                onRemoveForm = { featureForm -> }
+                onRemoveForm = { featureForm ->
+                    state.removeFeatureForm(featureForm)
+                }
             )
         }
     }
 
     // only enable back navigation if there is a previous route
     BackHandler(hasBackStack) {
-        Log.e("TAG", "FeatureFormManagerActionBar: backhandler", )
         currentBackStackEntry?.let {
             featureFormState.popBackStack(it)
         }
