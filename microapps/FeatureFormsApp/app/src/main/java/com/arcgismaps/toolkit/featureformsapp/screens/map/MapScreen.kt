@@ -107,8 +107,9 @@ import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.mapping.layers.ArcGISSublayer
 import com.arcgismaps.mapping.layers.FeatureLayer
 import com.arcgismaps.mapping.layers.SubtypeFeatureLayer
-import com.arcgismaps.toolkit.featureforms.FeatureForm
-import com.arcgismaps.toolkit.featureforms.FeatureFormState
+import com.arcgismaps.toolkit.featureforms.FeatureFormManager
+import com.arcgismaps.toolkit.featureforms.FeatureFormManagerState
+import com.arcgismaps.toolkit.featureforms.internal.editor.FeatureFormToolbar
 import com.arcgismaps.toolkit.featureformsapp.R
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.BottomSheetMaxWidth
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.SheetExpansionHeight
@@ -131,7 +132,7 @@ fun MapScreen(
     val featureFormState = remember(uiState) {
         when (uiState) {
             is UIState.Editing -> {
-                (uiState as UIState.Editing).featureFormState
+                (uiState as UIState.Editing).featureFormManagerState
             }
 
             else -> {
@@ -224,7 +225,7 @@ fun MapScreen(
                 val rememberedForm = remember(this) {
                     featureFormState!!
                 }
-                FeatureFormSheet(
+                FeatureFormBrowserSheet(
                     state = rememberedForm,
                     isNavigationEnabled = mapViewModel.navigationEnabled,
                     onShowOnMapRequest = { feature ->
@@ -421,8 +422,8 @@ fun FeatureItem(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FeatureFormSheet(
-    state: FeatureFormState,
+fun FeatureFormBrowserSheet(
+    state: FeatureFormManagerState,
     isNavigationEnabled: Boolean,
     onShowOnMapRequest: (ArcGISFeature) -> Unit,
     onDismiss: () -> Unit,
@@ -444,33 +445,36 @@ fun FeatureFormSheet(
         sheetOffsetY = { bottomSheetState.requireOffset() },
         modifier = modifier,
         maxWidth = BottomSheetMaxWidth,
+        anchoredContent =
+            {
+            Surface {
+                AnimatedVisibility(
+                    visible = bottomSheetState.currentValue == SheetValue.Expanded || bottomSheetState.currentValue == SheetValue.PartiallyExpanded
+                ) {
+                    FeatureFormToolbar(
+                        state = state,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
+            }
+        }
     ) { layoutWidth, layoutHeight ->
         StandardBottomSheet(
             state = bottomSheetState,
             peekHeight = 40.dp,
             expansionHeight = SheetExpansionHeight(0.5f),
             sheetSwipeEnabled = true,
-            shape = RoundedCornerShape(5.dp),
+            shape = RoundedCornerShape(topStart = 18.dp, topEnd = 18.dp),
             containerColor = MaterialTheme.colorScheme.surface,
             layoutHeight = layoutHeight.toFloat(),
             sheetWidth = with(LocalDensity.current) { layoutWidth.toDp() },
             tonalElevation = (-1).dp
         ) {
-            FeatureForm(
-                featureFormState = state,
-                modifier = Modifier.fillMaxSize(),
-                isNavigationEnabled = isNavigationEnabled,
-                onShowOnMapRequest = { feature ->
-                    scope.launch {
-                        if (isCompact) {
-                            // minimize the sheet on compact devices
-                            bottomSheetState.animateTo(SheetValue.Minimized)
-                        }
-                    }.invokeOnCompletion {
-                        // invoke the locate request after minimizing the sheet
-                        onShowOnMapRequest(feature)
-                    }
-                },
+            FeatureFormManager(
+                state = state,
+                modifier = Modifier.fillMaxWidth(),
+                showToolbar = false,
+                onShowOnMapRequest = onShowOnMapRequest,
                 onDismiss = onDismiss
             )
         }

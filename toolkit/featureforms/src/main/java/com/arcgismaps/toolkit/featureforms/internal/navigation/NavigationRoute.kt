@@ -32,7 +32,9 @@ internal sealed class NavigationRoute {
      * Represents a route for the [FeatureFormScreen].
      */
     @Serializable
-    data object Form : NavigationRoute()
+    data class Form(
+        val direction: FormNavigationDirection = FormNavigationDirection.Default
+    ) : NavigationRoute()
 
     /**
      * Represents a route for the [UNAssociationsFilterResultScreen].
@@ -122,4 +124,15 @@ internal sealed class AddFromSourceNavRoute {
      */
     @Serializable
     data object CreateAssociation : AddFromSourceNavRoute()
+}
+
+/**
+ * Represents the direction of navigation for a form destination. This dictates the animation used
+ * when navigating to the destination.
+ */
+@Serializable
+internal enum class FormNavigationDirection {
+    Next,
+    Previous,
+    Default
 }

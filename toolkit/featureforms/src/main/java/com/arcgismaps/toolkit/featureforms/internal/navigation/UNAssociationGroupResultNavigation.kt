@@ -16,6 +16,8 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.navigation
 
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -26,7 +28,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import com.arcgismaps.data.ArcGISFeature
-import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.toolkit.featureforms.FeatureFormNavigationRoute
 import com.arcgismaps.toolkit.featureforms.FeatureFormState
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationsElementState
@@ -42,8 +43,14 @@ internal fun NavGraphBuilder.associationGroupResultDestination(
     onAssociatedFeatureLocateRequest: (ArcGISFeature) -> Unit,
     onBack: (NavBackStackEntry) -> Unit,
     isNavigationEnabled: Boolean,
+    allowNavigationWithEdits: Boolean,
+    showTopBar: Boolean
 ) {
-    composable<NavigationRoute.UNAssociationGroupResult> { backStackEntry ->
+    composable<NavigationRoute.UNAssociationGroupResult>(
+        exitTransition = {
+            fadeOut(animationSpec = tween(100))
+        }
+    ) { backStackEntry ->
         val route = backStackEntry.toRoute<NavigationRoute.UNAssociationGroupResult>()
         val formData = remember(backStackEntry) { state.getActiveFormStateData() }
         val states = formData.stateCollection
@@ -57,6 +64,8 @@ internal fun NavGraphBuilder.associationGroupResultDestination(
                 state = utilityAssociationsElementState,
                 featureForm = formData.featureForm,
                 isNavigationEnabled = isNavigationEnabled,
+                allowNavigationWithEdits = allowNavigationWithEdits,
+                showTopBar = showTopBar,
                 onSave = onSave,
                 onDiscard = onDiscard,
                 onNavigateToAssociation = {

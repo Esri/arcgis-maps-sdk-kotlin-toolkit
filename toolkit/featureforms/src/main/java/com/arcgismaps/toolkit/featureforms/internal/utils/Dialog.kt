@@ -197,8 +197,10 @@ internal sealed class DialogType {
 
     data class ValidationErrorsDialog(
         val onDismiss: () -> Unit,
+        val onAction: (() -> Unit)?,
         val title: String,
-        val body: String
+        val body: String,
+        val actionText: String
     ) : DialogType()
 }
 
@@ -495,15 +497,22 @@ internal fun FeatureFormDialog(states: FormStateCollection) {
 
         is DialogType.ValidationErrorsDialog -> {
             val onDismiss = (dialogType as DialogType.ValidationErrorsDialog).onDismiss
+            val onAction = (dialogType as DialogType.ValidationErrorsDialog).onAction
             val title = (dialogType as DialogType.ValidationErrorsDialog).title
             val body = (dialogType as DialogType.ValidationErrorsDialog).body
+            val actionText = (dialogType as DialogType.ValidationErrorsDialog).actionText
             ErrorDialog(
                 onDismissRequest = {
                     dialogRequester.dismissDialog()
                     onDismiss()
                 },
+                onAction = {
+                    dialogRequester.dismissDialog()
+                    onAction?.invoke()
+                },
                 title = title,
-                body = body
+                body = body,
+                actionText = actionText
             )
         }
 

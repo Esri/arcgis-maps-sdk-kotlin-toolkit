@@ -190,6 +190,10 @@
     <string name="this_file_is_too_large">This file is too large. Maximum allowed size is %1$d MB.</string>
     <string name="attachment_with_name">Attachment: %1$s</string>
     <string name="add_attachment">Add Attachment</string>
+    <string name="there_are_validation_errors">There are validation errors</string>
+    <string name="view_errors">View Errors</string>
+    <string name="error_saving_edits">Error savings edits</string>
+    <string name="an_error_occurred_while_saving_the_edits">An error occurred while saving the edits: %1$s</string>
     <plurals name="min_attachments_required">
         <item quantity="zero">At least %1$d attachments are required</item>
         <item quantity="one">At least %1$d attachment is required</item>
@@ -197,5 +201,13 @@
         <item quantity="few">At least %1$d attachments are required</item>
         <item quantity="many">At least %1$d attachments are required</item>
         <item quantity="other">At least %1$d attachments are required</item>
+    </plurals>
+    <plurals name="form_manager_has_validation_errors">
+        <item quantity="zero">There are %1$d forms with validation errors. Please correct the errors before saving.</item>
+        <item quantity="one">There is %1$d form with validation errors. Please correct the errors before saving.</item>
+        <item quantity="two">There are %1$d forms with validation errors. Please correct the errors before saving.</item>
+        <item quantity="few">There are %1$d forms with validation errors. Please correct the errors before saving.</item>
+        <item quantity="many">There are %1$d forms with validation errors. Please correct the errors before saving.</item>
+        <item quantity="other">There are %1$d forms with validation errors. Please correct the errors before saving.</item>
     </plurals>
 </resources>

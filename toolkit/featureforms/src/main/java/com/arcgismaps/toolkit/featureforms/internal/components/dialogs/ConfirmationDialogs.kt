@@ -80,8 +80,10 @@ internal fun SaveEditsDialog(
 @Composable
 internal fun ErrorDialog(
     onDismissRequest: () -> Unit,
+    onAction: (() -> Unit)?,
     title : String,
-    body : String
+    body : String,
+    actionText: String
 ) {
     AlertDialog(
         onDismissRequest = onDismissRequest,
@@ -91,9 +93,16 @@ internal fun ErrorDialog(
         text = {
             Text(text = body)
         },
-        confirmButton = {
+        dismissButton = {
             TextButton(onClick = onDismissRequest) {
                 Text(stringResource(R.string.ok))
+            }
+        },
+        confirmButton = {
+            if (onAction != null) {
+                TextButton(onClick = onAction) {
+                    Text(actionText)
+                }
             }
         },
         properties = DialogProperties(
@@ -117,7 +126,9 @@ private fun ValidationErrorsDialogPreview() {
         pluralStringResource(R.plurals.you_have_errors_that_must_be_fixed_before_saving, 1, 1)
     ErrorDialog(
         onDismissRequest = {},
+        onAction = {},
         title = formHasValidationErrors,
-        body = youHaveErrors
+        body = youHaveErrors,
+        actionText = "Okay"
     )
 }

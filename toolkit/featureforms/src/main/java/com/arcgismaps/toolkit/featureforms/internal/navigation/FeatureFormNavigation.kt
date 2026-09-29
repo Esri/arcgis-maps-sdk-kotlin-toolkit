@@ -16,11 +16,16 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.navigation
 
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
+import androidx.navigation.toRoute
 import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.toolkit.featureforms.FeatureFormNavigationRoute
 import com.arcgismaps.toolkit.featureforms.FeatureFormState
@@ -32,13 +37,32 @@ internal fun NavGraphBuilder.featureFormDestination(
     onBarcodeButtonClick: ((FieldFormElement) -> Unit)?,
     onUtilityFilterSelected: (NavBackStackEntry, Int) -> Unit,
     onNavigationEvent: (FeatureFormNavigationRoute) -> Unit,
-    state : FeatureFormState,
-    validationErrorVisibility : ValidationErrorVisibility
+    state: FeatureFormState,
+    showTopBar: Boolean,
+    validationErrorVisibility: ValidationErrorVisibility
 ) {
-    composable<NavigationRoute.Form> { backStackEntry ->
+    composable<NavigationRoute.Form>(
+        enterTransition = {
+            when (targetState.toRoute<NavigationRoute.Form>().direction) {
+                FormNavigationDirection.Default -> fadeIn()
+                FormNavigationDirection.Next -> slideInHorizontally { w -> w }
+                FormNavigationDirection.Previous -> slideInHorizontally { w -> -w }
+            }
+        },
+        exitTransition = {
+            when (targetState.toRoute<NavigationRoute.Form>().direction) {
+                FormNavigationDirection.Default -> fadeOut()
+                FormNavigationDirection.Next -> slideOutHorizontally { w -> -w }
+                FormNavigationDirection.Previous -> slideOutHorizontally { w -> w }
+            }
+        },
+        popEnterTransition = { fadeIn() },
+        popExitTransition = { slideOutHorizontally { h -> h } }
+    ) { backStackEntry ->
         val formData = remember(backStackEntry) { state.getActiveFormStateData() }
         FeatureFormScreen(
             formStateData = formData,
+            showTopBar = showTopBar,
             onAudioCaptureRequest = { maxDuration, stateId ->
                 onAudioCaptureRequest(backStackEntry, maxDuration, stateId)
             },

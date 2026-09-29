@@ -303,7 +303,7 @@ private fun getTopBarTitleAndSubtitle(
  * @param modifier The [Modifier] to apply to this layout.
  */
 @Composable
-private fun FeatureFormTitle(
+internal fun FeatureFormTitle(
     title: String,
     subTitle: String,
     hasEdits: Boolean,
@@ -406,7 +406,7 @@ private fun InitializingExpressions(
     }
 }
 
-private fun NavBackStackEntry.shouldEnableTopBar(): Boolean {
+internal fun NavBackStackEntry.shouldEnableTopBar(): Boolean {
     return when {
         this.destination.parent?.hasRoute<NavigationRoute.AddUNAssociationFromSource>() == true -> false
         this.destination.hasRoute<NavigationRoute.UNAssociationDetails>() -> false

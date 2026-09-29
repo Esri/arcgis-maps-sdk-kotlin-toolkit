@@ -16,6 +16,8 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.navigation
 
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
@@ -46,7 +48,7 @@ internal fun NavGraphBuilder.associationDetailsDestination(
         popEnterTransition = { fadeIn() },
         popExitTransition = { slideOutVertically { h -> h } }
     ) { backStackEntry ->
-        val route = backStackEntry.toRoute<NavigationRoute.UNAssociationGroupResult>()
+        val route = backStackEntry.toRoute<NavigationRoute.UNAssociationDetails>()
         val formData = remember(backStackEntry) { state.getActiveFormStateData() }
         val states = formData.stateCollection
         // Get the selected UtilityAssociationsElementState from the state collection

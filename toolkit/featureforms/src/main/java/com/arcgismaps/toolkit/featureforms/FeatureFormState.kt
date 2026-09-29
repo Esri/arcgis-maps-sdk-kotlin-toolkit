@@ -20,6 +20,7 @@ import androidx.annotation.MainThread
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
@@ -67,6 +68,7 @@ import com.arcgismaps.toolkit.featureforms.internal.components.text.FormTextFiel
 import com.arcgismaps.toolkit.featureforms.internal.components.text.TextFieldProperties
 import com.arcgismaps.toolkit.featureforms.internal.components.text.TextFormElementState
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationsElementState
+import com.arcgismaps.toolkit.featureforms.internal.navigation.FormNavigationDirection
 import com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationRoute
 import com.arcgismaps.toolkit.featureforms.internal.navigation.lifecycleIsResumed
 import com.arcgismaps.toolkit.featureforms.internal.utils.fieldIsNullable
@@ -110,10 +112,22 @@ public class FeatureFormState private constructor(
     private var navigateToRoute: ((NavigationRoute) -> Unit)? = null
 
     /**
+     * A navigation callback that is designed to pop all destinations before navigating
+     * to the new [FeatureForm]. This should be set by the composition.
+     */
+    private var navigatePopUpToRoute: ((NavigationRoute, () -> Unit) -> Boolean)? = null
+
+    /**
      * A navigation callback that is called when navigating back to a previous [FeatureForm]. This
      * should be set by the composition that uses the NavController to navigate back.
      */
     private var navigateBack: (() -> Boolean)? = null
+
+    /**
+     * A callback to resolve a [FormStateData] for a given [ArcGISFeature]. This is used to determine
+     * if a [FormStateData] is already cached or needs to be created for a given [ArcGISFeature].
+     */
+    private var resolveFormStateData: ((ArcGISFeature) -> FormStateData)? = null
 
     /**
      * The currently active [FeatureForm]. This property is updated when navigating between forms.
@@ -133,12 +147,10 @@ public class FeatureFormState private constructor(
         coroutineScope: CoroutineScope
     ) : this(featureForm) {
         this.coroutineScope = coroutineScope
-        val formElements: List<FormElement> =
-            featureForm.elements + listOfNotNull(featureForm.defaultAttachmentsElement)
         // create state objects for all the supported element types that are part of the provided FeatureForm
         val states = createStates(
             form = this.featureForm,
-            elements = formElements,
+            elements = this.featureForm.allElements,
             scope = coroutineScope
         )
         val formStateData = FormStateData(featureForm, states)
@@ -150,17 +162,13 @@ public class FeatureFormState private constructor(
     }
 
     internal constructor(
-        featureForm: FeatureForm,
-        stateCollection: FormStateCollection,
-        coroutineScope: CoroutineScope
-    ) : this(featureForm) {
+        formStateData: FormStateData,
+        coroutineScope: CoroutineScope,
+        onResolveFormStateData: ((ArcGISFeature) -> FormStateData)?
+    ) : this(formStateData.featureForm) {
         this.coroutineScope = coroutineScope
-        // Add the provided state collection to the store.
-        val formStateData = FormStateData(this.featureForm, stateCollection)
         store.addLast(formStateData)
-        coroutineScope.launch(start = CoroutineStart.UNDISPATCHED) {
-            formStateData.evaluateExpressions()
-        }
+        this.resolveFormStateData = onResolveFormStateData
     }
 
     /**
@@ -172,17 +180,8 @@ public class FeatureFormState private constructor(
     public suspend fun discardEdits(): Result<List<FormExpressionEvaluationError>> {
         val formData = getActiveFormStateData()
         formData.featureForm.discardEdits()
-        formData.stateCollection.forEach {
-            when (it.state) {
-                is AttachmentElementState -> {
-                    (it.state as AttachmentElementState).refreshAttachments()
-                }
-
-                is UtilityAssociationsElementState -> {
-                    (it.state as UtilityAssociationsElementState).refreshResults()
-                }
-            }
-        }
+        formData.refreshAttachments()
+        formData.refreshUtilityAssociations()
         return formData.evaluateExpressions()
     }
 
@@ -195,11 +194,7 @@ public class FeatureFormState private constructor(
         val formData = getActiveFormStateData()
         val result = formData.featureForm.finishEditing().onSuccess {
             // After a successful save, refresh the associations
-            formData.stateCollection.forEach { entry ->
-                if (entry.state is UtilityAssociationsElementState) {
-                    (entry.state as UtilityAssociationsElementState).refreshResults()
-                }
-            }
+            formData.refreshUtilityAssociations()
         }
         return result
     }
@@ -211,6 +206,14 @@ public class FeatureFormState private constructor(
      */
     internal fun setNavigationCallback(navigateToRoute: ((NavigationRoute) -> Unit)?) {
         this.navigateToRoute = navigateToRoute
+    }
+
+    /**
+     * Sets the navigation callback to the provided [navigatePopUpToRoute] function. This function is
+     * called when navigating to a new [FeatureForm] and popping all destinations before navigating.
+     */
+    internal fun setNavigationPopupToCallback(callback: ((NavigationRoute, () -> Unit) -> Boolean)?) {
+        this.navigatePopUpToRoute = callback
     }
 
     /**
@@ -233,7 +236,10 @@ public class FeatureFormState private constructor(
         if (_activeFeatureForm.value != formStateData.featureForm) {
             _activeFeatureForm.value = formStateData.featureForm
             // refresh the feature to ensure the latest data is loaded.
-            formStateData.featureForm.feature.refresh()
+            if (!formStateData.featureForm.hasEdits.value) {
+                // only refresh the feature if there are no edits, otherwise the edits will be lost.
+                formStateData.featureForm.feature.refresh()
+            }
             if (formStateData.initialEvaluation.not()) {
                 formStateData.evaluateExpressions()
             }
@@ -253,17 +259,51 @@ public class FeatureFormState private constructor(
         val navigateTo = navigateToRoute ?: return false
         // Check if the backStackEntry is in the resumed state.
         if (backStackEntry.lifecycleIsResumed().not()) return false
-        val form = FeatureForm(feature)
-        val states = createStates(
-            form = form,
-            elements = form.elements,
-            scope = coroutineScope
-        )
-        // Add the new form to the stack.
-        store.addLast(FormStateData(form, states))
+        // Get a resolution for the form state data for the feature.
+        val formStateData = resolveFormStateData?.invoke(feature) ?: run {
+            // Existing standalone FeatureForm behavior. Check if the feature is already in the
+            // local cache/stack, if so, navigate to it.
+            store.find {
+                feature.id() != null && it.featureForm.feature.id() == feature.id()
+            } ?: run {
+                // If the feature is not in the stack, create a new form data.
+                val form = FeatureForm(feature)
+                val states = createStates(
+                    form = form,
+                    elements = form.elements,
+                    scope = coroutineScope
+                )
+                FormStateData(form, states)
+            }
+        }
+        // Add the form to the stack.
+        store.addLast(formStateData)
         // Navigate to the form view.
-        navigateTo(NavigationRoute.Form)
+        navigateTo(NavigationRoute.Form(FormNavigationDirection.Next))
         return true
+    }
+
+    /**
+     * Adds a new [FeatureForm] to the local stack and navigates to it. [updateActiveFeatureForm]
+     * must be called after this to update the [activeFeatureForm], preferably after the navigation
+     * is complete. This will clear the stack and add the new form to the stack.
+     *
+     * [setNavigationPopupToCallback] must be set before calling this function to ensure that the
+     * navigation is valid.
+     */
+    @MainThread
+    internal fun navigateToForm(
+        formStateData: FormStateData,
+        direction: FormNavigationDirection
+    ): Boolean {
+        val navigateTo = navigatePopUpToRoute ?: return false
+        // Navigate to the form view.
+        return navigateTo(NavigationRoute.Form(direction)) {
+            // This is only invoked after the NavHost owner confirms that navigation is valid but
+            // before the navigation is actually performed. This is a good place to update the stack.
+            store.clear()
+            store.addLast(formStateData)
+        }
     }
 
     /**
@@ -316,29 +356,16 @@ public class FeatureFormState private constructor(
      */
     internal fun validateAllFields() {
         // Force validation of all the states in the current form.
-        getActiveFormStateData().stateCollection.forEach { entry ->
-            when (entry.formElement) {
-                // validate attachments
-                is AttachmentsFormElement -> {
-                    (entry.getState<AttachmentElementState>()).forceValidation()
-                }
-                // validate all fields
-                is FieldFormElement -> {
-                    entry.getState<BaseFieldState<*>>().forceValidation()
-                }
-
-                // validate any fields that are within a group
-                is GroupFormElement -> {
-                    entry.getState<BaseGroupState>().fieldStates.forEach { childEntry ->
-                        childEntry.getState<BaseFieldState<*>>().forceValidation()
-                    }
-                }
-
-                else -> {}
-            }
-        }
+        getActiveFormStateData().validateAllFields()
     }
 }
+
+/**
+ * Returns a list of all the elements in the [FeatureForm], including the default attachments element
+ * if it exists.
+ */
+internal val FeatureForm.allElements: List<FormElement>
+    get() = elements + listOfNotNull(defaultAttachmentsElement)
 
 /**
  * A structure that holds the [FeatureForm] and its associated [FormStateCollection].
@@ -353,6 +380,10 @@ internal data class FormStateData(
     val featureForm: FeatureForm,
     val stateCollection: FormStateCollection
 ) {
+    var firstVisibleItemIndex by mutableIntStateOf(0)
+
+    var firstVisibleItemScrollOffset by mutableIntStateOf(0)
+
     /**
      * Indicates if the expressions for the [featureForm] have been evaluated at least once.
      */
@@ -379,6 +410,56 @@ internal data class FormStateData(
             }
         } finally {
             isEvaluatingExpressions = false
+        }
+    }
+
+    /**
+     * Validates all the fields in the form.
+     */
+    fun validateAllFields() {
+        // Force validation of all the states in the current form.
+        stateCollection.forEach { entry ->
+            when (entry.formElement) {
+                // validate attachments
+                is AttachmentsFormElement -> {
+                    (entry.getState<AttachmentElementState>()).forceValidation()
+                }
+                // validate all fields
+                is FieldFormElement -> {
+                    entry.getState<BaseFieldState<*>>().forceValidation()
+                }
+
+                // validate any fields that are within a group
+                is GroupFormElement -> {
+                    entry.getState<BaseGroupState>().fieldStates.forEach { childEntry ->
+                        childEntry.getState<BaseFieldState<*>>().forceValidation()
+                    }
+                }
+
+                else -> {}
+            }
+        }
+    }
+
+    /**
+     * Refreshes the utility associations for all the [UtilityAssociationsElementState] in the form.
+     */
+    suspend fun refreshUtilityAssociations() {
+        stateCollection.forEach { entry ->
+            if (entry.state is UtilityAssociationsElementState) {
+                (entry.state as UtilityAssociationsElementState).refreshResults()
+            }
+        }
+    }
+
+    /**
+     * Refreshes the attachments for all the [AttachmentElementState] in the form.
+     */
+    fun refreshAttachments() {
+        stateCollection.forEach { entry ->
+            if (entry.state is AttachmentElementState) {
+                (entry.state as AttachmentElementState).refreshAttachments()
+            }
         }
     }
 }
