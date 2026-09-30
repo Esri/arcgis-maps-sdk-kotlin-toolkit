@@ -118,6 +118,8 @@ plugins {
     alias(libs.plugins.binary.compatibility.validator) apply true
     id("com.android.library")
     id("artifact-deploy")
+    id("org.jetbrains.kotlin.plugin.compose")
+    alias(libs.plugins.kotlin.convention.plugin)
 }
 EOM
     # Find the line number of the old plugin block start
