@@ -312,7 +312,7 @@ internal class AddAssociationFromSourceViewModel(
                     source.queryFeatures(
                         assetType = assetType
                     ).onSuccess { result ->
-                        _fields.value = source.getFields(assetType.assetGroup)
+                        _fields.value = assetType.assetGroup?.let(source::getFields).orEmpty()
                         _featureCandidatesUiState.value = FeatureCandidatesUiState(
                             isLoading = false,
                             candidates = result.candidates,
@@ -806,7 +806,7 @@ internal fun List<UtilityAssetType>.orderByAssetGroup(): List<UtilityAssetType> 
         if (toIndexInclusive > fromIndex) {
             reorderedList.subList(fromIndex, toIndexInclusive + 1).sortWith(
                 compareBy(String.CASE_INSENSITIVE_ORDER) {
-                    it.assetGroup.name
+                    it.assetGroup?.name.orEmpty()
                 }
             )
         }

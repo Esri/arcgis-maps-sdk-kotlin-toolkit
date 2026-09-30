@@ -4,17 +4,12 @@ public final class com/arcgismaps/toolkit/buildingexplorer/BuildingExplorerKt {
 
 public final class com/arcgismaps/toolkit/buildingexplorer/BuildingExplorerState {
 	public static final field $stable I
-	public fun <init> (Lcom/arcgismaps/mapping/layers/BuildingSceneLayer;Lkotlinx/coroutines/CoroutineScope;)V
-	public final fun getCategories ()Ljava/util/List;
-	public final fun getLevels ()Ljava/util/List;
-	public final fun getSelectedLevel ()Ljava/lang/String;
-	public final fun setSelectedLevel (Ljava/lang/String;)V
+	public fun <init> (Ljava/util/List;Lkotlinx/coroutines/CoroutineScope;)V
 }
 
 public final class com/arcgismaps/toolkit/buildingexplorer/ComposableSingletons$BuildingExplorerKt {
 	public static final field INSTANCE Lcom/arcgismaps/toolkit/buildingexplorer/ComposableSingletons$BuildingExplorerKt;
 	public fun <init> ()V
-	public final fun getLambda$-185515847$buildingexplorer_release ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda$364055217$buildingexplorer_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-1400580779$buildingexplorer ()Lkotlin/jvm/functions/Function3;
 }
 
