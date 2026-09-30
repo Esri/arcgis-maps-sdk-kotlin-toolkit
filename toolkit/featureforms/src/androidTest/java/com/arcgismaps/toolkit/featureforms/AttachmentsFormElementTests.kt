@@ -26,6 +26,7 @@ import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertTextContains
+import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isDialog
 import androidx.compose.ui.test.isDisplayed
@@ -38,7 +39,9 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
+import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.printToLog
 import androidx.test.espresso.Espresso
 import androidx.test.espresso.intent.Intents.intending
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasAction
@@ -821,6 +824,105 @@ class AttachmentsFormElementTests : FeatureFormTestRunner(
     }
 
     /**
+     * Given a `FeatureForm` with an authored `AttachmentsFormElement`
+     * When the `FeatureForm` is displayed
+     * Then the attachments can be renamed successfully
+     *
+     * @since 300.2.0
+     */
+    @Test
+    fun testRenamingAttachments() = runTest {
+        // Create a FeatureFormState and set the compose content
+        val featureFormState = FeatureFormState(
+            featureForm = featureForm,
+            coroutineScope = scope
+        )
+        composeTestRule.setContent {
+            FeatureForm(featureFormState = featureFormState, showFormActions = false)
+        }
+
+        // Find the lazy column node the FeatureForm is displayed in
+        val lazyColumnNode = composeTestRule.onNodeWithContentDescription("lazy column")
+
+        val attachmentsFormElement = featureForm.elements.firstOrNull {
+            it.label == "Any"
+        } as? AttachmentsFormElement
+        assertThat(attachmentsFormElement).isNotNull()
+
+        // Scroll to the attachments form element to ensure it is visible
+        lazyColumnNode.performScrollToNode(hasText(attachmentsFormElement!!.label))
+
+        // Assert that the attachments element is displayed
+        val attachmentsNode = composeTestRule.onNodeWithText(attachmentsFormElement.label)
+        attachmentsNode.assertIsDisplayed()
+
+        // Get the add attachment button and assert that it is displayed
+        val addAttachmentButton = attachmentsNode.onChildWithContentDescription(
+            context.getString(R.string.add_attachment)
+        )
+        addAttachmentButton.assertIsDisplayed()
+        addAttachmentButton.performClick()
+
+        // Add an attachment
+        val menu = composeTestRule.onNode(isPopup())
+        menu.assertIsDisplayed()
+        val chooseFromFiles = menu.onChildWithText(
+            value = context.getString(R.string.choose_from_files),
+            recurse = true
+        ).assertIsDisplayed()
+
+        // Create a temporary file to simulate the selected document
+        mockFilePickerIntentResult(context, "test_document.txt", "text/plain")
+        // Perform the click on the "Choose From Files" option
+        chooseFromFiles.performClick()
+        composeTestRule.waitForIdle()
+        // Assert that the intent was sent and received correctly by the component and the new
+        // attachment is displayed in the attachments list
+        composeTestRule.waitUntil(timeoutMillis = 5_000) {
+            try {
+                // Check for the content description since `displayFileName` is false
+                attachmentsNode.onChildWithContentDescription(
+                    "Attachment: test_document.txt"
+                ).assertExists()
+                true
+            } catch (_: AssertionError) {
+                false
+            }
+        }
+        lazyColumnNode.performScrollToNode(
+            hasContentDescription("Attachment: test_document.txt")
+        ).assertIsDisplayed()
+        composeTestRule.waitForIdle()
+        val attachmentNode = attachmentsNode.onChildWithContentDescription(
+            "Attachment: test_document.txt"
+        )
+        attachmentNode.performTouchInput { longClick() }
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithText(context.getString(R.string.rename)).performClick()
+        composeTestRule.waitForIdle()
+
+        // Assert that the rename dialog is displayed
+        val dialog = composeTestRule.onNode(isDialog())
+        dialog.assertIsDisplayed()
+        dialog.printToLog("XYZ")
+        dialog.onChildWithText("test_document", recurse = true).performTextReplacement("renamed_document")
+        dialog.onChildWithText(context.getString(R.string.rename), recurse = true).performClick()
+
+        // Assert that the attachment has been renamed successfully
+        composeTestRule.waitUntil {
+            try {
+                // Check for the content description since `displayFileName` is false
+                attachmentsNode.onChildWithContentDescription(
+                    "Attachment: renamed_document.txt"
+                ).assertExists()
+                true
+            } catch (_: AssertionError) {
+                false
+            }
+        }
+    }
+
+    /**
      * Mocks the result of a file picker intent to simulate selecting a file from the device's
      * storage. This method supports mocking files with the following content types: "image/png" and
      * "text/plain". If an unsupported content type is provided, an [UnsupportedOperationException]
@@ -841,31 +943,32 @@ class AttachmentsFormElementTests : FeatureFormTestRunner(
             // parent nested dir must match the path in the file provider XML
             File(context.cacheDir, "feature_forms_attachments"),
             // the test file
-            fileName //"test_document.txt"
+            fileName
         )
         // Create the mock document file with some content
         file.parentFile?.mkdirs()
         // If the file already exists, we don't need to create it again
-        if (file.exists()) return
-        when (contentType) {
-            "image/png" -> {
-                val bitmap = Bitmap.createBitmap(50, 50, Bitmap.Config.ARGB_8888)
-                file.outputStream().use { outputStream ->
-                    bitmap.compress(Bitmap.CompressFormat.PNG, 0, outputStream)
+        if (file.exists().not()) {
+            when (contentType) {
+                "image/png" -> {
+                    val bitmap = Bitmap.createBitmap(50, 50, Bitmap.Config.ARGB_8888)
+                    file.outputStream().use { outputStream ->
+                        bitmap.compress(Bitmap.CompressFormat.PNG, 0, outputStream)
+                    }
+                    bitmap.recycle()
                 }
-                bitmap.recycle()
-            }
 
-            "text/plain" -> {
-                FileWriter(file).use { writer ->
-                    writer.write("Mock file content for testing.")
-                    writer.flush()
+                "text/plain" -> {
+                    FileWriter(file).use { writer ->
+                        writer.write("Mock file content for testing.")
+                        writer.flush()
+                    }
                 }
-            }
 
-            else -> {
-                // If the content type is not supported, throw an exception
-                throw UnsupportedOperationException("Unsupported content type: $contentType")
+                else -> {
+                    // If the content type is not supported, throw an exception
+                    throw UnsupportedOperationException("Unsupported content type: $contentType")
+                }
             }
         }
         // Set up the intent response with the file URI

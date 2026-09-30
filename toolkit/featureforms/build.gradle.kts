@@ -113,7 +113,7 @@ android {
      */
     testOptions {
         targetSdk = libs.versions.compileSdk.get().toInt()
-        val connectedTestReportsPath: String by project
+        val connectedTestReportsPath: String = rootProject.extra["connectedTestReportsPath"] as String
         reportDir = "$connectedTestReportsPath/${project.name}"
     }
 
@@ -166,7 +166,9 @@ apiValidation {
         "com.arcgismaps.toolkit.featureforms.internal.screens.ComposableSingletons\$SelectNetworkSourceScreenKt",
         "com.arcgismaps.toolkit.featureforms.internal.screens.ComposableSingletons\$UtilityAssociationDetailsScreenKt",
         "com.arcgismaps.toolkit.featureforms.internal.screens.ComposableSingletons\$FeaturesFilterScreenKt",
-        "com.arcgismaps.toolkit.featureforms.internal.utils.ComposableSingletons\$SearchBarKt"
+        "com.arcgismaps.toolkit.featureforms.internal.utils.ComposableSingletons\$SearchBarKt",
+        "com.arcgismaps.toolkit.featureforms.internal.utils.ComposableSingletons\$DialogKt",
+        "com.arcgismaps.toolkit.featureforms.internal.components.attachment.ComposableSingletons\$AddAttachmentKt"
     )
     ignoredClasses.addAll(composableSingletons)
 }

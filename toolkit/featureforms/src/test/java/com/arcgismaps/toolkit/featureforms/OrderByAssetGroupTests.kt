@@ -45,7 +45,7 @@ class OrderByAssetGroupTests {
                 "Electric Low Voltage Pole",
                 "Electric Medium Voltage Pole"
             ),
-            result.map { it.assetGroup.name }
+            result.map { it.assetGroup!!.name }
         )
     }
 
@@ -110,7 +110,7 @@ class OrderByAssetGroupTests {
                 "Electric Transmission Device",
                 "Electric High Voltage Pole" // Triple Circuit Lattice
             ),
-            result.map { it.assetGroup.name }
+            result.map { it.assetGroup!!.name }
         )
     }
 
@@ -129,7 +129,7 @@ class OrderByAssetGroupTests {
 
         assertEquals(
             listOf("eLeCtRiC Low Voltage pole", "Electric Medium Voltage Pole"),
-            result.map { it.assetGroup.name }
+            result.map { it.assetGroup!!.name }
         )
     }
 
