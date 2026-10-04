@@ -429,6 +429,29 @@ class MapViewModel @Inject constructor(
         }
     }
 
+    fun selectFeatures(features: List<ArcGISFeature>) {
+        when (_uiState.value) {
+            is UIState.SelectFeature, UIState.NotEditing -> {
+                val forms = features.map(::FeatureForm)
+                // if the current state is selecting a feature or not editing then select the feature
+                val featureFormState = FeatureFormManagerState(
+                    forms = forms,
+                    scope = scope
+                )
+                // set the UI to an editing state with the FeatureForm
+                _uiState.value = UIState.Editing(featureFormState)
+                scope.launch {
+                    // set the viewpoint to the first feature extent
+                    features.first().geometry?.let {
+                        proxy.setViewpointGeometry(it.extent, 50.0)
+                    }
+                }
+            }
+
+            else -> return
+        }
+    }
+
     /**
      * Toggles the navigation enabled state. When navigation is enabled, the user can navigate between
      * features in the feature form.
