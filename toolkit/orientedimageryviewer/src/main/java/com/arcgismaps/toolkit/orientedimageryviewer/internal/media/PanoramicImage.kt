@@ -24,14 +24,12 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.Matrix
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.exifinterface.media.ExifInterface
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -56,7 +54,6 @@ import io.github.sceneview.texture.ImageTexture
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
-import java.io.ByteArrayInputStream
 import java.net.HttpURLConnection
 import java.net.URL
 
@@ -191,7 +188,7 @@ private suspend fun loadBitmapFromUri(context: Context, imageSource: String): Bi
     val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
         ?: throw IllegalArgumentException("Failed to decode panoramic image from $imageSource")
 
-    applyExifOrientation(bitmap, imageBytes)
+    bitmap
 }
 
 private fun loadImageBytesFromUri(context: Context, imageSource: String): ByteArray {
@@ -284,54 +281,3 @@ private fun loadImageBytesFromMediaStorePath(context: Context, filePath: String,
     }
 }
 
-private fun applyExifOrientation(bitmap: Bitmap, imageBytes: ByteArray): Bitmap {
-    val exif = runCatching {
-        ExifInterface(ByteArrayInputStream(imageBytes))
-    }.getOrNull() ?: return bitmap
-
-    val orientation = exif.getAttributeInt(
-        ExifInterface.TAG_ORIENTATION,
-        ExifInterface.ORIENTATION_NORMAL
-    )
-
-    val matrix = Matrix()
-
-    when (orientation) {
-        ExifInterface.ORIENTATION_ROTATE_90 ->
-            matrix.postRotate(90f)
-
-        ExifInterface.ORIENTATION_ROTATE_180 ->
-            matrix.postRotate(180f)
-
-        ExifInterface.ORIENTATION_ROTATE_270 ->
-            matrix.postRotate(270f)
-
-        ExifInterface.ORIENTATION_FLIP_HORIZONTAL ->
-            matrix.preScale(-1f, 1f)
-
-        ExifInterface.ORIENTATION_FLIP_VERTICAL ->
-            matrix.preScale(1f, -1f)
-
-        ExifInterface.ORIENTATION_TRANSPOSE -> {
-            matrix.preScale(-1f, 1f)
-            matrix.postRotate(270f)
-        }
-
-        ExifInterface.ORIENTATION_TRANSVERSE -> {
-            matrix.preScale(-1f, 1f)
-            matrix.postRotate(90f)
-        }
-
-        else -> return bitmap
-    }
-
-    return Bitmap.createBitmap(
-        bitmap,
-        0,
-        0,
-        bitmap.width,
-        bitmap.height,
-        matrix,
-        true
-    )
-}

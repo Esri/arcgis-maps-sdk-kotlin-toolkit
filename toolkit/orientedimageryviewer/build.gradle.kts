@@ -105,7 +105,6 @@ dependencies {
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.composeCore)
     implementation(libs.bundles.core)
-    implementation(libs.androidx.exifinterface)
     implementation(libs.bundles.icons)
     implementation(libs.androidx.activity.compose)
     implementation(libs.sceneview)
