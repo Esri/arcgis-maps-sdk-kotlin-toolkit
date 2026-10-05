@@ -303,6 +303,10 @@ public fun SceneView(
  * - <a href="https://developers.arcgis.com/kotlin/scenes-3d/tutorials/display-a-web-scene/">Display a web scene tutorial</a>
  * @since 300.0.0
  */
+@Deprecated(
+    message = "Use the SceneView function with `useSystemTextScale` instead. This deprecated function remains to maintain binary compatibility",
+    level = DeprecationLevel.HIDDEN,
+)
 @Composable
 public fun SceneView(
     arcGISScene: ArcGISScene,
@@ -347,6 +351,189 @@ public fun SceneView(
     onDrawStatusChanged: ((DrawStatus) -> Unit)? = null,
     canFocus: Boolean = true,
     onGeoModelErrorChanged: ((Throwable?) -> Unit)? = null,
+    content: (@Composable SceneViewScope.() -> Unit)? = null,
+) {
+    SceneView(
+        arcGISScene = arcGISScene,
+        modifier = modifier,
+        onViewpointChangedForCenterAndScale = onViewpointChangedForCenterAndScale,
+        onViewpointChangedForBoundingGeometry = onViewpointChangedForBoundingGeometry,
+        graphicsOverlays = graphicsOverlays,
+        sceneViewProxy = sceneViewProxy,
+        sceneViewInteractionOptions = sceneViewInteractionOptions,
+        viewLabelProperties = viewLabelProperties,
+        selectionProperties = selectionProperties,
+        grid = grid,
+        isAttributionBarVisible = isAttributionBarVisible,
+        onAttributionTextChanged = onAttributionTextChanged,
+        onAttributionBarLayoutChanged = onAttributionBarLayoutChanged,
+        cameraController = cameraController,
+        analysisOverlays = analysisOverlays,
+        imageOverlays = imageOverlays,
+        atmosphereEffect = atmosphereEffect,
+        timeExtent = timeExtent,
+        onTimeExtentChanged = onTimeExtentChanged,
+        spaceEffect = spaceEffect,
+        sunTime = sunTime,
+        sunLighting = sunLighting,
+        ambientLightColor = ambientLightColor,
+        onNavigationChanged = onNavigationChanged,
+        onSpatialReferenceChanged = onSpatialReferenceChanged,
+        onLayerViewStateChanged = onLayerViewStateChanged,
+        onAnalysisViewStatusChanged = onAnalysisViewStatusChanged,
+        onInteractingChanged = onInteractingChanged,
+        onCurrentViewpointCameraChanged = onCurrentViewpointCameraChanged,
+        onRotate = onRotate,
+        onScale = onScale,
+        onUp = onUp,
+        onDown = onDown,
+        onSingleTapConfirmed = onSingleTapConfirmed,
+        onDoubleTap = onDoubleTap,
+        onLongPress = onLongPress,
+        onTwoPointerTap = onTwoPointerTap,
+        onPan = onPan,
+        onInteractiveZooming = onInteractiveZooming,
+        onDrawStatusChanged = onDrawStatusChanged,
+        canFocus = canFocus,
+        onGeoModelErrorChanged = onGeoModelErrorChanged,
+        useSystemTextScale = true,
+        content = content
+    )
+}
+
+/**
+ * A composable UI element that displays three-dimensional (3D) geographic content defined by an `ArcGISScene`.
+ *
+ * A composable scene view displays `ArcGISScene` layers and graphics in 3D. It uses a `Camera` to control
+ * the visible area (extent) of the `ArcGISScene` (see [cameraController]) and supports user interactions such as pan,
+ * zoom, tilt, and rotate.
+ * It also provides access to the underlying layer data in the scene.
+ *
+ * User interactions (pan, zoom, tilt, rotate, identify, selection) are supported using touch interaction on the
+ * composable. If required, you can respond to certain gesture events to provide
+ * a specific user experience by collecting gesture flows such as:
+ * - [onPan]
+ * - [onSingleTapConfirmed]
+ * - [onDoubleTap]
+ *
+ * The visible area (`Viewpoint`) of the composable scene view is defined by the position and orientation of a `Camera`.
+ * The current visible area can be accessed through the lambda callbacks:
+ * - [onViewpointChangedForCenterAndScale]
+ * - [onViewpointChangedForBoundingGeometry]
+ * - [onCurrentViewpointCameraChanged]
+ *
+ * These callbacks are triggered when navigation completes or the viewpoint changes.
+ *
+ * To programmatically set the viewpoint, use a [SceneViewProxy] passed to the composable and call methods such as
+ * [SceneViewProxy.setViewpointAnimated] or [SceneViewProxy.setViewpointCamera].
+ *
+ * In an MVVM architecture, this composable represents the View tier. The Model tier is the [ArcGISScene], which can
+ * provide operational layers, base map, and a base surface.
+ *
+ * Only one [arcGISScene] can be set at a time, but you may replace it
+ * while the application is running.
+ *
+ * See [Scene view documentation](https://developers.arcgis.com/documentation/mapping-apis-and-services/maps/scenes-3d/#scene-view)
+ *
+ * @param arcGISScene the [ArcGISScene] to be rendered by this composable SceneView
+ * @param modifier Modifier to be applied to the composable SceneView
+ * @param onViewpointChangedForCenterAndScale lambda invoked when the viewpoint changes, passing a viewpoint
+ * type of [ViewpointType.CenterAndScale]
+ * @param onViewpointChangedForBoundingGeometry lambda invoked when the viewpoint changes, passing a viewpoint
+ * type of [ViewpointType.BoundingGeometry]
+ * @param graphicsOverlays graphics overlays used by this composable SceneView
+ * @param sceneViewProxy the [SceneViewProxy] to associate with the composable SceneView
+ * @param sceneViewInteractionOptions the [SceneViewInteractionOptions] used by this composable SceneView
+ * @param viewLabelProperties the [ViewLabelProperties] used by the composable SceneView
+ * @param selectionProperties the [SelectionProperties] used by the composable SceneView
+ * @param grid represents the display of a coordinate system [Grid] on the composable SceneView
+ * @param isAttributionBarVisible true if attribution bar is visible in the composable SceneView, false otherwise
+ * @param onAttributionTextChanged lambda invoked when the attribution text of the composable SceneView has changed
+ * @param onAttributionBarLayoutChanged lambda invoked when the attribution bar's position or size changes
+ * @param cameraController the [CameraController] to manage the position, orientation, and movement of the camera
+ * @param analysisOverlays analysis overlays that render the results of 3D visual analysis on the composable SceneView
+ * @param imageOverlays image overlays for displaying images in the composable SceneView
+ * @param atmosphereEffect the effect applied to the scene's atmosphere
+ * @param timeExtent the [TimeExtent] used by the composable SceneView
+ * @param onTimeExtentChanged lambda invoked when the composable SceneView's [TimeExtent] is changed
+ * @param spaceEffect the visual effect of outer space in the composable SceneView
+ * @param sunTime the position of the sun in the composable SceneView based on a specific date and time
+ * @param sunLighting the type of ambient sunlight and shadows in the composable SceneView
+ * @param ambientLightColor the color of the composable SceneView's ambient light
+ * @param useSystemTextScale true to apply the system font scale to supported text rendered by the SceneView
+ * @param onNavigationChanged lambda invoked when the navigation status of the composable SceneView has changed
+ * @param onSpatialReferenceChanged lambda invoked when the spatial reference of the composable SceneView has changed
+ * @param onLayerViewStateChanged lambda invoked when the composable SceneView's layer view state is changed
+ * @param onAnalysisViewStatusChanged lambda invoked when the composable SceneView's analysis view status is changed
+ * @param onInteractingChanged lambda invoked when the user starts and ends interacting with the composable SceneView
+ * @param onCurrentViewpointCameraChanged lambda invoked when the viewpoint camera of the composable SceneView has changed
+ * @param onRotate lambda invoked when a user performs a rotation gesture on the composable SceneView
+ * @param onScale lambda invoked when a user performs a pinch gesture on the composable SceneView
+ * @param onUp lambda invoked when the user removes all their pointers from the composable SceneView
+ * @param onDown lambda invoked when the user first presses on the composable SceneView
+ * @param onSingleTapConfirmed lambda invoked when the user taps once on the composable SceneView
+ * @param onDoubleTap lambda invoked the user double taps on the composable SceneView
+ * @param onLongPress lambda invoked when a user holds a pointer on the composable SceneView
+ * @param onTwoPointerTap lambda invoked when a user taps two pointers on the composable SceneView
+ * @param onPan lambda invoked when a user drags a pointer or pointers across composable SceneView
+ * @param onInteractiveZooming lambda invoked when a user performs a pinch or double-tap-drag gesture
+ *  on the composable SceneView
+ * @param onDrawStatusChanged lambda invoked when the draw status of the composable SceneView is changed
+ * @param canFocus pass true if the SceneView should receive focus. Note that specifying a modifier property `Modifier.focusProperties { canFocus = true/false }` on the SceneView composable has no effect.
+ * @param onGeoModelErrorChanged lambda invoked when the GeoModel error state of the composable
+ * LocalSceneView changes
+ * @param content the content of the composable SceneView
+ * @sample com.arcgismaps.toolkit.geoviewcompose.samples.SceneViewSample
+ * @see
+ * - <a href="https://developers.arcgis.com/kotlin/scenes-3d/tutorials/display-a-scene/">Display a scene tutorial</a>
+ * - <a href="https://developers.arcgis.com/kotlin/scenes-3d/tutorials/display-a-web-scene/">Display a web scene tutorial</a>
+ * @since 300.2.0
+ */
+@Composable
+public fun SceneView(
+    arcGISScene: ArcGISScene,
+    modifier: Modifier = Modifier,
+    onViewpointChangedForCenterAndScale: ((Viewpoint) -> Unit)? = null,
+    onViewpointChangedForBoundingGeometry: ((Viewpoint) -> Unit)? = null,
+    graphicsOverlays: List<GraphicsOverlay> = remember { emptyList() },
+    sceneViewProxy: SceneViewProxy? = null,
+    sceneViewInteractionOptions: SceneViewInteractionOptions = remember { SceneViewInteractionOptions() },
+    viewLabelProperties: ViewLabelProperties = remember { ViewLabelProperties() },
+    selectionProperties: SelectionProperties = remember { SelectionProperties() },
+    grid: Grid? = null,
+    isAttributionBarVisible: Boolean = true,
+    onAttributionTextChanged: ((String) -> Unit)? = null,
+    onAttributionBarLayoutChanged: ((AttributionBarLayoutChangeEvent) -> Unit)? = null,
+    cameraController: CameraController = remember { GlobeCameraController() },
+    analysisOverlays: List<AnalysisOverlay> = remember { emptyList() },
+    imageOverlays: List<ImageOverlay> = remember { emptyList() },
+    atmosphereEffect: AtmosphereEffect = AtmosphereEffect.HorizonOnly,
+    timeExtent: TimeExtent? = null,
+    onTimeExtentChanged: ((TimeExtent?) -> Unit)? = null,
+    spaceEffect: SpaceEffect = SpaceEffect.Stars,
+    sunTime: Instant = SceneViewDefaults.DefaultSunTime,
+    sunLighting: LightingMode = LightingMode.NoLight,
+    ambientLightColor: Color = SceneViewDefaults.DefaultAmbientLightColor,
+    useSystemTextScale: Boolean = true,
+    onNavigationChanged: ((isNavigating: Boolean) -> Unit)? = null,
+    onSpatialReferenceChanged: ((spatialReference: SpatialReference?) -> Unit)? = null,
+    onLayerViewStateChanged: ((GeoView.GeoViewLayerViewStateChanged) -> Unit)? = null,
+    onAnalysisViewStatusChanged: ((GeoView.GeoViewAnalysisViewStatusChanged) -> Unit)? = null,
+    onInteractingChanged: ((isInteracting: Boolean) -> Unit)? = null,
+    onCurrentViewpointCameraChanged: ((camera: Camera) -> Unit)? = null,
+    onRotate: ((RotationChangeEvent) -> Unit)? = null,
+    onScale: ((ScaleChangeEvent) -> Unit)? = null,
+    onUp: ((UpEvent) -> Unit)? = null,
+    onDown: ((DownEvent) -> Unit)? = null,
+    onSingleTapConfirmed: ((SingleTapConfirmedEvent) -> Unit)? = null,
+    onDoubleTap: ((DoubleTapEvent) -> Unit)? = null,
+    onLongPress: ((LongPressEvent) -> Unit)? = null,
+    onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)? = null,
+    onPan: ((PanChangeEvent) -> Unit)? = null,
+    onInteractiveZooming: ((InteractiveZoomingChangeEvent) -> Unit)? = null,
+    onDrawStatusChanged: ((DrawStatus) -> Unit)? = null,
+    canFocus: Boolean = true,
+    onGeoModelErrorChanged: ((Throwable?) -> Unit)? = null,
     content: (@Composable SceneViewScope.() -> Unit)? = null
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -372,6 +559,7 @@ public fun SceneView(
             factory = { sceneView },
             update = {
                 it.scene = arcGISScene
+                it.useSystemTextScale = useSystemTextScale
                 it.isFocusable = isGeoViewFocusable
                 it.interactionOptions = sceneViewInteractionOptions
                 it.labeling = viewLabelProperties
@@ -693,13 +881,13 @@ private fun ViewpointHandler(
                 }
                 currentOnViewpointChangedForCenterAndScale?.let { callback ->
                     sceneView.getCurrentViewpoint(ViewpointType.CenterAndScale)?.let { currentViewpointCenterAndScale ->
-                        callback.invoke(currentViewpointCenterAndScale)
-                    }
+                            callback.invoke(currentViewpointCenterAndScale)
+                        }
                 }
                 currentOnViewpointChangedForBoundingGeometry?.let { callback ->
                     sceneView.getCurrentViewpoint(ViewpointType.BoundingGeometry)?.let { currentViewpointBoundingGeometry ->
-                        callback.invoke(currentViewpointBoundingGeometry)
-                    }
+                            callback.invoke(currentViewpointBoundingGeometry)
+                        }
                 }
             }
         }

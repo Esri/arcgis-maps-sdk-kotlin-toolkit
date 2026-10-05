@@ -13,7 +13,7 @@ androidxTestExt = "1.3.0"
 androidXTestRunner = "1.7.0"
 androidXTestRules = "1.7.0"
 androidxWindow = "1.5.1"
-binaryCompatibilityValidator = "0.18.1"
+binaryCompatibilityValidator = "0.18.2"
 #noinspection UnusedVersionCatalogEntry
 compileSdk = "37"
 compose-navigation = "2.9.8"
@@ -106,6 +106,7 @@ play-services-location = { group = "com.google.android.gms", name = "play-servic
 androidx-espresso-intents = { group = "androidx.test.espresso", name = "espresso-intents", version.ref = "androidxEspresso" }
 # Dependencies of the included build-logic and build-logic--internal
 android-gradle-plugin = { group = "com.android.tools.build", name = "gradle", version.ref = "androidGradlePlugin" }
+bcv-implementation = { group = "org.jetbrains.kotlinx", name = "binary-compatibility-validator", version.ref = "binaryCompatibilityValidator" }
 arcgismaps-testdata-sync-gradle-plugin = { group = "com.esri.gradle-plugins.testdata.sync", name = "com.esri.gradle-plugins.testdata.sync.gradle.plugin", version.ref = "arcgismapsTestdataSync" }
 kotlin-gradle = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin"}
 secrets-gradle-plugin = { group = "com.google.android.libraries.mapsplatform.secrets-gradle-plugin", name = "secrets-gradle-plugin", version.ref = "gradleSecrets"}
