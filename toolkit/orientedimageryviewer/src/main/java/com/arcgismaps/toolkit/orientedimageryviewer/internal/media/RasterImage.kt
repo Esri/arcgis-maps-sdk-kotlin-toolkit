@@ -22,6 +22,7 @@ import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import com.arcgismaps.Color
 import com.arcgismaps.geometry.Envelope
@@ -56,6 +57,9 @@ internal fun RasterImage(
     viewerState: OrientedImageryViewerState,
     modifier: Modifier = Modifier
 ) {
+    val coroutineScope = rememberCoroutineScope()
+    val viewerUiState = viewerState.uiState
+
     val proxy = remember {
         MapViewProxy()
     }
@@ -68,7 +72,7 @@ internal fun RasterImage(
         listOf(graphicsOverlay)
     }
 
-    val rasterPath = viewerState.activeImageInfo?.dataUri ?: return
+    val rasterPath = viewerUiState.activeImageInfo?.dataUri ?: return
     val rasterLayer = remember(rasterPath) {
         RasterLayer(Raster.createWithPath(rasterPath))
     }
@@ -86,7 +90,7 @@ internal fun RasterImage(
         backgroundGrid = BackgroundGrid().apply { isVisible = false },
         mapViewInteractionOptions = MapViewInteractionOptions(isEnabled = true),
         onSingleTapConfirmed = { event ->
-            viewerState.coroutineScope.launch {
+            coroutineScope.launch {
                 val result = viewerState.imageToLocation(event.screenCoordinate)
                 if (result != null) {
                     result.onSuccess { _ ->
@@ -106,7 +110,8 @@ internal fun RasterImage(
             }
         },
         onViewpointChangedForBoundingGeometry = { viewpoint ->
-            if ((viewerState.activeImageInfo != null) && viewerState.isActiveFootprintVisible() && !viewerState.isSequentialNavigationEnabled) {
+            val currentUiState = viewerState.uiState
+            if ((currentUiState.activeImageInfo != null) && currentUiState.isActiveFootprintVisible && !currentUiState.isSequentialNavigationEnabled) {
                 val imageCoordinates = computePixelCorners(viewpoint, rasterLayer)
                 if (imageCoordinates != null) {
                     viewerState.updateFootprints(imageCoordinates)
@@ -120,7 +125,7 @@ internal fun RasterImage(
             rasterLayer.fullExtent?.let { fullExtent ->
                 proxy.setViewpointGeometry(fullExtent)
             }
-            if (viewerState.supportsSequentialNavigation && viewerState.isSequentialNavigationEnabled) {
+            if (viewerState.supportsSequentialNavigation && viewerState.uiState.isSequentialNavigationEnabled) {
                 val imageCenter = computeImageCenter(rasterLayer)
                 if (imageCenter != null) {
                     val graphic = Graphic(

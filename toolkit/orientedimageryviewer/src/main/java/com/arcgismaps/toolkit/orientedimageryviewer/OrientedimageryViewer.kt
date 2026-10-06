@@ -20,13 +20,12 @@ package com.arcgismaps.toolkit.orientedimageryviewer
 
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.HorizontalDivider
@@ -37,15 +36,19 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.mapping.layers.OrientedImageryLayer
 import com.arcgismaps.mapping.view.GraphicsOverlay
+import com.arcgismaps.toolkit.orientedimageryviewer.internal.ImageryView
+import kotlinx.coroutines.launch
 
 @Composable
 public fun OrientedImageryViewer(
@@ -54,19 +57,31 @@ public fun OrientedImageryViewer(
     onDismiss: () -> Unit = {},
     showCloseIcon: Boolean = true,
 ) {
+    val coroutineScope = rememberCoroutineScope()
+    val viewerUiState = orientedImageryViewerState.uiState
+
     ViewerLayout(
         viewerState = orientedImageryViewerState,
         modifier = modifier,
         title = orientedImageryViewerState.title,
-        onPreviousImage = { orientedImageryViewerState.showPreviousImage() },
-        onNextImage = { orientedImageryViewerState.showNextImage() },
+        onPreviousImage = {
+            coroutineScope.launch {
+                orientedImageryViewerState.navigatePreviousImage()
+            }
+        },
+        onNextImage = {
+            coroutineScope.launch {
+                orientedImageryViewerState.navigateNextImage()
+            }
+        },
         onCurrentFootprint = { orientedImageryViewerState.toggleActiveFootprint() },
         onAdditionalFootprints = { orientedImageryViewerState.toggleAdditionalFootprints() },
         onAdditionalCameraLocations = { orientedImageryViewerState.toggleAdditionalCameraLocations() },
         onSequentialNavigation = { orientedImageryViewerState.toggleSequentialNavigation() },
         onReset = { orientedImageryViewerState.resetAll()},
         onDismiss = onDismiss,
-        showCloseIcon = showCloseIcon
+        showCloseIcon = showCloseIcon,
+        isSequentialNavigationEnabled = viewerUiState.isSequentialNavigationEnabled
     )
 }
 
@@ -84,48 +99,58 @@ internal fun ViewerLayout(
     onReset: () -> Unit = {},
     onDismiss: () -> Unit = {},
     showCloseIcon: Boolean = true,
+    isSequentialNavigationEnabled: Boolean = false,
 ) {
     ViewerLayout(
         modifier = modifier,
         topBar = {
-            Row(
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(64.dp)
                     .background(MaterialTheme.colorScheme.surface)
-                    .padding(start = 8.dp, end = 4.dp),
-                horizontalArrangement = Arrangement.End,
-                verticalAlignment = Alignment.CenterVertically
+                    .padding(horizontal = 8.dp, vertical = 8.dp)
             ) {
-                Text(
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(end = 8.dp),
-                    text = title,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    style = MaterialTheme.typography.titleLarge,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                if (showCloseIcon) {
-                    IconButton(onClick = onDismiss) {
-                        Icon(
-                            imageVector = Icons.Default.Close,
-                            contentDescription = "Close"
-                        )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(end = 8.dp),
+                        text = title,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        style = MaterialTheme.typography.titleLarge,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    if (showCloseIcon) {
+                        IconButton(onClick = onDismiss) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = stringResource(R.string.toolbar_close)
+                            )
+                        }
                     }
                 }
-                OrientedImageryToolbar(
-                    onPreviousImage = onPreviousImage,
-                    onNextImage = onNextImage,
-                    onCurrentFootprint = onCurrentFootprint,
-                    onAdditionalFootprints = onAdditionalFootprints,
-                    onAdditionalCameraLocations = onAdditionalCameraLocations,
-                    supportsSequentialNavigation = viewerState.supportsSequentialNavigation,
-                    isSequentialNavigationEnabled = viewerState.isSequentialNavigationEnabled,
-                    onSequentialNavigation = onSequentialNavigation,
-                    onReset = onReset
-                )
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState()),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    OrientedImageryToolbar(
+                        onPreviousImage = onPreviousImage,
+                        onNextImage = onNextImage,
+                        onCurrentFootprint = onCurrentFootprint,
+                        onAdditionalFootprints = onAdditionalFootprints,
+                        onAdditionalCameraLocations = onAdditionalCameraLocations,
+                        supportsSequentialNavigation = viewerState.supportsSequentialNavigation,
+                        isSequentialNavigationEnabled = isSequentialNavigationEnabled,
+                        onSequentialNavigation = onSequentialNavigation,
+                        onReset = onReset
+                    )
+                }
             }
         },
         content = {
@@ -168,7 +193,7 @@ private fun OrientedImageryToolbar(
         ) {
             Icon(
                 painter = painterResource(R.drawable.arrow_bold_left_24),
-                contentDescription = "Previous image",
+                contentDescription = stringResource(R.string.toolbar_previous_image),
                 tint = Color.Unspecified
             )
         }
@@ -178,28 +203,28 @@ private fun OrientedImageryToolbar(
         ) {
             Icon(
                 painter = painterResource(R.drawable.arrow_bold_right_24),
-                contentDescription = "Next image",
+                contentDescription = stringResource(R.string.toolbar_next_image),
                 tint = Color.Unspecified
             )
         }
         IconButton(onClick = onCurrentFootprint) {
             Icon(
                 painter = painterResource(R.drawable.footprint_24),
-                contentDescription = "Current footprint",
+                contentDescription = stringResource(R.string.toolbar_current_footprint),
                 tint = Color.Red
             )
         }
         IconButton(onClick = onAdditionalFootprints) {
             Icon(
                 painter = painterResource(R.drawable.footprint_24),
-                contentDescription = "Additional footprints",
+                contentDescription = stringResource(R.string.toolbar_additional_footprints),
                 tint = Color.Blue
             )
         }
         IconButton(onClick = onAdditionalCameraLocations) {
             Icon(
                 painter = painterResource(R.drawable.additional_cameras_24),
-                contentDescription = "Additional camera locations",
+                contentDescription = stringResource(R.string.toolbar_additional_camera_locations),
                 tint = Color.Unspecified
             )
         }
@@ -210,13 +235,13 @@ private fun OrientedImageryToolbar(
         ) {
             Icon(
                 painter = painterResource(R.drawable.sequential_navigation_24),
-                contentDescription = "Location-image"
+                contentDescription = stringResource(R.string.toolbar_sequential_navigation)
             )
         }
         IconButton(onClick = onReset) {
             Icon(
                 painter = painterResource(R.drawable.reset_24),
-                contentDescription = "Reset",
+                contentDescription = stringResource(R.string.toolbar_reset),
                 tint = Color.Unspecified
             )
         }

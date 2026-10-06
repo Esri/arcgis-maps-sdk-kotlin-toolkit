@@ -111,11 +111,4 @@ dependencies {
     testImplementation(libs.bundles.unitTest)
     androidTestImplementation(libs.bundles.composeTest)
     debugImplementation(libs.bundles.debug)
-
-    /**
-     * Include this if any internal-only test dependencies are required
-     */
-    if (file(project.findProperty("toolkitTestDir") as String).exists()) {
-        androidTestImplementation(libs.mockingjay)
-    }
 }

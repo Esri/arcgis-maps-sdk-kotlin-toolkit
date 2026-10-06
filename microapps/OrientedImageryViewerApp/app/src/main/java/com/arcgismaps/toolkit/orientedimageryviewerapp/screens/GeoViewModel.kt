@@ -34,13 +34,14 @@ import com.arcgismaps.mapping.view.IdentifyLayerResult
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
 import com.arcgismaps.toolkit.geoviewcompose.SceneViewProxy
+import com.arcgismaps.toolkit.orientedimageryviewer.SearchImagesOutcome
 import com.arcgismaps.toolkit.orientedimageryviewer.OrientedImageryViewerState
 import kotlinx.coroutines.launch
 
 class GeoViewModel(application: Application) : AndroidViewModel(application) {
 
     val arcGISMap: ArcGISMap =
-        ArcGISMap("https://runtimecoretest.maps.arcgis.com/home/item.html?id=3be52fd477a44af2b75bb70c974e9d07")
+        ArcGISMap("https://runtimecoretest.maps.arcgis.com/home/item.html?id=0e320b4e87934a44a86643ba85b3946e")
 
     val arcGISScene: ArcGISScene =
         ArcGISScene("https://www.arcgis.com/home/item.html?id=aa1c036445824e06a2d1b0e12e02a924")
@@ -61,52 +62,74 @@ class GeoViewModel(application: Application) : AndroidViewModel(application) {
     val orientedImageryViewerState: OrientedImageryViewerState?
         get() = _orientedImageryViewerState.value
 
+    private val _isLoading: MutableState<Boolean> = mutableStateOf(true)
+    val isLoading: Boolean
+        get() = _isLoading.value
+
     init {
         viewModelScope.launch {
-            arcGISMap.load().onSuccess {
-                val index = arcGISMap.operationalLayers.filterIsInstance<OrientedImageryLayer>().lastIndex
-                if (index > -1) {
-                    val orientedImageryLayer = arcGISMap.operationalLayers[index] as OrientedImageryLayer
-                    orientedImageryLayer.load().onSuccess {
-                        orientedImageryLayer.fullExtent?.let { extent ->
-                            mapViewProxy.setViewpoint(Viewpoint(extent))
+            try {
+                arcGISMap.load().onSuccess {
+                    val index = arcGISMap.operationalLayers.filterIsInstance<OrientedImageryLayer>().lastIndex
+                    if (index > -1) {
+                        val orientedImageryLayer = arcGISMap.operationalLayers[index] as OrientedImageryLayer
+                        orientedImageryLayer.load().onSuccess {
+                            orientedImageryLayer.fullExtent?.let { extent ->
+                                mapViewProxy.setViewpoint(Viewpoint(extent))
+                            }
                         }
                     }
                 }
+            } finally {
+                _isLoading.value = false
             }
         }
     }
 
     fun handleSingleTap(event: SingleTapConfirmedEvent) {
         viewModelScope.launch {
-            when (_geoViewType.value) {
-                GeoViewType.MapViewType -> {
-                    mapViewProxy.identifyLayers(event.screenCoordinate, 20.dp, false)
-                        .onSuccess { identifyResults ->
-                            createViewerState(identifyResults)
-                        }.onFailure { error ->
-                            Log.e("GeoViewModel", "Identify layers on map failed: ${error.message}")
-                        }
-                }
-                GeoViewType.SceneViewType -> {
-                    sceneviewProxy.identifyLayers(event.screenCoordinate, 20.dp, false)
-                        .onSuccess { identifyResults ->
-                            createViewerState(identifyResults)
-                        }.onFailure { error ->
-                            Log.e("GeoViewModel", "Identify layers on scene failed: ${error.message}")
-                        }
-                }
-            }
-            val lastMapLocation = if (_orientedImageryViewerState.value != null) {
+            _isLoading.value = true
+            try {
                 when (_geoViewType.value) {
-                    GeoViewType.MapViewType -> event.mapPoint
-                    GeoViewType.SceneViewType -> sceneviewProxy.screenToLocation(event.screenCoordinate).getOrNull()
+                    GeoViewType.MapViewType -> {
+                        mapViewProxy.identifyLayers(event.screenCoordinate, 20.dp, false)
+                            .onSuccess { identifyResults ->
+                                createViewerState(identifyResults)
+                            }.onFailure { error ->
+                                Log.e("GeoViewModel", "Identify layers on map failed: ${error.message}")
+                            }
+                    }
+
+                    GeoViewType.SceneViewType -> {
+                        sceneviewProxy.identifyLayers(event.screenCoordinate, 20.dp, false)
+                            .onSuccess { identifyResults ->
+                                createViewerState(identifyResults)
+                            }.onFailure { error ->
+                                Log.e("GeoViewModel", "Identify layers on scene failed: ${error.message}")
+                            }
+                    }
                 }
-            } else {
-                null
-            }
-            lastMapLocation?.let { point ->
-                _orientedImageryViewerState.value!!.searchImages(point)
+                val lastMapLocation = if (_orientedImageryViewerState.value != null) {
+                    when (_geoViewType.value) {
+                        GeoViewType.MapViewType -> event.mapPoint
+                        GeoViewType.SceneViewType -> sceneviewProxy.screenToLocation(event.screenCoordinate).getOrNull()
+                    }
+                } else {
+                    null
+                }
+                lastMapLocation?.let { point ->
+                    _orientedImageryViewerState.value!!.searchImages(point)
+                        .onSuccess { outcome ->
+                            if (outcome is SearchImagesOutcome.NoImagesFound) {
+                                Log.i("GeoViewModel", "No oriented images found at location: $point")
+                            }
+                        }
+                        .onFailure { error ->
+                            Log.e("GeoViewModel", "Search images failed: ${error.message}")
+                        }
+                }
+            } finally {
+                _isLoading.value = false
             }
         }
     }

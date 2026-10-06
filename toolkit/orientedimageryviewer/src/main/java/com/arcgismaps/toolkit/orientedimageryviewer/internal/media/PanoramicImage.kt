@@ -28,19 +28,18 @@ import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
 import android.util.Log
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.core.content.ContextCompat
+import androidx.compose.runtime.setValue
 import androidx.core.net.toUri
 import com.google.android.filament.MaterialInstance
 import dev.romainguy.kotlin.math.Float3
@@ -51,6 +50,7 @@ import io.github.sceneview.rememberCameraNode
 import io.github.sceneview.rememberEngine
 import io.github.sceneview.rememberMaterialLoader
 import io.github.sceneview.texture.ImageTexture
+import com.arcgismaps.toolkit.orientedimageryviewer.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -67,20 +67,10 @@ internal fun PanoramicImage(
     val materialLoader = rememberMaterialLoader(engine)
     val context = LocalContext.current
     val readImagesPermission = remember(context, imageSource) { readImagesPermissionFor(context, imageSource) }
-    var hasReadImagesPermission by remember(readImagesPermission) {
-        mutableStateOf(readImagesPermission == null || context.hasPermission(readImagesPermission))
-    }
-    val readImagesPermissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        hasReadImagesPermission = isGranted
-    }
-
-    LaunchedEffect(readImagesPermission, hasReadImagesPermission) {
-        if (readImagesPermission != null && !hasReadImagesPermission) {
-            readImagesPermissionLauncher.launch(readImagesPermission)
-        }
-    }
+    // TODO: document that read image permission is required for local files outside of the app's private storage.
+    val permissionRequiredMessage = stringResource(R.string.panoramic_image_permission_required, imageSource)
+    val loadFailedMessage = stringResource(R.string.panoramic_image_load_failed, imageSource)
+    val hasReadImagesPermission = readImagesPermission == null || context.hasPermission(readImagesPermission)
 
     // Load the bitmap off the main thread to avoid jank.
     var materialInstance by remember(materialLoader) { mutableStateOf<MaterialInstance?>(null) }
@@ -88,21 +78,20 @@ internal fun PanoramicImage(
     LaunchedEffect(imageSource, materialLoader, context, hasReadImagesPermission) {
         materialInstance = null
         if (!hasReadImagesPermission) {
-            Log.e("PanoramicImage", "Cannot load local panoramic image until image read permission is granted: $imageSource")
-            return@LaunchedEffect
-        }
+            Log.e("PanoramicImage", permissionRequiredMessage)
+        } else {
+            val bitmap = runCatching {
+                loadBitmapFromUri(context, imageSource)
+            }.onFailure { throwable ->
+                Log.e("PanoramicImage", loadFailedMessage, throwable)
+            }.getOrNull()
 
-        val bitmap = runCatching {
-            loadBitmapFromUri(context, imageSource)
-        }.onFailure { throwable ->
-            Log.e("PanoramicImage", "Failed to load panoramic image from $imageSource", throwable)
-        }.getOrNull()
-
-        materialInstance = bitmap?.let {
-            val texture = ImageTexture.Builder()
-                .bitmap(it)
-                .build(materialLoader.engine)
-            materialLoader.createImageInstance(texture)
+            materialInstance = bitmap?.let {
+                val texture = ImageTexture.Builder()
+                    .bitmap(it)
+                    .build(materialLoader.engine)
+                materialLoader.createImageInstance(texture)
+            }
         }
     }
 
@@ -183,27 +172,30 @@ private fun File.isInAppPrivateStorage(context: Context): Boolean {
     return localFilePath == appDataPath || localFilePath.startsWith("$appDataPath${File.separator}")
 }
 
-private suspend fun loadBitmapFromUri(context: Context, imageSource: String): Bitmap = withContext(Dispatchers.IO) {
-    val imageBytes = loadImageBytesFromUri(context, imageSource)
-    val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
-        ?: throw IllegalArgumentException("Failed to decode panoramic image from $imageSource")
+private suspend fun loadBitmapFromUri(context: Context, imageSource: String): Bitmap =
+    withContext(Dispatchers.IO) {
+        val imageBytes = loadImageBytesFromUri(context, imageSource)
+        val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+            ?: throw IllegalArgumentException(context.getString(R.string.panoramic_image_decode_failed, imageSource))
 
-    bitmap
-}
+        bitmap
+    }
 
 private fun loadImageBytesFromUri(context: Context, imageSource: String): ByteArray {
     val uri = imageSource.toUri()
     return when (uri.scheme?.lowercase()) {
-        "https" -> loadImageBytesFromUrl(imageSource)
+        "https" -> loadImageBytesFromUrl(context, imageSource)
         "content" -> loadImageBytesFromContentUri(context, uri, imageSource)
         "file" -> loadImageBytesFromFilePath(context, uri.path, imageSource)
         null, "" -> loadImageBytesFromFilePath(context, imageSource, imageSource)
         else -> loadImageBytesFromFilePathIfPresent(imageSource)
-            ?: throw IllegalArgumentException("Unsupported panoramic image source: $imageSource")
+            ?: throw IllegalArgumentException(
+                context.getString(R.string.panoramic_image_source_unsupported, imageSource)
+            )
     }
 }
 
-private fun loadImageBytesFromUrl(imageUrl: String): ByteArray {
+private fun loadImageBytesFromUrl(context: Context, imageUrl: String): ByteArray {
     val connection = (URL(imageUrl).openConnection() as HttpURLConnection).apply {
         connectTimeout = 15_000
         readTimeout = 30_000
@@ -213,7 +205,9 @@ private fun loadImageBytesFromUrl(imageUrl: String): ByteArray {
     return try {
         val responseCode = connection.responseCode
         if (responseCode !in 200..299) {
-            throw IllegalArgumentException("HTTP $responseCode while loading panoramic image from $imageUrl")
+            throw IllegalArgumentException(
+                context.getString(R.string.panoramic_image_http_error, responseCode, imageUrl)
+            )
         }
 
         connection.inputStream.use { inputStream ->
@@ -227,10 +221,12 @@ private fun loadImageBytesFromUrl(imageUrl: String): ByteArray {
 private fun loadImageBytesFromContentUri(context: Context, uri: Uri, imageSource: String): ByteArray =
     context.contentResolver.openInputStream(uri)?.use { inputStream ->
         inputStream.readBytes()
-    } ?: throw IllegalArgumentException("Failed to open panoramic image from $imageSource")
+    } ?: throw IllegalArgumentException(context.getString(R.string.panoramic_image_open_failed, imageSource))
 
 private fun loadImageBytesFromFilePath(context: Context, filePath: String?, imageSource: String): ByteArray {
-    val path = requireNotNull(filePath) { "Missing file path for panoramic image source: $imageSource" }
+    val path = requireNotNull(filePath) {
+        context.getString(R.string.panoramic_image_missing_file_path, imageSource)
+    }
     val directFileResult = runCatching { loadImageBytesFromFilePathIfPresent(path) }
     if (directFileResult.isSuccess) {
         directFileResult.getOrNull()?.let { return it }
@@ -240,14 +236,12 @@ private fun loadImageBytesFromFilePath(context: Context, filePath: String?, imag
 
     directFileResult.exceptionOrNull()?.let { throwable ->
         throw IllegalArgumentException(
-            "Failed to open panoramic image from $imageSource. Android may block direct access " +
-                    "to shared-storage file paths. Use a content:// URI from the Android photo/file picker, " +
-                    "or request the appropriate image read permission before loading this file.",
+            context.getString(R.string.panoramic_image_shared_storage_access_hint, imageSource),
             throwable
         )
     }
 
-    throw IllegalArgumentException("Failed to decode panoramic image from $imageSource")
+    throw IllegalArgumentException(context.getString(R.string.panoramic_image_decode_failed, imageSource))
 }
 
 private fun loadImageBytesFromFilePathIfPresent(filePath: String): ByteArray? {

@@ -16,7 +16,7 @@
  *
  */
 
-package com.arcgismaps.toolkit.orientedimageryviewer
+package com.arcgismaps.toolkit.orientedimageryviewer.internal
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -30,6 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.mapping.layers.orientedimagery.OrientedImageType
+import com.arcgismaps.toolkit.orientedimageryviewer.OrientedImageryViewerState
 import com.arcgismaps.toolkit.orientedimageryviewer.internal.media.PanoramicImage
 import com.arcgismaps.toolkit.orientedimageryviewer.internal.media.RasterImage
 
@@ -38,6 +39,8 @@ internal fun ImageryView(
     viewerState: OrientedImageryViewerState,
     modifier: Modifier = Modifier,
 ) {
+    val viewerUiState = viewerState.uiState
+
     Box(
         modifier = modifier
             .fillMaxWidth()
@@ -46,28 +49,36 @@ internal fun ImageryView(
             .clip(MaterialTheme.shapes.medium),
         contentAlignment = Alignment.Center
     ) {
-        val activeImage = viewerState.activeImageInfo
-        if (activeImage == null) {
-            // TODO: Show a placeholder or error message for when there is no active image.
-            return@Box
-        } else if (activeImage.dataUri == null) {
-            // TODO: Show a placeholder or error message for when the active image has no data URI.
-            return@Box
-        }
-        val imageUri = activeImage.dataUri
-        when (activeImage.type) {
-                OrientedImageType.Horizontal,
-                OrientedImageType.Inspection,
-                OrientedImageType.Nadir,
-                OrientedImageType.Oblique -> {
-                    RasterImage(viewerState, modifier = Modifier.fillMaxSize())
+        val activeImage = viewerUiState.activeImageInfo
+        when {
+            activeImage == null -> {
+                // TODO: Show a placeholder or error message for when there is no active image.
+            }
+
+            activeImage.dataUri == null -> {
+                // TODO: Show a placeholder or error message for when the active image has no data URI.
+            }
+
+            else -> {
+                val imageUri = activeImage.dataUri
+                when (activeImage.type) {
+                    OrientedImageType.Horizontal,
+                    OrientedImageType.Inspection,
+                    OrientedImageType.Nadir,
+                    OrientedImageType.Oblique -> {
+                        RasterImage(viewerState, modifier = Modifier.fillMaxSize())
+                    }
+
+                    OrientedImageType.Image360 -> {
+                        PanoramicImage(imageSource = imageUri)
+                    }
+
+                    else -> {
+                        // TODO: Show a placeholder or error message for unsupported image types including video.
+                    }
                 }
-                OrientedImageType.Image360 -> {
-                    PanoramicImage(imageSource = imageUri)
-                }
-                else -> {
-                    // TODO: Show a placeholder or error message for unsupported image types including video.
-                }
+            }
         }
     }
 }
+

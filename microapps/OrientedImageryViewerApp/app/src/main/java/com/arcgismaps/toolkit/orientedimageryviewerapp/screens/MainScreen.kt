@@ -19,6 +19,8 @@
 package com.arcgismaps.toolkit.orientedimageryviewerapp.screens
 
 import android.util.Log
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.consumeWindowInsets
@@ -28,6 +30,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.material3.BottomSheetScaffold
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
@@ -39,7 +42,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.dp
@@ -85,65 +90,78 @@ fun MainScreen() {
         GeoViewType.SceneViewType -> "Map"
     }
 
-    BottomSheetScaffold(
-        sheetContent = {
-            visibleViewerState?.let { state ->
-                OrientedImageryViewer(
-                    orientedImageryViewerState = state,
-                    modifier = Modifier.heightIn(max = maxHeight),
-                    onDismiss = {
-                        state.resetAll()
-                        scope.launch {
-                            scaffoldState.bottomSheetState.hide()
+    Box(modifier = Modifier.fillMaxSize()) {
+        BottomSheetScaffold(
+            sheetContent = {
+                visibleViewerState?.let { state ->
+                    OrientedImageryViewer(
+                        orientedImageryViewerState = state,
+                        modifier = Modifier.heightIn(max = maxHeight),
+                        onDismiss = {
+                            state.resetAll()
+                            scope.launch {
+                                scaffoldState.bottomSheetState.hide()
+                            }
                         }
-                    }
+                    )
+                }
+            },
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(WindowInsets.safeDrawing.asPaddingValues()),
+            scaffoldState = scaffoldState,
+            sheetPeekHeight = 96.dp,
+            sheetSwipeEnabled = false,
+            topBar = {
+                TopAppBar(
+                    modifier = Modifier.height(48.dp),
+                    title = { Text("") },
+                    actions = {
+                        TextButton(onClick = viewModel::toggleGeoViewType) {
+                            Text(toggleGeoViewLabel)
+                        }
+                    },
+                    windowInsets = WindowInsets(0, 0, 0, 0)
                 )
             }
-        },
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(WindowInsets.safeDrawing.asPaddingValues()),
-        scaffoldState = scaffoldState,
-        sheetPeekHeight = 96.dp,
-        sheetSwipeEnabled = false,
-        topBar = {
-            TopAppBar(
-                modifier = Modifier.height(48.dp),
-                title = { Text("") },
-                actions = {
-                    TextButton(onClick = viewModel::toggleGeoViewType) {
-                        Text(toggleGeoViewLabel)
-                    }
-                },
-                windowInsets = WindowInsets(0, 0, 0, 0)
-            )
+        ) { paddingValues ->
+            when (viewModel.geoViewType) {
+                GeoViewType.MapViewType -> {
+                    MapView(
+                        arcGISMap = viewModel.arcGISMap,
+                        mapViewProxy = viewModel.mapViewProxy,
+                        graphicsOverlays = mapGraphicsOverlays,
+                        modifier = Modifier
+                            .consumeWindowInsets(paddingValues)
+                            .fillMaxSize(),
+                        onSingleTapConfirmed = viewModel::handleSingleTap
+                    )
+                }
+                GeoViewType.SceneViewType -> {
+                    SceneView(
+                        arcGISScene = viewModel.arcGISScene,
+                        sceneViewProxy = viewModel.sceneviewProxy,
+                        graphicsOverlays = sceneGraphicsOverlays,
+                        modifier = Modifier
+                            .consumeWindowInsets(paddingValues)
+                            .fillMaxSize(),
+                        onSingleTapConfirmed = viewModel::handleSingleTap,
+                        onSpatialReferenceChanged = {
+                            Log.i("MainScreen", "SceneView spatial reference changed to: ${it?.wkid}")
+                        }
+                    )
+                }
+            }
         }
-    ) { paddingValues ->
-        when (viewModel.geoViewType) {
-            GeoViewType.MapViewType -> {
-                MapView(
-                    arcGISMap = viewModel.arcGISMap,
-                    mapViewProxy = viewModel.mapViewProxy,
-                    graphicsOverlays = mapGraphicsOverlays,
-                    modifier = Modifier
-                        .consumeWindowInsets(paddingValues)
-                        .fillMaxSize(),
-                    onSingleTapConfirmed = viewModel::handleSingleTap
-                )
-            }
-            GeoViewType.SceneViewType -> {
-                SceneView(
-                    arcGISScene = viewModel.arcGISScene,
-                    sceneViewProxy = viewModel.sceneviewProxy,
-                    graphicsOverlays = sceneGraphicsOverlays,
-                    modifier = Modifier
-                        .consumeWindowInsets(paddingValues)
-                        .fillMaxSize(),
-                    onSingleTapConfirmed = viewModel::handleSingleTap,
-                    onSpatialReferenceChanged = {
-                        Log.i("MainScreen", "SceneView spatial reference changed to: ${it?.wkid}")
-                    }
-                )
+
+        if (viewModel.isLoading) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.15f)),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
             }
         }
     }
