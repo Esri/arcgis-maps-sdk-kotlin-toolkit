@@ -22,15 +22,18 @@ package com.arcgismaps.toolkit.popupapp.screens.mapscreen
 
 import android.widget.Toast
 import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SheetValue
@@ -39,10 +42,13 @@ import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arcgismaps.data.Feature
@@ -119,6 +125,21 @@ fun MainScreen(viewModel: MapViewModel = viewModel()) {
         scaffoldState = scaffoldState,
         sheetPeekHeight = bottomInset.times(2),
         sheetSwipeEnabled = true,
+        sheetDragHandle = {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    // Forces the invisible touch bounding box to be at least 48dp tall for a11y
+                    .heightIn(min = 48.dp)
+                    .semantics {
+                        contentDescription = "Drag handle to resize bottom sheet"
+                    },
+                contentAlignment = Alignment.Center
+            ) {
+                // Drop in the native Material 3 styling wrapper safely inside the 48dp zone
+                BottomSheetDefaults.DragHandle()
+            }
+        },
         topBar = null
     ) { padding ->
         // show the composable map using the mapViewModel
