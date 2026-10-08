@@ -47,6 +47,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -114,12 +116,16 @@ private fun FileViewerContent(
         when (fileState.type) {
             is ViewableFileType.Image ->
                 AsyncImage(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .semantics{
+                            contentDescription = fileState.name
+                        },
                     model = fileState.path,
-                    contentDescription = stringResource(id = R.string.image),
+                    contentDescription = null
                 )
 
-            is ViewableFileType.Video, ViewableFileType.Audio -> VideoViewer(fileState.path)
+            is ViewableFileType.Video, ViewableFileType.Audio -> VideoViewer(path = fileState.path, name = fileState.name)
             else -> {
                 throw UnsupportedOperationException("Cannot view this file type")
             }
@@ -185,7 +191,7 @@ private fun ViewerActions(
                 leadingIcon = {
                     Icon(
                         Icons.Rounded.Share,
-                        contentDescription = stringResource(id = R.string.share),
+                        contentDescription = null,
                         tint = MaterialTheme.colorScheme.onSurface
                     )
                 }
@@ -213,7 +219,7 @@ private fun ViewerActions(
                 leadingIcon = {
                     Icon(
                         Icons.Rounded.Save,
-                        contentDescription = stringResource(id = R.string.save),
+                        contentDescription = null,
                         tint = MaterialTheme.colorScheme.onSurface
                     )
                 }
@@ -223,7 +229,7 @@ private fun ViewerActions(
 }
 
 @Composable
-internal fun VideoViewer(path: String) {
+internal fun VideoViewer(path: String, name: String) {
     val context = LocalContext.current
     val exoPlayer = remember {
         ExoPlayer.Builder(context).build().apply {
@@ -239,6 +245,7 @@ internal fun VideoViewer(path: String) {
         factory = {
             PlayerView(context).apply {
                 player = exoPlayer
+                contentDescription = name
             }
         }
     )
