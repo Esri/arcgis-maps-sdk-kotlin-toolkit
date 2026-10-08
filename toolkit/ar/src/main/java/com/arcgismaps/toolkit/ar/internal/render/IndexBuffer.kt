@@ -13,14 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Modifications copyright (C) 2024 Esri Inc
+ * Modifications copyright (C) 2026 Esri Inc
  */
-package com.arcgismaps.toolkit.ar.internal.render;
+package com.arcgismaps.toolkit.ar.internal.render
 
-import android.opengl.GLES30;
-
-import java.io.Closeable;
-import java.nio.IntBuffer;
+import android.opengl.GLES30
+import java.io.Closeable
+import java.nio.IntBuffer
 
 /**
  * A list of vertex indices stored GPU-side. This class is based on the [IndexBuffer](https://github.com/google-ar/arcore-android-sdk/blob/main/samples/hello_ar_kotlin/app/src/main/java/com/google/ar/core/examples/java/common/samplerender/IndexBuffer.java)
@@ -32,24 +31,22 @@ import java.nio.IntBuffer;
  * @see <a
  * href="https://www.khronos.org/registry/OpenGL-Refpages/es3.0/html/glDrawElements.xhtml">glDrawElements</a>
  *
- * @since 200.6.0
+ * Construct an {@link IndexBuffer} populated with initial data.
+ *
+ * <p>The GPU buffer will be filled with the data in the <i>direct</i> buffer {@code entries},
+ * starting from the beginning of the buffer (not the current cursor position). The cursor will be
+ * left in an undefined position after this function returns.
+ *
+ * <p>The {@code entries} buffer may be null, in which case an empty buffer is constructed
+ * instead.
+ *
+ * @since 300.0.0
  */
-class IndexBuffer implements Closeable {
-    private final GpuBuffer buffer;
+internal class IndexBuffer(
+    entries: IntBuffer?
+) : Closeable {
 
-    /**
-     * Construct an {@link IndexBuffer} populated with initial data.
-     *
-     * <p>The GPU buffer will be filled with the data in the <i>direct</i> buffer {@code entries},
-     * starting from the beginning of the buffer (not the current cursor position). The cursor will be
-     * left in an undefined position after this function returns.
-     *
-     * <p>The {@code entries} buffer may be null, in which case an empty buffer is constructed
-     * instead.
-     */
-    public IndexBuffer(IntBuffer entries) {
-        buffer = new GpuBuffer(GLES30.GL_ELEMENT_ARRAY_BUFFER, GpuBuffer.INT_SIZE, entries);
-    }
+    private val buffer = GpuBuffer(GLES30.GL_ELEMENT_ARRAY_BUFFER, GpuBuffer.INT_SIZE, entries)
 
     /**
      * Populate with new data.
@@ -62,22 +59,19 @@ class IndexBuffer implements Closeable {
      *
      * <p>The {@code entries} buffer may be null, in which case the buffer will become empty.
      */
-    public void set(IntBuffer entries) {
-        buffer.set(entries);
+    fun set(entries: IntBuffer?) {
+        buffer.set(entries)
     }
 
-    @Override
-    public void close() {
-        buffer.free();
+    override fun close() {
+        buffer.free()
     }
 
-    /* package-private */
-    int getBufferId() {
-        return buffer.getBufferId();
-    }
+    /** The OpenGL buffer ID. */
+    internal val bufferId: Int
+        get() = buffer.bufferId
 
-    /* package-private */
-    int getSize() {
-        return buffer.getSize();
-    }
+    /** The size of the buffer. */
+    internal val size: Int
+        get() = buffer.size
 }
