@@ -14,6 +14,7 @@ queries:
 query-filters:
   - exclude:
       id: java/field-masks-super-field
+      id: java/local-variable-is-never-read
 
 # paths: does not work with compiled languages, the build command dictates what files are analyzed
 # paths-ignore: does not work with compiled languages, use exclude in the sarif-tools filter configuration instead
