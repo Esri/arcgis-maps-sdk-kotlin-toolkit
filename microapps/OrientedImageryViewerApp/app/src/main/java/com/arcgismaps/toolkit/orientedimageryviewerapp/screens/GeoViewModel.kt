@@ -34,7 +34,7 @@ import com.arcgismaps.mapping.view.IdentifyLayerResult
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
 import com.arcgismaps.toolkit.geoviewcompose.SceneViewProxy
-import com.arcgismaps.toolkit.orientedimageryviewer.SearchImagesOutcome
+import com.arcgismaps.toolkit.orientedimageryviewer.ImageSearchStatus
 import com.arcgismaps.toolkit.orientedimageryviewer.OrientedImageryViewerState
 import kotlinx.coroutines.launch
 
@@ -120,7 +120,7 @@ class GeoViewModel(application: Application) : AndroidViewModel(application) {
                 lastMapLocation?.let { point ->
                     _orientedImageryViewerState.value!!.searchImages(point)
                         .onSuccess { outcome ->
-                            if (outcome is SearchImagesOutcome.NoImagesFound) {
+                            if (outcome is ImageSearchStatus.NoImagesFound) {
                                 Log.i("GeoViewModel", "No oriented images found at location: $point")
                             }
                         }
