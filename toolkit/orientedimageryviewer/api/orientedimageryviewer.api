@@ -1,0 +1,24 @@
+
+public final class com/arcgismaps/toolkit/orientedimageryviewer/OrientedimageryViewerKt {
+	public static final fun OrientedImageryViewer (Lcom/arcgismaps/toolkit/orientedimageryviewer/OrientedImageryViewerState;Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function0;ZLandroidx/compose/runtime/Composer;II)V
+}
+
+public final class com/arcgismaps/toolkit/orientedimageryviewer/OrientedImageryViewerState {
+	public static final field $stable I
+	public fun <init> (Lcom/arcgismaps/mapping/layers/OrientedImageryLayer;Lcom/arcgismaps/mapping/view/GraphicsOverlay;Lkotlinx/coroutines/CoroutineScope;)V
+	public final fun fetchImage (Lcom/arcgismaps/data/Feature;)V
+	public final fun getHasActiveImage ()Z
+	public final fun getSupportsSequentialNavigation ()Z
+	public final fun getTitle ()Ljava/lang/String;
+	public final fun isActiveFootprintVisible ()Z
+	public final fun isSequentialNavigationEnabled ()Z
+	public final fun navigateNextImage ()V
+	public final fun navigatePreviousImage ()V
+	public final fun resetAll ()V
+	public final fun searchImages (Lcom/arcgismaps/geometry/Point;)V
+	public final fun setSequentialNavigationEnabled (Z)V
+	public final fun toggleActiveFootprint ()V
+	public final fun toggleAdditionalCameraLocations ()V
+	public final fun toggleAdditionalFootprints ()V
+	public final fun toggleSequentialNavigation ()V
+}
