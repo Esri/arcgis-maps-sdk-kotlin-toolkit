@@ -18,6 +18,7 @@
 
 package com.arcgismaps.toolkit.orientedimageryviewer
 
+import android.net.Uri
 import android.util.Log
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.MutableState
@@ -85,7 +86,7 @@ public class OrientedImageryViewerState public constructor(
     private var additionalCameraLocationGraphics: List<Graphic> = emptyList()
     private var additionalFootprints: List<OrientedImageFootprint> = emptyList()
     private var footprintUpdateJob: Job? = null
-    private var pendingFootprintCoordinates: List<DoubleXY>? = null
+    private var pendingFootprintUpdate: (suspend (OrientedImageFootprint) -> Result<*>)? = null
 
     internal val uiState: OrientedImageryViewerUiState
         get() = _uiState.value
@@ -151,10 +152,7 @@ public class OrientedImageryViewerState public constructor(
                         onFailure = { error ->
                             setActiveOrientedImage(null)
                             activeIndex = -1
-                            Log.i(
-                                "OrientedImagery",
-                                "Failed to load oriented image: ${error.message}; URI: ${orientedImage.dataUri}; Original URI: ${orientedImage.attributes["ImagePath"]}"
-                            )
+                            logOrientedImageLoadFailure(error, orientedImage)
                             Result.failure(error)
                         }
                     )
@@ -186,10 +184,7 @@ public class OrientedImageryViewerState public constructor(
                     onFailure = { error ->
                         setActiveOrientedImage(null)
                         activeIndex = -1
-                        Log.i(
-                            "OrientedImagery",
-                            "Failed to load oriented image: ${error.message}; URI: ${orientedImage.dataUri}; Original URI: ${orientedImage.attributes["ImagePath"]}"
-                        )
+                        logOrientedImageLoadFailure(error, orientedImage)
                         Result.failure(error)
                     }
                 )
@@ -264,20 +259,28 @@ public class OrientedImageryViewerState public constructor(
     }
 
     internal fun updateFootprints(imageCoordinates: List<DoubleXY>) {
+        updateActiveFootprint { footprint -> footprint.updateFootprint(imageCoordinates) }
+    }
+
+    internal fun updateFootprints(yaw: Double, pitch: Double, horizontalFov: Double, verticalFov: Double) {
+        updateActiveFootprint { footprint -> footprint.updateFootprint(yaw, pitch, horizontalFov, verticalFov) }
+    }
+
+    private fun updateActiveFootprint(update: suspend (OrientedImageFootprint) -> Result<*>) {
         if (!uiState.isActiveFootprintVisible) return
 
         activeFootprint?.let { footprint ->
-            pendingFootprintCoordinates = imageCoordinates
+            pendingFootprintUpdate = update
             if (footprintUpdateJob?.isActive == true) {
                 return
             }
 
             footprintUpdateJob = coroutineScope.launch {
                 while (true) {
-                    val coordinatesToUpdate = pendingFootprintCoordinates ?: break
-                    pendingFootprintCoordinates = null
+                    val updateToApply = pendingFootprintUpdate ?: break
+                    pendingFootprintUpdate = null
 
-                    footprint.updateFootprint(coordinatesToUpdate).onSuccess {
+                    updateToApply(footprint).onSuccess {
                         Log.i(
                             "OrientedImageryViewerState",
                             "Footprint updated successfully for image: ${footprint.orientedImage.dataUri}"
@@ -360,7 +363,7 @@ public class OrientedImageryViewerState public constructor(
                         Result.success(ImageNavigationStatus.Moved)
                     },
                     onFailure = { error ->
-                        Log.i("OrientedImagery", "Failed to load ${step.javaClass.simpleName} image: ${error.message}")
+                        logOrientedImageLoadFailure(error, adjacentImage, "Failed to load ${step.javaClass.simpleName} image")
                         Result.failure(error)
                     }
                 )
@@ -386,7 +389,7 @@ public class OrientedImageryViewerState public constructor(
                 Result.success(ImageNavigationStatus.Moved)
             },
             onFailure = { error ->
-                Log.i("OrientedImagery", "Failed to load next image in image result: ${error.message}")
+                logOrientedImageLoadFailure(error, nextImage, "Failed to load next image in image result")
                 Result.failure(error)
             }
         )
@@ -406,7 +409,7 @@ public class OrientedImageryViewerState public constructor(
                 Result.success(ImageNavigationStatus.Moved)
             },
             onFailure = { error ->
-                Log.i("OrientedImagery", "Failed to load previous image in image result: ${error.message}")
+                logOrientedImageLoadFailure(error, previousImage, "Failed to load previous image in image result")
                 Result.failure(error)
             }
         )
@@ -476,7 +479,37 @@ public class OrientedImageryViewerState public constructor(
     private fun cancelFootprintUpdateJob() {
         footprintUpdateJob?.cancel()
         footprintUpdateJob = null
-        pendingFootprintCoordinates = null
+        pendingFootprintUpdate = null
+    }
+
+    private fun logOrientedImageLoadFailure(
+        error: Throwable,
+        orientedImage: OrientedImage,
+        messagePrefix: String = "Failed to load oriented image"
+    ) {
+        val resolvedUri = orientedImage.dataUri
+        val originalUri = orientedImage.attributes["ImagePath"]?.toString().orEmpty()
+        val originalImageHost = runCatching { Uri.parse(originalUri).host }.getOrNull().orEmpty()
+
+        if (originalUri.startsWith("http://", ignoreCase = true)) {
+            val hostSuffix = originalImageHost.takeIf { it.isNotBlank() }?.let { " for host '$it'" }.orEmpty()
+            Log.w(
+                "OrientedImagery",
+                "Detected cleartext HTTP oriented image source$hostSuffix. Android may block this unless the app allows cleartext traffic with usesCleartextTraffic or a network security config. Original URI: $originalUri"
+            )
+        }
+
+        if (resolvedUri.isNullOrBlank()) {
+            Log.w(
+                "OrientedImagery",
+                "Oriented image load failed before the SDK resolved a data URI. Original URI: $originalUri"
+            )
+        }
+
+        Log.i(
+            "OrientedImagery",
+            "$messagePrefix: ${error.message}; URI: ${resolvedUri.orEmpty()}; Original URI: $originalUri"
+        )
     }
 
     private fun getOrCreateActiveFootprint(): OrientedImageFootprint {

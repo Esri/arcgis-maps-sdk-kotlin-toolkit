@@ -33,19 +33,22 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.core.content.ContextCompat
 import androidx.compose.runtime.setValue
+import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
+import com.arcgismaps.toolkit.orientedimageryviewer.OrientedImageryViewerState
 import com.google.android.filament.MaterialInstance
+import com.google.android.filament.Camera
 import dev.romainguy.kotlin.math.Float3
 import io.github.sceneview.SceneView
 import io.github.sceneview.gesture.CameraGestureDetector
 import io.github.sceneview.gesture.FovZoomCameraManipulator
+import io.github.sceneview.node.CameraNode
 import io.github.sceneview.rememberCameraNode
 import io.github.sceneview.rememberEngine
 import io.github.sceneview.rememberMaterialLoader
@@ -56,13 +59,17 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.net.HttpURLConnection
 import java.net.URL
+import kotlin.math.abs
+import kotlin.math.atan2
+import kotlin.math.sqrt
 
 @Composable
 internal fun PanoramicImage(
-    imageSource: String,
+    viewerState: OrientedImageryViewerState,
     modifier: Modifier = Modifier,
     radiusMeters: Float = 10.0f
 ) {
+    val imageSource = viewerState.uiState.activeImageInfo?.dataUri ?: return
     val engine = rememberEngine()
     val materialLoader = rememberMaterialLoader(engine)
     val context = LocalContext.current
@@ -108,6 +115,7 @@ internal fun PanoramicImage(
             pinchFovSpeed = 0.05f
         )
     }
+    val footprintUpdateTracker = remember(imageSource) { PanoramicFootprintUpdateTracker() }
 
     Box(modifier = modifier.fillMaxSize()) {
         SceneView(
@@ -115,7 +123,36 @@ internal fun PanoramicImage(
             engine = engine,
             materialLoader = materialLoader,
             cameraNode = cameraNode,
-            cameraManipulator = cameraManipulator
+            cameraManipulator = cameraManipulator,
+            onFrame = {
+                val currentUiState = viewerState.uiState
+                if (
+                    currentUiState.activeImageInfo?.dataUri != imageSource ||
+                    !currentUiState.isActiveFootprintVisible ||
+                    currentUiState.isSequentialNavigationEnabled
+                ) {
+                    footprintUpdateTracker.lastUpdate = null
+                    return@SceneView
+                }
+
+                val currentUpdate = cameraNode.toFootprintUpdate() ?: return@SceneView
+                if (currentUpdate.isApproximatelyEqualTo(footprintUpdateTracker.lastUpdate)) {
+                    return@SceneView
+                }
+
+                footprintUpdateTracker.lastUpdate = currentUpdate
+                Log.d(
+                    "PanoramicImage",
+                    "Updating footprint: yaw=${currentUpdate.yaw}, pitch=${currentUpdate.pitch}, " +
+                            "horizontalFov=${currentUpdate.horizontalFov}, verticalFov=${currentUpdate.verticalFov}"
+                )
+                viewerState.updateFootprints(
+                    yaw = currentUpdate.yaw,
+                    pitch = currentUpdate.pitch,
+                    horizontalFov = currentUpdate.horizontalFov,
+                    verticalFov = currentUpdate.verticalFov
+                )
+            }
         ) {
             val mat = materialInstance
             if (mat != null) {
@@ -139,6 +176,68 @@ internal fun PanoramicImage(
         }
     }
 }
+
+private class PanoramicFootprintUpdateTracker {
+    var lastUpdate: PanoramicFootprintUpdate? = null
+}
+
+private data class PanoramicFootprintUpdate(
+    val yaw: Double,
+    val pitch: Double,
+    val horizontalFov: Double,
+    val verticalFov: Double
+)
+
+private fun CameraNode.toFootprintUpdate(): PanoramicFootprintUpdate? {
+    val forwardDirection = forwardDirection
+    val horizontalMagnitude = sqrt(
+        (forwardDirection.x * forwardDirection.x + forwardDirection.z * forwardDirection.z).toDouble()
+    )
+    // With +Z treated as north and +X as east, atan2(x, z) yields yaw measured clockwise from north.
+    val yaw = normalizeYawDegrees(
+        Math.toDegrees(
+            atan2(
+                forwardDirection.x.toDouble(),
+                forwardDirection.z.toDouble()
+            )
+        )
+    )
+    // Oriented imagery pitch is measured from straight down: 0 = down, 90 = horizontal, 180 = up.
+    val pitch = Math.toDegrees(atan2(horizontalMagnitude, -forwardDirection.y.toDouble()))
+    val horizontalFov = camera.getFieldOfViewInDegrees(Camera.Fov.HORIZONTAL)
+    val verticalFov = camera.getFieldOfViewInDegrees(Camera.Fov.VERTICAL)
+
+    if (!yaw.isFinite() || !pitch.isFinite() || !horizontalFov.isFinite() || !verticalFov.isFinite()) {
+        return null
+    }
+
+    return PanoramicFootprintUpdate(
+        yaw = yaw,
+        pitch = pitch,
+        horizontalFov = horizontalFov,
+        verticalFov = verticalFov
+    )
+}
+
+private fun PanoramicFootprintUpdate.isApproximatelyEqualTo(other: PanoramicFootprintUpdate?): Boolean {
+    if (other == null) {
+        return false
+    }
+
+    return angularDifferenceDegrees(yaw, other.yaw) <= FOOTPRINT_UPDATE_EPSILON_DEGREES &&
+            abs(pitch - other.pitch) <= FOOTPRINT_UPDATE_EPSILON_DEGREES &&
+            abs(horizontalFov - other.horizontalFov) <= FOOTPRINT_UPDATE_EPSILON_DEGREES &&
+            abs(verticalFov - other.verticalFov) <= FOOTPRINT_UPDATE_EPSILON_DEGREES
+}
+
+private fun normalizeYawDegrees(yaw: Double): Double = ((yaw % 360.0) + 360.0) % 360.0
+
+private fun angularDifferenceDegrees(left: Double, right: Double): Double {
+    val difference = (left - right + 540.0) % 360.0 - 180.0
+    return abs(difference)
+}
+
+private const val FOOTPRINT_UPDATE_EPSILON_DEGREES = 0.1
 
 private fun Context.hasPermission(permission: String): Boolean =
     ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED
