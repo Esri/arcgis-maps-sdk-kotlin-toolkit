@@ -66,7 +66,6 @@ internal fun OrientedImagery(
             }
 
             else -> {
-                val imageUri = activeImage.dataUri
                 when (activeImage.type) {
                     OrientedImageType.Horizontal,
                     OrientedImageType.Inspection,
@@ -76,7 +75,7 @@ internal fun OrientedImagery(
                     }
 
                     OrientedImageType.Image360 -> {
-                        PanoramicImage(imageSource = imageUri)
+                        PanoramicImage(viewerState = viewerState, modifier = Modifier.fillMaxSize())
                     }
 
                     else -> {
