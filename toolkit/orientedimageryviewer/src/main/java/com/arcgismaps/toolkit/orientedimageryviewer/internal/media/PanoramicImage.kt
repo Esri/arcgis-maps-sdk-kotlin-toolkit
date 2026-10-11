@@ -33,6 +33,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -45,9 +46,9 @@ import com.arcgismaps.toolkit.orientedimageryviewer.OrientedImageryViewerState
 import com.google.android.filament.MaterialInstance
 import com.google.android.filament.Camera
 import dev.romainguy.kotlin.math.Float3
+import dev.romainguy.kotlin.math.Float4
 import io.github.sceneview.SceneView
 import io.github.sceneview.gesture.CameraGestureDetector
-import io.github.sceneview.gesture.FovZoomCameraManipulator
 import io.github.sceneview.node.CameraNode
 import io.github.sceneview.rememberCameraNode
 import io.github.sceneview.rememberEngine
@@ -61,7 +62,9 @@ import java.net.HttpURLConnection
 import java.net.URL
 import kotlin.math.abs
 import kotlin.math.atan2
-import kotlin.math.sqrt
+import kotlin.math.cos
+import kotlin.math.hypot
+import kotlin.math.sin
 
 @Composable
 internal fun PanoramicImage(
@@ -81,8 +84,13 @@ internal fun PanoramicImage(
 
     // Load the bitmap off the main thread to avoid jank.
     var materialInstance by remember(materialLoader) { mutableStateOf<MaterialInstance?>(null) }
+    val inputLocationData = viewerState.uiState.inputLocationData
+    val sequentialNavigation = viewerState.uiState.isSequentialNavigationEnabled
+    var initialDirection by remember(imageSource, inputLocationData, sequentialNavigation) {
+        mutableStateOf<Float3?>(null)
+    }
 
-    LaunchedEffect(imageSource, materialLoader, context, hasReadImagesPermission) {
+    LaunchedEffect(imageSource, materialLoader, context, hasReadImagesPermission, inputLocationData, sequentialNavigation) {
         materialInstance = null
         if (!hasReadImagesPermission) {
             Log.e("PanoramicImage", permissionRequiredMessage)
@@ -94,6 +102,18 @@ internal fun PanoramicImage(
             }.getOrNull()
 
             materialInstance = bitmap?.let {
+                // Aim at the searched/selected map location, as the raster viewer does. Renderer
+                // axes alone cannot identify the correct side or elevation of an oriented image.
+                val imagePoint = if (!sequentialNavigation) {
+                    inputLocationData?.toPoint()?.let { location ->
+                        viewerState.locationToImage(location)?.onFailure { error ->
+                            Log.e("PanoramicImage", "Unable to locate the initial view in the panorama", error)
+                        }?.getOrNull()
+                    }
+                } else null
+                initialDirection = imagePoint?.let { point ->
+                    panoramicImageDirection(point.x, point.y, it.width, it.height)
+                } ?: Float3(1f, 0f, 0f) // Image center when no valid target is available.
                 val texture = ImageTexture.Builder()
                     .bitmap(it)
                     .build(materialLoader.engine)
@@ -102,20 +122,71 @@ internal fun PanoramicImage(
         }
     }
 
-    val cameraNode = rememberCameraNode(engine) {
+    // Do not render or submit a default footprint before the map-to-image transform completes.
+    val startingDirection = initialDirection
+    if (startingDirection == null || materialInstance == null) {
+        Box(modifier = modifier.fillMaxSize())
+        return
+    }
+    val cameraNode = key(imageSource, startingDirection) { rememberCameraNode(engine) {
         // Put camera at the center of the sphere.
         position = Float3(0f, 0f, 0f)
-        lookAt(Float3(0f, 0f, 1f))
-    }
+        lookAt(startingDirection)
+    } }
     val cameraManipulator = remember(cameraNode) {
-        FovZoomCameraManipulator(
-            inner = CameraGestureDetector.DefaultCameraManipulator(),
-            cameraNode = cameraNode,
-            fovRangeDegrees = 25f..100f,
-            pinchFovSpeed = 0.05f
-        )
+        // Orbit supplies rotation, but its translation must not move the camera away from the
+        // panorama center. Otherwise camera FOV and direction do not describe the visible image.
+        val rotationManipulator = object : CameraGestureDetector.DefaultCameraManipulator(
+            orbitHomePosition = -startingDirection,
+            targetPosition = Float3(0f, 0f, 0f)
+        ) {
+            override fun getTransform() = super.getTransform().apply {
+                w = Float4(0f, 0f, 0f, 1f)
+            }
+
+            // Two-finger panning cannot translate a panorama camera either.
+            override fun grabBegin(x: Int, y: Int, strafe: Boolean) {
+                super.grabBegin(x, y, false)
+            }
+        }
+        // Keep the projection and pinch baseline identical. SceneView's FOV manipulator starts
+        // tracking at 60 degrees regardless of the camera's actual lens projection, and resize
+        // can restore that lens projection. A panorama needs a stable vertical FOV instead.
+        object : CameraGestureDetector.CameraManipulator by rotationManipulator {
+            var verticalFov = 90.0
+            var aspect = 1.0
+
+            fun updateProjection() {
+                cameraNode.setProjection(
+                    verticalFov, aspect, cameraNode.near.toDouble(), cameraNode.far.toDouble(),
+                    Camera.Fov.VERTICAL
+                )
+            }
+
+            override fun setViewport(width: Int, height: Int) {
+                rotationManipulator.setViewport(width, height)
+                if (width > 0 && height > 0) {
+                    aspect = width.toDouble() / height
+                    updateProjection()
+                }
+            }
+
+            override fun scrollUpdate(x: Int, y: Int, prevSeparation: Float, currSeparation: Float) {
+                if (prevSeparation > 0f && currSeparation > 0f &&
+                    prevSeparation.isFinite() && currSeparation.isFinite()
+                ) {
+                    verticalFov = (verticalFov * prevSeparation / currSeparation).coerceIn(25.0, 100.0)
+                    updateProjection()
+                }
+            }
+
+            override fun update(deltaTime: Float) {
+                rotationManipulator.update(deltaTime)
+                updateProjection()
+            }
+        }
     }
-    val footprintUpdateTracker = remember(imageSource) { PanoramicFootprintUpdateTracker() }
+    val footprintUpdateTracker = remember(cameraNode) { PanoramicFootprintUpdateTracker() }
 
     Box(modifier = modifier.fillMaxSize()) {
         SceneView(
@@ -156,21 +227,15 @@ internal fun PanoramicImage(
         ) {
             val mat = materialInstance
             if (mat != null) {
-                // Compose API: builds and adds a SphereNode to the current Scene via NodeScope.
-                // We keep the camera inside the sphere to emulate VrPanoramaView.
+                // Sphere UVs are oriented for viewing from outside. Reflect X so the image reads
+                // left-to-right from inside, preserving the +Z initial view and vertical orientation.
                 SphereNode(
                     radius = radiusMeters,
                     center = Float3(0f, 0f, 0f),
                     stacks = 64,
                     slices = 128,
                     materialInstance = mat,
-                    apply = {
-                        // If the library supports it, we want to see the texture from the inside.
-                        // The internal SphereNode implementation already uses a double-sided material
-                        // for ImageTexture on most devices; if you still see nothing, we can switch
-                        // to a custom MaterialInstance with culling disabled.
-                        // position = Position(0f, 0f, 0f)
-                    }
+                    scale = Float3(-1f, 1f, 1f)
                 )
             }
         }
@@ -181,35 +246,70 @@ private class PanoramicFootprintUpdateTracker {
     var lastUpdate: PanoramicFootprintUpdate? = null
 }
 
-private data class PanoramicFootprintUpdate(
+internal data class PanoramicFootprintUpdate(
     val yaw: Double,
     val pitch: Double,
     val horizontalFov: Double,
     val verticalFov: Double
 )
 
-private fun CameraNode.toFootprintUpdate(): PanoramicFootprintUpdate? {
-    val forwardDirection = forwardDirection
-    val horizontalMagnitude = sqrt(
-        (forwardDirection.x * forwardDirection.x + forwardDirection.z * forwardDirection.z).toDouble()
-    )
-    // With +Z treated as north and +X as east, atan2(x, z) yields yaw measured clockwise from north.
-    val yaw = normalizeYawDegrees(
-        Math.toDegrees(
-            atan2(
-                forwardDirection.x.toDouble(),
-                forwardDirection.z.toDouble()
-            )
-        )
-    )
-    // Oriented imagery pitch is measured from straight down: 0 = down, 90 = horizontal, 180 = up.
-    val pitch = Math.toDegrees(atan2(horizontalMagnitude, -forwardDirection.y.toDouble()))
-    val horizontalFov = camera.getFieldOfViewInDegrees(Camera.Fov.HORIZONTAL)
-    val verticalFov = camera.getFieldOfViewInDegrees(Camera.Fov.VERTICAL)
+/** Inverse of the reflected sphere/image-material UV mapping; image pixels have a top-left origin. */
+internal fun panoramicImageDirection(
+    imageX: Double,
+    imageY: Double,
+    imageWidth: Int,
+    imageHeight: Int
+): Float3? {
+    if (imageWidth <= 0 || imageHeight <= 0 || !imageX.isFinite() || !imageY.isFinite() ||
+        imageY < 0.0 || imageY > imageHeight
+    ) return null
 
-    if (!yaw.isFinite() || !pitch.isFinite() || !horizontalFov.isFinite() || !verticalFov.isFinite()) {
+    val yaw = Math.toRadians(360.0 * (imageX / imageWidth - 0.5))
+    // Avoid a singular orbit look-at at the exact poles while keeping the selected pixel visible.
+    val pitch = Math.toRadians(180.0 * (1.0 - imageY / imageHeight)).coerceIn(0.0001, Math.PI - 0.0001)
+    return Float3(
+        (sin(pitch) * cos(yaw)).toFloat(),
+        (-cos(pitch)).toFloat(),
+        (sin(pitch) * sin(yaw)).toFloat()
+    )
+}
+
+private fun CameraNode.toFootprintUpdate(): PanoramicFootprintUpdate? = panoramicFootprintUpdate(
+    forwardDirection = forwardDirection,
+    horizontalFov = camera.getFieldOfViewInDegrees(Camera.Fov.HORIZONTAL),
+    verticalFov = camera.getFieldOfViewInDegrees(Camera.Fov.VERTICAL)
+)
+
+internal fun panoramicFootprintUpdate(
+    forwardDirection: Float3,
+    horizontalFov: Double,
+    verticalFov: Double
+): PanoramicFootprintUpdate? {
+    // The ray is in renderer space, not geographic space. The SDK receives image-relative
+    // angles; the OrientedImage supplies the geographic orientation of the footprint.
+    val x = forwardDirection.x.toDouble()
+    val up = forwardDirection.y.toDouble()
+    val z = forwardDirection.z.toDouble()
+    if (!x.isFinite() || !up.isFinite() || !z.isFinite() ||
+        !horizontalFov.isFinite() || horizontalFov <= 0.0 || horizontalFov >= 180.0 ||
+        !verticalFov.isFinite() || verticalFov <= 0.0 || verticalFov >= 180.0
+    ) {
         return null
     }
+    val horizontalMagnitude = hypot(x, z)
+    if (horizontalMagnitude == 0.0 && up == 0.0) {
+        return null
+    }
+    // Undo the sphere's X reflection: theta = atan2(z, -x). Sphere U = 1 - theta/(2*PI).
+    // Like the .NET implementation, footprint yaw = 360*(U - 0.5), wrapped to [0, 360).
+    // This simplifies to atan2(z, x): +X is the image center (0), +Z is 90,
+    // -X is the image seam (180), and -Z is 270. Do not use renderer compass axes here.
+    // At a vertical pole longitude is undefined; use the image center deterministically.
+    val yaw = if (horizontalMagnitude == 0.0) 0.0 else
+        normalizeYawDegrees(Math.toDegrees(atan2(z, x)))
+    // Sphere V = 1 - phi/PI; the image material flips V, so image row v = phi/PI.
+    // Footprint pitch = 180*(1 - v): -Y = down (0), horizontal = 90, +Y = up (180).
+    val pitch = Math.toDegrees(atan2(horizontalMagnitude, -up))
 
     return PanoramicFootprintUpdate(
         yaw = yaw,
