@@ -18,12 +18,12 @@
 
 package com.arcgismaps.toolkit.orientedimageryviewer
 
-import android.net.Uri
 import android.util.Log
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.mutableStateOf
+import androidx.core.net.toUri
 import com.arcgismaps.Color
 import com.arcgismaps.data.Feature
 import com.arcgismaps.geometry.Point
@@ -347,7 +347,10 @@ public class OrientedImageryViewerState public constructor(
         setActiveImageInfo(orientedImage?.let { image ->
             OrientedImageInfo(
                 dataUri = image.dataUri,
-                type = image.type
+                type = image.type,
+                cameraLocationData = (image.geometry as? Point)?.let { camera ->
+                    PointData(camera.x, camera.y, camera.z, camera.spatialReference?.wkid)
+                }
             )
         })
     }
@@ -502,7 +505,7 @@ public class OrientedImageryViewerState public constructor(
     ) {
         val resolvedUri = orientedImage.dataUri
         val originalUri = orientedImage.attributes["ImagePath"]?.toString().orEmpty()
-        val originalImageHost = runCatching { Uri.parse(originalUri).host }.getOrNull().orEmpty()
+        val originalImageHost = runCatching { originalUri.toUri().host }.getOrNull().orEmpty()
 
         if (originalUri.startsWith("http://", ignoreCase = true)) {
             val hostSuffix = originalImageHost.takeIf { it.isNotBlank() }?.let { " for host '$it'" }.orEmpty()

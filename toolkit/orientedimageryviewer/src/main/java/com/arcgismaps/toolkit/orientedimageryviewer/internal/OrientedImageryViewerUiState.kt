@@ -40,7 +40,8 @@ internal data class OrientedImageryViewerUiState(
 @Immutable
 internal data class OrientedImageInfo(
     val dataUri: String?,
-    val type: OrientedImageType?
+    val type: OrientedImageType?,
+    val cameraLocationData: PointData? = null
 )
 
 @Immutable
