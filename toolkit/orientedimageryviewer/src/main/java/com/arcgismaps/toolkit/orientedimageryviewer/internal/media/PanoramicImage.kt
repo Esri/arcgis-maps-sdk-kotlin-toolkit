@@ -42,6 +42,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.runtime.setValue
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
+import com.arcgismaps.geometry.GeometryEngine
+import com.arcgismaps.geometry.Point
+import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.toolkit.orientedimageryviewer.OrientedImageryViewerState
 import com.google.android.filament.MaterialInstance
 import com.google.android.filament.Camera
@@ -89,9 +92,13 @@ internal fun PanoramicImage(
     var initialDirection by remember(imageSource, inputLocationData, sequentialNavigation) {
         mutableStateOf<Float3?>(null)
     }
+    var footprintOrientation by remember(imageSource, inputLocationData, sequentialNavigation) {
+        mutableStateOf<PanoramicFootprintOrientation?>(null)
+    }
 
     LaunchedEffect(imageSource, materialLoader, context, hasReadImagesPermission, inputLocationData, sequentialNavigation) {
         materialInstance = null
+        footprintOrientation = null
         if (!hasReadImagesPermission) {
             Log.e("PanoramicImage", permissionRequiredMessage)
         } else {
@@ -114,6 +121,10 @@ internal fun PanoramicImage(
                 initialDirection = imagePoint?.let { point ->
                     panoramicImageDirection(point.x, point.y, it.width, it.height)
                 } ?: Float3(1f, 0f, 0f) // Image center when no valid target is available.
+                footprintOrientation = loadPanoramicFootprintOrientation(viewerState, it.width, it.height)
+                if (footprintOrientation == null) {
+                    Log.e("PanoramicImage", "Unable to calibrate geographic footprint orientation")
+                }
                 val texture = ImageTexture.Builder()
                     .bitmap(it)
                     .build(materialLoader.engine)
@@ -206,7 +217,8 @@ internal fun PanoramicImage(
                     return@SceneView
                 }
 
-                val currentUpdate = cameraNode.toFootprintUpdate() ?: return@SceneView
+                val orientation = footprintOrientation ?: return@SceneView
+                val currentUpdate = cameraNode.toFootprintUpdate(orientation) ?: return@SceneView
                 if (currentUpdate.isApproximatelyEqualTo(footprintUpdateTracker.lastUpdate)) {
                     return@SceneView
                 }
@@ -274,8 +286,44 @@ internal fun panoramicImageDirection(
     )
 }
 
-private fun CameraNode.toFootprintUpdate(): PanoramicFootprintUpdate? = panoramicFootprintUpdate(
-    forwardDirection = forwardDirection,
+// The current SDK footprint angle overload uses geographic heading/pitch. Its locationToImage
+// transform already includes the image's horizon yaw, pitch and roll. Sampling world basis rays
+// avoids duplicating that metadata transformation or assuming the renderer's axes are geographic.
+private suspend fun loadPanoramicFootprintOrientation(
+    viewerState: OrientedImageryViewerState,
+    width: Int,
+    height: Int
+): PanoramicFootprintOrientation? {
+    val camera = viewerState.uiState.activeImageInfo?.cameraLocationData?.toPoint() ?: return null
+    val projected = GeometryEngine.projectOrNull(camera, SpatialReference(3857)) as? Point ?: return null
+    val cameraZ = projected.z?.takeIf { it.isFinite() } ?: return null
+    val sr = projected.spatialReference ?: return null
+    suspend fun directionAt(point: Point): Float3? {
+        val pixel = viewerState.locationToImage(point)?.getOrNull() ?: return null
+        return panoramicImageDirection(pixel.x, pixel.y, width, height)
+    }
+    val east = directionAt(Point(projected.x + 100.0, projected.y, cameraZ, sr)) ?: return null
+    val north = directionAt(Point(projected.x, projected.y + 100.0, cameraZ, sr)) ?: return null
+    val up = directionAt(Point(projected.x, projected.y, cameraZ + 100.0, sr)) ?: return null
+    return PanoramicFootprintOrientation(east, north, up)
+}
+
+internal data class PanoramicFootprintOrientation(
+    val eastInRenderer: Float3,
+    val northInRenderer: Float3,
+    val upInRenderer: Float3
+) {
+    // Output uses +X for north, +Z for east, +Y for up so the common angle conversion below
+    // produces compass heading (atan2(east, north)) and inclination from the nadir.
+    fun toFootprintDirection(direction: Float3): Float3 {
+        fun dot(axis: Float3): Float =
+            direction.x * axis.x + direction.y * axis.y + direction.z * axis.z
+        return Float3(dot(northInRenderer), dot(upInRenderer), dot(eastInRenderer))
+    }
+}
+
+private fun CameraNode.toFootprintUpdate(orientation: PanoramicFootprintOrientation): PanoramicFootprintUpdate? = panoramicFootprintUpdate(
+    forwardDirection = orientation.toFootprintDirection(forwardDirection),
     horizontalFov = camera.getFieldOfViewInDegrees(Camera.Fov.HORIZONTAL),
     verticalFov = camera.getFieldOfViewInDegrees(Camera.Fov.VERTICAL)
 )
@@ -285,8 +333,8 @@ internal fun panoramicFootprintUpdate(
     horizontalFov: Double,
     verticalFov: Double
 ): PanoramicFootprintUpdate? {
-    // The ray is in renderer space, not geographic space. The SDK receives image-relative
-    // angles; the OrientedImage supplies the geographic orientation of the footprint.
+    // Caller supplies a footprint-space ray: +X north, +Y up, +Z east. For renderer-space
+    // rays this helper also yields image-relative angles, used by the UV mapping tests.
     val x = forwardDirection.x.toDouble()
     val up = forwardDirection.y.toDouble()
     val z = forwardDirection.z.toDouble()
@@ -300,15 +348,12 @@ internal fun panoramicFootprintUpdate(
     if (horizontalMagnitude == 0.0 && up == 0.0) {
         return null
     }
-    // Undo the sphere's X reflection: theta = atan2(z, -x). Sphere U = 1 - theta/(2*PI).
-    // Like the .NET implementation, footprint yaw = 360*(U - 0.5), wrapped to [0, 360).
-    // This simplifies to atan2(z, x): +X is the image center (0), +Z is 90,
-    // -X is the image seam (180), and -Z is 270. Do not use renderer compass axes here.
-    // At a vertical pole longitude is undefined; use the image center deterministically.
+    // Geographic heading clockwise from north. Do not submit image-relative longitude directly:
+    // it omits the loaded image's geographic orientation and can point to the opposite sector.
+    // At a vertical pole heading is undefined; use north deterministically.
     val yaw = if (horizontalMagnitude == 0.0) 0.0 else
         normalizeYawDegrees(Math.toDegrees(atan2(z, x)))
-    // Sphere V = 1 - phi/PI; the image material flips V, so image row v = phi/PI.
-    // Footprint pitch = 180*(1 - v): -Y = down (0), horizontal = 90, +Y = up (180).
+    // Geographic inclination: down (0), horizontal (90), up (180).
     val pitch = Math.toDegrees(atan2(horizontalMagnitude, -up))
 
     return PanoramicFootprintUpdate(
