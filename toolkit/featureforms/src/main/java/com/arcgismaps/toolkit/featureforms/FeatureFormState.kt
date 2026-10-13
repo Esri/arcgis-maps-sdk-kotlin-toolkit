@@ -20,10 +20,9 @@ import androidx.annotation.MainThread
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavDestination.Companion.hasRoute
 import com.arcgismaps.data.ArcGISFeature
@@ -51,9 +50,9 @@ import com.arcgismaps.toolkit.featureforms.internal.components.barcode.BarcodeTe
 import com.arcgismaps.toolkit.featureforms.internal.components.base.BaseFieldState
 import com.arcgismaps.toolkit.featureforms.internal.components.base.BaseGroupState
 import com.arcgismaps.toolkit.featureforms.internal.components.base.FormStateCollection
+import com.arcgismaps.toolkit.featureforms.internal.components.base.FormStateData
 import com.arcgismaps.toolkit.featureforms.internal.components.base.MutableFormStateCollection
 import com.arcgismaps.toolkit.featureforms.internal.components.base.formattedValueAsStateFlow
-import com.arcgismaps.toolkit.featureforms.internal.components.base.getState
 import com.arcgismaps.toolkit.featureforms.internal.components.base.mapValidationErrors
 import com.arcgismaps.toolkit.featureforms.internal.components.base.mapValueAsStateFlow
 import com.arcgismaps.toolkit.featureforms.internal.components.codedvalue.CodedValueFieldProperties
@@ -68,6 +67,8 @@ import com.arcgismaps.toolkit.featureforms.internal.components.text.FormTextFiel
 import com.arcgismaps.toolkit.featureforms.internal.components.text.TextFieldProperties
 import com.arcgismaps.toolkit.featureforms.internal.components.text.TextFormElementState
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationsElementState
+import com.arcgismaps.toolkit.featureforms.internal.editor.allElements
+import com.arcgismaps.toolkit.featureforms.internal.editor.id
 import com.arcgismaps.toolkit.featureforms.internal.navigation.FormNavigationDirection
 import com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationRoute
 import com.arcgismaps.toolkit.featureforms.internal.navigation.lifecycleIsResumed
@@ -75,6 +76,16 @@ import com.arcgismaps.toolkit.featureforms.internal.utils.fieldIsNullable
 import com.arcgismaps.toolkit.featureforms.internal.utils.toMap
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 /**
@@ -97,11 +108,33 @@ import kotlinx.coroutines.launch
  */
 @Stable
 public class FeatureFormState private constructor(
-    private val featureForm: FeatureForm
+    private val featureForm: FeatureForm,
+    private val coroutineScope: CoroutineScope,
+    public val willApplyEdits: Boolean,
+    initialForms: List<FeatureForm>
 ) {
     private val store: ArrayDeque<FormStateData> = ArrayDeque()
 
-    private lateinit var coroutineScope: CoroutineScope
+    /**
+     * The backing [FeatureFormGroup] instance.
+     */
+    private val _featureFormGroup: FeatureFormGroup = FeatureFormGroup(emptyList())
+
+    /**
+     * The list of [FormStateData] for all the feature forms managed by this state. This list is
+     * backed by a [SnapshotStateList] and will be updated whenever a new feature form is added or
+     * removed.
+     *
+     * It should always be kept in sync with the [_featureFormGroup.featureForms] list.
+     */
+    private val _featureFormStates = SnapshotStateList<FormStateData>()
+
+    /**
+     * The list of [FormStateData] for all the feature forms managed by this state. This list is
+     * backed by a [SnapshotStateList] and will be updated whenever a new feature form is added or
+     * removed.
+     */
+    internal val featureFormStates: List<FormStateData> = _featureFormStates
 
     private val _activeFeatureForm: MutableState<FeatureForm> = mutableStateOf(featureForm)
 
@@ -124,12 +157,6 @@ public class FeatureFormState private constructor(
     private var navigateBack: (() -> Boolean)? = null
 
     /**
-     * A callback to resolve a [FormStateData] for a given [ArcGISFeature]. This is used to determine
-     * if a [FormStateData] is already cached or needs to be created for a given [ArcGISFeature].
-     */
-    private var resolveFormStateData: ((ArcGISFeature) -> FormStateData)? = null
-
-    /**
      * The currently active [FeatureForm]. This property is updated when navigating between forms.
      *
      * Note that this property is observable and if you use it in the composable function it will be
@@ -142,34 +169,138 @@ public class FeatureFormState private constructor(
      */
     public val activeFeatureForm: FeatureForm by _activeFeatureForm
 
-    public constructor(
-        featureForm: FeatureForm,
-        coroutineScope: CoroutineScope
-    ) : this(featureForm) {
-        this.coroutineScope = coroutineScope
-        // create state objects for all the supported element types that are part of the provided FeatureForm
-        val states = createStates(
-            form = this.featureForm,
-            elements = this.featureForm.allElements,
-            scope = coroutineScope
-        )
-        val formStateData = FormStateData(featureForm, states)
-        // Add the provided state collection to the store.
-        store.addLast(formStateData)
+    private val featureFormsFlow = snapshotFlow {
+        _featureFormStates.toList()
+    }
+
+    init {
+        initialForms.forEachIndexed { index, form ->
+            _featureFormGroup.addFeatureForm(form)
+            // create state objects
+            val formStateData = FormStateData.create(form, coroutineScope)
+            _featureFormStates.add(formStateData)
+            // Add the first form to the store.
+            if (index == 0) {
+                store.addLast(formStateData)
+            }
+        }
         coroutineScope.launch(start = CoroutineStart.UNDISPATCHED) {
-            formStateData.evaluateExpressions()
+            _featureFormGroup.evaluateExpressions()
         }
     }
 
-    internal constructor(
-        formStateData: FormStateData,
+    @OptIn(ExperimentalCoroutinesApi::class)
+    internal val hasEdits: StateFlow<Boolean> = featureFormsFlow.flatMapLatest { forms ->
+        combine(
+            forms.map {
+                it.featureForm.hasEdits
+            }
+        ) { array ->
+            // check if any form has edits
+            array.any { it }
+        }
+    }.stateIn(
+        initialValue = false,
+        scope = coroutineScope,
+        started = SharingStarted.Eagerly
+    )
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    internal val formsWithErrors: StateFlow<Int> = featureFormsFlow.flatMapLatest { forms ->
+        combine(
+            flows = forms.map { form ->
+                form.featureForm.elementValidationErrors
+            }
+        ) { validationErrors ->
+            // count the number of forms with errors
+            validationErrors.count { it.isNotEmpty() }
+        }
+    }.stateIn(
+        initialValue = 0,
+        scope = coroutineScope,
+        started = SharingStarted.Eagerly
+    )
+
+    private val _editingEvent = MutableSharedFlow<FeatureFormEditingEvent>()
+    internal val editingEvent: SharedFlow<FeatureFormEditingEvent> = _editingEvent.asSharedFlow()
+
+    /**
+     * Creates a [FeatureFormState] using the supplied [featureForm] and [coroutineScope].
+     *
+     * @param featureForm the [FeatureForm] to create the state for.
+     * @param coroutineScope the [CoroutineScope] to use for evaluating expressions and other
+     * asynchronous operations.
+     *
+     * @since 200.8.0
+     */
+    @Deprecated(
+        level = DeprecationLevel.HIDDEN,
+        message = "Deprecated for binary compatibility. Use the constructor with willApplyEdits " +
+            "parameter instead.",
+        replaceWith = ReplaceWith(
+            expression = "FeatureFormState(featureForm, coroutineScope, willApplyEdits = false)",
+            imports = ["com.arcgismaps.toolkit.featureforms.FeatureFormState"]
+        )
+    )
+    public constructor(
+        featureForm: FeatureForm,
         coroutineScope: CoroutineScope,
-        onResolveFormStateData: ((ArcGISFeature) -> FormStateData)?
-    ) : this(formStateData.featureForm) {
-        this.coroutineScope = coroutineScope
-        store.addLast(formStateData)
-        this.resolveFormStateData = onResolveFormStateData
-    }
+    ) : this(
+        featureForm = featureForm,
+        coroutineScope = coroutineScope,
+        initialForms = listOf(featureForm),
+        willApplyEdits = false
+    )
+
+    /**
+     * Creates a [FeatureFormState] using the supplied [featureForm] and [coroutineScope].
+     *
+     * @param featureForm the [FeatureForm] to create the state for.
+     * @param coroutineScope the [CoroutineScope] to use for evaluating expressions and other
+     * asynchronous operations.
+     * @param willApplyEdits whether the edits made to the feature form should be applied to the
+     * service. Defaults to false.
+     *
+     * @since 300.2.0
+     */
+    public constructor(
+        featureForm: FeatureForm,
+        coroutineScope: CoroutineScope,
+        willApplyEdits: Boolean = false
+    ) : this(
+        featureForm = featureForm,
+        coroutineScope = coroutineScope,
+        initialForms = listOf(featureForm),
+        willApplyEdits = willApplyEdits
+    )
+
+    /**
+     * Creates a [FeatureFormState] using the supplied list of [featureForms] and [coroutineScope].
+     * The first [FeatureForm] in the list will be used as the initial active form with the rest
+     * of the forms being available for editing. If the list is empty, an [IllegalArgumentException]
+     * will be thrown.
+     *
+     * @param featureForms A list of [FeatureForm]s to manage. The first form will be the initial
+     * active form.
+     * @param coroutineScope The [CoroutineScope] to use for evaluating expressions and other
+     * asynchronous operations.
+     * @param willApplyEdits Whether the edits made to the feature forms should be applied to the
+     * service. Defaults to false.
+     * @throws IllegalArgumentException if [featureForms] is empty.
+     *
+     * @since 300.2.0
+     */
+    public constructor(
+        featureForms: List<FeatureForm>,
+        coroutineScope: CoroutineScope,
+        willApplyEdits: Boolean = false
+    ) : this(
+        featureForm = featureForms.firstOrNull()
+            ?: throw IllegalArgumentException("featureForms must not be empty"),
+        coroutineScope = coroutineScope,
+        initialForms = featureForms,
+        willApplyEdits = willApplyEdits
+    )
 
     /**
      * Discards all the edits made to the [activeFeatureForm], refreshes the attachments and
@@ -178,25 +309,53 @@ public class FeatureFormState private constructor(
      * @since 200.8.0
      */
     public suspend fun discardEdits(): Result<List<FormExpressionEvaluationError>> {
-        val formData = getActiveFormStateData()
-        formData.featureForm.discardEdits()
-        formData.refreshAttachments()
-        formData.refreshUtilityAssociations()
-        return formData.evaluateExpressions()
+        _featureFormGroup.discardEdits()
+        _featureFormStates.forEach {
+            it.refreshAttachments()
+            it.refreshUtilityAssociations()
+        }
+        return _featureFormGroup.evaluateExpressions()
     }
 
-    /**
-     * Saves all the edits made to the [activeFeatureForm] and refreshes the associations.
-     *
-     * @return the result of the save operation.
-     */
-    internal suspend fun saveEdits(): Result<Unit> {
-        val formData = getActiveFormStateData()
-        val result = formData.featureForm.finishEditing().onSuccess {
-            // After a successful save, refresh the associations
-            formData.refreshUtilityAssociations()
+    internal fun discard() {
+        coroutineScope.launch {
+            discardEdits().onSuccess {
+                _editingEvent.emit(
+                    FeatureFormEditingEvent.DiscardedEdits(
+                        activeFeatureForm,
+                        false
+                    )
+                )
+            }
         }
-        return result
+    }
+
+    public suspend fun finishEditing(): Result<Unit> = runCatching {
+        _featureFormStates.forEach { it.validateAllFields() }
+        require(formsWithErrors.value == 0) {
+            "Cannot finish editing because there are validation errors in one or more forms."
+        }
+        return _featureFormGroup.finishEditing().onSuccess {
+            _featureFormStates.forEach {
+                it.refreshUtilityAssociations()
+            }
+            if (willApplyEdits) {
+                TODO("Apply edits to service feature table if applicable")
+            }
+        }
+    }
+
+    internal fun finish() {
+        coroutineScope.launch {
+            finishEditing().onSuccess {
+                _editingEvent.emit(
+                    FeatureFormEditingEvent.SavedEdits(
+                        activeFeatureForm,
+                        false
+                    )
+                )
+            }
+        }
     }
 
     /**
@@ -259,21 +418,14 @@ public class FeatureFormState private constructor(
         val navigateTo = navigateToRoute ?: return false
         // Check if the backStackEntry is in the resumed state.
         if (backStackEntry.lifecycleIsResumed().not()) return false
-        // Get a resolution for the form state data for the feature.
-        val formStateData = resolveFormStateData?.invoke(feature) ?: run {
-            // Existing standalone FeatureForm behavior. Check if the feature is already in the
-            // local cache/stack, if so, navigate to it.
-            store.find {
-                feature.id() != null && it.featureForm.feature.id() == feature.id()
-            } ?: run {
-                // If the feature is not in the stack, create a new form data.
-                val form = FeatureForm(feature)
-                val states = createStates(
-                    form = form,
-                    elements = form.elements,
-                    scope = coroutineScope
-                )
-                FormStateData(form, states)
+
+        val form = FeatureForm(feature)
+        val formStateData = if (_featureFormGroup.addFeatureForm(form)) {
+            FormStateData.create(form, coroutineScope).also(_featureFormStates::add)
+        } else {
+            val id = feature.id()
+            _featureFormStates.first {
+                id != null && it.featureForm.feature.id() == id
             }
         }
         // Add the form to the stack.
@@ -356,111 +508,7 @@ public class FeatureFormState private constructor(
      */
     internal fun validateAllFields() {
         // Force validation of all the states in the current form.
-        getActiveFormStateData().validateAllFields()
-    }
-}
-
-/**
- * Returns a list of all the elements in the [FeatureForm], including the default attachments element
- * if it exists.
- */
-internal val FeatureForm.allElements: List<FormElement>
-    get() = elements + listOfNotNull(defaultAttachmentsElement)
-
-/**
- * A structure that holds the [FeatureForm] and its associated [FormStateCollection].
- *
- * This class is also [Stable] and enables composition optimizations.
- *
- * @param featureForm the [FeatureForm] to create the state for.
- * @param stateCollection the [FormStateCollection] created for the [featureForm].
- */
-@Stable
-internal data class FormStateData(
-    val featureForm: FeatureForm,
-    val stateCollection: FormStateCollection
-) {
-    var firstVisibleItemIndex by mutableIntStateOf(0)
-
-    var firstVisibleItemScrollOffset by mutableIntStateOf(0)
-
-    /**
-     * Indicates if the expressions for the [featureForm] have been evaluated at least once.
-     */
-    var initialEvaluation: Boolean by mutableStateOf(false)
-        private set
-
-    /**
-     * Indicates if the expressions for the [featureForm] are currently being evaluated.
-     */
-    var isEvaluatingExpressions: Boolean by mutableStateOf(false)
-        private set
-
-    /**
-     * Evaluates the expressions for the [featureForm] and returns the result. After a successful
-     * evaluation, the [initialEvaluation] is set to true. While this function is running, the
-     * [isEvaluatingExpressions] will be true.
-     */
-    suspend fun evaluateExpressions(): Result<List<FormExpressionEvaluationError>> {
-        try {
-            isEvaluatingExpressions = true
-            return featureForm.evaluateExpressions().onSuccess {
-                // Set the initial evaluation to true after the first successful evaluation.
-                initialEvaluation = true
-            }
-        } finally {
-            isEvaluatingExpressions = false
-        }
-    }
-
-    /**
-     * Validates all the fields in the form.
-     */
-    fun validateAllFields() {
-        // Force validation of all the states in the current form.
-        stateCollection.forEach { entry ->
-            when (entry.formElement) {
-                // validate attachments
-                is AttachmentsFormElement -> {
-                    (entry.getState<AttachmentElementState>()).forceValidation()
-                }
-                // validate all fields
-                is FieldFormElement -> {
-                    entry.getState<BaseFieldState<*>>().forceValidation()
-                }
-
-                // validate any fields that are within a group
-                is GroupFormElement -> {
-                    entry.getState<BaseGroupState>().fieldStates.forEach { childEntry ->
-                        childEntry.getState<BaseFieldState<*>>().forceValidation()
-                    }
-                }
-
-                else -> {}
-            }
-        }
-    }
-
-    /**
-     * Refreshes the utility associations for all the [UtilityAssociationsElementState] in the form.
-     */
-    suspend fun refreshUtilityAssociations() {
-        stateCollection.forEach { entry ->
-            if (entry.state is UtilityAssociationsElementState) {
-                (entry.state as UtilityAssociationsElementState).refreshResults()
-            }
-        }
-    }
-
-    /**
-     * Refreshes the attachments for all the [AttachmentElementState] in the form.
-     */
-    fun refreshAttachments() {
-        stateCollection.forEach { entry ->
-            if (entry.state is AttachmentElementState) {
-                (entry.state as AttachmentElementState).refreshAttachments()
-            }
-        }
+        _featureFormStates.forEach { it.validateAllFields() }
     }
 }
 

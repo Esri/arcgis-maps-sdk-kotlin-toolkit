@@ -42,9 +42,7 @@ internal fun NavGraphBuilder.associationGroupResultDestination(
     onNavigationEvent: (FeatureFormNavigationRoute) -> Unit,
     onAssociatedFeatureLocateRequest: (ArcGISFeature) -> Unit,
     onBack: (NavBackStackEntry) -> Unit,
-    isNavigationEnabled: Boolean,
-    allowNavigationWithEdits: Boolean,
-    showTopBar: Boolean
+    isNavigationEnabled: Boolean
 ) {
     composable<NavigationRoute.UNAssociationGroupResult>(
         exitTransition = {
@@ -64,8 +62,6 @@ internal fun NavGraphBuilder.associationGroupResultDestination(
                 state = utilityAssociationsElementState,
                 featureForm = formData.featureForm,
                 isNavigationEnabled = isNavigationEnabled,
-                allowNavigationWithEdits = allowNavigationWithEdits,
-                showTopBar = showTopBar,
                 onSave = onSave,
                 onDiscard = onDiscard,
                 onNavigateToAssociation = {

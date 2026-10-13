@@ -25,6 +25,9 @@ import com.arcgismaps.data.ArcGISFeatureTable
 import com.arcgismaps.data.FeatureEditResult
 import com.arcgismaps.data.ServiceFeatureTable
 import com.arcgismaps.mapping.featureforms.FeatureForm
+import com.arcgismaps.mapping.featureforms.FormExpressionEvaluationError
+import com.arcgismaps.toolkit.featureforms.internal.components.base.FormStateData
+import com.arcgismaps.toolkit.featureforms.internal.editor.id
 import com.arcgismaps.toolkit.featureforms.internal.navigation.FormNavigationDirection
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
@@ -41,7 +44,7 @@ import kotlinx.coroutines.withContext
 /**
  * STUB class, will be replaced by an API in the SDK.
  */
-internal class FeatureFormManager(
+internal class FeatureFormGroup(
     featureForms: List<FeatureForm>
 ) {
     val featureForms: List<FeatureForm>
@@ -61,8 +64,18 @@ internal class FeatureFormManager(
         return featureForms.removeIf { it.feature.id() == form.feature.id() }
     }
 
-    suspend fun evaluateExpressions() {
-        featureForms.forEach { it.evaluateExpressions() }
+    suspend fun evaluateExpressions() : Result<List<FormExpressionEvaluationError>> {
+        return withContext(Dispatchers.Default) {
+            val errors = mutableListOf<FormExpressionEvaluationError>()
+            featureForms.forEach { form ->
+                val result = form.evaluateExpressions()
+                if (result.isFailure) {
+                    return@withContext Result.failure(result.exceptionOrNull()!!)
+                }
+                errors.addAll(result.getOrThrow())
+            }
+            Result.success(errors)
+        }
     }
 
     suspend fun discardEdits() {
@@ -93,9 +106,9 @@ public class FeatureFormManagerState(
 ) {
 
     /**
-     * The backing [FeatureFormManager] instance.
+     * The backing [FeatureFormGroup] instance.
      */
-    private val _featureFormManager = FeatureFormManager(forms)
+    private val _featureFormGroup = FeatureFormGroup(forms)
 
     /**
      * Backing state for [showOverview].
@@ -112,14 +125,14 @@ public class FeatureFormManagerState(
      * backed by a [SnapshotStateList] and will be updated whenever a new feature form is added or
      * removed.
      *
-     * It should always be kept in sync with the [_featureFormManager.featureForms] list.
+     * It should always be kept in sync with the [_featureFormGroup.featureForms] list.
      */
     private val _featureFormStates = SnapshotStateList<FormStateData>().also {
-        _featureFormManager.featureForms.forEach { form ->
-            it.add(createFormStateData(form, scope))
+        _featureFormGroup.featureForms.forEach { form ->
+            it.add(FormStateData.create(form, scope))
         }
         scope.launch {
-            _featureFormManager.evaluateExpressions()
+            _featureFormGroup.evaluateExpressions()
         }
     }
 
@@ -141,30 +154,31 @@ public class FeatureFormManagerState(
     /**
      * The [FeatureFormState] that manages the state of the currently active feature form.
      */
-    internal val featureFormState = FeatureFormState(
-        formStateData = _featureFormStates.first(),
-        coroutineScope = scope,
-        onResolveFormStateData = { feature ->
-            // When the nested FeatureForm component needs to fetch the FormStateData for a specific
-            // feature, it will invoke this callback.
-            val form = FeatureForm(feature)
-            // Attempt to add the form first
-            if (_featureFormManager.addFeatureForm(form)) {
-                // If the feature form was added to the manager, it means it is a new form, so
-                // create a new FormStateData , add it to the store and return it.
-                createFormStateData(form, scope).also(_featureFormStates::add)
-            } else {
-                // Feature form already exists in the manager, it means the FormStateData should
-                // already be in the store, so find and return it.
-                val id = feature.id()
-                // Unguarded operation, but should be safe because both the manager and the store
-                // are always kept in sync.
-                _featureFormStates.first {
-                    id != null && it.featureForm.feature.id() == id
-                }
-            }
-        }
-    )
+    internal lateinit var featureFormState: FeatureFormState
+//    = FeatureFormState(
+//        formStateData = _featureFormStates.first(),
+//        coroutineScope = scope,
+//        onResolveFormStateData = { feature ->
+//            // When the nested FeatureForm component needs to fetch the FormStateData for a specific
+//            // feature, it will invoke this callback.
+//            val form = FeatureForm(feature)
+//            // Attempt to add the form first
+//            if (_featureFormGroup.addFeatureForm(form)) {
+//                // If the feature form was added to the manager, it means it is a new form, so
+//                // create a new FormStateData , add it to the store and return it.
+//                FormStateData.create(form, scope).also(_featureFormStates::add)
+//            } else {
+//                // Feature form already exists in the manager, it means the FormStateData should
+//                // already be in the store, so find and return it.
+//                val id = feature.id()
+//                // Unguarded operation, but should be safe because both the manager and the store
+//                // are always kept in sync.
+//                _featureFormStates.first {
+//                    id != null && it.featureForm.feature.id() == id
+//                }
+//            }
+//        }
+//    )
 
     /**
      * A [StateFlow] that emits a boolean indicating whether any of the feature forms managed have
@@ -228,7 +242,7 @@ public class FeatureFormManagerState(
      * Evaluates the expressions for all the feature forms managed by this state.
      */
     public suspend fun evaluateExpressions() {
-        _featureFormManager.evaluateExpressions()
+        _featureFormGroup.evaluateExpressions()
     }
 
     /**
@@ -236,12 +250,12 @@ public class FeatureFormManagerState(
      * to their original state and refresh the attachments and utility associations for each form.
      */
     public suspend fun discardEdits() {
-        _featureFormManager.discardEdits()
+        _featureFormGroup.discardEdits()
         _featureFormStates.forEach {
             it.refreshAttachments()
             it.refreshUtilityAssociations()
         }
-        _featureFormManager.evaluateExpressions()
+        _featureFormGroup.evaluateExpressions()
     }
 
     public suspend fun finishEditing(): Result<Unit> = runCatching {
@@ -249,7 +263,7 @@ public class FeatureFormManagerState(
         require(formsWithErrors.value == 0) {
             "Cannot finish editing because there are validation errors in one or more forms."
         }
-        return _featureFormManager.finishEditing().onSuccess {
+        return _featureFormGroup.finishEditing().onSuccess {
             _featureFormStates.forEach {
                 it.refreshUtilityAssociations()
             }
@@ -308,90 +322,3 @@ public class FeatureFormManagerState(
         _featureFormStates.forEach { it.validateAllFields() }
     }
 }
-
-internal fun ArcGISFeature.id(): String? {
-    val table = featureTable as ArcGISFeatureTable
-    val globalId = attributes[table.globalIdField]
-    val objectId = attributes[table.objectIdField]
-    return if (globalId == null && objectId == null) {
-        null
-    } else {
-        "${globalId}_${objectId}"
-    }
-}
-
-/**
- * Applies the edits in the feature form to the service feature table if it is a service feature
- * table in a connected state. If there is no service connection, for example, in case of an
- * offline scenario, this function will be a no-op and return a successful result.
- *
- * @return a [Result] containing a list of [Throwable]s if there were any errors applying the edits
- * to the service feature table. Note that a successful result may still contain errors. A failure
- * result indicates that the applyEdits operation failed to complete.
- */
-private suspend fun FeatureForm.applyEditsToService(): Result<List<Throwable>> {
-    val table = feature.featureTable as? ServiceFeatureTable
-    // if the table is not a service feature table then return as there is nothing to sync
-    val serviceFeatureTable = table ?: return Result.success(emptyList())
-    if (serviceFeatureTable.serviceGeodatabase?.hasLocalEdits() == false) {
-        // if there are no local edits across all the tables in the service geodatabase
-        // then return as there is nothing to sync
-        return Result.success(emptyList())
-    }
-    // check if the service supports applyEdits using the service geodatabase
-    val canUseServiceGeodatabaseApplyEdits =
-        serviceFeatureTable.serviceGeodatabase?.serviceInfo?.canUseServiceGeodatabaseApplyEdits == true
-    var result = Result.success(emptyList<Throwable>())
-    withContext(Dispatchers.IO) {
-        if (canUseServiceGeodatabaseApplyEdits) {
-            serviceFeatureTable.serviceGeodatabase!!.applyEdits()
-                .onSuccess { featureTableEditResults ->
-                    // build a list of edit results from the feature table edit results
-                    val errors = featureTableEditResults.flatMap {
-                        it.editResults.asSequence()
-                    }.errors
-                    result = Result.success(errors)
-                }
-                .onFailure {
-                    result = Result.failure(it)
-                }
-        } else {
-            serviceFeatureTable.applyEdits().onSuccess { featureEditResults ->
-                result = Result.success(featureEditResults.errors)
-            }.onFailure {
-                result = Result.failure(it)
-            }
-        }
-    }
-    return result
-}
-
-private fun createFormStateData(form: FeatureForm, scope: CoroutineScope): FormStateData {
-    val data = FormStateData(
-        featureForm = form,
-        stateCollection = createStates(
-            form = form,
-            elements = form.allElements,
-            scope = scope
-        )
-    )
-
-    scope.launch(start = CoroutineStart.UNDISPATCHED) {
-        data.evaluateExpressions()
-    }
-    return data
-}
-
-/**
- * Returns a list of all the errors in the list of [FeatureEditResult]s that have an error
- * including the attachment results that have an error.
- */
-private val List<FeatureEditResult>.errors: List<Throwable>
-    get() = mapNotNull { editResult ->
-        editResult.error
-    } + flatMap {
-        it.attachmentResults.mapNotNull { editResult ->
-            editResult.error
-        }
-    }
-

@@ -51,7 +51,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.data.ArcGISFeature
-import com.arcgismaps.toolkit.featureforms.FormStateData
+import com.arcgismaps.toolkit.featureforms.internal.components.base.FormStateData
 import com.arcgismaps.toolkit.featureforms.internal.screens.verticalScrollbar
 
 @Composable

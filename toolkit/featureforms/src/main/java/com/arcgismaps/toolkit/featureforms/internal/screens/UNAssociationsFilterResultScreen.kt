@@ -64,7 +64,6 @@ import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.Ut
 @Composable
 internal fun UNAssociationsFilterResultScreen(
     state: UtilityAssociationsElementState,
-    showTopBar: Boolean,
     onGroupSelected: (Int) -> Unit,
     onAddFromSourceClick: (Int) -> Unit,
     modifier: Modifier = Modifier
@@ -76,24 +75,22 @@ internal fun UNAssociationsFilterResultScreen(
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Show the top bar if the flag is set to true
-        if (showTopBar.not()) {
-            FeatureFormTitle(
-                title = filterResult.filter.title,
-                subTitle = filterResult.filter.description,
-                hasEdits = false,
-                showCloseIcon = false,
-                showBackIcon = false,
-                isNavigationEnabled = true,
-                onBackPressed = {},
-                onClose = {},
-                onSave = {},
-                onDiscard = {},
-                modifier = Modifier
-                    .padding(horizontal = 16.dp)
-                    .fillMaxWidth()
-            )
-        }
+        // Display the top bar
+        FeatureFormTitle(
+            title = filterResult.filter.title,
+            subTitle = filterResult.filter.description,
+            hasEdits = false,
+            showCloseIcon = false,
+            showBackIcon = false,
+            isNavigationEnabled = true,
+            onBackPressed = {},
+            onClose = {},
+            onSave = {},
+            onDiscard = {},
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .fillMaxWidth()
+        )
         UtilityAssociationsFilterResult(
             groupResults = filterResult.groupResults,
             onGroupClick = { groupResult ->

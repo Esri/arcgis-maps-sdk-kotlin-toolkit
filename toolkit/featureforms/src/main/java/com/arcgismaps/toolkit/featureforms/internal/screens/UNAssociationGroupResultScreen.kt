@@ -59,11 +59,9 @@ internal fun UNAssociationGroupResultScreen(
     state: UtilityAssociationsElementState,
     featureForm: FeatureForm,
     isNavigationEnabled: Boolean,
-    allowNavigationWithEdits: Boolean,
-    showTopBar: Boolean,
     onSave: suspend (Boolean) -> Result<Unit>,
     onDiscard: suspend (Boolean) -> Unit,
-    onNavigateToAssociation : () -> Unit,
+    onNavigateToAssociation: () -> Unit,
     onNavigateToFeature: (ArcGISFeature) -> Unit,
     onAssociatedFeatureLocateRequest: (ArcGISFeature) -> Unit,
     onBack: () -> Unit,
@@ -87,22 +85,22 @@ internal fun UNAssociationGroupResultScreen(
         }
     }
     Column(modifier = modifier.fillMaxSize()) {
-        // Show the top bar if the flag is set to true
-        if (showTopBar.not()) {
-            FeatureFormTitle(
-                title = groupResult.name,
-                subTitle = state.selectedFilterResult?.filter?.title ?: "",
-                hasEdits = false,
-                showCloseIcon = false,
-                showBackIcon = false,
-                isNavigationEnabled = true,
-                onBackPressed = {},
-                onClose = {},
-                onSave = {},
-                onDiscard = {},
-                modifier = Modifier.padding(horizontal = 16.dp).fillMaxWidth()
-            )
-        }
+        // Display the top bar
+        FeatureFormTitle(
+            title = groupResult.name,
+            subTitle = state.selectedFilterResult?.filter?.title ?: "",
+            hasEdits = false,
+            showCloseIcon = false,
+            showBackIcon = false,
+            isNavigationEnabled = true,
+            onBackPressed = {},
+            onClose = {},
+            onSave = {},
+            onDiscard = {},
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .fillMaxWidth()
+        )
 
         UtilityAssociationGroupResult(
             groupResult = groupResult,
@@ -110,15 +108,9 @@ internal fun UNAssociationGroupResultScreen(
             isNavigationEnabled = isNavigationEnabled,
             onAssociatedFeatureLocateRequest = onAssociatedFeatureLocateRequest,
             onItemClick = { index ->
-                // only set the action to navigate if there are unsaved edits and navigation with edits
-                // is not allowed
-                if (hasEdits && !allowNavigationWithEdits) {
-                    pendingNavigationAction = NavigationAction.NavigateToFeature(index)
-                } else {
-                    val feature = groupResult.associationResults[index].associatedFeature
-                    // Navigate to the next form if there are no edits.
-                    onNavigateToFeature(feature)
-                }
+                val feature = groupResult.associationResults[index].associatedFeature
+                // Navigate to the next form if there are no edits.
+                onNavigateToFeature(feature)
             },
             onDetailsClick = { index ->
                 val association = groupResult.associationResults[index]

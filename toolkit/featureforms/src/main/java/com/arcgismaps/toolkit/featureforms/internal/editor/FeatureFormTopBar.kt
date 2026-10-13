@@ -16,6 +16,8 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.editor
 
+import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -48,12 +50,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
-import com.arcgismaps.toolkit.featureforms.FeatureFormManagerState
+import com.arcgismaps.toolkit.featureforms.FeatureFormState
 
 @Composable
-internal fun FeatureFormManagerActionBar(
+internal fun FeatureFormTopBar(
     isVisible: Boolean,
-    state: FeatureFormManagerState,
+    state: FeatureFormState,
     hasBackStack: Boolean,
     onBack: () -> Unit,
     onSave: () -> Unit,
@@ -62,6 +64,7 @@ internal fun FeatureFormManagerActionBar(
     modifier: Modifier = Modifier
 ) {
     val hasEdits by state.hasEdits.collectAsState()
+    Log.e("TAG", "FeatureFormTopBar: $hasEdits", )
     var showConfirmationDialog by rememberSaveable(state) {
         mutableStateOf(false)
     }
@@ -69,7 +72,7 @@ internal fun FeatureFormManagerActionBar(
         visible = isVisible,
         enter = fadeIn(animationSpec = tween(50))
     ) {
-        FeatureFormManagerActionBar(
+        FeatureFormTopBar(
             hasEdits = hasEdits,
             hasBackStack = hasBackStack,
             modifier = modifier,
@@ -95,10 +98,14 @@ internal fun FeatureFormManagerActionBar(
             }
         )
     }
+    BackHandler(hasBackStack) {
+        Log.e("TAG", "FeatureFormTopBar: $hasBackStack", )
+        onBack()
+    }
 }
 
 @Composable
-private fun FeatureFormManagerActionBar(
+private fun FeatureFormTopBar(
     hasEdits: Boolean,
     hasBackStack: Boolean,
     onBack: () -> Unit,
@@ -199,9 +206,9 @@ private fun DismissConfirmationDialog(
 
 @Preview(showBackground = true)
 @Composable
-private fun FeatureFormManagerActionBarPreview() {
+private fun FeatureFormTopBarPreview() {
     MaterialTheme {
-        FeatureFormManagerActionBar(
+        FeatureFormTopBar(
             hasEdits = true,
             hasBackStack = true,
             modifier = Modifier.fillMaxWidth(),
