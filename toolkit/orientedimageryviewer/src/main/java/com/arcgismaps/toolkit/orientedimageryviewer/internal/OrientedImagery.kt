@@ -34,8 +34,14 @@ import com.arcgismaps.toolkit.orientedimageryviewer.OrientedImageryViewerState
 import com.arcgismaps.toolkit.orientedimageryviewer.internal.media.PanoramicImage
 import com.arcgismaps.toolkit.orientedimageryviewer.internal.media.RasterImage
 
+/**
+ * Composable function that displays oriented imagery based on the provided [OrientedImageryViewerState].
+ *
+ * @param viewerState The state of the oriented imagery viewer.
+ * @param modifier The modifier to be applied to the composable.
+ */
 @Composable
-internal fun ImageryView(
+internal fun OrientedImagery(
     viewerState: OrientedImageryViewerState,
     modifier: Modifier = Modifier,
 ) {
@@ -81,4 +87,3 @@ internal fun ImageryView(
         }
     }
 }
-

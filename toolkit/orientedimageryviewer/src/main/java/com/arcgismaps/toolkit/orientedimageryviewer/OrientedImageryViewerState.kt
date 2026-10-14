@@ -42,6 +42,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
+/**
+ * Represents the status of an image search operation.
+ */
 @Immutable
 public sealed interface ImageSearchStatus {
     @Immutable
@@ -53,6 +56,9 @@ public sealed interface ImageSearchStatus {
     public object NoImagesFound : ImageSearchStatus
 }
 
+/**
+ * Represents the status of image navigation operations, such as moving to the next or previous image.
+ */
 @Immutable
 public sealed interface ImageNavigationStatus {
     @Immutable
@@ -65,6 +71,13 @@ public sealed interface ImageNavigationStatus {
     public object BoundaryReached : ImageNavigationStatus
 }
 
+/**
+ * Represents the state of the oriented imagery viewer, including the active oriented image, footprints, and camera locations.
+ *
+ * @property orientedImageryLayer The oriented imagery layer associated with this viewer state.
+ * @property graphicsOverlay The graphics overlay used to display camera locations and footprints.
+ * @property coroutineScope The coroutine scope for managing asynchronous operations.
+ */
 @Stable
 public class OrientedImageryViewerState public constructor(
     private val orientedImageryLayer: OrientedImageryLayer,
@@ -427,7 +440,7 @@ public class OrientedImageryViewerState public constructor(
                 .filterIndexed { index, _ -> index != activeIndex }
                 .map { orientedImage ->
                     OrientedImageFootprint(orientedImage).apply {
-                        fillColor = ImageDefaults.ADDITIONAL_FOOTPRINT_COLOR
+                        fillColor = ImageDefaults.additionalFootprintColor
                         outlineColor = Color.transparent
                     }
                 }

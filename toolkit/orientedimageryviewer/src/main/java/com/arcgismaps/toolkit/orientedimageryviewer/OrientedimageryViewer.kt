@@ -47,7 +47,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.mapping.layers.OrientedImageryLayer
 import com.arcgismaps.mapping.view.GraphicsOverlay
-import com.arcgismaps.toolkit.orientedimageryviewer.internal.ImageryView
+import com.arcgismaps.toolkit.orientedimageryviewer.internal.OrientedImagery
 import kotlinx.coroutines.launch
 
 @Composable
@@ -154,7 +154,7 @@ internal fun ViewerLayout(
             }
         },
         content = {
-            ImageryView(
+            OrientedImagery(
                 viewerState = viewerState,
             )
         }

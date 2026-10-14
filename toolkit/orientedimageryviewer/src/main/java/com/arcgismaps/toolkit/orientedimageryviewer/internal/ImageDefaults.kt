@@ -24,20 +24,20 @@ import com.arcgismaps.mapping.symbology.SimpleMarkerSymbolStyle
 
 internal object ImageDefaults {
     private const val CAMERA_LOCATION_SYMBOL_SIZE = 15.0f
-    private val ACTIVE_CAMERA_SYMBOL_COLOR = Color.fromRgba(255, 102, 102, 100)
-    private val ADDITIONAL_CAMERA_SYMBOL_COLOR = Color.fromRgba(0, 128, 192, 100)
+    private val activeCameraSymbolColor = Color.fromRgba(255, 102, 102, 100)
+    private val additionalCameraSymbolColor = Color.fromRgba(0, 128, 192, 100)
 
-    val ADDITIONAL_FOOTPRINT_COLOR = Color.fromRgba(0, 128, 192, 60)
+    val additionalFootprintColor = Color.fromRgba(0, 128, 192, 60)
 
     fun activeCameraLocationSymbol(): SimpleMarkerSymbol = SimpleMarkerSymbol(
         SimpleMarkerSymbolStyle.Circle,
-        ACTIVE_CAMERA_SYMBOL_COLOR,
+        activeCameraSymbolColor,
         CAMERA_LOCATION_SYMBOL_SIZE
     )
 
     fun additionalCameraLocationSymbol(): SimpleMarkerSymbol = SimpleMarkerSymbol(
         SimpleMarkerSymbolStyle.Circle,
-        ADDITIONAL_CAMERA_SYMBOL_COLOR,
+        additionalCameraSymbolColor,
         CAMERA_LOCATION_SYMBOL_SIZE
     )
 
@@ -47,4 +47,3 @@ internal object ImageDefaults {
         CAMERA_LOCATION_SYMBOL_SIZE
     )
 }
-

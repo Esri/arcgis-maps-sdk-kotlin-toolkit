@@ -41,9 +41,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.core.content.ContextCompat
 import androidx.compose.runtime.setValue
 import androidx.core.net.toUri
+import com.arcgismaps.ArcGISEnvironment
 import com.google.android.filament.MaterialInstance
 import dev.romainguy.kotlin.math.Float3
-import io.github.sceneview.SceneView
+import io.github.sceneview.SceneView as FilamentSceneView
 import io.github.sceneview.gesture.CameraGestureDetector
 import io.github.sceneview.gesture.FovZoomCameraManipulator
 import io.github.sceneview.rememberCameraNode
@@ -54,9 +55,14 @@ import com.arcgismaps.toolkit.orientedimageryviewer.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
-import java.net.HttpURLConnection
-import java.net.URL
 
+/**
+ * Composable function that displays a panoramic image using Filament.
+ *
+ * @param imageSource The source of the image, which can be a URL, content URI, or file path.
+ * @param modifier The modifier to be applied to the composable.
+ * @param radiusMeters The radius of the sphere in meters. Default is 10.0f.
+ */
 @Composable
 internal fun PanoramicImage(
     imageSource: String,
@@ -110,7 +116,7 @@ internal fun PanoramicImage(
     }
 
     Box(modifier = modifier.fillMaxSize()) {
-        SceneView(
+        FilamentSceneView(
             modifier = Modifier.fillMaxSize(),
             engine = engine,
             materialLoader = materialLoader,
@@ -181,7 +187,7 @@ private suspend fun loadBitmapFromUri(context: Context, imageSource: String): Bi
         bitmap
     }
 
-private fun loadImageBytesFromUri(context: Context, imageSource: String): ByteArray {
+private suspend fun loadImageBytesFromUri(context: Context, imageSource: String): ByteArray {
     val uri = imageSource.toUri()
     return when (uri.scheme?.lowercase()) {
         "https" -> loadImageBytesFromUrl(context, imageSource)
@@ -195,39 +201,43 @@ private fun loadImageBytesFromUri(context: Context, imageSource: String): ByteAr
     }
 }
 
-private fun loadImageBytesFromUrl(context: Context, imageUrl: String): ByteArray {
-    val connection = (URL(imageUrl).openConnection() as HttpURLConnection).apply {
-        connectTimeout = 15_000
-        readTimeout = 30_000
-        instanceFollowRedirects = true
-    }
+private suspend fun loadImageBytesFromUrl(context: Context, imageUrl: String): ByteArray {
+    return withContext(Dispatchers.IO) {
+        val destinationFile = File.createTempFile("panoramic-image", ".img", context.cacheDir)
 
-    return try {
-        val responseCode = connection.responseCode
-        if (responseCode !in 200..299) {
-            throw IllegalArgumentException(
-                context.getString(R.string.panoramic_image_http_error, responseCode, imageUrl)
-            )
-        }
+        try {
+            val downloadTask = ArcGISEnvironment.arcGISHttpClient.downloadWithTask(imageUrl, destinationFile)
+            if (!downloadTask.start()) {
+                throw IllegalArgumentException(
+                    context.getString(R.string.panoramic_image_http_error, -1, imageUrl)
+                )
+            }
 
-        connection.inputStream.use { inputStream ->
-            inputStream.readBytes()
+            downloadTask.result().getOrElse { throwable -> throw throwable }
+
+            destinationFile.readBytes()
+        } finally {
+            destinationFile.delete()
         }
-    } finally {
-        connection.disconnect()
     }
 }
 
-private fun loadImageBytesFromContentUri(context: Context, uri: Uri, imageSource: String): ByteArray =
-    context.contentResolver.openInputStream(uri)?.use { inputStream ->
-        inputStream.readBytes()
-    } ?: throw IllegalArgumentException(context.getString(R.string.panoramic_image_open_failed, imageSource))
+private suspend fun loadImageBytesFromContentUri(context: Context, uri: Uri, imageSource: String): ByteArray =
+    withContext(Dispatchers.IO) {
+        context.contentResolver.openInputStream(uri)?.use { inputStream ->
+            inputStream.readBytes()
+        } ?: throw IllegalArgumentException(context.getString(R.string.panoramic_image_open_failed, imageSource))
+    }
 
-private fun loadImageBytesFromFilePath(context: Context, filePath: String?, imageSource: String): ByteArray {
+private suspend fun loadImageBytesFromFilePath(context: Context, filePath: String?, imageSource: String): ByteArray {
     val path = requireNotNull(filePath) {
         context.getString(R.string.panoramic_image_missing_file_path, imageSource)
     }
-    val directFileResult = runCatching { loadImageBytesFromFilePathIfPresent(path) }
+    val directFileResult = try {
+        Result.success(loadImageBytesFromFilePathIfPresent(path))
+    } catch (throwable: Throwable) {
+        Result.failure(throwable)
+    }
     if (directFileResult.isSuccess) {
         directFileResult.getOrNull()?.let { return it }
     }
@@ -244,33 +254,37 @@ private fun loadImageBytesFromFilePath(context: Context, filePath: String?, imag
     throw IllegalArgumentException(context.getString(R.string.panoramic_image_decode_failed, imageSource))
 }
 
-private fun loadImageBytesFromFilePathIfPresent(filePath: String): ByteArray? {
-    val file = File(filePath)
-    if (!file.isFile) {
-        return null
-    }
+private suspend fun loadImageBytesFromFilePathIfPresent(filePath: String): ByteArray? {
+    return withContext(Dispatchers.IO) {
+        val file = File(filePath)
+        if (!file.isFile) {
+            return@withContext null
+        }
 
-    return file.inputStream().use { inputStream ->
-        inputStream.readBytes()
+        file.inputStream().use { inputStream ->
+            inputStream.readBytes()
+        }
     }
 }
 
-private fun loadImageBytesFromMediaStorePath(context: Context, filePath: String, imageSource: String): ByteArray? {
-    val collection = MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL)
+private suspend fun loadImageBytesFromMediaStorePath(context: Context, filePath: String, imageSource: String): ByteArray? {
+    return withContext(Dispatchers.IO) {
+        val collection = MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL)
 
-    return context.contentResolver.query(
-        collection,
-        arrayOf(MediaStore.Images.Media._ID),
-        "${MediaStore.Images.Media.DATA} = ?",
-        arrayOf(filePath),
-        null
-    )?.use { cursor ->
-        if (!cursor.moveToFirst()) {
+        context.contentResolver.query(
+            collection,
+            arrayOf(MediaStore.Images.Media._ID),
+            "${MediaStore.Images.Media.DATA} = ?",
+            arrayOf(filePath),
             null
-        } else {
-            val id = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID))
-            val imageUri = ContentUris.withAppendedId(collection, id)
-            loadImageBytesFromContentUri(context, imageUri, imageSource)
+        )?.use { cursor ->
+            if (!cursor.moveToFirst()) {
+                null
+            } else {
+                val id = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID))
+                val imageUri = ContentUris.withAppendedId(collection, id)
+                loadImageBytesFromContentUri(context, imageUri, imageSource)
+            }
         }
     }
 }
