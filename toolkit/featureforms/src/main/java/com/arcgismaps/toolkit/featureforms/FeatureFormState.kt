@@ -173,6 +173,21 @@ public class FeatureFormState private constructor(
         _featureFormStates.toList()
     }
 
+    private val _editingEvent = MutableSharedFlow<FeatureFormEditingEvent>()
+    internal val editingEvent: SharedFlow<FeatureFormEditingEvent> = _editingEvent.asSharedFlow()
+
+    /**
+     * Backing state for [showOverview].
+     */
+    private var _showOverview = mutableStateOf(false)
+
+    /**
+     * A boolean indicating whether the overview of all feature forms should be visible. The value
+     * can be set using the [showOverview] function.
+     */
+    internal val showOverview
+        get() = _showOverview.value
+
     init {
         initialForms.forEachIndexed { index, form ->
             _featureFormGroup.addForm(form)
@@ -186,6 +201,10 @@ public class FeatureFormState private constructor(
         }
         coroutineScope.launch(start = CoroutineStart.UNDISPATCHED) {
             _featureFormGroup.evaluateExpressions()
+        }
+        // If there are multiple forms, show the overview by default.
+        if (initialForms.size > 1) {
+            _showOverview.value = true
         }
     }
 
@@ -220,21 +239,6 @@ public class FeatureFormState private constructor(
         scope = coroutineScope,
         started = SharingStarted.Eagerly
     )
-
-    private val _editingEvent = MutableSharedFlow<FeatureFormEditingEvent>()
-    internal val editingEvent: SharedFlow<FeatureFormEditingEvent> = _editingEvent.asSharedFlow()
-
-    /**
-     * Backing state for [showOverview].
-     */
-    private var _showOverview = mutableStateOf(false)
-
-    /**
-     * A boolean indicating whether the overview of all feature forms should be visible. The value
-     * can be set using the [showOverview] function.
-     */
-    internal val showOverview
-        get() = _showOverview.value
 
     /**
      * Creates a [FeatureFormState] using the supplied [featureForm] and [coroutineScope].
