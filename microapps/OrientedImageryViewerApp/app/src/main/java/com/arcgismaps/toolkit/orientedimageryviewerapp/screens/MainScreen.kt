@@ -32,7 +32,9 @@ import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SheetValue
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -70,6 +72,7 @@ fun MainScreen() {
     val mapGraphicsOverlays = remember(viewModel) { listOf(viewModel.mapGraphicsOverlay) }
     val sceneGraphicsOverlays = remember(viewModel) { listOf(viewModel.sceneGraphicsOverlay) }
     val orientedImageryViewerState = viewModel.orientedImageryViewerState
+    val statusMessage = viewModel.statusMessage
     val visibleViewerState = orientedImageryViewerState?.takeIf { it.hasActiveImage }
     val shouldShowBottomSheet = visibleViewerState != null
 
@@ -162,6 +165,27 @@ fun MainScreen() {
                 contentAlignment = Alignment.Center
             ) {
                 CircularProgressIndicator()
+            }
+        }
+
+        statusMessage?.let { message ->
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(24.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Surface(
+                    color = MaterialTheme.colorScheme.surface,
+                    contentColor = MaterialTheme.colorScheme.onSurface,
+                    tonalElevation = 6.dp,
+                    shadowElevation = 6.dp
+                ) {
+                    Text(
+                        text = message,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
+                    )
+                }
             }
         }
     }

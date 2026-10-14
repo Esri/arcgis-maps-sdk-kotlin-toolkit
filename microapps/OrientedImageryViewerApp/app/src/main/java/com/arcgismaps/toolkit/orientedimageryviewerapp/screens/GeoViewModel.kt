@@ -66,20 +66,40 @@ class GeoViewModel(application: Application) : AndroidViewModel(application) {
     val isLoading: Boolean
         get() = _isLoading.value
 
+    private val _statusMessage: MutableState<String?> = mutableStateOf(null)
+    val statusMessage: String?
+        get() = _statusMessage.value
+
     init {
         viewModelScope.launch {
             try {
-                arcGISMap.load().onSuccess {
-                    val index = arcGISMap.operationalLayers.filterIsInstance<OrientedImageryLayer>().lastIndex
-                    if (index > -1) {
-                        val orientedImageryLayer = arcGISMap.operationalLayers[index] as OrientedImageryLayer
-                        orientedImageryLayer.load().onSuccess {
-                            orientedImageryLayer.fullExtent?.let { extent ->
-                                mapViewProxy.setViewpoint(Viewpoint(extent))
-                            }
+                arcGISMap.load()
+                    .onSuccess {
+                        val orientedImageryLayer = arcGISMap.operationalLayers
+                            .filterIsInstance<OrientedImageryLayer>()
+                            .lastOrNull()
+
+                        if (orientedImageryLayer == null) {
+                            _statusMessage.value = "No OrientedImageryLayers found in the Map."
+                            return@onSuccess
                         }
+
+                        orientedImageryLayer.load()
+                            .onSuccess {
+                                _statusMessage.value = null
+                                orientedImageryLayer.fullExtent?.let { extent ->
+                                    mapViewProxy.setViewpoint(Viewpoint(extent))
+                                }
+                            }
+                            .onFailure { error ->
+                                _statusMessage.value = "Failed to load the oriented imagery layer."
+                                Log.e("GeoViewModel", "Load oriented imagery layer failed: ${error.message}",error)
+                            }
                     }
-                }
+                    .onFailure { error ->
+                        _statusMessage.value = "Failed to load the map."
+                        Log.e("GeoViewModel", "Load map failed: ${error.message}", error)
+                    }
             } finally {
                 _isLoading.value = false
             }
@@ -96,6 +116,7 @@ class GeoViewModel(application: Application) : AndroidViewModel(application) {
                             .onSuccess { identifyResults ->
                                 createViewerState(identifyResults)
                             }.onFailure { error ->
+                                _statusMessage.value = "Failed to identify layers in the map."
                                 Log.e("GeoViewModel", "Identify layers on map failed: ${error.message}")
                             }
                     }
@@ -105,6 +126,7 @@ class GeoViewModel(application: Application) : AndroidViewModel(application) {
                             .onSuccess { identifyResults ->
                                 createViewerState(identifyResults)
                             }.onFailure { error ->
+                                _statusMessage.value = "Failed to identify layers in the scene."
                                 Log.e("GeoViewModel", "Identify layers on scene failed: ${error.message}")
                             }
                     }
@@ -120,12 +142,18 @@ class GeoViewModel(application: Application) : AndroidViewModel(application) {
                 lastMapLocation?.let { point ->
                     _orientedImageryViewerState.value!!.searchImages(point)
                         .onSuccess { outcome ->
+                            _statusMessage.value = null
                             if (outcome is ImageSearchStatus.NoImagesFound) {
-                                Log.i("GeoViewModel", "No oriented images found at location: $point")
+                                _statusMessage.value = "No oriented images were found at the selected location."
+                                Log.i(
+                                    "GeoViewModel",
+                                    "No oriented images found at location: $point"
+                                )
                             }
                         }
                         .onFailure { error ->
-                            Log.e("GeoViewModel", "Search images failed: ${error.message}")
+                            _statusMessage.value = "Search for oriented images failed."
+                            Log.e("GeoViewModel", "Search images failed: ${error.message}", error)
                         }
                 }
             } finally {
@@ -139,14 +167,16 @@ class GeoViewModel(application: Application) : AndroidViewModel(application) {
             val identifyResult = identifyResults.firstOrNull { it.layerContent is OrientedImageryLayer }
             if (identifyResult != null) {
                 val orientedImageryLayer = identifyResult.layerContent as OrientedImageryLayer
+                _statusMessage.value = null
                 _orientedImageryViewerState.value = OrientedImageryViewerState(
                     orientedImageryLayer, currentGraphicsOverlay(), viewModelScope
                 )
             } else {
-                Log.e("GeoViewModel", "No OrientedImageryLayer found in identify results")
+                _statusMessage.value =
+                    "No oriented imagery layer was found at the selected location."
             }
         } else {
-            Log.e("GeoViewModel", "No identify results found")
+            _statusMessage.value = "No identifiable layers were found at the selected location."
         }
     }
 
