@@ -17,6 +17,9 @@
 package com.arcgismaps.toolkit.featureforms.internal.editor
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -25,17 +28,21 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Article
-import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.rounded.Warning
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.FilledIconButton
+import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -52,16 +59,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.toolkit.featureforms.internal.components.base.FormStateData
+import com.arcgismaps.toolkit.featureforms.internal.components.datetime.picker.time.TimePickerState
 import com.arcgismaps.toolkit.featureforms.internal.screens.verticalScrollbar
 
 @Composable
 internal fun ManagerOverview(
     forms: List<FormStateData>,
+    hasEdits: Boolean,
     editable: Boolean,
     errorCount: Int,
     modifier: Modifier = Modifier,
     onShowOnMapRequest: (ArcGISFeature) -> Unit,
     onDismiss: () -> Unit,
+    onSave: () -> Unit,
     onNavigateToForm: (FormStateData) -> Unit,
     onRemoveForm: (FormStateData) -> Unit
 ) {
@@ -71,27 +81,12 @@ internal fun ManagerOverview(
         color = MaterialTheme.colorScheme.surfaceVariant,
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = "All Forms (${forms.size})",
-                    style = MaterialTheme.typography.headlineSmall,
-                    modifier = Modifier.padding(12.dp)
-                )
-                IconButton(
-                    onClick = onDismiss,
-                    modifier = Modifier.padding(12.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Outlined.Close,
-                        contentDescription = "Close",
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
-            }
+            ManagerOverviewHeader(
+                formCount = forms.size,
+                hasEdits = hasEdits,
+                onSave = onSave,
+                onDismiss = onDismiss
+            )
             LazyColumn(
                 state = lazyListState,
                 modifier = Modifier
@@ -129,6 +124,55 @@ internal fun ManagerOverview(
     }
     BackHandler(enabled = true) {
         onDismiss()
+    }
+}
+
+@Composable
+private fun ManagerOverviewHeader(
+    formCount: Int,
+    hasEdits: Boolean,
+    onSave: () -> Unit,
+    onDismiss: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(
+            text = "All Forms ($formCount)",
+            style = MaterialTheme.typography.headlineSmall,
+            modifier = Modifier.padding(12.dp)
+        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            AnimatedVisibility(
+                visible = hasEdits,
+                enter = fadeIn(),
+                exit = fadeOut()
+            ) {
+                FilledIconButton(
+                    onClick = onSave,
+                    modifier = Modifier.width(52.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.Check,
+                        contentDescription = "Save edits"
+                    )
+                }
+            }
+            FilledTonalIconButton(
+                onClick = onDismiss,
+                modifier = Modifier.padding(12.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Close,
+                    contentDescription = "Close Overview"
+                )
+            }
+        }
     }
 }
 

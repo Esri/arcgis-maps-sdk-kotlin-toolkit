@@ -40,14 +40,9 @@ import kotlinx.coroutines.launch
 /**
  * Screen that displays the selected group of associations.
  *
- * @param state The state of the utility associations element.
+ * @param state The state of the utility association element.
  * @param featureForm The feature form associated with the current feature.
  * @param isNavigationEnabled Flag indicating whether navigation to associated features is enabled.
- * @param onSave The callback to be invoked when the save button is clicked. The boolean parameter
- * indicates whether this action should be followed by a forward navigation. The callback should
- * return a [Result] that indicates the success or failure of the save operation.
- * @param onDiscard The callback to be invoked when the discard button is clicked. The boolean parameter
- * indicates whether this action should be followed by a forward navigation.
  * @param onNavigateToAssociation The callback to be invoked when the user selects to view association details.
  * @param onNavigateToFeature The callback to be invoked when the user selects a feature to navigate to.
  * @param onAssociatedFeatureLocateRequest The callback to be invoked when a locate request is made for an associated feature.
@@ -59,8 +54,6 @@ internal fun UNAssociationGroupResultScreen(
     state: UtilityAssociationsElementState,
     featureForm: FeatureForm,
     isNavigationEnabled: Boolean,
-    onSave: suspend (Boolean) -> Result<Unit>,
-    onDiscard: suspend (Boolean) -> Unit,
     onNavigateToAssociation: () -> Unit,
     onNavigateToFeature: (ArcGISFeature) -> Unit,
     onAssociatedFeatureLocateRequest: (ArcGISFeature) -> Unit,
@@ -68,22 +61,7 @@ internal fun UNAssociationGroupResultScreen(
     modifier: Modifier = Modifier
 ) {
     val groupResult = state.selectedGroupResult ?: return
-    val hasEdits by featureForm.hasEdits.collectAsState()
     val isEditable by state.isEditable.collectAsState()
-    val scope = rememberCoroutineScope()
-    // State to hold the pending navigation action when the form has unsaved edits
-    var pendingNavigationAction: NavigationAction by rememberSaveable {
-        mutableStateOf(NavigationAction.None)
-    }
-    // Handler for navigating to a selected associated feature
-    val navigateToFeature: (NavigationAction) -> Unit = { action ->
-        if (action is NavigationAction.NavigateToFeature) {
-            val selectedIndex = action.index
-            groupResult.associationResults.getOrNull(selectedIndex)?.associatedFeature?.let { feature ->
-                onNavigateToFeature(feature)
-            }
-        }
-    }
     Column(modifier = modifier.fillMaxSize()) {
         // Display the top bar
         FeatureFormTitle(
@@ -126,31 +104,6 @@ internal fun UNAssociationGroupResultScreen(
                 }
             },
             modifier = Modifier.padding(16.dp)
-        )
-    }
-    if (pendingNavigationAction != NavigationAction.None) {
-        SaveEditsDialog(
-            onDismissRequest = {
-                // Clear the pending navigation action when the dialog is dismissed
-                pendingNavigationAction = NavigationAction.None
-            },
-            onSave = {
-                scope.launch {
-                    onSave(true).onSuccess {
-                        // If the save is successful, navigate to the association
-                        navigateToFeature(pendingNavigationAction)
-                    }
-                    pendingNavigationAction = NavigationAction.None
-                }
-            },
-            onDiscard = {
-                scope.launch {
-                    onDiscard(true)
-                    // Navigate to the association after discarding changes
-                    navigateToFeature(pendingNavigationAction)
-                    pendingNavigationAction = NavigationAction.None
-                }
-            }
         )
     }
 }

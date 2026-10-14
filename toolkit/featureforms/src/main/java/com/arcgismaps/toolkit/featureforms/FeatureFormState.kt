@@ -27,11 +27,13 @@ import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavDestination.Companion.hasRoute
 import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.data.RangeDomain
+import com.arcgismaps.exceptions.ArcGISException
 import com.arcgismaps.mapping.featureforms.AttachmentsFormElement
 import com.arcgismaps.mapping.featureforms.BarcodeScannerFormInput
 import com.arcgismaps.mapping.featureforms.ComboBoxFormInput
 import com.arcgismaps.mapping.featureforms.DateTimePickerFormInput
 import com.arcgismaps.mapping.featureforms.FeatureForm
+import com.arcgismaps.mapping.featureforms.FeatureFormGroup
 import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.mapping.featureforms.FormElement
 import com.arcgismaps.mapping.featureforms.FormExpressionEvaluationError
@@ -67,7 +69,6 @@ import com.arcgismaps.toolkit.featureforms.internal.components.text.FormTextFiel
 import com.arcgismaps.toolkit.featureforms.internal.components.text.TextFieldProperties
 import com.arcgismaps.toolkit.featureforms.internal.components.text.TextFormElementState
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationsElementState
-import com.arcgismaps.toolkit.featureforms.internal.editor.allElements
 import com.arcgismaps.toolkit.featureforms.internal.editor.id
 import com.arcgismaps.toolkit.featureforms.internal.navigation.FormNavigationDirection
 import com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationRoute
@@ -78,7 +79,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -118,7 +118,7 @@ public class FeatureFormState private constructor(
     /**
      * The backing [FeatureFormGroup] instance.
      */
-    private val _featureFormGroup: FeatureFormGroup = FeatureFormGroup(emptyList())
+    private val _featureFormGroup: FeatureFormGroupInternal = FeatureFormGroupInternal(emptyList())
 
     /**
      * The list of [FormStateData] for all the feature forms managed by this state. This list is
@@ -148,7 +148,7 @@ public class FeatureFormState private constructor(
      * A navigation callback that is designed to pop all destinations before navigating
      * to the new [FeatureForm]. This should be set by the composition.
      */
-    private var navigatePopUpToRoute: ((NavigationRoute, () -> Unit) -> Boolean)? = null
+    private var navigatePopUpToRoute: ((NavigationRoute) -> Unit)? = null
 
     /**
      * A navigation callback that is called when navigating back to a previous [FeatureForm]. This
@@ -175,7 +175,7 @@ public class FeatureFormState private constructor(
 
     init {
         initialForms.forEachIndexed { index, form ->
-            _featureFormGroup.addFeatureForm(form)
+            _featureFormGroup.addForm(form)
             // create state objects
             val formStateData = FormStateData.create(form, coroutineScope)
             _featureFormStates.add(formStateData)
@@ -223,6 +223,18 @@ public class FeatureFormState private constructor(
 
     private val _editingEvent = MutableSharedFlow<FeatureFormEditingEvent>()
     internal val editingEvent: SharedFlow<FeatureFormEditingEvent> = _editingEvent.asSharedFlow()
+
+    /**
+     * Backing state for [showOverview].
+     */
+    private var _showOverview = mutableStateOf(false)
+
+    /**
+     * A boolean indicating whether the overview of all feature forms should be visible. The value
+     * can be set using the [showOverview] function.
+     */
+    internal val showOverview
+        get() = _showOverview.value
 
     /**
      * Creates a [FeatureFormState] using the supplied [featureForm] and [coroutineScope].
@@ -371,8 +383,8 @@ public class FeatureFormState private constructor(
      * Sets the navigation callback to the provided [navigatePopUpToRoute] function. This function is
      * called when navigating to a new [FeatureForm] and popping all destinations before navigating.
      */
-    internal fun setNavigationPopupToCallback(callback: ((NavigationRoute, () -> Unit) -> Boolean)?) {
-        this.navigatePopUpToRoute = callback
+    internal fun setNavigationPopupToCallback(navigatePopUpToRoute: ((NavigationRoute) -> Unit)?) {
+        this.navigatePopUpToRoute = navigatePopUpToRoute
     }
 
     /**
@@ -418,11 +430,13 @@ public class FeatureFormState private constructor(
         val navigateTo = navigateToRoute ?: return false
         // Check if the backStackEntry is in the resumed state.
         if (backStackEntry.lifecycleIsResumed().not()) return false
-
+        // Create or find existing state data.
         val form = FeatureForm(feature)
-        val formStateData = if (_featureFormGroup.addFeatureForm(form)) {
+        val formStateData = try {
+            _featureFormGroup.addForm(form)
             FormStateData.create(form, coroutineScope).also(_featureFormStates::add)
-        } else {
+        } catch (_: ArcGISException) {
+            // To-do: Handle different ArcGISException types.
             val id = feature.id()
             _featureFormStates.first {
                 id != null && it.featureForm.feature.id() == id
@@ -445,17 +459,19 @@ public class FeatureFormState private constructor(
      */
     @MainThread
     internal fun navigateToForm(
+        backStackEntry: NavBackStackEntry,
         formStateData: FormStateData,
         direction: FormNavigationDirection
     ): Boolean {
         val navigateTo = navigatePopUpToRoute ?: return false
+        // Check if the backStackEntry is in the resumed state.
+        if (backStackEntry.lifecycleIsResumed().not()) return false
+
+        store.clear()
+        store.addLast(formStateData)
         // Navigate to the form view.
-        return navigateTo(NavigationRoute.Form(direction)) {
-            // This is only invoked after the NavHost owner confirms that navigation is valid but
-            // before the navigation is actually performed. This is a good place to update the stack.
-            store.clear()
-            store.addLast(formStateData)
-        }
+        navigateTo(NavigationRoute.Form(direction))
+        return true
     }
 
     /**
@@ -509,6 +525,16 @@ public class FeatureFormState private constructor(
     internal fun validateAllFields() {
         // Force validation of all the states in the current form.
         _featureFormStates.forEach { it.validateAllFields() }
+    }
+
+    /**
+     * Sets the visibility of the overview of all feature forms. This updates the [showOverview]
+     * property and can be used to show or hide the overview.
+     *
+     * @param visible true to show the overview, false to hide it.
+     */
+    internal fun showOverview(visible: Boolean) {
+        _showOverview.value = visible
     }
 }
 

@@ -202,7 +202,7 @@
         <item quantity="many">At least %1$d attachments are required</item>
         <item quantity="other">At least %1$d attachments are required</item>
     </plurals>
-    <plurals name="form_manager_has_validation_errors">
+    <plurals name="form_group_has_validation_errors">
         <item quantity="zero">There are %1$d forms with validation errors. Please correct the errors before saving.</item>
         <item quantity="one">There is %1$d form with validation errors. Please correct the errors before saving.</item>
         <item quantity="two">There are %1$d forms with validation errors. Please correct the errors before saving.</item>

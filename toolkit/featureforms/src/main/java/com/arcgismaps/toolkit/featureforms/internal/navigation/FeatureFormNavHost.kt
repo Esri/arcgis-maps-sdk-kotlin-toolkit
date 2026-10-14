@@ -76,8 +76,6 @@ internal fun FeatureFormNavHost(
 
         associationGroupResultDestination(
             state = state,
-            onSave = onSaveForm,
-            onDiscard = onDiscardForm,
             isNavigationEnabled = isNavigationEnabled,
             onNavigateToAssociation = navController::navigateToUNAssociationDetails,
             onNavigateToFeature = state::navigateTo,

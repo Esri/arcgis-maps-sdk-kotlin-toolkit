@@ -20,8 +20,8 @@ package com.arcgismaps.toolkit.featureforms
 
 import android.Manifest
 import android.content.Context
-import android.util.Log
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxSize
@@ -33,6 +33,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -66,7 +67,10 @@ import com.arcgismaps.mapping.featureforms.UtilityAssociationFeatureCandidate
 import com.arcgismaps.mapping.featureforms.UtilityAssociationFeatureSource
 import com.arcgismaps.mapping.featureforms.UtilityAssociationsFormElement
 import com.arcgismaps.toolkit.featureforms.internal.editor.FeatureFormTopBar
+import com.arcgismaps.toolkit.featureforms.internal.editor.ManagerOverview
+import com.arcgismaps.toolkit.featureforms.internal.editor.ModalSheet
 import com.arcgismaps.toolkit.featureforms.internal.navigation.FeatureFormNavHost
+import com.arcgismaps.toolkit.featureforms.internal.navigation.FormNavigationDirection
 import com.arcgismaps.toolkit.featureforms.internal.navigation.lifecycleIsResumed
 import com.arcgismaps.toolkit.featureforms.internal.screens.shouldEnableTopBar
 import com.arcgismaps.toolkit.featureforms.internal.utils.DialogType
@@ -384,31 +388,9 @@ public fun FeatureForm(
     typography: FeatureFormTypography = FeatureFormDefaults.typography(),
 ) {
     val state by rememberUpdatedState(featureFormState)
-    val scope = rememberCoroutineScope()
+    val currentOnEditingEvent by rememberUpdatedState(onEditingEvent)
+    val currentOnNavigationEvent by rememberUpdatedState(onNavigationEvent)
     val navController = rememberNavController()
-    state.setNavigationCallback { route ->
-        navController.navigate(route)
-    }
-    state.setNavigationPopupToCallback callback@{ route, beforeNavigateAction ->
-        val entry = navController.currentBackStackEntry ?: return@callback false
-
-        if (!entry.lifecycleIsResumed()) {
-            return@callback false
-        }
-        // Run the beforeNavigateAction callback to allow the caller to perform any necessary
-        // actions before navigating.
-        beforeNavigateAction()
-
-        navController.navigate(route) {
-            popUpTo(navController.graph.id) {
-                inclusive = true
-            }
-        }
-        true
-    }
-    state.setNavigateBack {
-        navController.navigateUp()
-    }
 
     val res = LocalResources.current
     val dialogRequester = LocalDialogRequester.current
@@ -419,26 +401,48 @@ public fun FeatureForm(
     fun saveForm(state: FeatureFormState) {
         focusManager.clearFocus()
         // Check for validation errors
-        val errorCount = state.formsWithErrors.value
-        return if (errorCount == 0) {
-            // Finish editing the form if there are no validation errors
-            state.finish()
-        } else {
-            // Show a dialog with the validation errors if they exist
-            val errorDialog = DialogType.ValidationErrorsDialog(
-                onDismiss = {
-                    state.validateAllFields()
-                },
-                onAction = null,
-                title = validationErrorMessage,
-                body = res.getQuantityString(
-                    R.plurals.you_have_errors_that_must_be_fixed_before_saving,
-                    errorCount,
-                    errorCount
-                ),
-                actionText = ""
-            )
-            dialogRequester.requestDialog(errorDialog)
+        val formsWithErrors = state.formsWithErrors.value
+        when {
+            formsWithErrors > 0 && state.featureFormStates.size > 1 -> {
+                // If there are validation errors and more than one form, show a dialog with
+                // the option to view the errors in the overview screen.
+                val errorDialog = DialogType.ValidationErrorsDialog(
+                    onDismiss = state::validateAllFields,
+                    onAction = {
+                        state.showOverview(true)
+                    },
+                    title = validationErrorMessage,
+                    body = res.getQuantityString(
+                        R.plurals.form_group_has_validation_errors,
+                        formsWithErrors,
+                        formsWithErrors
+                    ),
+                    actionText = res.getString(R.string.view_errors)
+                )
+                dialogRequester.requestDialog(errorDialog)
+            }
+            formsWithErrors > 0 && state.featureFormStates.size == 1-> {
+                val errorCount = state.featureFormStates.first().featureForm.elementValidationErrors.value.size
+                // If there are validation errors and only one form, show a dialog with
+                // the option to dismiss the dialog and fix the errors.
+                val errorDialog = DialogType.ValidationErrorsDialog(
+                    onDismiss = state::validateAllFields,
+                    onAction = null,
+                    title = validationErrorMessage,
+                    body = res.getQuantityString(
+                        R.plurals.you_have_errors_that_must_be_fixed_before_saving,
+                        errorCount,
+                        errorCount
+                    ),
+                    actionText = ""
+                )
+                dialogRequester.requestDialog(errorDialog)
+            }
+
+            formsWithErrors == 0 -> {
+                // Finish editing the form if there are no validation errors
+                state.finish()
+            }
         }
     }
 
@@ -450,65 +454,120 @@ public fun FeatureForm(
     }
     // Get the form data for the active entry (destination) in the back stack
     val formData = remember(backStackEntry) { state.getActiveFormStateData() }
-    FeatureFormLayout(
-        topBar = {
-            val isDialogDestination = backStackEntry?.destination is FloatingWindow
-            // Track if there is a back stack entry
-            val hasBackStack = if (isDialogDestination) {
-                contentHasBackStack
-            } else {
-                navController.previousBackStackEntry != null
-            }
-            SideEffect {
-                // update the retained value only for regular content destinations.
-                // A dialog's own previous entry must not alter it.
-                if (!isDialogDestination) {
-                    contentHasBackStack = hasBackStack
+
+    Box(modifier = modifier) {
+        FeatureFormLayout(
+            topBar = {
+                val isDialogDestination = backStackEntry?.destination is FloatingWindow
+                // Track if there is a back stack entry
+                val hasBackStack = if (isDialogDestination) {
+                    contentHasBackStack
+                } else {
+                    navController.previousBackStackEntry != null
                 }
+                SideEffect {
+                    // update the retained value only for regular content destinations.
+                    // A dialog's own previous entry must not alter it.
+                    if (!isDialogDestination) {
+                        contentHasBackStack = hasBackStack
+                    }
+                }
+                FeatureFormTopBar(
+                    isVisible = backStackEntry?.shouldEnableTopBar() == true,
+                    state = state,
+                    hasBackStack = contentHasBackStack,
+                    onBack = {
+                        backStackEntry?.let(state::popBackStack)
+                    },
+                    onSave = {
+                        saveForm(state)
+                    },
+                    onDiscard = state::discard,
+                    onDismiss = onDismiss,
+                    onShowOverview = {
+                        state.showOverview(true)
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp)
+                )
+            },
+            content = {
+                FeatureFormNavHost(
+                    navController = navController,
+                    state = state,
+                    isNavigationEnabled = isNavigationEnabled,
+                    validationErrorVisibility = validationErrorVisibility,
+                    onSaveForm = {
+                        saveForm(state)
+                    },
+                    onDiscardForm = {
+                        state.discard()
+                    },
+                    onBarcodeButtonClick = onBarcodeButtonClick,
+                    onShowOnMapRequest = onShowOnMapRequest,
+                    onNavigationEvent = currentOnNavigationEvent,
+                    modifier = Modifier.fillMaxSize()
+                )
+            },
+            modifier = Modifier.fillMaxSize(),
+            colorScheme = colorScheme,
+            typography = typography
+        )
+        ModalSheet(
+            visibilityProvider = { state.showOverview },
+            onDismiss = {
+                state.showOverview(false)
             }
-            FeatureFormTopBar(
-                isVisible = backStackEntry?.shouldEnableTopBar() == true,
-                state = state,
-                hasBackStack = contentHasBackStack,
-                onBack = {
-                    backStackEntry?.let(state::popBackStack)
+        ) {
+            val forms = state.featureFormStates
+            val hasEdits by state.hasEdits.collectAsState()
+            ManagerOverview(
+                forms = forms,
+                hasEdits = hasEdits,
+                editable = false,
+                errorCount = state.formsWithErrors.collectAsState().value,
+                modifier = Modifier.fillMaxSize(),
+                onShowOnMapRequest = onShowOnMapRequest,
+                onDismiss = {
+                    state.showOverview(false)
                 },
                 onSave = {
+                    saveForm(state)
+                },
+                onNavigateToForm = { stateData ->
+                    backStackEntry?.let { entry ->
+                        state.navigateToForm(
+                            backStackEntry = entry,
+                            formStateData = stateData,
+                            direction = FormNavigationDirection.Default
+                        )
+                    }
+                    state.showOverview(false)
+                },
+                onRemoveForm = { TODO() }
+            )
+        }
+    }
 
-                },
-                onDiscard = state::discard,
-                onDismiss = onDismiss,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 8.dp)
-            )
-        },
-        content = {
-            FeatureFormNavHost(
-                navController = navController,
-                state = state,
-                isNavigationEnabled = isNavigationEnabled,
-                validationErrorVisibility = validationErrorVisibility,
-                onSaveForm = { willNavigate ->
-                    saveForm(state, willNavigate)
-                },
-                onDiscardForm = {
-                    state.discard()
-                },
-                onBarcodeButtonClick = onBarcodeButtonClick,
-                onShowOnMapRequest = onShowOnMapRequest,
-                onNavigationEvent = onNavigationEvent,
-                modifier = Modifier.fillMaxSize()
-            )
-        },
-        modifier = modifier,
-        colorScheme = colorScheme,
-        typography = typography
-    )
+    // Dialogs
     FeatureFormDialog(states = formData.stateCollection)
 
     // Clear the navigation callbacks when the composition is disposed to avoid memory leaks
-    DisposableEffect(state) {
+    DisposableEffect(state, navController) {
+        state.setNavigationCallback { route ->
+            navController.navigate(route)
+        }
+        state.setNavigationPopupToCallback { route ->
+            navController.navigate(route) {
+                popUpTo(navController.graph.id) {
+                    inclusive = true
+                }
+            }
+        }
+        state.setNavigateBack {
+            navController.navigateUp()
+        }
         onDispose {
             // Clear the navigation actions when the composition is disposed
             state.setNavigationCallback(null)
@@ -519,8 +578,8 @@ public fun FeatureForm(
 
     // Observe and emit editing events from the FeatureFormState to the onEditingEvent callback
     LaunchedEffect(state.editingEvent) {
-        state.editingEvent.collect {
-            onEditingEvent(it)
+        state.editingEvent.collect { event ->
+            currentOnEditingEvent(event)
         }
     }
 

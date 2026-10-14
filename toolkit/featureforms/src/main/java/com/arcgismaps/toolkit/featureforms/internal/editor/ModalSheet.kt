@@ -17,8 +17,6 @@
 package com.arcgismaps.toolkit.featureforms.internal.editor
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
@@ -27,23 +25,24 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.movableContentOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 
 @Composable
 internal fun BoxScope.ModalSheet(
     onDismiss: () -> Unit,
-    visible: Boolean,
+    visibilityProvider: () -> Boolean,
     content: @Composable () -> Unit
 ) {
     // Scrim background
     AnimatedVisibility(
-        visible = visible,
+        visible = visibilityProvider(),
         modifier = Modifier.matchParentSize()
     ) {
         Box(
@@ -60,13 +59,14 @@ internal fun BoxScope.ModalSheet(
     }
     // Modal sheet content
     AnimatedVisibility(
-        visible = visible,
+        visible = visibilityProvider(),
         modifier = Modifier.align(Alignment.BottomCenter),
         enter = slideInVertically { h -> h },
         exit = slideOutVertically { h -> h }
     ) {
         Surface(
             modifier = Modifier.fillMaxSize(),
+            shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
         ) {
             content()
         }

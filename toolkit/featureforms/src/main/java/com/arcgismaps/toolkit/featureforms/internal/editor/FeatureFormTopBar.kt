@@ -19,8 +19,10 @@ package com.arcgismaps.toolkit.featureforms.internal.editor
 import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -29,9 +31,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.outlined.Article
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.outlined.Check
-import androidx.compose.material.icons.outlined.DeleteSweep
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.FilledTonalIconButton
@@ -61,10 +63,10 @@ internal fun FeatureFormTopBar(
     onSave: () -> Unit,
     onDiscard: () -> Unit,
     onDismiss: () -> Unit,
+    onShowOverview: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val hasEdits by state.hasEdits.collectAsState()
-    Log.e("TAG", "FeatureFormTopBar: $hasEdits", )
     var showConfirmationDialog by rememberSaveable(state) {
         mutableStateOf(false)
     }
@@ -75,6 +77,7 @@ internal fun FeatureFormTopBar(
         FeatureFormTopBar(
             hasEdits = hasEdits,
             hasBackStack = hasBackStack,
+            formCount = state.featureFormStates.count(),
             modifier = modifier,
             onBack = onBack,
             onSave = onSave,
@@ -85,7 +88,8 @@ internal fun FeatureFormTopBar(
                 } else {
                     onDismiss()
                 }
-            }
+            },
+            onShowOverview = onShowOverview
         )
     }
     if (showConfirmationDialog) {
@@ -99,7 +103,7 @@ internal fun FeatureFormTopBar(
         )
     }
     BackHandler(hasBackStack) {
-        Log.e("TAG", "FeatureFormTopBar: $hasBackStack", )
+        Log.e("TAG", "FeatureFormTopBar: $hasBackStack")
         onBack()
     }
 }
@@ -108,10 +112,12 @@ internal fun FeatureFormTopBar(
 private fun FeatureFormTopBar(
     hasEdits: Boolean,
     hasBackStack: Boolean,
+    formCount: Int,
     onBack: () -> Unit,
     onSave: () -> Unit,
     onDiscard: () -> Unit,
     onClose: () -> Unit,
+    onShowOverview: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -129,28 +135,35 @@ private fun FeatureFormTopBar(
             }
         }
         Spacer(modifier = Modifier.weight(1f))
-        AnimatedVisibility(hasEdits) {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+        Crossfade(
+            targetState = formCount > 1,
+            label = "Form action"
+        ) { showOverview ->
+            if (showOverview) {
                 FilledIconButton(
-                    onClick = onSave,
+                    onClick = onShowOverview,
                     modifier = Modifier.width(52.dp)
                 ) {
                     Icon(
-                        imageVector = Icons.Outlined.Check,
-                        contentDescription = "Save Edits"
+                        imageVector = Icons.AutoMirrored.Outlined.Article,
+                        contentDescription = "Show form overview"
                     )
                 }
-                FilledIconButton(
-                    onClick = onDiscard,
-                    modifier = Modifier.width(52.dp)
+            } else {
+                AnimatedVisibility(
+                    visible = hasEdits,
+                    enter = fadeIn(),
+                    exit = fadeOut()
                 ) {
-                    Icon(
-                        imageVector = Icons.Outlined.DeleteSweep,
-                        contentDescription = "Save Edits"
-                    )
+                    FilledIconButton(
+                        onClick = onSave,
+                        modifier = Modifier.width(52.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.Check,
+                            contentDescription = "Save edits"
+                        )
+                    }
                 }
             }
         }
@@ -211,11 +224,13 @@ private fun FeatureFormTopBarPreview() {
         FeatureFormTopBar(
             hasEdits = true,
             hasBackStack = true,
+            formCount = 2,
             modifier = Modifier.fillMaxWidth(),
             onBack = {},
             onSave = {},
             onDiscard = {},
-            onClose = {}
+            onClose = {},
+            onShowOverview = {}
         )
     }
 }
