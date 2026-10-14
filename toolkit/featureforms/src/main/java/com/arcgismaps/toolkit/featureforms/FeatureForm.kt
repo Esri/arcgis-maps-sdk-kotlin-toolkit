@@ -388,6 +388,13 @@ public fun FeatureForm(
                 // Send a saved edits event if the save was successful
                 val event = FeatureFormEditingEvent.SavedEdits(form, willNavigate)
                 onEditingEvent(event)
+            }.onFailure { error ->
+                dialogRequester.requestDialog(
+                    DialogType.SaveErrorDialog(
+                        message = error.localizedMessage
+                            ?: res.getString(R.string.unknown_save_error)
+                    )
+                )
             }
         } else {
             // Show a dialog with the validation errors if they exist
