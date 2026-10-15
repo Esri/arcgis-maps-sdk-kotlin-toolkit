@@ -35,6 +35,7 @@ kotlinxCoroutinesTest = "1.11.0"
 kotlinxSerializationJson = "1.11.0"
 mockkAndroid = "1.14.11"
 room = "2.8.4"
+sceneview = "4.18.0"
 targetSdk = "37"
 truth = "1.4.5"
 uiautomator = "2.4.0"
@@ -99,6 +100,7 @@ mockk-android = { module = "io.mockk:mockk-android", version.ref = "mockkAndroid
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 room-ext = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
+sceneview = { module = "io.github.sceneview:sceneview", version.ref = "sceneview" }
 truth = { group = "com.google.truth", name = "truth", version.ref = "truth" }
 dokka-versioning = { group = "org.jetbrains.dokka", name = "versioning-plugin", version.ref = "dokka" }
 arcore = { group = "com.google.ar", name = "core", version.ref = "arcore" }
