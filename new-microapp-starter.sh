@@ -77,11 +77,23 @@ if [ "$1" == "-h" ]; then
 fi
 
 # prompt for component name
-echo "Please enter the name of the new microapp in CamelCase without spaces. The name should end with App e.g. CompassApp."
-read name
+echo "Please enter the name of the new microapp in CamelCase (start with an ASCII letter; letters and digits only). The name should end with App e.g. CompassApp."
+if ! IFS= read -r name; then
+    echo "error: could not read the microapp name." >&2
+    exit 1
+fi
+
+if [[ ! "$name" =~ ^[abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ][abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789]*$ ]]; then
+    echo "error: the microapp name must start with an ASCII letter and contain only ASCII letters and digits (no spaces)." >&2
+    exit 1
+fi
 
 componentName="${name,,}"
 componentName="${componentName%app}"
+if [ -z "$componentName" ]; then
+    echo "error: the microapp name must contain a component name before the App suffix." >&2
+    exit 1
+fi
 composableFunctionName="${name^}"
 appDirName="${composableFunctionName}"
 if [[ ! "${appDirName}" =~ .+[Aa]pp$ ]] ; then
