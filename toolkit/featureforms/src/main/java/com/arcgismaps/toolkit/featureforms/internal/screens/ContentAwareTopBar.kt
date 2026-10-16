@@ -388,7 +388,7 @@ internal fun FeatureFormTitle(
 }
 
 @Composable
-private fun InitializingExpressions(
+internal fun InitializingExpressions(
     modifier: Modifier = Modifier,
     evaluationProvider: () -> Boolean
 ) {

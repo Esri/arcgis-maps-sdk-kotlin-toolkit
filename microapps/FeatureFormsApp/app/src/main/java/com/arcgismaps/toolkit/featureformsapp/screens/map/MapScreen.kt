@@ -329,7 +329,7 @@ fun FeatureFormSheet(
             peekHeight = 40.dp,
             expansionHeight = SheetExpansionHeight(0.5f),
             sheetSwipeEnabled = true,
-            shape = RoundedCornerShape(5.dp),
+            shape = RoundedCornerShape(15.dp),
             containerColor = MaterialTheme.colorScheme.surface,
             layoutHeight = layoutHeight.toFloat(),
             sheetWidth = with(LocalDensity.current) { layoutWidth.toDp() },

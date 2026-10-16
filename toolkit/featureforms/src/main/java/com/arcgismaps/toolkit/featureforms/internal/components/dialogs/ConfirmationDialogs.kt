@@ -112,6 +112,13 @@ internal fun ErrorDialog(
     )
 }
 
+@Composable
+internal fun SavingEditsDialog(
+    onDismissRequest: () -> Unit
+) {
+
+}
+
 @Preview
 @Composable
 private fun SaveEditsDialogPreview() {

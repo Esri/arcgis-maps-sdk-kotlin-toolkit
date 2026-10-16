@@ -39,8 +39,6 @@ internal fun FeatureFormNavHost(
     state: FeatureFormState,
     isNavigationEnabled: Boolean,
     validationErrorVisibility: ValidationErrorVisibility,
-    onSaveForm: () -> Unit,
-    onDiscardForm: () -> Unit,
     onBarcodeButtonClick: ((FieldFormElement) -> Unit)?,
     onShowOnMapRequest: (ArcGISFeature) -> Unit,
     onNavigationEvent: (FeatureFormNavigationRoute) -> Unit,

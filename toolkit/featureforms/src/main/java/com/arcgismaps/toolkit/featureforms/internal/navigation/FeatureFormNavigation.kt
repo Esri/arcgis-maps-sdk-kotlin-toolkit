@@ -61,6 +61,7 @@ internal fun NavGraphBuilder.featureFormDestination(
         val formData = remember(backStackEntry) { state.getActiveFormStateData() }
         FeatureFormScreen(
             formStateData = formData,
+            isGroupEvaluatingExpressions = state.isEvaluatingExpressions,
             onAudioCaptureRequest = { maxDuration, stateId ->
                 onAudioCaptureRequest(backStackEntry, maxDuration, stateId)
             },

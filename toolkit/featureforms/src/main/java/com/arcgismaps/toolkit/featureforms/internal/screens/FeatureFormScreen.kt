@@ -72,6 +72,7 @@ import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.Ut
 @Composable
 internal fun FeatureFormScreen(
     formStateData: FormStateData,
+    isGroupEvaluatingExpressions: Boolean,
     onAudioCaptureRequest: (Long?, Int) -> Unit,
     onBarcodeButtonClick: ((FieldFormElement) -> Unit)?,
     onUtilityFilterSelected: (UtilityAssociationsElementState) -> Unit,
@@ -114,10 +115,16 @@ internal fun FeatureFormScreen(
                 .padding(horizontal = 16.dp)
                 .fillMaxWidth()
         )
+        InitializingExpressions(
+            modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+            evaluationProvider = {
+                formStateData.isEvaluatingExpressions || isGroupEvaluatingExpressions
+            }
+        )
         HorizontalDivider(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 8.dp)
+                .padding(bottom = 8.dp)
                 .graphicsLayer {
                     this.alpha = alpha
                 }

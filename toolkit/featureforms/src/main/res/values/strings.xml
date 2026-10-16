@@ -210,4 +210,12 @@
         <item quantity="many">There are %1$d forms with validation errors. Please correct the errors before saving.</item>
         <item quantity="other">There are %1$d forms with validation errors. Please correct the errors before saving.</item>
     </plurals>
+    <plurals name="validation_errors">
+        <item quantity="zero">%1$d Errors.</item>
+        <item quantity="one">%1$d Error</item>
+        <item quantity="two">%1$d Errors</item>
+        <item quantity="few">%1$d Errors</item>
+        <item quantity="many">%1$d Errors</item>
+        <item quantity="other">%1$d Errors</item>
+    </plurals>
 </resources>

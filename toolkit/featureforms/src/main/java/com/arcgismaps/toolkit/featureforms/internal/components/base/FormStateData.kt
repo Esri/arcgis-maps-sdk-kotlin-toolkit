@@ -130,6 +130,23 @@ internal data class FormStateData(
         }
     }
 
+    /**
+     * Sets the [isEvaluatingExpressions] to true. This is used to indicate that the expressions are
+     * currently being evaluated externally.
+     */
+    fun setEvaluating() {
+        isEvaluatingExpressions = true
+    }
+
+    /**
+     * Sets the [initialEvaluation] to true. This is used to indicate that the expressions have been
+     * evaluated at least once externally.
+     */
+    fun setEvaluated() {
+        initialEvaluation = true
+        isEvaluatingExpressions = false
+    }
+
     companion object {
 
         /**

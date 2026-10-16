@@ -33,7 +33,6 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -66,12 +65,12 @@ import com.arcgismaps.mapping.featureforms.TextFormElement
 import com.arcgismaps.mapping.featureforms.UtilityAssociationFeatureCandidate
 import com.arcgismaps.mapping.featureforms.UtilityAssociationFeatureSource
 import com.arcgismaps.mapping.featureforms.UtilityAssociationsFormElement
+import com.arcgismaps.toolkit.featureforms.internal.components.dialogs.SavingsEditsDialog
 import com.arcgismaps.toolkit.featureforms.internal.editor.FeatureFormTopBar
 import com.arcgismaps.toolkit.featureforms.internal.editor.ManagerOverview
 import com.arcgismaps.toolkit.featureforms.internal.editor.ModalSheet
 import com.arcgismaps.toolkit.featureforms.internal.navigation.FeatureFormNavHost
 import com.arcgismaps.toolkit.featureforms.internal.navigation.FormNavigationDirection
-import com.arcgismaps.toolkit.featureforms.internal.navigation.lifecycleIsResumed
 import com.arcgismaps.toolkit.featureforms.internal.screens.shouldEnableTopBar
 import com.arcgismaps.toolkit.featureforms.internal.utils.DialogType
 import com.arcgismaps.toolkit.featureforms.internal.utils.FeatureFormDialog
@@ -86,6 +85,7 @@ import com.arcgismaps.utilitynetworks.UtilityAssociationGroupResult
 import com.arcgismaps.utilitynetworks.UtilityAssociationResult
 import com.arcgismaps.utilitynetworks.UtilityAssociationsFilter
 import com.arcgismaps.utilitynetworks.UtilityAssociationsFilterResult
+import kotlinx.coroutines.launch
 
 /**
  * Defines the visibility behavior of validation errors in a [FeatureForm].
@@ -390,8 +390,8 @@ public fun FeatureForm(
     val state by rememberUpdatedState(featureFormState)
     val currentOnEditingEvent by rememberUpdatedState(onEditingEvent)
     val currentOnNavigationEvent by rememberUpdatedState(onNavigationEvent)
-    val navController = rememberNavController()
-
+    val navController = rememberNavController(state)
+    val scope = rememberCoroutineScope()
     val res = LocalResources.current
     val dialogRequester = LocalDialogRequester.current
     val focusManager = LocalFocusManager.current
@@ -403,6 +403,7 @@ public fun FeatureForm(
         // Check for validation errors
         val formsWithErrors = state.formsWithErrors.value
         when {
+            // If there are errors with more than 1 form
             formsWithErrors > 0 && state.featureFormStates.size > 1 -> {
                 // If there are validation errors and more than one form, show a dialog with
                 // the option to view the errors in the overview screen.
@@ -421,8 +422,10 @@ public fun FeatureForm(
                 )
                 dialogRequester.requestDialog(errorDialog)
             }
-            formsWithErrors > 0 && state.featureFormStates.size == 1-> {
-                val errorCount = state.featureFormStates.first().featureForm.elementValidationErrors.value.size
+            // If there is a single form with errors
+            formsWithErrors > 0 && state.featureFormStates.size == 1 -> {
+                val errorCount =
+                    state.featureFormStates.first().featureForm.elementValidationErrors.value.size
                 // If there are validation errors and only one form, show a dialog with
                 // the option to dismiss the dialog and fix the errors.
                 val errorDialog = DialogType.ValidationErrorsDialog(
@@ -438,7 +441,7 @@ public fun FeatureForm(
                 )
                 dialogRequester.requestDialog(errorDialog)
             }
-
+            // No errors, proceed to finish editing the form
             formsWithErrors == 0 -> {
                 // Finish editing the form if there are no validation errors
                 state.finish()
@@ -476,14 +479,22 @@ public fun FeatureForm(
                     isVisible = backStackEntry?.shouldEnableTopBar() == true,
                     state = state,
                     hasBackStack = contentHasBackStack,
+                    showCloseIcon = showCloseIcon,
+                    showFormActions = showFormActions,
                     onBack = {
                         backStackEntry?.let(state::popBackStack)
                     },
                     onSave = {
-                        saveForm(state)
+                        scope.launch {
+                            state.evaluateExpressions()
+                        }.invokeOnCompletion {
+                            saveForm(state)
+                        }
                     },
-                    onDiscard = state::discard,
-                    onDismiss = onDismiss,
+                    onDismiss = {
+                        state.discard()
+                        onDismiss()
+                    },
                     onShowOverview = {
                         state.showOverview(true)
                     },
@@ -498,12 +509,6 @@ public fun FeatureForm(
                     state = state,
                     isNavigationEnabled = isNavigationEnabled,
                     validationErrorVisibility = validationErrorVisibility,
-                    onSaveForm = {
-                        saveForm(state)
-                    },
-                    onDiscardForm = {
-                        state.discard()
-                    },
                     onBarcodeButtonClick = onBarcodeButtonClick,
                     onShowOnMapRequest = onShowOnMapRequest,
                     onNavigationEvent = currentOnNavigationEvent,
@@ -520,20 +525,24 @@ public fun FeatureForm(
                 state.showOverview(false)
             }
         ) {
-            val forms = state.featureFormStates
-            val hasEdits by state.hasEdits.collectAsState()
             ManagerOverview(
-                forms = forms,
-                hasEdits = hasEdits,
+                state = state,
                 editable = false,
-                errorCount = state.formsWithErrors.collectAsState().value,
                 modifier = Modifier.fillMaxSize(),
                 onShowOnMapRequest = onShowOnMapRequest,
                 onDismiss = {
                     state.showOverview(false)
                 },
+                onClose = {
+                    state.discard()
+                    onDismiss()
+                },
                 onSave = {
-                    saveForm(state)
+                    scope.launch {
+                        state.evaluateExpressions()
+                    }.invokeOnCompletion {
+                        saveForm(state)
+                    }
                 },
                 onNavigateToForm = { stateData ->
                     backStackEntry?.let { entry ->
@@ -552,6 +561,11 @@ public fun FeatureForm(
 
     // Dialogs
     FeatureFormDialog(states = formData.stateCollection)
+
+    SavingsEditsDialog(
+        onDismissRequest = state::resetSavedEditsState,
+        state = state.saveEditsState
+    )
 
     // Clear the navigation callbacks when the composition is disposed to avoid memory leaks
     DisposableEffect(state, navController) {

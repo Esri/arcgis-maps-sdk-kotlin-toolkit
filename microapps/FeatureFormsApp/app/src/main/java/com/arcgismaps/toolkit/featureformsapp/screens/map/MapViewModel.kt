@@ -435,9 +435,9 @@ class MapViewModel @Inject constructor(
             is UIState.SelectFeature, UIState.NotEditing -> {
                 val forms = features.map(::FeatureForm)
                 // if the current state is selecting a feature or not editing then select the feature
-                val featureFormState = FeatureFormManagerState(
-                    forms = forms,
-                    scope = scope
+                val featureFormState = FeatureFormState(
+                    featureForms = forms,
+                    coroutineScope = scope
                 )
                 // set the UI to an editing state with the FeatureForm
                 _uiState.value = UIState.Editing(featureFormState)
