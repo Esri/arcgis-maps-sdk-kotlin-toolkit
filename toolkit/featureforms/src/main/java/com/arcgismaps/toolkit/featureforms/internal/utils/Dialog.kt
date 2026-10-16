@@ -200,6 +200,8 @@ internal sealed class DialogType {
         val title: String,
         val body: String
     ) : DialogType()
+
+    data class SaveErrorDialog(val message: String) : DialogType()
 }
 
 /**
@@ -504,6 +506,14 @@ internal fun FeatureFormDialog(states: FormStateCollection) {
                 },
                 title = title,
                 body = body
+            )
+        }
+
+        is DialogType.SaveErrorDialog -> {
+            ErrorDialog(
+                onDismissRequest = { dialogRequester.dismissDialog() },
+                title = stringResource(R.string.save_failed),
+                body = (dialogType as DialogType.SaveErrorDialog).message
             )
         }
 

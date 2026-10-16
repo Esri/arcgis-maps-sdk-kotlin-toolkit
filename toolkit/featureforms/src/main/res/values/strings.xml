@@ -119,6 +119,8 @@
     <string name="file_size_exceeds_limit">File Size Exceeds Limit</string>
     <string name="unsupported_file_type">Unsupported File Type</string>
     <string name="save">Save</string>
+    <string name="save_failed">Unable to save edits</string>
+    <string name="unknown_save_error">An unexpected error occurred while saving the form.</string>
     <string name="discard">Discard</string>
     <string name="none_selected">None Selected</string>
     <string name="the_form_has_validation_errors">The form has validation errors</string>
