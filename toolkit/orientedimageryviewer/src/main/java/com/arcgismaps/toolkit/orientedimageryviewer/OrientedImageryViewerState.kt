@@ -32,6 +32,7 @@ import com.arcgismaps.mapping.layers.orientedimagery.OrientedImage
 import com.arcgismaps.mapping.layers.orientedimagery.OrientedImageFootprint
 import com.arcgismaps.mapping.layers.orientedimagery.OrientedImageSearchParameters
 import com.arcgismaps.mapping.layers.orientedimagery.SequenceStep
+import com.arcgismaps.mapping.popup.Popup
 import com.arcgismaps.mapping.view.DoubleXY
 import com.arcgismaps.mapping.view.Graphic
 import com.arcgismaps.mapping.view.GraphicsOverlay
@@ -39,6 +40,7 @@ import com.arcgismaps.toolkit.orientedimageryviewer.internal.ImageDefaults
 import com.arcgismaps.toolkit.orientedimageryviewer.internal.OrientedImageInfo
 import com.arcgismaps.toolkit.orientedimageryviewer.internal.OrientedImageryViewerUiState
 import com.arcgismaps.toolkit.orientedimageryviewer.internal.PointData
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -102,6 +104,24 @@ public class OrientedImageryViewerState public constructor(
 
     public val hasActiveImage: Boolean
         get() = uiState.activeImageInfo != null
+
+    /**
+     * Creates a popup for the currently active oriented image by wrapping its geometry and
+     * attributes in a [Graphic].
+     *
+     * Returns a failed [Result] if there is no active image or popup creation fails.
+     */
+    public fun createImagePopup(): Result<Popup> {
+        val image = activeOrientedImage
+            ?: return Result.failure(IllegalStateException("An active oriented image is required to create a popup."))
+
+        return runCatching {
+            Popup(Graphic(image.geometry, image.attributes))
+        }.onFailure { error ->
+            if (error is CancellationException) throw error
+            Log.e("OrientedImagery", "Unable to create the image popup", error)
+        }
+    }
 
     private fun updateUiState(transform: (OrientedImageryViewerUiState) -> OrientedImageryViewerUiState) {
         _uiState.value = transform(_uiState.value)
@@ -343,7 +363,12 @@ public class OrientedImageryViewerState public constructor(
     }
 
     private fun setActiveImageInfo(value: OrientedImageInfo?) {
-        updateUiState { uiState -> uiState.copy(activeImageInfo = value) }
+        updateUiState { uiState ->
+            uiState.copy(
+                activeImageInfo = value,
+                activeImageRevision = uiState.activeImageRevision + 1
+            )
+        }
     }
 
     private fun setInputLocationData(value: PointData?) {

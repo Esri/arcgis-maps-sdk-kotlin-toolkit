@@ -102,12 +102,16 @@ android {
 dependencies {
     api(arcgis.mapsSdk)
     implementation(project(":geoview-compose"))
+    implementation(project(":popup"))
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.composeCore)
     implementation(libs.bundles.core)
     implementation(libs.bundles.icons)
     implementation(libs.androidx.activity.compose)
-    implementation(libs.sceneview)
+    implementation(libs.sceneview) {
+        // Popup's Parcelize runtime replaces the legacy parcel classes pulled in by Fuel.
+        exclude(group = "org.jetbrains.kotlin", module = "kotlin-android-extensions-runtime")
+    }
     testImplementation(libs.bundles.unitTest)
     androidTestImplementation(libs.bundles.composeTest)
     debugImplementation(libs.bundles.debug)

@@ -30,6 +30,7 @@ import com.arcgismaps.toolkit.orientedimageryviewer.OrientedImageryViewerState
 @Immutable
 internal data class OrientedImageryViewerUiState(
     val activeImageInfo: OrientedImageInfo? = null,
+    val activeImageRevision: Long = 0,
     val inputLocationData: PointData? = null,
     val isSequentialNavigationEnabled: Boolean = false,
     val isActiveFootprintVisible: Boolean = false,
