@@ -28,8 +28,14 @@ import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
 import android.util.Log
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -60,6 +66,7 @@ import io.github.sceneview.texture.ImageTexture
 import com.arcgismaps.toolkit.orientedimageryviewer.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import androidx.compose.ui.unit.dp
 import java.io.File
 import java.net.HttpURLConnection
 import java.net.URL
@@ -85,30 +92,32 @@ internal fun PanoramicImage(
     val loadFailedMessage = stringResource(R.string.panoramic_image_load_failed, imageSource)
     val hasReadImagesPermission = readImagesPermission == null || context.hasPermission(readImagesPermission)
 
-    // Load the bitmap off the main thread to avoid jank.
-    var materialInstance by remember(materialLoader) { mutableStateOf<MaterialInstance?>(null) }
+    // Preserve the previous panorama until the replacement image is fully ready.
+    data class RenderState(
+        val materialInstance: MaterialInstance,
+        val initialDirection: Float3,
+        val footprintOrientation: PanoramicFootprintOrientation?
+    )
+
+    var renderState by remember(materialLoader) { mutableStateOf<RenderState?>(null) }
+    var loadErrorMessage by remember(materialLoader) { mutableStateOf<String?>(null) }
     val inputLocationData = viewerState.uiState.inputLocationData
     val sequentialNavigation = viewerState.uiState.isSequentialNavigationEnabled
-    var initialDirection by remember(imageSource, inputLocationData, sequentialNavigation) {
-        mutableStateOf<Float3?>(null)
-    }
-    var footprintOrientation by remember(imageSource, inputLocationData, sequentialNavigation) {
-        mutableStateOf<PanoramicFootprintOrientation?>(null)
-    }
 
     LaunchedEffect(imageSource, materialLoader, context, hasReadImagesPermission, inputLocationData, sequentialNavigation) {
-        materialInstance = null
-        footprintOrientation = null
+        loadErrorMessage = null
         if (!hasReadImagesPermission) {
+            loadErrorMessage = permissionRequiredMessage
             Log.e("PanoramicImage", permissionRequiredMessage)
         } else {
             val bitmap = runCatching {
                 loadBitmapFromUri(context, imageSource)
             }.onFailure { throwable ->
+                loadErrorMessage = loadFailedMessage
                 Log.e("PanoramicImage", loadFailedMessage, throwable)
             }.getOrNull()
 
-            materialInstance = bitmap?.let {
+            bitmap?.let {
                 // Aim at the searched/selected map location, as the raster viewer does. Renderer
                 // axes alone cannot identify the correct side or elevation of an oriented image.
                 val imagePoint = if (!sequentialNavigation) {
@@ -118,88 +127,106 @@ internal fun PanoramicImage(
                         }?.getOrNull()
                     }
                 } else null
-                initialDirection = imagePoint?.let { point ->
+                val initialDirection = imagePoint?.let { point ->
                     panoramicImageDirection(point.x, point.y, it.width, it.height)
                 } ?: Float3(1f, 0f, 0f) // Image center when no valid target is available.
-                footprintOrientation = loadPanoramicFootprintOrientation(viewerState, it.width, it.height)
+                val footprintOrientation = loadPanoramicFootprintOrientation(viewerState, it.width, it.height)
                 if (footprintOrientation == null) {
                     Log.e("PanoramicImage", "Unable to calibrate geographic footprint orientation")
                 }
                 val texture = ImageTexture.Builder()
                     .bitmap(it)
                     .build(materialLoader.engine)
-                materialLoader.createImageInstance(texture)
-            }
-        }
-    }
-
-    // Do not render or submit a default footprint before the map-to-image transform completes.
-    val startingDirection = initialDirection
-    if (startingDirection == null || materialInstance == null) {
-        Box(modifier = modifier.fillMaxSize())
-        return
-    }
-    val cameraNode = key(imageSource, startingDirection) { rememberCameraNode(engine) {
-        // Put camera at the center of the sphere.
-        position = Float3(0f, 0f, 0f)
-        lookAt(startingDirection)
-    } }
-    val cameraManipulator = remember(cameraNode) {
-        // Orbit supplies rotation, but its translation must not move the camera away from the
-        // panorama center. Otherwise camera FOV and direction do not describe the visible image.
-        val rotationManipulator = object : CameraGestureDetector.DefaultCameraManipulator(
-            orbitHomePosition = -startingDirection,
-            targetPosition = Float3(0f, 0f, 0f)
-        ) {
-            override fun getTransform() = super.getTransform().apply {
-                w = Float4(0f, 0f, 0f, 1f)
-            }
-
-            // Two-finger panning cannot translate a panorama camera either.
-            override fun grabBegin(x: Int, y: Int, strafe: Boolean) {
-                super.grabBegin(x, y, false)
-            }
-        }
-        // Keep the projection and pinch baseline identical. SceneView's FOV manipulator starts
-        // tracking at 60 degrees regardless of the camera's actual lens projection, and resize
-        // can restore that lens projection. A panorama needs a stable vertical FOV instead.
-        object : CameraGestureDetector.CameraManipulator by rotationManipulator {
-            var verticalFov = 90.0
-            var aspect = 1.0
-
-            fun updateProjection() {
-                cameraNode.setProjection(
-                    verticalFov, aspect, cameraNode.near.toDouble(), cameraNode.far.toDouble(),
-                    Camera.Fov.VERTICAL
+                renderState = RenderState(
+                    materialInstance = materialLoader.createImageInstance(texture),
+                    initialDirection = initialDirection,
+                    footprintOrientation = footprintOrientation
                 )
             }
-
-            override fun setViewport(width: Int, height: Int) {
-                rotationManipulator.setViewport(width, height)
-                if (width > 0 && height > 0) {
-                    aspect = width.toDouble() / height
-                    updateProjection()
-                }
-            }
-
-            override fun scrollUpdate(x: Int, y: Int, prevSeparation: Float, currSeparation: Float) {
-                if (prevSeparation > 0f && currSeparation > 0f &&
-                    prevSeparation.isFinite() && currSeparation.isFinite()
-                ) {
-                    verticalFov = (verticalFov * prevSeparation / currSeparation).coerceIn(25.0, 100.0)
-                    updateProjection()
-                }
-            }
-
-            override fun update(deltaTime: Float) {
-                rotationManipulator.update(deltaTime)
-                updateProjection()
-            }
         }
     }
-    val footprintUpdateTracker = remember(cameraNode) { PanoramicFootprintUpdateTracker() }
 
     Box(modifier = modifier.fillMaxSize()) {
+        val state = renderState
+        if (state == null) {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally
+            ) {
+                CircularProgressIndicator()
+                if (loadErrorMessage != null) {
+                    Text(
+                        text = loadErrorMessage.orEmpty(),
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(top = 16.dp)
+                    )
+                }
+            }
+            return@Box
+        }
+
+        // Do not render or submit a default footprint before the map-to-image transform completes.
+        val cameraNode = key(imageSource, state.initialDirection) { rememberCameraNode(engine) {
+            // Put camera at the center of the sphere.
+            position = Float3(0f, 0f, 0f)
+            lookAt(state.initialDirection)
+        } }
+        val cameraManipulator = remember(cameraNode) {
+            // Orbit supplies rotation, but its translation must not move the camera away from the
+            // panorama center. Otherwise camera FOV and direction do not describe the visible image.
+            val rotationManipulator = object : CameraGestureDetector.DefaultCameraManipulator(
+                orbitHomePosition = -state.initialDirection,
+                targetPosition = Float3(0f, 0f, 0f)
+            ) {
+                override fun getTransform() = super.getTransform().apply {
+                    w = Float4(0f, 0f, 0f, 1f)
+                }
+
+                // Two-finger panning cannot translate a panorama camera either.
+                override fun grabBegin(x: Int, y: Int, strafe: Boolean) {
+                    super.grabBegin(x, y, false)
+                }
+            }
+            // Keep the projection and pinch baseline identical. SceneView's FOV manipulator starts
+            // tracking at 60 degrees regardless of the camera's actual lens projection, and resize
+            // can restore that lens projection. A panorama needs a stable vertical FOV instead.
+            object : CameraGestureDetector.CameraManipulator by rotationManipulator {
+                var verticalFov = 90.0
+                var aspect = 1.0
+
+                fun updateProjection() {
+                    cameraNode.setProjection(
+                        verticalFov, aspect, cameraNode.near.toDouble(), cameraNode.far.toDouble(),
+                        Camera.Fov.VERTICAL
+                    )
+                }
+
+                override fun setViewport(width: Int, height: Int) {
+                    rotationManipulator.setViewport(width, height)
+                    if (width > 0 && height > 0) {
+                        aspect = width.toDouble() / height
+                        updateProjection()
+                    }
+                }
+
+                override fun scrollUpdate(x: Int, y: Int, prevSeparation: Float, currSeparation: Float) {
+                    if (prevSeparation > 0f && currSeparation > 0f &&
+                        prevSeparation.isFinite() && currSeparation.isFinite()
+                    ) {
+                        verticalFov = (verticalFov * prevSeparation / currSeparation).coerceIn(25.0, 100.0)
+                        updateProjection()
+                    }
+                }
+
+                override fun update(deltaTime: Float) {
+                    rotationManipulator.update(deltaTime)
+                    updateProjection()
+                }
+            }
+        }
+        val footprintUpdateTracker = remember(cameraNode) { PanoramicFootprintUpdateTracker() }
+
         SceneView(
             modifier = Modifier.fillMaxSize(),
             engine = engine,
@@ -217,7 +244,7 @@ internal fun PanoramicImage(
                     return@SceneView
                 }
 
-                val orientation = footprintOrientation ?: return@SceneView
+                val orientation = state.footprintOrientation ?: return@SceneView
                 val currentUpdate = cameraNode.toFootprintUpdate(orientation) ?: return@SceneView
                 if (currentUpdate.isApproximatelyEqualTo(footprintUpdateTracker.lastUpdate)) {
                     return@SceneView
@@ -237,19 +264,16 @@ internal fun PanoramicImage(
                 )
             }
         ) {
-            val mat = materialInstance
-            if (mat != null) {
-                // Sphere UVs are oriented for viewing from outside. Reflect X so the image reads
-                // left-to-right from inside, preserving the +Z initial view and vertical orientation.
-                SphereNode(
-                    radius = radiusMeters,
-                    center = Float3(0f, 0f, 0f),
-                    stacks = 64,
-                    slices = 128,
-                    materialInstance = mat,
-                    scale = Float3(-1f, 1f, 1f)
-                )
-            }
+            // Sphere UVs are oriented for viewing from outside. Reflect X so the image reads
+            // left-to-right from inside, preserving the +Z initial view and vertical orientation.
+            SphereNode(
+                radius = radiusMeters,
+                center = Float3(0f, 0f, 0f),
+                stacks = 64,
+                slices = 128,
+                materialInstance = state.materialInstance,
+                scale = Float3(-1f, 1f, 1f)
+            )
         }
     }
 }
@@ -295,7 +319,7 @@ private suspend fun loadPanoramicFootprintOrientation(
     height: Int
 ): PanoramicFootprintOrientation? {
     val camera = viewerState.uiState.activeImageInfo?.cameraLocationData?.toPoint() ?: return null
-    val projected = GeometryEngine.projectOrNull(camera, SpatialReference(3857)) as? Point ?: return null
+    val projected = GeometryEngine.projectOrNull(camera, SpatialReference(3857)) ?: return null
     val cameraZ = projected.z?.takeIf { it.isFinite() } ?: return null
     val sr = projected.spatialReference ?: return null
     suspend fun directionAt(point: Point): Float3? {

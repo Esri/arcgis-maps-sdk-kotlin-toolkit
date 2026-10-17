@@ -23,6 +23,9 @@
     <string name="toolbar_additional_camera_locations">Additional camera locations</string>
     <string name="toolbar_sequential_navigation">Location-image</string>
     <string name="toolbar_reset">Reset</string>
+    <string name="toolbar_popup">Image popup</string>
+    <string name="popup_no_active_image">Select an image before opening its popup.</string>
+    <string name="popup_creation_failed">Unable to create the image popup.</string>
 
     <string name="panoramic_image_permission_required">Cannot load local panoramic image until image read permission is granted: %1$s</string>
     <string name="panoramic_image_load_failed">Failed to load panoramic image from %1$s</string>
