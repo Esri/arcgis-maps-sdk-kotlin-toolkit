@@ -194,7 +194,7 @@ private fun FeatureFormTopBar(
             } else {
                 Row {
                     AnimatedVisibility(
-                        visible = hasEdits,
+                        visible = showFormActions && hasEdits,
                         enter = fadeIn(),
                         exit = fadeOut()
                     ) {

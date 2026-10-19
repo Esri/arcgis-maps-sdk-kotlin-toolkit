@@ -221,7 +221,7 @@
         <item quantity="other">%1$d Errors</item>
     </plurals>
     <plurals name="form_expression_evaluation_errors">
-        <item quantity="zero">There were %1$d errors evaluating form expressions.</item>
+        <item quantity="zero">There were an error while evaluating form expressions.</item>
         <item quantity="one">There was %1$d error evaluating form expressions.</item>
         <item quantity="two">There were %1$d errors evaluating form expressions.</item>
         <item quantity="few">There were %1$d errors evaluating form expressions.</item>

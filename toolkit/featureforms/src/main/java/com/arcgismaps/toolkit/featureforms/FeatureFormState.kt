@@ -73,6 +73,7 @@ import com.arcgismaps.toolkit.featureforms.internal.navigation.FormNavigationDir
 import com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationRoute
 import com.arcgismaps.toolkit.featureforms.internal.navigation.lifecycleIsResumed
 import com.arcgismaps.toolkit.featureforms.internal.utils.ApplyEditsException
+import com.arcgismaps.toolkit.featureforms.internal.utils.FinishEditingException
 import com.arcgismaps.toolkit.featureforms.internal.utils.FormExpressionEvaluationException
 import com.arcgismaps.toolkit.featureforms.internal.utils.InvalidFormGroupStateException
 import com.arcgismaps.toolkit.featureforms.internal.utils.InvalidFormStateException
@@ -407,6 +408,8 @@ public class FeatureFormState private constructor(
     }
 
     internal fun save() {
+        // If already saving, return early to avoid duplicate saves.
+        if (_savedEditsState.value == SavedEditsState.Saving) return
         _savedEditsState.value = SavedEditsState.Saving
         coroutineScope.launch {
             _isEvaluatingExpressions.value = true
@@ -451,7 +454,7 @@ public class FeatureFormState private constructor(
                     }.onFailure {
                         // set error state with the exception message
                         _savedEditsState.value = SavedEditsState.Error(
-                            ApplyEditsException(it.message ?: "Unknown error")
+                            FinishEditingException(it.message ?: "Unknown error")
                         )
                         // emit the error event
                         // TODO: emit an event for the error
