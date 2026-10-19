@@ -16,54 +16,120 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.components.dialogs
 
-import android.app.AlertDialog
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Warning
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.window.DialogProperties
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.SavedEditsState
+import com.arcgismaps.toolkit.featureforms.internal.utils.ApplyEditsException
+import com.arcgismaps.toolkit.featureforms.internal.utils.FinishEditingException
+import com.arcgismaps.toolkit.featureforms.internal.utils.FormExpressionEvaluationException
+import com.arcgismaps.toolkit.featureforms.internal.utils.InvalidFormGroupStateException
+import com.arcgismaps.toolkit.featureforms.internal.utils.InvalidFormStateException
 
 @Composable
 internal fun SavingsEditsDialog(
     onDismissRequest: () -> Unit,
     state: SavedEditsState
 ) {
+    when (state) {
+        SavedEditsState.Idle -> Unit
+
+        SavedEditsState.Saving -> {
+            SavingEditsProgressDialog()
+        }
+
+        SavedEditsState.Saved -> {
+            LaunchedEffect(Unit) {
+                onDismissRequest()
+            }
+        }
+
+        is SavedEditsState.Error -> {
+            ErrorDialog(
+                onDismissRequest = onDismissRequest,
+                onAction = null,
+                title = stringResource(R.string.error_saving_edits),
+                body = saveEditsErrorMessage(state.error),
+                actionText = ""
+            )
+        }
+    }
+}
+
+@Composable
+private fun SavingEditsProgressDialog() {
     AlertDialog(
         onDismissRequest = {},
-        confirmButton = {
-            TextButton(
-                onClick = {
-                    errorMessage = null
-                }
-            ) {
-                Text(text = stringResource(id = R.string.ok))
-            }
-        },
-        icon = {
-            Icon(
-                imageVector = Icons.Rounded.Warning,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.error
-            )
+        title = {
+            Text(stringResource(R.string.saving_edits))
         },
         text = {
-            when(state) {
-                SavedEditsState.Saved -> {
-                    Text(text = stringResource(id = R.string.edits_saved_successfully))
-                }
-                is SavedEditsState.Error -> {
-                    Text(text = stringResource(id = R.string.failed_to_save_edits))
-                }
-                SavedEditsState.Saving -> {
-                    Text(text = stringResource(id = R.string.saving_edits))
-                }
+            Box(
+                modifier = Modifier.fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
             }
         },
+        confirmButton = {},
+        properties = DialogProperties(
+            dismissOnClickOutside = false,
+            dismissOnBackPress = false
+        )
     )
+}
+
+@Composable
+private fun saveEditsErrorMessage(error: Throwable): String {
+    return when (error) {
+        is InvalidFormGroupStateException -> {
+            pluralStringResource(
+                R.plurals.form_group_has_validation_errors,
+                error.count,
+                error.count
+            )
+        }
+
+        is InvalidFormStateException -> {
+            pluralStringResource(
+                R.plurals.you_have_errors_that_must_be_fixed_before_saving,
+                error.count,
+                error.count
+            )
+        }
+
+        is FormExpressionEvaluationException -> {
+            val errorCount = error.errors.size
+            pluralStringResource(
+                R.plurals.form_expression_evaluation_errors,
+                errorCount,
+                errorCount
+            )
+        }
+
+        is FinishEditingException -> {
+            error.message ?: stringResource(R.string.unknown_error)
+        }
+
+        is ApplyEditsException -> {
+            error.message ?: stringResource(R.string.unknown_error)
+        }
+
+        else -> {
+            stringResource(
+                R.string.error_while_saving_the_edits,
+                error.localizedMessage ?: stringResource(R.string.unknown_error)
+            )
+        }
+    }
 }

@@ -36,7 +36,6 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -44,8 +43,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.platform.LocalResources
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.FloatingWindow
 import androidx.navigation.NavHostController
@@ -72,9 +69,7 @@ import com.arcgismaps.toolkit.featureforms.internal.editor.ModalSheet
 import com.arcgismaps.toolkit.featureforms.internal.navigation.FeatureFormNavHost
 import com.arcgismaps.toolkit.featureforms.internal.navigation.FormNavigationDirection
 import com.arcgismaps.toolkit.featureforms.internal.screens.shouldEnableTopBar
-import com.arcgismaps.toolkit.featureforms.internal.utils.DialogType
 import com.arcgismaps.toolkit.featureforms.internal.utils.FeatureFormDialog
-import com.arcgismaps.toolkit.featureforms.internal.utils.LocalDialogRequester
 import com.arcgismaps.toolkit.featureforms.theme.FeatureFormColorScheme
 import com.arcgismaps.toolkit.featureforms.theme.FeatureFormDefaults
 import com.arcgismaps.toolkit.featureforms.theme.FeatureFormTheme
@@ -85,7 +80,6 @@ import com.arcgismaps.utilitynetworks.UtilityAssociationGroupResult
 import com.arcgismaps.utilitynetworks.UtilityAssociationResult
 import com.arcgismaps.utilitynetworks.UtilityAssociationsFilter
 import com.arcgismaps.utilitynetworks.UtilityAssociationsFilterResult
-import kotlinx.coroutines.launch
 
 /**
  * Defines the visibility behavior of validation errors in a [FeatureForm].
@@ -391,64 +385,7 @@ public fun FeatureForm(
     val currentOnEditingEvent by rememberUpdatedState(onEditingEvent)
     val currentOnNavigationEvent by rememberUpdatedState(onNavigationEvent)
     val navController = rememberNavController(state)
-    val scope = rememberCoroutineScope()
-    val res = LocalResources.current
-    val dialogRequester = LocalDialogRequester.current
     val focusManager = LocalFocusManager.current
-    val validationErrorMessage = stringResource(R.string.the_form_has_validation_errors)
-
-    // A function that provides the action to save edits on the form
-    fun saveForm(state: FeatureFormState) {
-        focusManager.clearFocus()
-        // Check for validation errors
-        val formsWithErrors = state.formsWithErrors.value
-        when {
-            // If there are errors with more than 1 form
-            formsWithErrors > 0 && state.featureFormStates.size > 1 -> {
-                // If there are validation errors and more than one form, show a dialog with
-                // the option to view the errors in the overview screen.
-                val errorDialog = DialogType.ValidationErrorsDialog(
-                    onDismiss = state::validateAllFields,
-                    onAction = {
-                        state.showOverview(true)
-                    },
-                    title = validationErrorMessage,
-                    body = res.getQuantityString(
-                        R.plurals.form_group_has_validation_errors,
-                        formsWithErrors,
-                        formsWithErrors
-                    ),
-                    actionText = res.getString(R.string.view_errors)
-                )
-                dialogRequester.requestDialog(errorDialog)
-            }
-            // If there is a single form with errors
-            formsWithErrors > 0 && state.featureFormStates.size == 1 -> {
-                val errorCount =
-                    state.featureFormStates.first().featureForm.elementValidationErrors.value.size
-                // If there are validation errors and only one form, show a dialog with
-                // the option to dismiss the dialog and fix the errors.
-                val errorDialog = DialogType.ValidationErrorsDialog(
-                    onDismiss = state::validateAllFields,
-                    onAction = null,
-                    title = validationErrorMessage,
-                    body = res.getQuantityString(
-                        R.plurals.you_have_errors_that_must_be_fixed_before_saving,
-                        errorCount,
-                        errorCount
-                    ),
-                    actionText = ""
-                )
-                dialogRequester.requestDialog(errorDialog)
-            }
-            // No errors, proceed to finish editing the form
-            formsWithErrors == 0 -> {
-                // Finish editing the form if there are no validation errors
-                state.finish()
-            }
-        }
-    }
-
     // Get the current back stack entry as state
     val backStackEntry by navController.currentBackStackEntryAsState()
     // Track if the content has a back stack entry.
@@ -485,11 +422,8 @@ public fun FeatureForm(
                         backStackEntry?.let(state::popBackStack)
                     },
                     onSave = {
-                        scope.launch {
-                            state.evaluateExpressions()
-                        }.invokeOnCompletion {
-                            saveForm(state)
-                        }
+                        focusManager.clearFocus()
+                        state.save()
                     },
                     onDismiss = {
                         state.discard()
@@ -538,11 +472,7 @@ public fun FeatureForm(
                     onDismiss()
                 },
                 onSave = {
-                    scope.launch {
-                        state.evaluateExpressions()
-                    }.invokeOnCompletion {
-                        saveForm(state)
-                    }
+                    state.save()
                 },
                 onNavigateToForm = { stateData ->
                     backStackEntry?.let { entry ->

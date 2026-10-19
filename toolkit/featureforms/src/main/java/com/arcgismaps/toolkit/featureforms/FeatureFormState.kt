@@ -72,6 +72,10 @@ import com.arcgismaps.toolkit.featureforms.internal.editor.id
 import com.arcgismaps.toolkit.featureforms.internal.navigation.FormNavigationDirection
 import com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationRoute
 import com.arcgismaps.toolkit.featureforms.internal.navigation.lifecycleIsResumed
+import com.arcgismaps.toolkit.featureforms.internal.utils.ApplyEditsException
+import com.arcgismaps.toolkit.featureforms.internal.utils.FormExpressionEvaluationException
+import com.arcgismaps.toolkit.featureforms.internal.utils.InvalidFormGroupStateException
+import com.arcgismaps.toolkit.featureforms.internal.utils.InvalidFormStateException
 import com.arcgismaps.toolkit.featureforms.internal.utils.fieldIsNullable
 import com.arcgismaps.toolkit.featureforms.internal.utils.toMap
 import kotlinx.coroutines.CoroutineScope
@@ -382,6 +386,14 @@ public class FeatureFormState private constructor(
         }
     }
 
+    /**
+     * Finishes edits on the form(s) and applies them to the service if [willApplyEdits] is true.
+     * This method requires that there are no validation errors in any of the forms. If there are
+     * validation errors, an [IllegalStateException] is set on the returned result.
+     *
+     * @return A [Result] indicating success or failure.
+     * @since 300.2.0
+     */
     public suspend fun finishEditing(): Result<Unit> = runCatching {
         _featureFormStates.forEach { it.validateAllFields() }
         require(formsWithErrors.value == 0) {
@@ -397,30 +409,58 @@ public class FeatureFormState private constructor(
         }
     }
 
-    internal fun finish() {
+    internal fun save() {
         _savedEditsState.value = SavedEditsState.Saving
         coroutineScope.launch {
-            _featureFormGroup.evaluateExpressions()
-            finishEditing().onSuccess {
-                _savedEditsState.value = SavedEditsState.Saved
-                _editingEvent.emit(
-                    FeatureFormEditingEvent.SavedEdits(
-                        activeFeatureForm,
-                        false
+            _isEvaluatingExpressions.value = true
+            val evaluationErrors = _featureFormGroup.evaluateExpressions().getOrNull()
+            _isEvaluatingExpressions.value = false
+            // If task failed or there are evaluation errors, set error state and return.
+            if (evaluationErrors == null || evaluationErrors.isNotEmpty()) {
+                _savedEditsState.value = SavedEditsState.Error(
+                    FormExpressionEvaluationException(
+                        evaluationErrors ?: emptyList()
                     )
                 )
-            }.onFailure {
-                // emit failure event
-                _savedEditsState.value = SavedEditsState.Error(it)
+                return@launch
             }
-        }
-    }
+            when {
+                // If there are errors with more than 1 form
+                formsWithErrors.value > 0 && featureFormStates.size > 1 -> {
+                    _savedEditsState.value = SavedEditsState.Error(
+                        InvalidFormGroupStateException(formsWithErrors.value)
+                    )
+                }
 
-    internal suspend fun evaluateExpressions(): Result<List<FormExpressionEvaluationError>> {
-        _isEvaluatingExpressions.value = true
-        delay(25.seconds)
-        return _featureFormGroup.evaluateExpressions().also {
-            _isEvaluatingExpressions.value = false
+                // If there is a single form with errors
+                formsWithErrors.value > 0 && featureFormStates.size == 1 -> {
+                    val errorCount =
+                        featureFormStates.first().featureForm.elementValidationErrors.value.size
+                    _savedEditsState.value = SavedEditsState.Error(
+                        InvalidFormStateException(errorCount)
+                    )
+                }
+
+                // No errors, proceed to finish editing the form
+                formsWithErrors.value == 0 -> {
+                    finishEditing().onSuccess {
+                        _savedEditsState.value = SavedEditsState.Saved
+                        _editingEvent.emit(
+                            FeatureFormEditingEvent.SavedEdits(
+                                activeFeatureForm,
+                                false
+                            )
+                        )
+                    }.onFailure {
+                        // set error state with the exception message
+                        _savedEditsState.value = SavedEditsState.Error(
+                            ApplyEditsException(it.message ?: "Unknown error")
+                        )
+                        // emit the error event
+                        // TODO: emit an event for the error
+                    }
+                }
+            }
         }
     }
 
@@ -617,7 +657,7 @@ public class FeatureFormState private constructor(
 internal sealed class SavedEditsState {
     object Idle : SavedEditsState()
     object Saving : SavedEditsState()
-    object Saved: SavedEditsState()
+    object Saved : SavedEditsState()
     data class Error(val error: Throwable) : SavedEditsState()
 }
 

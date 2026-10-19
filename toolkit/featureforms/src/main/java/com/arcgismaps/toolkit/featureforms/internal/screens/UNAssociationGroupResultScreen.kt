@@ -23,19 +23,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.mapping.featureforms.FeatureForm
-import com.arcgismaps.toolkit.featureforms.internal.components.dialogs.SaveEditsDialog
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationGroupResult
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationsElementState
-import com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationAction
-import kotlinx.coroutines.launch
 
 /**
  * Screen that displays the selected group of associations.

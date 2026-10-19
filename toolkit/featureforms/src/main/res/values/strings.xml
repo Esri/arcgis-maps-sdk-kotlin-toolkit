@@ -193,7 +193,9 @@
     <string name="there_are_validation_errors">There are validation errors</string>
     <string name="view_errors">View Errors</string>
     <string name="error_saving_edits">Error savings edits</string>
-    <string name="an_error_occurred_while_saving_the_edits">An error occurred while saving the edits: %1$s</string>
+    <string name="error_while_saving_the_edits">An error occurred while saving the edits: %1$s</string>
+    <string name="saving_edits">Saving edits</string>
+    <string name="unknown_error">Unknown error</string>
     <plurals name="min_attachments_required">
         <item quantity="zero">At least %1$d attachments are required</item>
         <item quantity="one">At least %1$d attachment is required</item>
@@ -217,5 +219,13 @@
         <item quantity="few">%1$d Errors</item>
         <item quantity="many">%1$d Errors</item>
         <item quantity="other">%1$d Errors</item>
+    </plurals>
+    <plurals name="form_expression_evaluation_errors">
+        <item quantity="zero">There were %1$d errors evaluating form expressions.</item>
+        <item quantity="one">There was %1$d error evaluating form expressions.</item>
+        <item quantity="two">There were %1$d errors evaluating form expressions.</item>
+        <item quantity="few">There were %1$d errors evaluating form expressions.</item>
+        <item quantity="many">There were %1$d errors evaluating form expressions.</item>
+        <item quantity="other">There were %1$d errors evaluating form expressions.</item>
     </plurals>
 </resources>
