@@ -42,12 +42,6 @@ internal fun SavingsEditsDialog(
     state: SavedEditsState
 ) {
     when (state) {
-        SavedEditsState.Idle -> Unit
-
-        SavedEditsState.Saving -> {
-            SavingEditsProgressDialog()
-        }
-
         SavedEditsState.Saved -> {
             LaunchedEffect(Unit) {
                 onDismissRequest()
@@ -63,6 +57,8 @@ internal fun SavingsEditsDialog(
                 actionText = ""
             )
         }
+
+        else -> {}
     }
 }
 

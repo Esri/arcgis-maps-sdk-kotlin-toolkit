@@ -81,7 +81,6 @@ import com.arcgismaps.toolkit.featureforms.internal.utils.toMap
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -91,7 +90,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import kotlin.time.Duration.Companion.seconds
 
 /**
  * The state object for a [FeatureForm] used by the FeatureForm composable. This class is
@@ -232,7 +230,6 @@ public class FeatureFormState private constructor(
         }
         coroutineScope.launch(start = CoroutineStart.UNDISPATCHED) {
             _isEvaluatingExpressions.value = true
-            delay(25.seconds)
             // Evaluate expressions on the group.
             _featureFormGroup.evaluateExpressions().onSuccess {
                 _featureFormStates.forEach {
