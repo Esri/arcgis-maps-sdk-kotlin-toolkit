@@ -57,11 +57,13 @@ internal fun PanoramicImage(
     val revision = uiState.activeImageRevision
     val inputLocation = uiState.inputLocationData
     val sequential = uiState.isSequentialNavigationEnabled
+    val footprintVisible = uiState.isActiveFootprintVisible
+    var panoramaView by remember { mutableStateOf<PanoramaView?>(null) }
     val failureMessage = stringResource(R.string.panoramic_image_load_failed, source)
     var frame by remember(viewerState, revision, source, inputLocation, sequential) { mutableStateOf<PanoramaFrame?>(null) }
     var error by remember(viewerState, revision, source, inputLocation, sequential) { mutableStateOf<String?>(null) }
     var loading by remember(viewerState, revision, source, inputLocation, sequential) { mutableStateOf(true) }
-    var lastFootprint by remember(viewerState, revision, uiState.isActiveFootprintVisible, sequential) {
+    var lastFootprint by remember(viewerState, revision, frame, footprintVisible, sequential) {
         mutableStateOf<PanoramaFootprint?>(null)
     }
 
@@ -120,24 +122,37 @@ internal fun PanoramicImage(
             !current.isSequentialNavigationEnabled && !loading && error == null
         ) {
             val update = displayed.orientation?.footprint(camera, aspect)
-            if (update != null && !update.approximatelyEquals(lastFootprint)) {
+            if (update == null) {
+                viewerState.showConstructedPanoramaFootprint(revision)
+            } else if (!update.approximatelyEquals(lastFootprint)) {
                 lastFootprint = update
                 viewerState.updateFootprints(update.yaw, update.pitch, update.horizontalFov, update.verticalFov)
             }
         }
     }
 
+    // Readiness supplies the first sync. Eligibility changes must also sync an already-ready
+    // view, even when no gesture, resize, or AndroidView update occurs.
+    LaunchedEffect(viewerState, revision, panoramaView, frame, loading, error, footprintVisible, sequential) {
+        if (footprintVisible && !sequential && !loading) {
+            if (error != null) viewerState.showConstructedPanoramaFootprint(revision)
+            else panoramaView?.notifyCameraChanged()
+        }
+    }
+
     Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         AndroidView(
-            factory = { context -> PanoramaView(context) },
+            factory = { context -> PanoramaView(context).also { panoramaView = it } },
             modifier = Modifier.fillMaxSize(),
-            onRelease = { it.release() },
+            onRelease = {
+                if (panoramaView === it) panoramaView = null
+                it.release()
+            },
             update = { surface ->
                 surface.onReady = { onReady(it) }
                 surface.onFailure = { failed, exception -> onFailure(failed, exception) }
                 surface.onCameraChanged = { displayed, camera, aspect -> onCameraChanged(displayed, camera, aspect) }
                 currentFrame?.let(surface::setFrame)
-                surface.notifyCameraChanged()
             }
         )
         if (loading || error != null) {

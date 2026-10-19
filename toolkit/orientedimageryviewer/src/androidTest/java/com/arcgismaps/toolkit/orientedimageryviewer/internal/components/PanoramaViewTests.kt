@@ -21,8 +21,11 @@ import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.test.platform.app.InstrumentationRegistry
 import java.io.File
+import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
 import org.junit.After
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -35,6 +38,10 @@ class PanoramaViewTests {
     private lateinit var surface: PanoramaView
     private val ready = AtomicReference<PanoramaFrame?>()
     private val failure = AtomicReference<Exception?>()
+    private val readyCount = AtomicInteger()
+    private val cameraCount = AtomicInteger()
+    private val displayedCamera = AtomicReference<PanoramaCamera?>()
+    private val displayedAspect = AtomicReference<Double?>()
 
     @After
     fun deleteImages() {
@@ -62,6 +69,41 @@ class PanoramaViewTests {
     }
 
     @Test
+    fun firstReadySynchronizesCurrentCameraAndExplicitResyncNeedsNoMovement() {
+        val file = temporaryFile()
+        writeImage(file, Color.GREEN, Color.GREEN)
+        val camera = PanoramaCamera(yaw = 123.0, pitch = 35.0, verticalFov = 60.0)
+        val frame = PanoramaFrame(file.path, camera, null)
+        show(frame)
+        awaitColor(frame, Color.GREEN)
+
+        compose.runOnIdle {
+            assertEquals(1, readyCount.get())
+            assertTrue(cameraCount.get() > 0)
+            assertEquals(camera, displayedCamera.get())
+            assertEquals(surface.width.toDouble() / surface.height, requireNotNull(displayedAspect.get()), 0.0)
+
+            // Re-enabling a footprint requests the current camera, even without input/rendering.
+            val count = cameraCount.get()
+            repeat(2) { surface.notifyCameraChanged() }
+            assertEquals(count + 2, cameraCount.get())
+            assertEquals(1, readyCount.get())
+        }
+
+        val replacement = PanoramaFrame(file.path, camera.zoom(2.0), null)
+        compose.runOnIdle { surface.setFrame(replacement) }
+        awaitColor(replacement, Color.GREEN)
+        compose.runOnIdle {
+            assertEquals(2, readyCount.get())
+            assertEquals(replacement.initialCamera, displayedCamera.get())
+            val count = cameraCount.get()
+            surface.release()
+            surface.notifyCameraChanged()
+            assertEquals(count, cameraCount.get())
+        }
+    }
+
+    @Test
     fun invalidLocalImageReportsFailureAndCanBeReleasedRepeatedly() {
         val file = temporaryFile().apply { writeText("not an image") }
         show(PanoramaFrame(file.path, PanoramaCamera(), null))
@@ -86,7 +128,17 @@ class PanoramaViewTests {
                         }
                     PanoramaView(context).also {
                         surface = it
-                        it.onReady = { displayed -> ready.set(displayed) }
+                        it.onReady = { displayed ->
+                            ready.set(displayed)
+                            readyCount.incrementAndGet()
+                        }
+                        it.onCameraChanged = { displayed, camera, aspect ->
+                            // Initial camera sync must follow readiness, not texture upload alone.
+                            assertSame(displayed, ready.get())
+                            displayedCamera.set(camera)
+                            displayedAspect.set(aspect)
+                            cameraCount.incrementAndGet()
+                        }
                         it.onFailure = { _, exception -> failure.set(exception) }
                         it.setFrame(frame)
                     }

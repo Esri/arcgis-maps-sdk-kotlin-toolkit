@@ -31,6 +31,7 @@ import com.arcgismaps.mapping.layers.OrientedImageryLayer
 import com.arcgismaps.mapping.layers.orientedimagery.OrientedImage
 import com.arcgismaps.mapping.layers.orientedimagery.OrientedImageFootprint
 import com.arcgismaps.mapping.layers.orientedimagery.OrientedImageSearchParameters
+import com.arcgismaps.mapping.layers.orientedimagery.OrientedImageType
 import com.arcgismaps.mapping.layers.orientedimagery.SequenceStep
 import com.arcgismaps.mapping.popup.Popup
 import com.arcgismaps.mapping.view.DoubleXY
@@ -43,6 +44,8 @@ import com.arcgismaps.toolkit.orientedimageryviewer.internal.PointData
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
 
 /**
@@ -101,6 +104,7 @@ public class OrientedImageryViewerState public constructor(
     private var additionalCameraLocationGraphics: List<Graphic> = emptyList()
     private var additionalFootprints: List<OrientedImageFootprint> = emptyList()
     private var footprintUpdateJob: Job? = null
+    private var footprintUpdateGeneration = 0L
     private var pendingFootprintUpdate: (suspend (OrientedImageFootprint) -> Result<*>)? = null
 
     internal val uiState: OrientedImageryViewerUiState
@@ -258,6 +262,7 @@ public class OrientedImageryViewerState public constructor(
         if (shouldShow) {
             showActiveFootprint()
         } else {
+            cancelFootprintUpdateJob()
             activeFootprint?.let { footprint ->
                 orientedImageryLayer.visibleFootprints.remove(footprint)
             }
@@ -299,6 +304,19 @@ public class OrientedImageryViewerState public constructor(
         updateActiveFootprint { footprint -> footprint.updateFootprint(yaw, pitch, horizontalFov, verticalFov) }
     }
 
+    // Calibration/load failure is terminal for this view; retain the SDK-constructed fallback.
+    internal fun showConstructedPanoramaFootprint(revision: Long) {
+        if (revision != uiState.activeImageRevision || uiState.activeImageInfo?.type != OrientedImageType.Image360) return
+        activeFootprint?.let(::publishActiveFootprint)
+    }
+
+    private fun publishActiveFootprint(footprint: OrientedImageFootprint) {
+        if (footprint !== activeFootprint || !uiState.isActiveFootprintVisible) return
+        if (footprint !in orientedImageryLayer.visibleFootprints) {
+            orientedImageryLayer.visibleFootprints.add(footprint)
+        }
+    }
+
     private fun updateActiveFootprint(update: suspend (OrientedImageFootprint) -> Result<*>) {
         if (!uiState.isActiveFootprintVisible) return
 
@@ -308,12 +326,21 @@ public class OrientedImageryViewerState public constructor(
                 return
             }
 
+            val generation = footprintUpdateGeneration
+            val revision = uiState.activeImageRevision
             footprintUpdateJob = coroutineScope.launch {
                 while (true) {
                     val updateToApply = pendingFootprintUpdate ?: break
                     pendingFootprintUpdate = null
 
-                    updateToApply(footprint).onSuccess {
+                    val result = updateToApply(footprint)
+                    currentCoroutineContext().ensureActive()
+                    (result.exceptionOrNull() as? CancellationException)?.let { throw it }
+                    if (generation != footprintUpdateGeneration || revision != uiState.activeImageRevision ||
+                        footprint !== activeFootprint || !uiState.isActiveFootprintVisible
+                    ) return@launch
+
+                    result.onSuccess {
                         Log.i(
                             "OrientedImageryViewerState",
                             "Footprint updated successfully for image: ${footprint.orientedImage.dataUri}"
@@ -325,6 +352,9 @@ public class OrientedImageryViewerState public constructor(
                             it
                         )
                     }
+                    // Drain a newer camera request before publishing the initial footprint.
+                    // Ordinary SDK failures still show the constructed fallback.
+                    if (pendingFootprintUpdate == null) publishActiveFootprint(footprint)
                 }
             }
         }
@@ -359,7 +389,10 @@ public class OrientedImageryViewerState public constructor(
      * Sets whether sequential navigation is enabled for the viewer.
      */
     public fun setSequentialNavigationEnabled(enabled: Boolean) {
+        if (enabled == uiState.isSequentialNavigationEnabled) return
+        cancelFootprintUpdateJob()
         updateUiState { uiState -> uiState.copy(isSequentialNavigationEnabled = enabled) }
+        if (uiState.isActiveFootprintVisible) showActiveFootprint()
     }
 
     private fun setActiveOrientedImage(orientedImage: OrientedImage?) {
@@ -459,9 +492,17 @@ public class OrientedImageryViewerState public constructor(
     private fun showActiveFootprint() {
         if (activeFootprint == null) {
             activeFootprint = getOrCreateActiveFootprint()
+        }
+        activeCameraLocationGraphic?.isVisible = true
+        val imageInfo = uiState.activeImageInfo
+        if (imageInfo?.type == OrientedImageType.Image360 && imageInfo.dataUri != null &&
+            !uiState.isSequentialNavigationEnabled
+        ) {
+            // Do not expose the SDK's full constructed footprint before current-view calibration.
+            // This also covers a reused footprint that was already present in the layer.
+            orientedImageryLayer.visibleFootprints.remove(activeFootprint!!)
         } else {
-            orientedImageryLayer.visibleFootprints.add(activeFootprint!!)
-            activeCameraLocationGraphic?.isVisible = true
+            publishActiveFootprint(activeFootprint!!)
         }
     }
 
@@ -518,6 +559,7 @@ public class OrientedImageryViewerState public constructor(
     }
 
     private fun cancelFootprintUpdateJob() {
+        footprintUpdateGeneration++
         footprintUpdateJob?.cancel()
         footprintUpdateJob = null
         pendingFootprintUpdate = null
@@ -563,7 +605,6 @@ public class OrientedImageryViewerState public constructor(
             ?: OrientedImageFootprint(activeImage).also { footprint ->
                 Log.i("OrientedImageryViewerState", "Creating new footprint for active image: ${activeImage.dataUri}")
                 footprint.outlineColor = Color.transparent
-                orientedImageryLayer.visibleFootprints.add(footprint)
 
                 if (uiState.isSequentialNavigationEnabled) {
                     graphicsOverlay.graphics.clear()

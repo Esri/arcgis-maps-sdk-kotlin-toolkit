@@ -60,6 +60,7 @@ internal class PanoramaView(context: Context) : TextureView(context), TextureVie
     @Volatile private var camera = PanoramaCamera()
     @Volatile private var viewWidth = 0
     @Volatile private var viewHeight = 0
+    private var notifiedReadyFrame: PanoramaFrame? = null
     private val heldKeys = mutableSetOf<Int>()
     private var keyFramePosted = false
     private var lastKeyFrame = 0L
@@ -117,6 +118,7 @@ internal class PanoramaView(context: Context) : TextureView(context), TextureVie
     fun setFrame(value: PanoramaFrame) {
         if (disposed.get() || value === frame) return
         frame = value
+        notifiedReadyFrame = null
         camera = value.initialCamera
         requestRender()
     }
@@ -257,7 +259,8 @@ internal class PanoramaView(context: Context) : TextureView(context), TextureVie
 
     private fun ready(value: PanoramaFrame) {
         mainHandler.post {
-            if (!disposed.get() && frame === value) {
+            if (!disposed.get() && frame === value && readyFrame === value && notifiedReadyFrame !== value) {
+                notifiedReadyFrame = value
                 onReady(value)
                 notifyCameraChanged()
             }

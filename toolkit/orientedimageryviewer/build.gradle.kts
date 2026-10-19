@@ -111,5 +111,6 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     testImplementation(libs.bundles.unitTest)
     androidTestImplementation(libs.bundles.composeTest)
+    androidTestImplementation(libs.mockk.android)
     debugImplementation(libs.bundles.debug)
 }
