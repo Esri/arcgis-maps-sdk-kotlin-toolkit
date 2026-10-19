@@ -424,6 +424,8 @@ public class FeatureFormState private constructor(
                 )
                 return@launch
             }
+            // Validate all fields in the UI before finishing editing the form(s).
+            validateAllFields()
             when {
                 // If there are errors with more than 1 form
                 formsWithErrors.value > 0 && featureFormStates.size > 1 -> {
@@ -537,10 +539,11 @@ public class FeatureFormState private constructor(
         } catch (_: Exception) {
             // To-do: Handle different ArcGISException types.
             val id = feature.id()
-            _featureFormStates.first {
+            _featureFormStates.firstOrNull {
                 id != null && it.featureForm.feature.id() == id
             }
         }
+        if (formStateData == null) return false
         // Add the form to the stack.
         store.addLast(formStateData)
         // Navigate to the form view.
