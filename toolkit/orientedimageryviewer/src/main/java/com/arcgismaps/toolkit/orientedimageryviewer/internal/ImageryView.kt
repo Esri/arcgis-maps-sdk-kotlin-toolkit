@@ -33,8 +33,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.mapping.layers.orientedimagery.OrientedImageType
 import com.arcgismaps.toolkit.orientedimageryviewer.OrientedImageryViewerState
-import com.arcgismaps.toolkit.orientedimageryviewer.internal.media.MyPanoramicImage
-import com.arcgismaps.toolkit.orientedimageryviewer.internal.media.RasterImage
+import com.arcgismaps.toolkit.orientedimageryviewer.internal.components.PanoramicImage
+import com.arcgismaps.toolkit.orientedimageryviewer.internal.components.RasterImage
 
 @Composable
 internal fun ImageryView(
@@ -71,7 +71,7 @@ internal fun ImageryView(
                     }
 
                     OrientedImageType.Image360 -> {
-                        MyPanoramicImage(viewerState = viewerState, modifier = Modifier.fillMaxSize())
+                        PanoramicImage(viewerState = viewerState, modifier = Modifier.fillMaxSize())
                     }
 
                     else -> {
@@ -92,4 +92,3 @@ private fun PlaceholderMessage(message: String) {
         textAlign = TextAlign.Center
     )
 }
-

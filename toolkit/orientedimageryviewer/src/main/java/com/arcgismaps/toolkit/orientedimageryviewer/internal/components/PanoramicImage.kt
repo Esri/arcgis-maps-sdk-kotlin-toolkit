@@ -8,7 +8,7 @@
  * See the License for the specific language governing permissions and limitations under the License.
  */
 
-package com.arcgismaps.toolkit.orientedimageryviewer.internal.media
+package com.arcgismaps.toolkit.orientedimageryviewer.internal.components
 
 import android.graphics.BitmapFactory
 import android.util.Log
@@ -43,12 +43,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 /**
- * Local equirectangular panorama viewer backed by Android OpenGL ES, not SceneView.
+ * Local equirectangular panorama viewer backed by Android OpenGL ES.
  * Accepts absolute/relative file paths and file:// URIs. The caller must provide readable storage;
  * this component neither requests permissions nor downloads images.
  */
 @Composable
-internal fun MyPanoramicImage(
+internal fun PanoramicImage(
     viewerState: OrientedImageryViewerState,
     modifier: Modifier = Modifier
 ) {
@@ -58,11 +58,11 @@ internal fun MyPanoramicImage(
     val inputLocation = uiState.inputLocationData
     val sequential = uiState.isSequentialNavigationEnabled
     val failureMessage = stringResource(R.string.panoramic_image_load_failed, source)
-    var frame by remember(viewerState, revision, source, inputLocation, sequential) { mutableStateOf<MyPanoramaFrame?>(null) }
+    var frame by remember(viewerState, revision, source, inputLocation, sequential) { mutableStateOf<PanoramaFrame?>(null) }
     var error by remember(viewerState, revision, source, inputLocation, sequential) { mutableStateOf<String?>(null) }
     var loading by remember(viewerState, revision, source, inputLocation, sequential) { mutableStateOf(true) }
     var lastFootprint by remember(viewerState, revision, uiState.isActiveFootprintVisible, sequential) {
-        mutableStateOf<MyPanoramaFootprint?>(null)
+        mutableStateOf<PanoramaFootprint?>(null)
     }
 
     LaunchedEffect(viewerState, revision, source, inputLocation, sequential) {
@@ -90,31 +90,30 @@ internal fun MyPanoramicImage(
             val pixel = if (!sequential) inputLocation?.toPoint()?.let {
                 viewerState.locationToImage(it)?.getOrNull()
             } else null
-            val camera = pixel?.let { MyPanoramaCamera.fromPixel(it.x, it.y, width, height) } ?: MyPanoramaCamera()
-            val orientation = myPanoramaOrientation(viewerState, width, height)
-            // Cancellation from the effect prevents an old revision from publishing its frame.
-            frame = MyPanoramaFrame(file.path, camera, orientation)
+            val camera = pixel?.let { PanoramaCamera.fromPixel(it.x, it.y, width, height) } ?: PanoramaCamera()
+            val orientation = panoramaOrientation(viewerState, width, height)
+            frame = PanoramaFrame(file.path, camera, orientation)
         } catch (cancelled: CancellationException) {
             throw cancelled
         } catch (exception: Exception) {
-            Log.e("MyPanoramicImage", failureMessage, exception)
+            Log.e("PanoramicImage", failureMessage, exception)
             error = failureMessage
             loading = false
         }
     }
 
     val currentFrame by rememberUpdatedState(frame)
-    val onReady by rememberUpdatedState<(MyPanoramaFrame) -> Unit> { ready ->
+    val onReady by rememberUpdatedState<(PanoramaFrame) -> Unit> { ready ->
         if (ready === frame) loading = false
     }
-    val onFailure by rememberUpdatedState<(MyPanoramaFrame, Exception) -> Unit> { failed, exception ->
+    val onFailure by rememberUpdatedState<(PanoramaFrame, Exception) -> Unit> { failed, exception ->
         if (failed === frame) {
-            Log.e("MyPanoramicImage", failureMessage, exception)
+            Log.e("PanoramicImage", failureMessage, exception)
             error = failureMessage
             loading = false
         }
     }
-    val onCameraChanged by rememberUpdatedState<(MyPanoramaFrame, MyPanoramaCamera, Double) -> Unit> { displayed, camera, aspect ->
+    val onCameraChanged by rememberUpdatedState<(PanoramaFrame, PanoramaCamera, Double) -> Unit> { displayed, camera, aspect ->
         val current = viewerState.uiState
         if (displayed === frame && current.activeImageRevision == revision &&
             current.activeImageInfo?.dataUri == source && current.isActiveFootprintVisible &&
@@ -130,7 +129,7 @@ internal fun MyPanoramicImage(
 
     Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         AndroidView(
-            factory = { context -> MyPanoramaSurface(context) },
+            factory = { context -> PanoramaView(context) },
             modifier = Modifier.fillMaxSize(),
             onRelease = { it.release() },
             update = { surface ->
@@ -138,7 +137,6 @@ internal fun MyPanoramicImage(
                 surface.onFailure = { failed, exception -> onFailure(failed, exception) }
                 surface.onCameraChanged = { displayed, camera, aspect -> onCameraChanged(displayed, camera, aspect) }
                 currentFrame?.let(surface::setFrame)
-                // Also submit when footprint visibility changes without camera movement.
                 surface.notifyCameraChanged()
             }
         )
@@ -151,23 +149,23 @@ internal fun MyPanoramicImage(
     }
 }
 
-internal class MyPanoramaFrame(
+internal class PanoramaFrame(
     val path: String,
-    val initialCamera: MyPanoramaCamera,
-    val orientation: MyPanoramaOrientation?
+    val initialCamera: PanoramaCamera,
+    val orientation: PanoramaOrientation?
 )
 
-internal data class MyPanoramaOrientation(
-    val east: MyPanoramaRay,
-    val north: MyPanoramaRay,
-    val up: MyPanoramaRay
+internal data class PanoramaOrientation(
+    val east: PanoramaRay,
+    val north: PanoramaRay,
+    val up: PanoramaRay
 ) {
-    fun footprint(camera: MyPanoramaCamera, aspect: Double): MyPanoramaFootprint {
+    fun footprint(camera: PanoramaCamera, aspect: Double): PanoramaFootprint {
         val direction = camera.forward
         val e = direction.dot(east)
         val n = direction.dot(north)
         val u = direction.dot(up)
-        return MyPanoramaFootprint(
+        return PanoramaFootprint(
             ((Math.toDegrees(atan2(e, n)) % 360.0) + 360.0) % 360.0,
             Math.toDegrees(atan2(hypot(e, n), -u)),
             camera.horizontalFov(aspect), camera.verticalFov
@@ -175,24 +173,25 @@ internal data class MyPanoramaOrientation(
     }
 }
 
-internal data class MyPanoramaFootprint(val yaw: Double, val pitch: Double, val horizontalFov: Double, val verticalFov: Double) {
-    fun approximatelyEquals(other: MyPanoramaFootprint?): Boolean = other != null &&
+internal data class PanoramaFootprint(val yaw: Double, val pitch: Double, val horizontalFov: Double, val verticalFov: Double) {
+    fun approximatelyEquals(other: PanoramaFootprint?): Boolean = other != null &&
         abs((yaw - other.yaw + 540.0) % 360.0 - 180.0) <= 0.1 &&
         abs(pitch - other.pitch) <= 0.1 && abs(horizontalFov - other.horizontalFov) <= 0.1 &&
         abs(verticalFov - other.verticalFov) <= 0.1
 }
 
-private suspend fun myPanoramaOrientation(state: OrientedImageryViewerState, width: Int, height: Int): MyPanoramaOrientation? {
+private suspend fun panoramaOrientation(state: OrientedImageryViewerState, width: Int, height: Int): PanoramaOrientation? {
     val location = state.uiState.activeImageInfo?.cameraLocationData?.toPoint() ?: return null
     val camera = GeometryEngine.projectOrNull(location, SpatialReference(3857)) ?: return null
     val z = camera.z?.takeIf { it.isFinite() } ?: return null
     val sr = camera.spatialReference ?: return null
-    suspend fun ray(point: Point): MyPanoramaRay? {
+    suspend fun ray(point: Point): PanoramaRay? {
         val pixel = state.locationToImage(point)?.getOrNull() ?: return null
-        return MyPanoramaCamera.imageRay(pixel.x, pixel.y, width, height)
+        return PanoramaCamera.imageRay(pixel.x, pixel.y, width, height)
     }
     val east = ray(Point(camera.x + 100.0, camera.y, z, sr)) ?: return null
     val north = ray(Point(camera.x, camera.y + 100.0, z, sr)) ?: return null
     val up = ray(Point(camera.x, camera.y, z + 100.0, sr)) ?: return null
-    return MyPanoramaOrientation(east, north, up)
+    return PanoramaOrientation(east, north, up)
 }
+

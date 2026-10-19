@@ -16,7 +16,7 @@
  *
  */
 
-package com.arcgismaps.toolkit.orientedimageryviewer.internal.media
+package com.arcgismaps.toolkit.orientedimageryviewer.internal.components
 
 import android.util.Log
 import androidx.compose.runtime.Composable

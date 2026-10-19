@@ -8,7 +8,7 @@
  * See the License for the specific language governing permissions and limitations under the License.
  */
 
-package com.arcgismaps.toolkit.orientedimageryviewer.internal.media
+package com.arcgismaps.toolkit.orientedimageryviewer.internal.components
 
 import android.app.Activity
 import android.content.ContextWrapper
@@ -27,13 +27,13 @@ import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 
-class MyPanoramaSurfaceTests {
+class PanoramaViewTests {
     @get:Rule
     val compose = createComposeRule()
 
     private val files = mutableListOf<File>()
-    private lateinit var surface: MyPanoramaSurface
-    private val ready = AtomicReference<MyPanoramaFrame?>()
+    private lateinit var surface: PanoramaView
+    private val ready = AtomicReference<PanoramaFrame?>()
     private val failure = AtomicReference<Exception?>()
 
     @After
@@ -45,19 +45,18 @@ class MyPanoramaSurfaceTests {
     fun localImageRendersUprightAndCanBeReplacedAtTheSamePath() {
         val file = temporaryFile()
         writeImage(file, Color.RED, Color.BLUE)
-        // Aim above the horizon to verify that bitmap rows are not inverted by the GL upload.
-        val initial = MyPanoramaFrame(file.path,
-            requireNotNull(MyPanoramaCamera.fromPixel(320.0, 64.0, 512, 256)), null)
+        val initial = PanoramaFrame(file.path,
+            requireNotNull(PanoramaCamera.fromPixel(320.0, 64.0, 512, 256)), null)
         show(initial)
         awaitColor(initial, Color.RED)
 
-        val below = MyPanoramaFrame(file.path,
-            requireNotNull(MyPanoramaCamera.fromPixel(320.0, 192.0, 512, 256)), null)
+        val below = PanoramaFrame(file.path,
+            requireNotNull(PanoramaCamera.fromPixel(320.0, 192.0, 512, 256)), null)
         compose.runOnIdle { surface.setFrame(below) }
         awaitColor(below, Color.BLUE)
 
         writeImage(file, Color.GREEN, Color.GREEN)
-        val replacement = MyPanoramaFrame(file.path, MyPanoramaCamera(), null)
+        val replacement = PanoramaFrame(file.path, PanoramaCamera(), null)
         compose.runOnIdle { surface.setFrame(replacement) }
         awaitColor(replacement, Color.GREEN)
     }
@@ -65,7 +64,7 @@ class MyPanoramaSurfaceTests {
     @Test
     fun invalidLocalImageReportsFailureAndCanBeReleasedRepeatedly() {
         val file = temporaryFile().apply { writeText("not an image") }
-        show(MyPanoramaFrame(file.path, MyPanoramaCamera(), null))
+        show(PanoramaFrame(file.path, PanoramaCamera(), null))
         compose.waitUntil(20_000) { failure.get() != null }
         assertTrue(failure.get() is IllegalArgumentException)
         compose.runOnIdle {
@@ -74,20 +73,18 @@ class MyPanoramaSurfaceTests {
         }
     }
 
-    private fun show(frame: MyPanoramaFrame) {
+    private fun show(frame: PanoramaFrame) {
         compose.setContent {
             AndroidView(
                 modifier = Modifier.fillMaxSize(),
                 factory = { context ->
-                    // A hidden TextureView has no surface. Keep this test activity visible even
-                    // when a shared test device is locked; do not change device security settings.
                     generateSequence(context) { (it as? ContextWrapper)?.baseContext }
                         .filterIsInstance<Activity>().first().apply {
                             setShowWhenLocked(true)
                             setTurnScreenOn(true)
                             window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
                         }
-                    MyPanoramaSurface(context).also {
+                    PanoramaView(context).also {
                         surface = it
                         it.onReady = { displayed -> ready.set(displayed) }
                         it.onFailure = { _, exception -> failure.set(exception) }
@@ -99,7 +96,7 @@ class MyPanoramaSurfaceTests {
         }
     }
 
-    private fun awaitColor(frame: MyPanoramaFrame, expected: Int) {
+    private fun awaitColor(frame: PanoramaFrame, expected: Int) {
         compose.waitUntil(20_000) {
             failure.get()?.let { throw AssertionError("Panorama rendering failed", it) }
             var matches = false

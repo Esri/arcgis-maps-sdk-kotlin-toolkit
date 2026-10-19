@@ -8,7 +8,7 @@
  * See the License for the specific language governing permissions and limitations under the License.
  */
 
-package com.arcgismaps.toolkit.orientedimageryviewer.internal.media
+package com.arcgismaps.toolkit.orientedimageryviewer.internal.components
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -44,22 +44,22 @@ import kotlin.math.sin
  * on one render thread. SurfaceTexture ownership transfers to that thread on destruction so the
  * EGL window is destroyed before Android releases its native window.
  */
-internal class MyPanoramaSurface(context: Context) : TextureView(context), TextureView.SurfaceTextureListener {
-    var onReady: (MyPanoramaFrame) -> Unit = {}
-    var onFailure: (MyPanoramaFrame, Exception) -> Unit = { _, _ -> }
-    var onCameraChanged: (MyPanoramaFrame, MyPanoramaCamera, Double) -> Unit = { _, _, _ -> }
+internal class PanoramaView(context: Context) : TextureView(context), TextureView.SurfaceTextureListener {
+    var onReady: (PanoramaFrame) -> Unit = {}
+    var onFailure: (PanoramaFrame, Exception) -> Unit = { _, _ -> }
+    var onCameraChanged: (PanoramaFrame, PanoramaCamera, Double) -> Unit = { _, _, _ -> }
 
-    private val renderThread = HandlerThread("MyPanoramicImage").apply { start() }
+    private val renderThread = HandlerThread("PanoramaView").apply { start() }
     private val renderHandler = Handler(renderThread.looper)
     private val mainHandler = Handler(context.mainLooper)
     private val disposed = AtomicBoolean(false)
     private val renderQueued = AtomicBoolean(false)
     private val renderer = Renderer()
-    @Volatile private var frame: MyPanoramaFrame? = null
-    @Volatile private var readyFrame: MyPanoramaFrame? = null
-    @Volatile private var camera = MyPanoramaCamera()
-    @Volatile private var viewportWidth = 0
-    @Volatile private var viewportHeight = 0
+    @Volatile private var frame: PanoramaFrame? = null
+    @Volatile private var readyFrame: PanoramaFrame? = null
+    @Volatile private var camera = PanoramaCamera()
+    @Volatile private var viewWidth = 0
+    @Volatile private var viewHeight = 0
     private val heldKeys = mutableSetOf<Int>()
     private var keyFramePosted = false
     private var lastKeyFrame = 0L
@@ -114,7 +114,7 @@ internal class MyPanoramaSurface(context: Context) : TextureView(context), Textu
         contentDescription = "360 degree image"
     }
 
-    fun setFrame(value: MyPanoramaFrame) {
+    fun setFrame(value: PanoramaFrame) {
         if (disposed.get() || value === frame) return
         frame = value
         camera = value.initialCamera
@@ -128,7 +128,7 @@ internal class MyPanoramaSurface(context: Context) : TextureView(context), Textu
         }
     }
 
-    private fun updateCamera(value: MyPanoramaCamera) {
+    private fun updateCamera(value: PanoramaCamera) {
         if (value == camera) return
         camera = value
         notifyCameraChanged()
@@ -145,16 +145,15 @@ internal class MyPanoramaSurface(context: Context) : TextureView(context), Textu
     }
 
     override fun onSurfaceTextureAvailable(surface: SurfaceTexture, width: Int, height: Int) {
-        viewportWidth = width
-        viewportHeight = height
+        viewWidth = width
+        viewHeight = height
         renderHandler.post { if (!disposed.get()) renderer.attach(surface) }
         requestRender()
     }
 
     override fun onSurfaceTextureSizeChanged(surface: SurfaceTexture, width: Int, height: Int) {
-        viewportWidth = width
-        viewportHeight = height
-        // Recreate the window to avoid stale-sized buffers on emulator/device EGL drivers.
+        viewWidth = width
+        viewHeight = height
         renderHandler.post { if (!disposed.get()) renderer.attach(surface) }
         notifyCameraChanged()
         requestRender()
@@ -170,7 +169,6 @@ internal class MyPanoramaSurface(context: Context) : TextureView(context), Textu
 
     override fun onSurfaceTextureUpdated(surface: SurfaceTexture) = Unit
 
-    // onSingleTapUp in gestureDetector calls performClick; drags and pinches must not click.
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent): Boolean {
         if (event.actionMasked == MotionEvent.ACTION_DOWN) {
@@ -257,7 +255,7 @@ internal class MyPanoramaSurface(context: Context) : TextureView(context), Textu
         }
     }
 
-    private fun ready(value: MyPanoramaFrame) {
+    private fun ready(value: PanoramaFrame) {
         mainHandler.post {
             if (!disposed.get() && frame === value) {
                 onReady(value)
@@ -266,7 +264,7 @@ internal class MyPanoramaSurface(context: Context) : TextureView(context), Textu
         }
     }
 
-    private fun failed(exception: Exception, failedFrame: MyPanoramaFrame? = frame) {
+    private fun failed(exception: Exception, failedFrame: PanoramaFrame? = frame) {
         if (failedFrame == null) return
         mainHandler.post { if (!disposed.get() && frame === failedFrame) onFailure(failedFrame, exception) }
     }
@@ -280,7 +278,7 @@ internal class MyPanoramaSurface(context: Context) : TextureView(context), Textu
         private var initializationFailure: Exception? = null
         private var program = 0
         private var texture = 0
-        private var attemptedFrame: MyPanoramaFrame? = null
+        private var attemptedFrame: PanoramaFrame? = null
         private var positionAttribute = 0
         private var uvAttribute = 0
         private var matrixUniform = 0
@@ -385,7 +383,7 @@ internal class MyPanoramaSurface(context: Context) : TextureView(context), Textu
 
         private fun drawCore() {
             initializationFailure?.let { throw it }
-            if (window == EGL14.EGL_NO_SURFACE || viewportWidth <= 0 || viewportHeight <= 0) return
+            if (window == EGL14.EGL_NO_SURFACE || viewWidth <= 0 || viewHeight <= 0) return
             checkEgl(EGL14.eglMakeCurrent(display, window, window, eglContext))
             if (program == 0) createProgram()
             val current = frame
@@ -393,8 +391,8 @@ internal class MyPanoramaSurface(context: Context) : TextureView(context), Textu
                 attemptedFrame = current
                 upload(current)
             }
-            val width = viewportWidth
-            val height = viewportHeight
+            val width = viewWidth
+            val height = viewHeight
             GLES20.glViewport(0, 0, width, height)
             GLES20.glClearColor(0.02f, 0.02f, 0.02f, 1f)
             GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT)
@@ -426,7 +424,7 @@ internal class MyPanoramaSurface(context: Context) : TextureView(context), Textu
             readyFrame?.let { if (it === current) ready(it) }
         }
 
-        private fun upload(value: MyPanoramaFrame) {
+        private fun upload(value: PanoramaFrame) {
             val max = IntArray(1)
             GLES20.glGetIntegerv(GLES20.GL_MAX_TEXTURE_SIZE, max, 0)
             val limit = max[0].coerceAtMost(4096)
@@ -449,7 +447,6 @@ internal class MyPanoramaSurface(context: Context) : TextureView(context), Textu
                 GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, ids[0])
                 GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR)
                 GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR)
-                // ES2 requires clamp-to-edge for non-power-of-two textures.
                 val powerOfTwo = (bitmap.width and (bitmap.width - 1)) == 0 && (bitmap.height and (bitmap.height - 1)) == 0
                 GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S, if (powerOfTwo) GLES20.GL_REPEAT else GLES20.GL_CLAMP_TO_EDGE)
                 GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE)
@@ -523,7 +520,6 @@ internal class MyPanoramaSurface(context: Context) : TextureView(context), Textu
         }
 
         fun close() {
-            // Destroying the context releases all its textures/shaders, even without a window.
             destroyWindow()
             if (display != EGL14.EGL_NO_DISPLAY) {
                 if (eglContext != EGL14.EGL_NO_CONTEXT) EGL14.eglDestroyContext(display, eglContext)
