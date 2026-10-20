@@ -44,8 +44,7 @@ import kotlinx.coroutines.withContext
 
 /**
  * Local equirectangular panorama viewer backed by Android OpenGL ES.
- * Accepts absolute/relative file paths and file:// URIs. The caller must provide readable storage;
- * this component neither requests permissions nor downloads images.
+ * Accepts absolute/relative file paths and file:// URIs. The caller must provide readable storage.
  */
 @Composable
 internal fun PanoramicImage(

@@ -57,7 +57,7 @@ import androidx.compose.ui.unit.dp
 import com.arcgismaps.mapping.layers.OrientedImageryLayer
 import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.toolkit.orientedimageryviewer.internal.ErrorSnackbarContainer
-import com.arcgismaps.toolkit.orientedimageryviewer.internal.ImageryView
+import com.arcgismaps.toolkit.orientedimageryviewer.internal.OrientedImagery
 import com.arcgismaps.toolkit.popup.Popup
 import com.arcgismaps.toolkit.popup.PopupState
 import kotlinx.coroutines.launch
@@ -202,7 +202,7 @@ internal fun ViewerLayout(
             },
             content = {
                 Box(modifier = Modifier.fillMaxSize()) {
-                    ImageryView(viewerState = viewerState, modifier = Modifier.fillMaxSize())
+                    OrientedImagery(viewerState = viewerState, modifier = Modifier.fillMaxSize())
                     imagePopup?.let { popup ->
                         // Scope evaluation to the popup's composition, including dismissal and image changes.
                         val popupScope = rememberCoroutineScope()
