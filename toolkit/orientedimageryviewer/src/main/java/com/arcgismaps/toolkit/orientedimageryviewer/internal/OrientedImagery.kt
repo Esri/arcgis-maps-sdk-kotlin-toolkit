@@ -24,22 +24,18 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.mapping.layers.orientedimagery.OrientedImageType
 import com.arcgismaps.toolkit.orientedimageryviewer.OrientedImageryViewerState
-import com.arcgismaps.toolkit.orientedimageryviewer.internal.media.PanoramicImage
-import com.arcgismaps.toolkit.orientedimageryviewer.internal.media.RasterImage
+import com.arcgismaps.toolkit.orientedimageryviewer.internal.components.PanoramicImage
+import com.arcgismaps.toolkit.orientedimageryviewer.internal.components.RasterImage
 
-/**
- * Composable function that displays oriented imagery based on the provided [OrientedImageryViewerState].
- *
- * @param viewerState The state of the oriented imagery viewer.
- * @param modifier The modifier to be applied to the composable.
- */
 @Composable
 internal fun OrientedImagery(
     viewerState: OrientedImageryViewerState,
@@ -58,15 +54,14 @@ internal fun OrientedImagery(
         val activeImage = viewerUiState.activeImageInfo
         when {
             activeImage == null -> {
-                // TODO: Show a placeholder or error message for when there is no active image.
+                PlaceholderMessage("No image is currently selected.")
             }
 
             activeImage.dataUri == null -> {
-                // TODO: Show a placeholder or error message for when the active image has no data URI.
+                PlaceholderMessage("The selected image is missing a data URI.")
             }
 
             else -> {
-                val imageUri = activeImage.dataUri
                 when (activeImage.type) {
                     OrientedImageType.Horizontal,
                     OrientedImageType.Inspection,
@@ -76,14 +71,25 @@ internal fun OrientedImagery(
                     }
 
                     OrientedImageType.Image360 -> {
-                        PanoramicImage(imageSource = imageUri)
+                        PanoramicImage(viewerState = viewerState, modifier = Modifier.fillMaxSize())
                     }
 
                     else -> {
-                        // TODO: Show a placeholder or error message for unsupported image types including video.
+                        PlaceholderMessage("This image type is not supported.")
                     }
                 }
             }
         }
     }
 }
+
+@Composable
+private fun PlaceholderMessage(message: String) {
+    Text(
+        text = message,
+        style = MaterialTheme.typography.bodyMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        textAlign = TextAlign.Center
+    )
+}
+

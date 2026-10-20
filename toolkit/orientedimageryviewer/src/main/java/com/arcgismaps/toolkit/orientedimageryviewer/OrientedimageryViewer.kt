@@ -20,12 +20,16 @@ package com.arcgismaps.toolkit.orientedimageryviewer
 
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.HorizontalDivider
@@ -34,8 +38,13 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -47,8 +56,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.mapping.layers.OrientedImageryLayer
 import com.arcgismaps.mapping.view.GraphicsOverlay
+import com.arcgismaps.toolkit.orientedimageryviewer.internal.ErrorSnackbarContainer
 import com.arcgismaps.toolkit.orientedimageryviewer.internal.OrientedImagery
+import com.arcgismaps.toolkit.popup.Popup
+import com.arcgismaps.toolkit.popup.PopupState
 import kotlinx.coroutines.launch
+import com.arcgismaps.mapping.popup.Popup as ImagePopup
 
 @Composable
 public fun OrientedImageryViewer(
@@ -100,76 +113,144 @@ internal fun ViewerLayout(
     onDismiss: () -> Unit = {},
     showCloseIcon: Boolean = true,
     isSequentialNavigationEnabled: Boolean = false,
+    onCreateImagePopup: suspend () -> Result<ImagePopup> = { viewerState.createImagePopup() },
 ) {
-    ViewerLayout(
-        modifier = modifier,
-        topBar = {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.surface)
-                    .padding(horizontal = 8.dp, vertical = 8.dp)
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
+    val coroutineScope = rememberCoroutineScope()
+    val imageRevision = viewerState.uiState.activeImageRevision
+    var isCreatingPopup by remember(viewerState, imageRevision) { mutableStateOf(false) }
+    // Key on transitions, not image metadata: a new search may return the same image.
+    var imagePopup by remember(viewerState, viewerState.uiState.activeImageRevision) {
+        mutableStateOf<ImagePopup?>(null)
+    }
+    val noActiveImageMessage = stringResource(R.string.popup_no_active_image)
+    val creationFailedMessage = stringResource(R.string.popup_creation_failed)
+
+    ErrorSnackbarContainer(modifier = modifier) { errors ->
+        ViewerLayout(
+            showTopBar = imagePopup == null,
+            topBar = {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(MaterialTheme.colorScheme.surface)
+                        .padding(horizontal = 8.dp, vertical = 8.dp)
                 ) {
-                    Text(
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(end = 8.dp),
+                            text = title,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            style = MaterialTheme.typography.titleLarge,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        if (showCloseIcon) {
+                            IconButton(onClick = onDismiss) {
+                                Icon(
+                                    imageVector = Icons.Default.Close,
+                                    contentDescription = stringResource(R.string.toolbar_close)
+                                )
+                            }
+                        }
+                    }
+                    Row(
                         modifier = Modifier
-                            .weight(1f)
-                            .padding(end = 8.dp),
-                        text = title,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        style = MaterialTheme.typography.titleLarge,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    if (showCloseIcon) {
-                        IconButton(onClick = onDismiss) {
-                            Icon(
-                                imageVector = Icons.Default.Close,
-                                contentDescription = stringResource(R.string.toolbar_close)
-                            )
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState()),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        OrientedImageryToolbar(
+                            onPreviousImage = onPreviousImage,
+                            onNextImage = onNextImage,
+                            onCurrentFootprint = onCurrentFootprint,
+                            onAdditionalFootprints = onAdditionalFootprints,
+                            onAdditionalCameraLocations = onAdditionalCameraLocations,
+                            supportsSequentialNavigation = viewerState.supportsSequentialNavigation,
+                            isSequentialNavigationEnabled = isSequentialNavigationEnabled,
+                            onSequentialNavigation = onSequentialNavigation,
+                            onPopup = {
+                                if (!isCreatingPopup) {
+                                    isCreatingPopup = true
+                                    coroutineScope.launch {
+                                        try {
+                                            val result = onCreateImagePopup()
+                                            if (viewerState.uiState.activeImageRevision == imageRevision) {
+                                                result.onSuccess { popup ->
+                                                    imagePopup = popup
+                                                }.onFailure {
+                                                    errors.showError(
+                                                        if (viewerState.hasActiveImage) creationFailedMessage
+                                                        else noActiveImageMessage
+                                                    )
+                                                }
+                                            }
+                                        } finally {
+                                            isCreatingPopup = false
+                                        }
+                                    }
+                                }
+                            },
+                            onReset = onReset
+                        )
+                    }
+                }
+            },
+            content = {
+                Box(modifier = Modifier.fillMaxSize()) {
+                    OrientedImagery(viewerState = viewerState, modifier = Modifier.fillMaxSize())
+                    imagePopup?.let { popup ->
+                        // Scope evaluation to the popup's composition, including dismissal and image changes.
+                        val popupScope = rememberCoroutineScope()
+                        val popupState = remember(popup) { PopupState(popup, popupScope) }
+                        Popup(
+                            popupState = popupState,
+                            modifier = Modifier.fillMaxSize(),
+                            onDismiss = { imagePopup = null },
+                            showCloseIcon = false
+                        )
+                        Surface(
+                            modifier = Modifier
+                                .align(Alignment.TopEnd)
+                                .padding(top = 16.dp, end = 16.dp),
+                            shape = CircleShape,
+                            color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                            tonalElevation = 2.dp,
+                        ) {
+                            IconButton(
+                                onClick = { imagePopup = null },
+                                modifier = Modifier.size(40.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Close,
+                                    contentDescription = stringResource(R.string.toolbar_close),
+                                    tint = MaterialTheme.colorScheme.onSurface
+                                )
+                            }
                         }
                     }
                 }
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .horizontalScroll(rememberScrollState()),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    OrientedImageryToolbar(
-                        onPreviousImage = onPreviousImage,
-                        onNextImage = onNextImage,
-                        onCurrentFootprint = onCurrentFootprint,
-                        onAdditionalFootprints = onAdditionalFootprints,
-                        onAdditionalCameraLocations = onAdditionalCameraLocations,
-                        supportsSequentialNavigation = viewerState.supportsSequentialNavigation,
-                        isSequentialNavigationEnabled = isSequentialNavigationEnabled,
-                        onSequentialNavigation = onSequentialNavigation,
-                        onReset = onReset
-                    )
-                }
             }
-        },
-        content = {
-            OrientedImagery(
-                viewerState = viewerState,
-            )
-        }
-    )
+        )
+    }
 }
 
 @Composable
 internal fun ViewerLayout(
     topBar: @Composable ColumnScope.() -> Unit,
     content: @Composable ColumnScope.() -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    showTopBar: Boolean = true
 ) {
     Column(modifier = modifier) {
-        topBar()
-        HorizontalDivider(modifier = Modifier.fillMaxWidth(), thickness = 2.dp)
+        if (showTopBar) {
+            topBar()
+            HorizontalDivider(modifier = Modifier.fillMaxWidth(), thickness = 2.dp)
+        }
         content()
     }
 }
@@ -184,6 +265,7 @@ private fun OrientedImageryToolbar(
     supportsSequentialNavigation: Boolean,
     isSequentialNavigationEnabled: Boolean,
     onSequentialNavigation: () -> Unit,
+    onPopup: () -> Unit,
     onReset: () -> Unit,
 ) {
     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -236,6 +318,12 @@ private fun OrientedImageryToolbar(
             Icon(
                 painter = painterResource(R.drawable.sequential_navigation_24),
                 contentDescription = stringResource(R.string.toolbar_sequential_navigation)
+            )
+        }
+        IconButton(onClick = onPopup) {
+            Icon(
+                painter = painterResource(R.drawable.popup_24),
+                contentDescription = stringResource(R.string.toolbar_popup)
             )
         }
         IconButton(onClick = onReset) {

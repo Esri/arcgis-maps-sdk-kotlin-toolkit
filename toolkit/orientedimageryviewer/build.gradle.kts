@@ -103,13 +103,14 @@ android {
 dependencies {
     api(arcgis.mapsSdk)
     implementation(project(":geoview-compose"))
+    implementation(project(":popup"))
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.composeCore)
     implementation(libs.bundles.core)
     implementation(libs.bundles.icons)
     implementation(libs.androidx.activity.compose)
-    implementation(libs.sceneview)
     testImplementation(libs.bundles.unitTest)
     androidTestImplementation(libs.bundles.composeTest)
+    androidTestImplementation(libs.mockk.android)
     debugImplementation(libs.bundles.debug)
 }
