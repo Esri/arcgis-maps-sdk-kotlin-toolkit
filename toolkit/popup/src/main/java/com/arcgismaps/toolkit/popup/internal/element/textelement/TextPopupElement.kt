@@ -55,6 +55,8 @@ private fun HTML(content: String) {
         """.trimIndent()
     AndroidView(factory = { context ->
         WebView(context).apply {
+            settings.allowContentAccess = false
+            settings.allowFileAccess = false
             webViewClient = object : WebViewClient() {
 
                 // This view might have changed size, so request a layout to ensure it is displayed correctly.
