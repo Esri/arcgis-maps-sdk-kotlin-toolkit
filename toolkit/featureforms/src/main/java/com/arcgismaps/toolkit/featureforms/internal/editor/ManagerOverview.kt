@@ -40,6 +40,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Article
 import androidx.compose.material.icons.filled.Circle
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.LocationSearching
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material3.DropdownMenu
@@ -284,9 +286,9 @@ private fun FeatureFormRow(
                 contentDescription = "Feature Symbol",
                 imageLoader = imageLoader,
                 modifier = Modifier
-                    .clip(CircleShape)
+                    .padding(start = 8.dp)
                     .size(28.dp),
-                contentScale = ContentScale.FillWidth,
+                contentScale = ContentScale.Fit,
                 placeholder = placeholder,
                 error = placeholder,
             )
@@ -299,7 +301,7 @@ private fun FeatureFormRow(
                     style = MaterialTheme.typography.titleSmall
                 )
                 FlowRow(
-                    modifier = Modifier.padding(bottom = 8.dp),
+                    modifier = Modifier.padding(start = 8.dp, bottom = 8.dp),
                     horizontalArrangement = Arrangement.spacedBy(4.dp),
                     verticalArrangement = Arrangement.Center
                 ) {
@@ -370,6 +372,12 @@ private fun FeatureFormRow(
                         onClick = {
                             showMenu = false
                             onShowOnMapRequest()
+                        },
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Default.LocationSearching,
+                                contentDescription = null
+                            )
                         }
                     )
                     if (editable) {
@@ -378,6 +386,12 @@ private fun FeatureFormRow(
                             onClick = {
                                 showMenu = false
                                 onRemove()
+                            },
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Default.Delete,
+                                    contentDescription = null
+                                )
                             }
                         )
                     }

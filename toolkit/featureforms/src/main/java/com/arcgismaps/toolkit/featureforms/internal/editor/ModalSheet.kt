@@ -66,7 +66,6 @@ internal fun BoxScope.ModalSheet(
     ) {
         Surface(
             modifier = Modifier.fillMaxSize(),
-            shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
         ) {
             content()
         }

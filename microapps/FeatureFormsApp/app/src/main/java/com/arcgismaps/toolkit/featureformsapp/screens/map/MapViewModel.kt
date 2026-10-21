@@ -598,6 +598,11 @@ class MapViewModel @Inject constructor(
                 feature.flashFeature()
             }
         }
+        // If the highlighted feature was also the active feature in the feature form, then
+        // re-select the feature on the map.
+        if ((_uiState.value as? UIState.Editing)?.featureFormState?.activeFeatureForm?.feature == feature) {
+            feature.selectFeature()
+        }
     }
 
     /**
