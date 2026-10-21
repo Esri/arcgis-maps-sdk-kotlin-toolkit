@@ -584,7 +584,7 @@ private data class UsernamePassword(val username: String, val password: String)
  * @param T a [Throwable] type which should be thrown instead of encapsulated in the [Result].
  * @since 200.8.0
  */
-internal inline fun <reified T : Throwable, R> Result<R>.except(): Result<R> = onFailure { if (it is T) throw it }
+internal inline fun <reified T : Throwable, S> Result<S>.except(): Result<S> = onFailure { if (it is T) throw it }
 
 /**
  * Runs the specified [block] with [this] value as its receiver and catches any exceptions, returning a `Result` with the
@@ -593,6 +593,6 @@ internal inline fun <reified T : Throwable, R> Result<R>.except(): Result<R> = o
  *
  * @since 200.8.0
  */
-internal inline fun <T, R> T.runCatchingCancellable(block: T.() -> R): Result<R> =
+internal inline fun <T, S> T.runCatchingCancellable(block: T.() -> S): Result<S> =
     runCatching(block)
-        .except<CancellationException, R>()
+        .except<CancellationException, S>()

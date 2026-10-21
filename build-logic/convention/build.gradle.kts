@@ -64,6 +64,7 @@ gradlePlugin {
 
 dependencies {
     compileOnly(libs.android.gradle.plugin)
+    compileOnly(libs.bcv.implementation)
     implementation(libs.kotlin.gradle)
     compileOnly(libs.secrets.gradle.plugin)
 }

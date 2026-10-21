@@ -39,6 +39,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -82,6 +83,7 @@ internal fun ExpandableCard(
             border = BorderStroke(shapes.borderThickness, colorScheme.borderColor),
             shape = shapes.containerShape,
             modifier = modifier
+                .testTag("ExpandableCard")
                 .fillMaxWidth()
                 .padding(padding)
         ) {
@@ -100,7 +102,10 @@ internal fun ExpandableCard(
                     }
                 }
 
-                AnimatedVisibility(visible = expandableCardState.isExpanded) {
+                AnimatedVisibility(
+                    visible = expandableCardState.isExpanded,
+                    modifier = Modifier.testTag("AnimatedVisibility")
+                ) {
                     content()
                 }
 
@@ -123,6 +128,7 @@ private fun ExpandableHeader(
     if (title.isEmpty() && description == null && !expandable) return
     Row(
         Modifier
+            .testTag("ExpandableHeader")
             .fillMaxWidth()
             .applyIf(expandable) {
                 clickable {
