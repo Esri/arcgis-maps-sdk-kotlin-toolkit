@@ -59,10 +59,9 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.toRoute
-import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.toolkit.featureforms.FeatureFormState
-import com.arcgismaps.toolkit.featureforms.FormStateData
 import com.arcgismaps.toolkit.featureforms.R
+import com.arcgismaps.toolkit.featureforms.internal.components.base.FormStateData
 import com.arcgismaps.toolkit.featureforms.internal.components.dialogs.SaveEditsDialog
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationsElementState
 import com.arcgismaps.toolkit.featureforms.internal.navigation.AddFromSourceNavRoute
@@ -389,7 +388,7 @@ internal fun FeatureFormTitle(
 }
 
 @Composable
-private fun InitializingExpressions(
+internal fun InitializingExpressions(
     modifier: Modifier = Modifier,
     evaluationProvider: () -> Boolean
 ) {

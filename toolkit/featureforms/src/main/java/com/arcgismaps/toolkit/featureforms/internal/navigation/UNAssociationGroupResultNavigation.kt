@@ -35,16 +35,12 @@ import com.arcgismaps.toolkit.featureforms.internal.screens.UNAssociationGroupRe
 
 internal fun NavGraphBuilder.associationGroupResultDestination(
     state: FeatureFormState,
-    onSave: suspend (Boolean) -> Result<Unit>,
-    onDiscard: suspend (Boolean) -> Unit,
     onNavigateToAssociation : (NavBackStackEntry, Int) -> Unit,
     onNavigateToFeature: (NavBackStackEntry, ArcGISFeature) -> Unit,
     onNavigationEvent: (FeatureFormNavigationRoute) -> Unit,
     onAssociatedFeatureLocateRequest: (ArcGISFeature) -> Unit,
     onBack: (NavBackStackEntry) -> Unit,
-    isNavigationEnabled: Boolean,
-    allowNavigationWithEdits: Boolean,
-    showTopBar: Boolean
+    isNavigationEnabled: Boolean
 ) {
     composable<NavigationRoute.UNAssociationGroupResult>(
         exitTransition = {
@@ -64,10 +60,6 @@ internal fun NavGraphBuilder.associationGroupResultDestination(
                 state = utilityAssociationsElementState,
                 featureForm = formData.featureForm,
                 isNavigationEnabled = isNavigationEnabled,
-                allowNavigationWithEdits = allowNavigationWithEdits,
-                showTopBar = showTopBar,
-                onSave = onSave,
-                onDiscard = onDiscard,
                 onNavigateToAssociation = {
                     onNavigateToAssociation(backStackEntry, utilityAssociationsElementState.id)
                 },

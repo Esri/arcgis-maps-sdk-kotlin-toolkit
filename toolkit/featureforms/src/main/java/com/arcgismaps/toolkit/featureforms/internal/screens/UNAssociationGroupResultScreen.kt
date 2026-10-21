@@ -23,31 +23,19 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.mapping.featureforms.FeatureForm
-import com.arcgismaps.toolkit.featureforms.internal.components.dialogs.SaveEditsDialog
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationGroupResult
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationsElementState
-import com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationAction
-import kotlinx.coroutines.launch
 
 /**
  * Screen that displays the selected group of associations.
  *
- * @param state The state of the utility associations element.
+ * @param state The state of the utility association element.
  * @param featureForm The feature form associated with the current feature.
  * @param isNavigationEnabled Flag indicating whether navigation to associated features is enabled.
- * @param onSave The callback to be invoked when the save button is clicked. The boolean parameter
- * indicates whether this action should be followed by a forward navigation. The callback should
- * return a [Result] that indicates the success or failure of the save operation.
- * @param onDiscard The callback to be invoked when the discard button is clicked. The boolean parameter
- * indicates whether this action should be followed by a forward navigation.
  * @param onNavigateToAssociation The callback to be invoked when the user selects to view association details.
  * @param onNavigateToFeature The callback to be invoked when the user selects a feature to navigate to.
  * @param onAssociatedFeatureLocateRequest The callback to be invoked when a locate request is made for an associated feature.
@@ -59,50 +47,31 @@ internal fun UNAssociationGroupResultScreen(
     state: UtilityAssociationsElementState,
     featureForm: FeatureForm,
     isNavigationEnabled: Boolean,
-    allowNavigationWithEdits: Boolean,
-    showTopBar: Boolean,
-    onSave: suspend (Boolean) -> Result<Unit>,
-    onDiscard: suspend (Boolean) -> Unit,
-    onNavigateToAssociation : () -> Unit,
+    onNavigateToAssociation: () -> Unit,
     onNavigateToFeature: (ArcGISFeature) -> Unit,
     onAssociatedFeatureLocateRequest: (ArcGISFeature) -> Unit,
     onBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val groupResult = state.selectedGroupResult ?: return
-    val hasEdits by featureForm.hasEdits.collectAsState()
     val isEditable by state.isEditable.collectAsState()
-    val scope = rememberCoroutineScope()
-    // State to hold the pending navigation action when the form has unsaved edits
-    var pendingNavigationAction: NavigationAction by rememberSaveable {
-        mutableStateOf(NavigationAction.None)
-    }
-    // Handler for navigating to a selected associated feature
-    val navigateToFeature: (NavigationAction) -> Unit = { action ->
-        if (action is NavigationAction.NavigateToFeature) {
-            val selectedIndex = action.index
-            groupResult.associationResults.getOrNull(selectedIndex)?.associatedFeature?.let { feature ->
-                onNavigateToFeature(feature)
-            }
-        }
-    }
     Column(modifier = modifier.fillMaxSize()) {
-        // Show the top bar if the flag is set to true
-        if (showTopBar.not()) {
-            FeatureFormTitle(
-                title = groupResult.name,
-                subTitle = state.selectedFilterResult?.filter?.title ?: "",
-                hasEdits = false,
-                showCloseIcon = false,
-                showBackIcon = false,
-                isNavigationEnabled = true,
-                onBackPressed = {},
-                onClose = {},
-                onSave = {},
-                onDiscard = {},
-                modifier = Modifier.padding(horizontal = 16.dp).fillMaxWidth()
-            )
-        }
+        // Display the top bar
+        FeatureFormTitle(
+            title = groupResult.name,
+            subTitle = state.selectedFilterResult?.filter?.title ?: "",
+            hasEdits = false,
+            showCloseIcon = false,
+            showBackIcon = false,
+            isNavigationEnabled = true,
+            onBackPressed = {},
+            onClose = {},
+            onSave = {},
+            onDiscard = {},
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .fillMaxWidth()
+        )
 
         UtilityAssociationGroupResult(
             groupResult = groupResult,
@@ -110,15 +79,9 @@ internal fun UNAssociationGroupResultScreen(
             isNavigationEnabled = isNavigationEnabled,
             onAssociatedFeatureLocateRequest = onAssociatedFeatureLocateRequest,
             onItemClick = { index ->
-                // only set the action to navigate if there are unsaved edits and navigation with edits
-                // is not allowed
-                if (hasEdits && !allowNavigationWithEdits) {
-                    pendingNavigationAction = NavigationAction.NavigateToFeature(index)
-                } else {
-                    val feature = groupResult.associationResults[index].associatedFeature
-                    // Navigate to the next form if there are no edits.
-                    onNavigateToFeature(feature)
-                }
+                val feature = groupResult.associationResults[index].associatedFeature
+                // Navigate to the next form if there are no edits.
+                onNavigateToFeature(feature)
             },
             onDetailsClick = { index ->
                 val association = groupResult.associationResults[index]
@@ -134,31 +97,6 @@ internal fun UNAssociationGroupResultScreen(
                 }
             },
             modifier = Modifier.padding(16.dp)
-        )
-    }
-    if (pendingNavigationAction != NavigationAction.None) {
-        SaveEditsDialog(
-            onDismissRequest = {
-                // Clear the pending navigation action when the dialog is dismissed
-                pendingNavigationAction = NavigationAction.None
-            },
-            onSave = {
-                scope.launch {
-                    onSave(true).onSuccess {
-                        // If the save is successful, navigate to the association
-                        navigateToFeature(pendingNavigationAction)
-                    }
-                    pendingNavigationAction = NavigationAction.None
-                }
-            },
-            onDiscard = {
-                scope.launch {
-                    onDiscard(true)
-                    // Navigate to the association after discarding changes
-                    navigateToFeature(pendingNavigationAction)
-                    pendingNavigationAction = NavigationAction.None
-                }
-            }
         )
     }
 }

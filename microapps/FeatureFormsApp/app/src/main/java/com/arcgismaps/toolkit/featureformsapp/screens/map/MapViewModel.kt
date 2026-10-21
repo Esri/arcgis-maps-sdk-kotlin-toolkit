@@ -53,7 +53,7 @@ import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 import com.arcgismaps.tasks.geodatabase.SyncDirection
 import com.arcgismaps.tasks.offlinemaptask.OfflineMapSyncTask
 import com.arcgismaps.tasks.offlinemaptask.PreplannedScheduledUpdatesOption
-import com.arcgismaps.toolkit.featureforms.FeatureFormManagerState
+import com.arcgismaps.toolkit.featureforms.FeatureFormState
 import com.arcgismaps.toolkit.featureformsapp.R
 import com.arcgismaps.toolkit.featureformsapp.data.PortalItemRepository
 import com.arcgismaps.toolkit.featureformsapp.di.ApplicationScope
@@ -113,10 +113,10 @@ sealed class UIState {
     data object Loading : UIState()
 
     /**
-     * In editing state with the [featureFormManagerState].
+     * In editing state with the [featureFormState].
      */
     data class Editing(
-        val featureFormManagerState: FeatureFormManagerState
+        val featureFormState: FeatureFormState
     ) : UIState()
 
     /**
@@ -261,7 +261,7 @@ class MapViewModel @Inject constructor(
      * A flow that emits the active feature form in the editing state, or null if not editing.
      */
     private var activeFeatureFormFlow = snapshotFlow {
-        (_uiState.value as? UIState.Editing)?.featureFormManagerState?.activeFeatureForm
+        (_uiState.value as? UIState.Editing)?.featureFormState?.activeFeatureForm
     }
 
     /**
@@ -411,15 +411,39 @@ class MapViewModel @Inject constructor(
         when (_uiState.value) {
             is UIState.SelectFeature, UIState.NotEditing -> {
                 // if the current state is selecting a feature or not editing then select the feature
-                val featureFormState = FeatureFormManagerState(
-                    forms = listOf(FeatureForm(feature)),
-                    scope = scope
+                val featureForm = FeatureForm(feature)
+                val featureFormState = FeatureFormState(
+                    featureForm = featureForm,
+                    coroutineScope = scope
                 )
                 // set the UI to an editing state with the FeatureForm
                 _uiState.value = UIState.Editing(featureFormState)
                 scope.launch {
                     // set the viewpoint to the feature extent
                     feature.geometry?.let {
+                        proxy.setViewpointGeometry(it.extent, 50.0)
+                    }
+                }
+            }
+
+            else -> return
+        }
+    }
+
+    fun selectFeatures(features: List<ArcGISFeature>) {
+        when (_uiState.value) {
+            is UIState.SelectFeature, UIState.NotEditing -> {
+                val forms = features.map(::FeatureForm)
+                // if the current state is selecting a feature or not editing then select the feature
+                val featureFormState = FeatureFormState(
+                    featureForms = forms,
+                    coroutineScope = scope
+                )
+                // set the UI to an editing state with the FeatureForm
+                _uiState.value = UIState.Editing(featureFormState)
+                scope.launch {
+                    // set the viewpoint to the first feature extent
+                    features.first().geometry?.let {
                         proxy.setViewpointGeometry(it.extent, 50.0)
                     }
                 }
@@ -480,7 +504,6 @@ class MapViewModel @Inject constructor(
      */
     suspend fun addNewFeature() {
         val map = mapState.map
-        map.operationalLayers.add(GroupLayer())
         val layers = map.operationalLayers.filterIsInstance<FeatureLayer>()
         val layerTemplates = mutableListOf<LayerTemplates>()
         layers.forEach { layer ->
@@ -535,16 +558,9 @@ class MapViewModel @Inject constructor(
             // create a default feature
             table.createFeature(emptyMap(), location) as ArcGISFeature
         }
-        if (location != null) {
-            // set the viewpoint to the feature location
-            proxy.setViewpointCenter(location)
-            // set the viewpoint scale if the layer has a min scale
-            layer.minScale?.let { scale ->
-                proxy.setViewpointScale(scale)
-            }
-        }
         table.addFeature(feature).onSuccess {
             // create a FeatureForm
+            val featureForm = FeatureForm(feature)
             if (location != null) {
                 // set the viewpoint to the feature location
                 proxy.setViewpointCenter(location)
@@ -554,9 +570,9 @@ class MapViewModel @Inject constructor(
                 }
             }
             _uiState.value = UIState.Editing(
-                FeatureFormManagerState(
-                    forms = listOf(FeatureForm(feature)),
-                    scope = scope
+                FeatureFormState(
+                    featureForm = featureForm,
+                    coroutineScope = scope
                 )
             )
         }.onFailure {
@@ -581,6 +597,11 @@ class MapViewModel @Inject constructor(
                 // flash the feature to highlight it
                 feature.flashFeature()
             }
+        }
+        // If the highlighted feature was also the active feature in the feature form, then
+        // re-select the feature on the map.
+        if ((_uiState.value as? UIState.Editing)?.featureFormState?.activeFeatureForm?.feature == feature) {
+            feature.selectFeature()
         }
     }
 
@@ -737,7 +758,7 @@ class MapViewModel @Inject constructor(
         serviceGeodatabase.undoLocalEdits().onSuccess {
             // refresh the feature in the map if there is an active feature form
             if (uiState.value is UIState.Editing) {
-                val featureFormState = (uiState.value as UIState.Editing).featureFormManagerState
+                val featureFormState = (uiState.value as UIState.Editing).featureFormState
                 featureFormState.activeFeatureForm.feature.refresh()
                 // discard edits needed to reset the state of the form including its attachments and
                 // associations to match the refreshed feature
