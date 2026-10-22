@@ -40,6 +40,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -134,6 +138,9 @@ private fun ExpandableHeader(
                 clickable {
                     onClick()
                 }
+                    .semantics(mergeDescendants = true){
+                        role = Role.Button
+                    }
             }
             .background(colors.headerBackgroundColor),
         verticalAlignment = Alignment.CenterVertically
@@ -160,9 +167,12 @@ private fun ExpandableHeader(
             Crossfade(targetState = isExpanded, label = "expandPopupElement") {
                 Icon(
                     modifier = Modifier
-                        .padding(16.dp),
+                        .padding(16.dp)
+                        .semantics{
+                            stateDescription = if(isExpanded) "Expanded" else "Collapsed"
+                        },
                     imageVector = if (it) Icons.Rounded.ExpandLess else Icons.Rounded.ExpandMore,
-                    contentDescription = "Expand"
+                    contentDescription = null
                 )
             }
         }

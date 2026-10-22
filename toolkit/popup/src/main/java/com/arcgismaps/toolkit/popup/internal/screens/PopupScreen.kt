@@ -37,8 +37,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.mapping.popup.AttachmentsPopupElement
 import com.arcgismaps.mapping.popup.FieldsPopupElement
@@ -119,7 +117,7 @@ private fun PopupBody(
     val lazyListState = rememberLazyListState()
     val states = popupStateData.stateCollection
     LazyColumn(
-        modifier = Modifier.testTag("PopupBody").semantics { contentDescription = "lazy column" },
+        modifier = Modifier.testTag("PopupBody"),
         state = lazyListState
     ) {
         states.forEach { entry ->
