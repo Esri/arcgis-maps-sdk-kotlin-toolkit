@@ -24,6 +24,10 @@
     <string name="toolbar_sequential_navigation">Location-image</string>
     <string name="toolbar_reset">Reset</string>
     <string name="toolbar_popup">Image popup</string>
+    <string name="toolbar_markers">Markers</string>
+    <string name="marker_tools_mark_location">Mark Location</string>
+    <string name="marker_tools_select_marker">Select Marker</string>
+    <string name="marker_tools_clear_all_markers">Clear All Markers</string>
     <string name="popup_no_active_image">Select an image before opening its popup.</string>
     <string name="popup_creation_failed">Unable to create the image popup.</string>
 

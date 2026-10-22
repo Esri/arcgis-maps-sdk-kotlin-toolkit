@@ -20,6 +20,7 @@ package com.arcgismaps.toolkit.orientedimageryviewer.internal.media
 
 import android.util.Log
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -29,6 +30,7 @@ import com.arcgismaps.geometry.Envelope
 import com.arcgismaps.geometry.GeometryEngine
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.geometry.Polygon
+import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.Basemap
 import com.arcgismaps.mapping.Viewpoint
@@ -81,6 +83,16 @@ internal fun RasterImage(
         ArcGISMap(Basemap(rasterLayer))
     }
 
+    DisposableEffect(viewerState, rasterLayer, viewerUiState.activeImageRevision) {
+        val toRasterPoint: (DoubleXY) -> Point? = { imagePoint ->
+            computeRasterPoint(imagePoint, rasterLayer)
+        }
+        viewerState.registerMarkerOverlayInImage(graphicsOverlay, toRasterPoint)
+        onDispose {
+            viewerState.unregisterMarkerOverlayInImage(toRasterPoint)
+        }
+    }
+
     MapView(
         modifier = modifier,
         arcGISMap = arcGISMap,
@@ -89,24 +101,16 @@ internal fun RasterImage(
         isAttributionBarVisible = false,
         backgroundGrid = BackgroundGrid().apply { isVisible = false },
         mapViewInteractionOptions = MapViewInteractionOptions(isEnabled = true),
-        onSingleTapConfirmed = { event ->
+        onSingleTapConfirmed = onTap@{ event ->
+            if (!viewerState.isMarkingLocation) return@onTap
+            val rasterPoint = event.mapPoint ?: return@onTap
+            val imagePoint = computeImagePoint(rasterPoint, rasterLayer) ?: return@onTap
             coroutineScope.launch {
-                val result = viewerState.imageToLocation(event.screenCoordinate)
-                if (result != null) {
-                    result.onSuccess { _ ->
-                        // TODO: add a graphic to the graphics overlay of GeoView for the returned location
-                    }.onFailure { error ->
-                        Log.e(
-                            "RasterImage",
-                            "imageToLocation failed for screen coordinates: (${event.screenCoordinate.x}, ${event.screenCoordinate.y}) with error: ${error.message}"
-                        )
-                    }
-                } else {
-                    Log.e(
-                        "RasterImage",
-                        "imageToLocation returned no active oriented image for screen coordinates: (${event.screenCoordinate.x}, ${event.screenCoordinate.y})"
-                    )
-                }
+                viewerState.addMarkerToRasterImage(
+                    imagePoint,
+                    rasterPoint,
+                    graphicsOverlay
+                )
             }
         },
         onViewpointChangedForBoundingGeometry = { viewpoint ->
@@ -117,6 +121,7 @@ internal fun RasterImage(
                     viewerState.updateFootprints(imageCoordinates)
                 }
             }
+            Log.i("RasterImage", "Viewpoint changed for bounding geometry: ${viewpoint.targetGeometry.toJson()}")
         }
     )
 
@@ -124,6 +129,7 @@ internal fun RasterImage(
         rasterLayer.load().onSuccess {
             rasterLayer.fullExtent?.let { fullExtent ->
                 proxy.setViewpointGeometry(fullExtent)
+                Log.i("RasterImage", "Raster layer loaded successfully with full extent: ${fullExtent.toJson()}")
             }
             if (viewerState.supportsSequentialNavigation && viewerState.uiState.isSequentialNavigationEnabled) {
                 val imageCenter = computeImageCenter(rasterLayer)
@@ -185,7 +191,29 @@ internal fun RasterImage(
 
 internal fun computeImageCenter(rasterLayer: RasterLayer): DoubleXY? {
     val rasterInfo = runCatching { rasterLayer.raster?.rasterInfo }.getOrNull() ?: return null
+    val centerPoint = rasterInfo.extent?.center ?: return null
+    return computeImagePoint(centerPoint, rasterLayer)
+}
 
+internal fun computeRasterPoint(imagePoint: DoubleXY, rasterLayer: RasterLayer): Point? {
+    val rasterInfo = runCatching { rasterLayer.raster?.rasterInfo }.getOrNull() ?: return null
+    val extent = rasterInfo.extent ?: return null
+    val cellSizeX = rasterInfo.cellSizeX
+    val cellSizeY = rasterInfo.cellSizeY
+    if (!cellSizeX.isFinite() || !cellSizeY.isFinite() || cellSizeX <= 0.0 || cellSizeY <= 0.0 ||
+        !imagePoint.x.isFinite() || !imagePoint.y.isFinite()
+    ) return null
+
+    val x = extent.xMin + imagePoint.x * cellSizeX
+    val y = extent.yMax - imagePoint.y * cellSizeY
+    if (!x.isFinite() || !y.isFinite() || x < extent.xMin || x > extent.xMax ||
+        y < extent.yMin || y > extent.yMax
+    ) return null
+    return Point(x, y, rasterLayer.spatialReference)
+}
+
+private fun computeImagePoint(rasterPoint: Point, rasterLayer: RasterLayer): DoubleXY? {
+    val rasterInfo = runCatching { rasterLayer.raster?.rasterInfo }.getOrNull() ?: return null
     val rasterExtent = rasterInfo.extent ?: return null
     val rasterXMin = rasterExtent.xMin
     val rasterYMax = rasterExtent.yMax
@@ -195,16 +223,26 @@ internal fun computeImageCenter(rasterLayer: RasterLayer): DoubleXY? {
         return null
     }
 
-    val centerPoint = rasterExtent.center
     return DoubleXY(
-        x = (centerPoint.x - rasterXMin) / cellSizeX,
-        y = (rasterYMax - centerPoint.y) / cellSizeY
+        x = (rasterPoint.x - rasterXMin) / cellSizeX,
+        y = (rasterYMax - rasterPoint.y) / cellSizeY
     )
 }
 
-internal fun computePixelCorners(viewpoint: Viewpoint, rasterLayer: RasterLayer): List<DoubleXY>? {
+
+private fun computeVisiblePolygon(viewpoint: Viewpoint, spatialReference: SpatialReference?): Polygon? {
     val extent = viewpoint.targetGeometry.extent
-    val rotation = if (viewpoint.rotation.isNaN()) 0.0 else viewpoint.rotation
+    val rotation = viewpoint.rotation.takeIf { it.isFinite() } ?: 0.0
+    val center = Point(extent.center.x, extent.center.y, extent.spatialReference)
+    val polygon = GeometryEngine.rotate(extent.toPolygon(), rotation, center) as? Polygon ?: return null
+    if (polygon.spatialReference == spatialReference) return polygon
+    if (polygon.spatialReference == null || spatialReference == null) return null
+    // Binary geometry operations require equivalent vertical references, even for XY-only
+    // geometries. Project the rotated viewport rather than relabeling its coordinates.
+    return GeometryEngine.projectOrNull(polygon, spatialReference)?.takeUnless { it.isEmpty }
+}
+
+internal fun computePixelCorners(viewpoint: Viewpoint, rasterLayer: RasterLayer): List<DoubleXY>? {
     val imageExtent = rasterLayer.fullExtent ?: return null
     val rasterInfo = runCatching { rasterLayer.raster?.rasterInfo }.getOrNull() ?: return null
 
@@ -212,7 +250,7 @@ internal fun computePixelCorners(viewpoint: Viewpoint, rasterLayer: RasterLayer)
         return null
     }
 
-    val visiblePolygon = GeometryEngine.rotate(extent.toPolygon(), rotation, extent.center) as? Polygon ?: return null
+    val visiblePolygon = computeVisiblePolygon(viewpoint, imageExtent.spatialReference) ?: return null
     val imagePolygon = imageExtent.toPolygon()
     val intersectionPolygon = GeometryEngine.intersectionOrNull(
         geometry1 = visiblePolygon,

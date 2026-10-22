@@ -57,7 +57,8 @@ import androidx.compose.ui.unit.dp
 import com.arcgismaps.mapping.layers.OrientedImageryLayer
 import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.toolkit.orientedimageryviewer.internal.ErrorSnackbarContainer
-import com.arcgismaps.toolkit.orientedimageryviewer.internal.ImageryView
+import com.arcgismaps.toolkit.orientedimageryviewer.internal.components.MarkerToolsButton
+import com.arcgismaps.toolkit.orientedimageryviewer.internal.OrientedImagery
 import com.arcgismaps.toolkit.popup.Popup
 import com.arcgismaps.toolkit.popup.PopupState
 import kotlinx.coroutines.launch
@@ -90,6 +91,9 @@ public fun OrientedImageryViewer(
         onCurrentFootprint = { orientedImageryViewerState.toggleActiveFootprint() },
         onAdditionalFootprints = { orientedImageryViewerState.toggleAdditionalFootprints() },
         onAdditionalCameraLocations = { orientedImageryViewerState.toggleAdditionalCameraLocations() },
+        onAddMarker = { orientedImageryViewerState.addMarker() },
+        onSelectMarker = { orientedImageryViewerState.selectMarker() },
+        onClearAllMarkers = { orientedImageryViewerState.clearAllMarkers() },
         onSequentialNavigation = { orientedImageryViewerState.toggleSequentialNavigation() },
         onReset = { orientedImageryViewerState.resetAll()},
         onDismiss = onDismiss,
@@ -108,6 +112,9 @@ internal fun ViewerLayout(
     onCurrentFootprint: () -> Unit = {},
     onAdditionalFootprints: () -> Unit = {},
     onAdditionalCameraLocations: () -> Unit = {},
+    onAddMarker: () -> Unit = {},
+    onSelectMarker: () -> Unit = {},
+    onClearAllMarkers: () -> Unit = {},
     onSequentialNavigation: () -> Unit = {},
     onReset: () -> Unit = {},
     onDismiss: () -> Unit = {},
@@ -165,11 +172,15 @@ internal fun ViewerLayout(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         OrientedImageryToolbar(
+                            isMarkingLocation = viewerState.uiState.isMarkingLocation,
                             onPreviousImage = onPreviousImage,
                             onNextImage = onNextImage,
                             onCurrentFootprint = onCurrentFootprint,
                             onAdditionalFootprints = onAdditionalFootprints,
                             onAdditionalCameraLocations = onAdditionalCameraLocations,
+                            onAddMarker = onAddMarker,
+                            onSelectMarker = onSelectMarker,
+                            onClearAllMarkers = onClearAllMarkers,
                             supportsSequentialNavigation = viewerState.supportsSequentialNavigation,
                             isSequentialNavigationEnabled = isSequentialNavigationEnabled,
                             onSequentialNavigation = onSequentialNavigation,
@@ -202,7 +213,7 @@ internal fun ViewerLayout(
             },
             content = {
                 Box(modifier = Modifier.fillMaxSize()) {
-                    ImageryView(viewerState = viewerState, modifier = Modifier.fillMaxSize())
+                    OrientedImagery(viewerState = viewerState, modifier = Modifier.fillMaxSize())
                     imagePopup?.let { popup ->
                         // Scope evaluation to the popup's composition, including dismissal and image changes.
                         val popupScope = rememberCoroutineScope()
@@ -257,11 +268,15 @@ internal fun ViewerLayout(
 
 @Composable
 private fun OrientedImageryToolbar(
+    isMarkingLocation: Boolean,
     onPreviousImage: (() -> Unit)?,
     onNextImage: (() -> Unit)?,
     onCurrentFootprint: () -> Unit,
     onAdditionalFootprints: () -> Unit,
     onAdditionalCameraLocations: () -> Unit,
+    onAddMarker: () -> Unit = {},
+    onSelectMarker: () -> Unit = {},
+    onClearAllMarkers: () -> Unit = {},
     supportsSequentialNavigation: Boolean,
     isSequentialNavigationEnabled: Boolean,
     onSequentialNavigation: () -> Unit,
@@ -303,13 +318,13 @@ private fun OrientedImageryToolbar(
                 tint = Color.Blue
             )
         }
-        IconButton(onClick = onAdditionalCameraLocations) {
-            Icon(
-                painter = painterResource(R.drawable.additional_cameras_24),
-                contentDescription = stringResource(R.string.toolbar_additional_camera_locations),
-                tint = Color.Unspecified
-            )
-        }
+//        IconButton(onClick = onAdditionalCameraLocations) {
+//            Icon(
+//                painter = painterResource(R.drawable.additional_cameras_24),
+//                contentDescription = stringResource(R.string.toolbar_additional_camera_locations),
+//                tint = Color.Unspecified
+//            )
+//        }
         IconToggleButton(
             checked = isSequentialNavigationEnabled,
             enabled = supportsSequentialNavigation,
@@ -326,13 +341,19 @@ private fun OrientedImageryToolbar(
                 contentDescription = stringResource(R.string.toolbar_popup)
             )
         }
-        IconButton(onClick = onReset) {
-            Icon(
-                painter = painterResource(R.drawable.reset_24),
-                contentDescription = stringResource(R.string.toolbar_reset),
-                tint = Color.Unspecified
-            )
-        }
+        MarkerToolsButton(
+            isMarkingLocation = isMarkingLocation,
+            onAddMarker = onAddMarker,
+            onSelectMarker = onSelectMarker,
+            onClearAllMarkers =onClearAllMarkers
+        )
+//        IconButton(onClick = onReset) {
+//            Icon(
+//                painter = painterResource(R.drawable.reset_24),
+//                contentDescription = stringResource(R.string.toolbar_reset),
+//                tint = Color.Unspecified
+//            )
+//        }
     }
 }
 

@@ -33,6 +33,7 @@ internal data class OrientedImageryViewerUiState(
     val activeImageRevision: Long = 0,
     val inputLocationData: PointData? = null,
     val isSequentialNavigationEnabled: Boolean = false,
+    val isMarkingLocation: Boolean = false,
     val isActiveFootprintVisible: Boolean = false,
     val isAdditionalFootprintsVisible: Boolean = false,
     val isAdditionalCameraLocationsVisible: Boolean = false
@@ -58,7 +59,3 @@ internal data class PointData(
         spatialReferenceWkid?.let { wkid -> Point(x, y, z, SpatialReference(wkid)) } ?: Point(x, y, z)
     }
 }
-
-
-
-

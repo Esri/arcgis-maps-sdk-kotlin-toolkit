@@ -33,6 +33,8 @@ import com.arcgismaps.mapping.layers.orientedimagery.OrientedImageFootprint
 import com.arcgismaps.mapping.layers.orientedimagery.OrientedImageSearchParameters
 import com.arcgismaps.mapping.layers.orientedimagery.SequenceStep
 import com.arcgismaps.mapping.popup.Popup
+import com.arcgismaps.mapping.symbology.SimpleMarkerSymbol
+import com.arcgismaps.mapping.symbology.SimpleMarkerSymbolStyle
 import com.arcgismaps.mapping.view.DoubleXY
 import com.arcgismaps.mapping.view.Graphic
 import com.arcgismaps.mapping.view.GraphicsOverlay
@@ -90,6 +92,12 @@ public class OrientedImageryViewerState public constructor(
     private var footprintUpdateJob: Job? = null
     private var pendingFootprintUpdate: (suspend (OrientedImageFootprint) -> Result<*>)? = null
 
+
+    private var markerGraphicsInImage: List<Graphic> = emptyList()
+    private var markerGraphicsInGeoView: List<Graphic> = emptyList()
+    private var markerOverlayInImage: GraphicsOverlay? = null
+    private var imageCoordinateToRasterPoint: ((DoubleXY) -> Point?)? = null
+
     internal val uiState: OrientedImageryViewerUiState
         get() = _uiState.value
 
@@ -99,8 +107,8 @@ public class OrientedImageryViewerState public constructor(
     internal val inputLocationData: PointData?
         get() = uiState.inputLocationData
 
-    public val isSequentialNavigationEnabled: Boolean
-        get() = uiState.isSequentialNavigationEnabled
+    public val isMarkingLocation: Boolean
+        get() = uiState.isMarkingLocation
 
     public val hasActiveImage: Boolean
         get() = uiState.activeImageInfo != null
@@ -134,6 +142,88 @@ public class OrientedImageryViewerState public constructor(
 
     internal suspend fun locationToImage(mapPoint: Point): Result<DoubleXY>? =
         activeOrientedImage?.locationToImage(mapPoint)
+
+    /**
+     * Searches for images at the tapped location when [isMarkingLocation] is false.
+     * Otherwise, adds a map marker and, if covered by the active image and projected within its
+     * raster bounds, a corresponding raster image marker.
+     *
+     * Returns a failed [Result] if searching, projection, or coverage validation fails.
+     * Cancellation is rethrown. A map marker may already have been added when an operation fails.
+     */
+    public suspend fun onSingleTapOnGeoView(mapPoint: Point): Result<Unit> = runCatching {
+        currentCoroutineContext().ensureActive()
+        if (!isMarkingLocation) {
+            searchImages(mapPoint).getOrThrow()
+        } else {
+            addImageLocationMarker(mapPoint)
+            val revision = uiState.activeImageRevision
+            val image = activeOrientedImage ?: return@runCatching
+            val overlay = markerOverlayInImage ?: return@runCatching
+            val toRasterPoint = imageCoordinateToRasterPoint ?: return@runCatching
+            fun isCurrent(): Boolean = isMarkingLocation && revision == uiState.activeImageRevision &&
+                        overlay === markerOverlayInImage && toRasterPoint === imageCoordinateToRasterPoint
+
+            if (!isCurrent()) return@runCatching
+            val imagePoint = image.locationToImage(mapPoint).getOrThrow()
+            currentCoroutineContext().ensureActive()
+            if (!isCurrent()) return@runCatching
+            val rasterPoint = toRasterPoint(imagePoint) ?: return@runCatching
+            // Projection is not a visibility test: even a point outside coverage can
+            // produce finite, in-bounds pixels. Only search after cheap pixel validation.
+            if (!canImageSeeLocation(image, mapPoint) || !isCurrent()) return@runCatching
+            val graphic = Graphic(
+                geometry = rasterPoint,
+                symbol = SimpleMarkerSymbol(SimpleMarkerSymbolStyle.Diamond, Color.blue, 20f)
+            )
+            overlay.graphics.add(graphic)
+            markerGraphicsInImage += graphic
+        }
+        currentCoroutineContext().ensureActive()
+    }.onFailure { error ->
+        if (error is CancellationException) throw error
+        currentCoroutineContext().ensureActive()
+    }
+
+    private suspend fun canImageSeeLocation(image: OrientedImage, point: Point): Boolean {
+        val result = orientedImageryLayer.searchImages(point, OrientedImageSearchParameters().apply {
+                applyHeightFilter = false
+                // The active image may rank below the default result limit.
+                maxResults = -1
+            })
+        currentCoroutineContext().ensureActive()
+        val candidates = result.getOrThrow()
+        val objectIdField = orientedImageryLayer.featureTable?.objectIdField
+        val objectId = objectIdField?.let { image.attributes[it] }
+        if (objectId != null) {
+            return candidates.any { it.attributes[objectIdField] == objectId }
+        }
+        val uri = image.dataUri ?: return false
+        for (candidate in candidates) {
+            if (candidate === image) return true
+            val loaded = candidate.load()
+            currentCoroutineContext().ensureActive()
+            loaded.getOrThrow()
+            if (candidate.dataUri == uri) return true
+        }
+        return false
+    }
+
+    internal fun registerMarkerOverlayInImage(
+        overlay: GraphicsOverlay,
+        toRasterPoint: (DoubleXY) -> Point?
+    ) {
+        markerOverlayInImage = overlay
+        imageCoordinateToRasterPoint = toRasterPoint
+    }
+
+    internal fun unregisterMarkerOverlayInImage(toRasterPoint: (DoubleXY) -> Point?) {
+        if (imageCoordinateToRasterPoint !== toRasterPoint) return
+        markerOverlayInImage?.graphics?.removeAll(markerGraphicsInImage)
+        markerGraphicsInImage = emptyList()
+        markerOverlayInImage = null
+        imageCoordinateToRasterPoint = null
+    }
 
     internal fun setInputLocation(point: Point?) {
         setInputLocationData(point?.let { pointData ->
@@ -319,6 +409,65 @@ public class OrientedImageryViewerState public constructor(
 
     public fun isActiveFootprintVisible(): Boolean = uiState.isActiveFootprintVisible
 
+    public fun addMarker() {
+        updateUiState { uiState ->
+            uiState.copy(isMarkingLocation = !uiState.isMarkingLocation)
+        }
+    }
+
+    internal fun addImageLocationMarker(point: Point) {
+        val graphic = Graphic(point, ImageDefaults.inputLocationSymbol())
+        graphicsOverlay.graphics.add(graphic)
+        markerGraphicsInGeoView += graphic
+    }
+
+    internal suspend fun addMarkerToRasterImage(
+        imagePoint: DoubleXY,
+        rasterPoint: Point,
+        rasterGraphicsOverlay: GraphicsOverlay
+    ) {
+        markerOverlayInImage = rasterGraphicsOverlay
+        if (!isMarkingLocation) return
+        val imageRevision = uiState.activeImageRevision
+        val result = imageToLocation(imagePoint)
+        if (result != null) {
+            result.onSuccess { point ->
+                if (!isMarkingLocation ||
+                    uiState.activeImageRevision != imageRevision
+                ) return@onSuccess
+
+                val graphic = Graphic(
+                    geometry = rasterPoint,
+                    symbol = SimpleMarkerSymbol(SimpleMarkerSymbolStyle.Diamond, Color.red, 20f)
+                )
+                rasterGraphicsOverlay.graphics.add(graphic)
+                markerGraphicsInImage += graphic
+                addImageLocationMarker(point)
+            }.onFailure { error ->
+                Log.e(
+                    "RasterImage",
+                    "imageToLocation failed for image coordinates: (${imagePoint.x}, ${imagePoint.y}) with error: ${error.message}"
+                )
+            }
+        } else {
+            Log.e(
+                "RasterImage",
+                "imageToLocation returned no active oriented image for image coordinates: (${imagePoint.x}, ${imagePoint.y})"
+            )
+        }
+    }
+
+    public fun selectMarker() {
+        // Implementation for selecting a marker
+    }
+
+    public fun clearAllMarkers() {
+        markerOverlayInImage?.graphics?.removeAll(markerGraphicsInImage)
+        graphicsOverlay.graphics.removeAll(markerGraphicsInGeoView)
+        markerGraphicsInImage = emptyList()
+        markerGraphicsInGeoView = emptyList()
+    }
+
     public fun resetAll() {
         setActiveOrientedImage(null)
         activeFootprint = null
@@ -327,6 +476,7 @@ public class OrientedImageryViewerState public constructor(
         setInputLocation(null)
         updateUiState { uiState ->
             uiState.copy(
+                isMarkingLocation = false,
                 isActiveFootprintVisible = false,
                 isAdditionalFootprintsVisible = false,
                 isAdditionalCameraLocationsVisible = false,
@@ -336,6 +486,10 @@ public class OrientedImageryViewerState public constructor(
         }
         cancelFootprintUpdateJob()
         orientedImageryLayer.visibleFootprints.clear()
+        clearAllMarkers()
+        markerOverlayInImage?.graphics?.clear()
+        markerOverlayInImage = null
+        imageCoordinateToRasterPoint = null
         graphicsOverlay.graphics.clear()
         orientedImages = emptyList()
         additionalFootprints = emptyList()
@@ -565,5 +719,3 @@ public class OrientedImageryViewerState public constructor(
             }
     }
 }
-
-
