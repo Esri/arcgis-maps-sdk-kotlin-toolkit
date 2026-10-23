@@ -20,44 +20,62 @@ package com.esri.microappslib.theme
 
 import androidx.compose.ui.graphics.Color
 
-val primaryLight = Color(0xFF007AC2)
+// Light Scheme
+val primaryLight = Color(0xFF7A2EE2)
 val onPrimaryLight = Color(0xFFFFFFFF)
-val primaryContainerLight = Color(0xFF007AC2)
-val onPrimaryContainerLight = Color(0xFFFFFFFF)
-val secondaryLight = Color(0xFF45617E)
+val primaryContainerLight = Color(0xFFEEDBFF)
+val onPrimaryContainerLight = Color(0xFF270055)
+
+val secondaryLight = Color(0xFF655B6B)
 val onSecondaryLight = Color(0xFFFFFFFF)
-val secondaryContainerLight = Color(0xFFCAE2FF)
-val onSecondaryContainerLight = Color(0xFF2C4864)
-val tertiaryLight = Color(0xFF004C7A)
+val secondaryContainerLight = Color(0xFFEDE0F2)
+val onSecondaryContainerLight = Color(0xFF211926)
+
+val tertiaryLight = Color(0xFF80525A)
 val onTertiaryLight = Color(0xFFFFFFFF)
-val tertiaryContainerLight = Color(0xFF2371AC)
-val onTertiaryContainerLight = Color(0xFFFFFFFF)
+val tertiaryContainerLight = Color(0xFFFFD9DF)
+val onTertiaryContainerLight = Color(0xFF321018)
+
+val backgroundLight = Color(0xFFFEF7FF)
+val onBackgroundLight = Color(0xFF1D1B20)
+val surfaceLight = Color(0xFFFEF7FF)
+val onSurfaceLight = Color(0xFF1D1B20)
+
 val errorLight = Color(0xFFBA1A1A)
 val onErrorLight = Color(0xFFFFFFFF)
 val errorContainerLight = Color(0xFFFFDAD6)
 val onErrorContainerLight = Color(0xFF410002)
-val backgroundLight = Color(0xFFF7F9FF)
-val onBackgroundLight = Color(0xFF181C21)
-val surfaceLight = Color(0xFFF7F9FF)
-val onSurfaceLight = Color(0xFF181C21)
 
-val primaryDark = Color(0xFF009AF2)
-val onPrimaryDark = Color(0xFF003355)
-val primaryContainerDark = Color(0xFF0070B3)
-val onPrimaryContainerDark = Color(0xFFFFFFFF)
-val secondaryDark = Color(0xFFACC9EA)
-val onSecondaryDark = Color(0xFF13324D)
-val secondaryContainerDark = Color(0xFF223F5A)
-val onSecondaryContainerDark = Color(0xFFB7D4F5)
-val tertiaryDark = Color(0xFF99CBFF)
-val onTertiaryDark = Color(0xFF003354)
-val tertiaryContainerDark = Color(0xFF00578C)
-val onTertiaryContainerDark = Color(0xFFF1F6FF)
+val outlineLight = Color(0xFF79747E)
+
+val outlineVariantLight = Color(0xFFCAC4D0)
+
+// Dark Scheme
+val primaryDark = Color(0xFFD1BCFF)
+val onPrimaryDark = Color(0xFF43008F)
+val primaryContainerDark = Color(0xFF5F00C8)
+val onPrimaryContainerDark = Color(0xFFEEDBFF)
+
+val secondaryDark = Color(0xFFD0C3D6)
+val onSecondaryDark = Color(0xFF362E3C)
+val secondaryContainerDark = Color(0xFF4C4453)
+val onSecondaryContainerDark = Color(0xFFEDE0F2)
+
+val tertiaryDark = Color(0xFFF4B8C1)
+val onTertiaryDark = Color(0xFF4C252D)
+val tertiaryContainerDark = Color(0xFF653B43)
+val onTertiaryContainerDark = Color(0xFFFFD9DF)
+
+val backgroundDark = Color(0xFF141218)
+val onBackgroundDark = Color(0xFFE6E1E6)
+val surfaceDark = Color(0xFF141218)
+val onSurfaceDark = Color(0xFFE6E1E6)
+
 val errorDark = Color(0xFFFFB4AB)
 val onErrorDark = Color(0xFF690005)
 val errorContainerDark = Color(0xFF93000A)
 val onErrorContainerDark = Color(0xFFFFDAD6)
-val backgroundDark = Color(0xFF101418)
-val onBackgroundDark = Color(0xFFE0E2E9)
-val surfaceDark = Color(0xFF101418)
-val onSurfaceDark = Color(0xFFE0E2E9)
+
+val outlineDark = Color(0xFF97939D)
+
+val outlineVariantDark = Color(0xFF49454F)
