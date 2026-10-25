@@ -113,5 +113,6 @@ dependencies {
     androidTestImplementation(libs.truth)
     androidTestImplementation(libs.bundles.composeTest)
     androidTestImplementation(libs.androidx.test.rules)
+    androidTestImplementation(project(":microapps-lib"))
     debugImplementation(libs.bundles.debug)
 }

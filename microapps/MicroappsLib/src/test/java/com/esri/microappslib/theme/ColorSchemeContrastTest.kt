@@ -25,14 +25,25 @@ import org.junit.Test
 import java.util.Locale
 import kotlin.math.pow
 
-@Suppress("DEPRECATION")
 class ColorSchemeContrastTest {
 
+    /**
+     * Given the light color scheme,
+     * when its listed text and outline color pairs are checked,
+     * then text contrast is at least 4.5:1 and outline contrast is at least 3:1.
+    * @since 300.2.0
+     */
     @Test
     fun lightColorSchemeMeetsContrastRequirements() {
         assertColorSchemeContrast(LightColorScheme, "Light")
     }
 
+    /**
+     * Given the dark color scheme,
+     * when its listed text and outline color pairs are checked,
+     * then text contrast is at least 4.5:1 and outline contrast is at least 3:1.
+    * @since 300.2.0
+     */
     @Test
     fun darkColorSchemeMeetsContrastRequirements() {
         assertColorSchemeContrast(DarkColorScheme, "Dark")

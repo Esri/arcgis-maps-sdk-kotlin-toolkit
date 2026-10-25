@@ -31,6 +31,7 @@ import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.unit.dp
+import com.esri.microappslib.theme.MicroAppTheme
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.Viewpoint
@@ -73,6 +74,7 @@ class ScalebarTests {
     fun testLineScalebarIsDisplayed() {
         // Test the scalebar
         composeTestRule.setContent {
+            MicroAppTheme {
                 LineScalebar(
                     displayLength = 160.0,
                     label = "1000 km",
@@ -81,6 +83,7 @@ class ScalebarTests {
                     shapes = ScalebarDefaults.shapes()
                 )
             }
+        }
         composeTestRule.onNodeWithTag(lineScalebarTag).assertIsDisplayed()
     }
 

@@ -24,6 +24,7 @@ import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.performClick
 import androidx.lifecycle.ViewModel
+import com.esri.microappslib.theme.MicroAppTheme
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.PortalItem
 import com.arcgismaps.mapping.Viewpoint
@@ -53,7 +54,9 @@ class FloorFilterTests {
     @Before
     fun setUpFloorFilter() {
         composeTestRule.setContent {
-            FloorFilter(floorFilterState = mapViewModel.floorFilterState)
+            MicroAppTheme {
+                FloorFilter(floorFilterState = mapViewModel.floorFilterState)
+            }
         }
     }
 

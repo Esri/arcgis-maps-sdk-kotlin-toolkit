@@ -30,6 +30,7 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.platform.app.InstrumentationRegistry
+import com.esri.microappslib.theme.MicroAppTheme
 import com.arcgismaps.mapping.featureforms.ComboBoxFormInput
 import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.google.common.truth.Truth.assertThat
@@ -65,8 +66,10 @@ class ComboBoxFieldTests : FeatureFormTestRunner(
             coroutineScope = scope
         )
         composeTestRule.setContent {
-            errorTextColor = MaterialTheme.colorScheme.error
-            FeatureForm(featureFormState = featureFormState)
+            MicroAppTheme {
+                errorTextColor = MaterialTheme.colorScheme.error
+                FeatureForm(featureFormState = featureFormState)
+            }
         }
     }
 

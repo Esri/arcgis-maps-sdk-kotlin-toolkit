@@ -25,6 +25,7 @@ import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
+import com.esri.microappslib.theme.MicroAppTheme
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
@@ -66,7 +67,11 @@ class OfflineMapAreasTests {
     @Test
     fun testPreplannedWorkflow() = runTest {
         val mapViewModel = MapViewModel(OfflineMapMode.Preplanned)
-        composeTestRule.setContent { OfflineScenario(mapViewModel) }
+        composeTestRule.setContent {
+            MicroAppTheme {
+                OfflineScenario(mapViewModel)
+            }
+        }
         // Verify that the OfflineMapAreas UI container is displayed
         composeTestRule.waitUntilExactlyOneExists(hasTestTag(offlineMapAreasContainerTag))
         // Wait until the OfflineMapState is initialized
@@ -118,7 +123,11 @@ class OfflineMapAreasTests {
     @Test
     fun testOnDemandWorkflow() = runTest {
         val mapViewModel = MapViewModel(OfflineMapMode.OnDemand)
-        composeTestRule.setContent { OfflineScenario(mapViewModel) }
+        composeTestRule.setContent {
+            MicroAppTheme {
+                OfflineScenario(mapViewModel)
+            }
+        }
         // Verify that the OfflineMapAreas UI container is displayed
         composeTestRule.waitUntilExactlyOneExists(hasTestTag(offlineMapAreasContainerTag))
         // Wait until the OfflineMapState is initialized

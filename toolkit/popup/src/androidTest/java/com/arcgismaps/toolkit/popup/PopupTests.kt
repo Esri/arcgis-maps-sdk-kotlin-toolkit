@@ -33,6 +33,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performScrollToIndex
 import androidx.test.platform.app.InstrumentationRegistry
+import com.esri.microappslib.theme.MicroAppTheme
 import com.arcgismaps.toolkit.popup.internal.element.attachment.AttachmentsElementState
 import com.arcgismaps.toolkit.popup.internal.element.fieldselement.FieldsElementState
 import com.arcgismaps.toolkit.popup.internal.element.media.MediaElementState
@@ -63,7 +64,11 @@ class PopupTests {
         // Load a popup using the web map.
         val mapViewModel = MapViewModel(itemId = "9f3a674e998f461580006e626611f9ad")
         val popupState = mapViewModel.load().first()
-        composeTestRule.setContent { PopupScenario(mapViewModel.map, popupState) }
+        composeTestRule.setContent {
+            MicroAppTheme {
+                PopupScenario(mapViewModel.map, popupState)
+            }
+        }
         composeTestRule.waitUntil(timeoutMillis = 10000) {
             popupState.getActivePopupStateData().initialEvaluation
         }

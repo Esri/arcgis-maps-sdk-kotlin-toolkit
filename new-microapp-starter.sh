@@ -83,7 +83,7 @@ if ! IFS= read -r name; then
     exit 1
 fi
 
-if [[ ! "$name" =~ ^[abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ][abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789]*$ ]]; then
+if ! (LC_ALL=C; [[ "$name" =~ ^[A-Za-z][A-Za-z0-9]*$ ]]); then
     echo "error: the microapp name must start with an ASCII letter and contain only ASCII letters and digits (no spaces)." >&2
     exit 1
 fi
