@@ -44,7 +44,9 @@ import com.arcgismaps.toolkit.orientedimageryviewer.internal.OrientedImageryView
 import com.arcgismaps.toolkit.orientedimageryviewer.internal.PointData
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
 
 @Immutable

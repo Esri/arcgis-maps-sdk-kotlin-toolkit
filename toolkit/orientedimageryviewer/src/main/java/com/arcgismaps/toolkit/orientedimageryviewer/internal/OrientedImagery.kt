@@ -33,11 +33,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.mapping.layers.orientedimagery.OrientedImageType
 import com.arcgismaps.toolkit.orientedimageryviewer.OrientedImageryViewerState
-import com.arcgismaps.toolkit.orientedimageryviewer.internal.media.PanoramicImage
-import com.arcgismaps.toolkit.orientedimageryviewer.internal.media.RasterImage
+import com.arcgismaps.toolkit.orientedimageryviewer.internal.components.PanoramicImage
+import com.arcgismaps.toolkit.orientedimageryviewer.internal.components.RasterImage
 
 @Composable
-internal fun ImageryView(
+internal fun OrientedImagery(
     viewerState: OrientedImageryViewerState,
     modifier: Modifier = Modifier,
 ) {
