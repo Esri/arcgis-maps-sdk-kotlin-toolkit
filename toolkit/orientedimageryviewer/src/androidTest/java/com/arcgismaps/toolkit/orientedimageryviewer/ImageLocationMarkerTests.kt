@@ -332,6 +332,121 @@ class ImageLocationMarkerTests {
     }
 
     @Test
+    fun coveredLocationPlacesPanoramicMarkerInsteadOfRasterMarker() {
+        compose.runOnIdle {
+            state.registerMarkerInPanoramicImage(state.uiState.activeImageRevision, 20, 10)
+            tap()
+            assertEquals(1, mapOverlay.graphics.size)
+            assertEquals(0, imageOverlay.graphics.size)
+            val marker = state.markerPointsInPanoramicImage.single()
+            assertEquals(5.0, marker.imagePoint.x, 0.0)
+            assertEquals(5.0, marker.imagePoint.y, 0.0)
+            assertTrue(marker.isFromGeoView)
+        }
+    }
+
+    @Test
+    fun uncoveredLocationDoesNotPlacePanoramicMarker() {
+        compose.runOnIdle {
+            state.registerMarkerInPanoramicImage(state.uiState.activeImageRevision, 20, 10)
+            coEvery { layer.searchImages(any(), any()) } returns Result.success(emptyList())
+            tap()
+            assertEquals(1, mapOverlay.graphics.size)
+            assertTrue(state.markerPointsInPanoramicImage.isEmpty())
+        }
+    }
+
+    @Test
+    fun panoramaRejectsInvalidPixelsButAcceptsWrappedLongitude() {
+        compose.runOnIdle {
+            state.registerMarkerInPanoramicImage(state.uiState.activeImageRevision, 20, 10)
+            for (pixel in listOf(
+                DoubleXY(Double.NaN, 5.0), DoubleXY(5.0, Double.POSITIVE_INFINITY),
+                DoubleXY(5.0, -1.0), DoubleXY(5.0, 11.0)
+            )) {
+                coEvery { image.locationToImage(any()) } returns Result.success(pixel)
+                tap()
+            }
+            assertTrue(state.markerPointsInPanoramicImage.isEmpty())
+            coVerify(exactly = 0) { layer.searchImages(any(), any()) }
+            coEvery { image.locationToImage(any()) } returns Result.success(DoubleXY(25.0, 5.0))
+            tap()
+            assertEquals(1, state.markerPointsInPanoramicImage.size)
+        }
+    }
+
+    @Test
+    fun retainedPanoramaCannotReceiveMarkersForNewImage() {
+        compose.runOnIdle {
+            state.registerMarkerInPanoramicImage(state.uiState.activeImageRevision - 1, 20, 10)
+            tap()
+            assertEquals(1, mapOverlay.graphics.size)
+            assertTrue(state.markerPointsInPanoramicImage.isEmpty())
+            coVerify(exactly = 0) { image.locationToImage(any()) }
+        }
+    }
+
+    @Test
+    fun disposedPanoramaDoesNotReceiveMarkersOrUnregisterReplacement() {
+        compose.runOnIdle {
+            val unregisterOld = state.registerMarkerInPanoramicImage(state.uiState.activeImageRevision, 20, 10)
+            val unregisterCurrent = state.registerMarkerInPanoramicImage(state.uiState.activeImageRevision, 20, 10)
+            unregisterOld()
+            tap()
+            assertEquals(1, state.markerPointsInPanoramicImage.size)
+            state.clearAllMarkers()
+            unregisterCurrent()
+            tap()
+            assertTrue(state.markerPointsInPanoramicImage.isEmpty())
+            assertEquals(0, imageOverlay.graphics.size)
+        }
+    }
+
+    @Test
+    fun clearingMarkersDuringProjectionDiscardsPendingPanoramicMarker() {
+        val projection = CompletableDeferred<Result<DoubleXY>>()
+        compose.runOnIdle {
+            state.registerMarkerInPanoramicImage(state.uiState.activeImageRevision, 20, 10)
+            coEvery { image.locationToImage(any()) } coAnswers { projection.await() }
+            tap()
+            state.clearAllMarkers()
+            projection.complete(Result.success(DoubleXY(5.0, 5.0)))
+        }
+        compose.runOnIdle {
+            assertTrue(state.markerPointsInPanoramicImage.isEmpty())
+            assertEquals(0, mapOverlay.graphics.size)
+        }
+    }
+
+    @Test
+    fun panoramaDisposalDuringCoverageSearchDiscardsPendingMarker() {
+        val coverage = CompletableDeferred<Result<List<OrientedImage>>>()
+        compose.runOnIdle {
+            val unregister = state.registerMarkerInPanoramicImage(state.uiState.activeImageRevision, 20, 10)
+            coEvery { layer.searchImages(any(), any()) } coAnswers { coverage.await() }
+            tap()
+            unregister()
+            coverage.complete(Result.success(listOf(image)))
+        }
+        compose.runOnIdle { assertTrue(state.markerPointsInPanoramicImage.isEmpty()) }
+    }
+
+    @Test
+    fun panoramicImageOriginMarkersRemainDistinctAndClearTogether() {
+        compose.runOnIdle {
+            val revision = state.uiState.activeImageRevision
+            state.registerMarkerInPanoramicImage(revision, 20, 10)
+            coEvery { image.imageToLocation(any()) } returns Result.success(location)
+            scope.launch { state.addMarkerToPanoramicImage(DoubleXY(3.0, 4.0), revision) }
+            tap()
+            assertEquals(listOf(false, true), state.markerPointsInPanoramicImage.map { it.isFromGeoView })
+            state.clearAllMarkers()
+            assertTrue(state.markerPointsInPanoramicImage.isEmpty())
+            assertEquals(0, mapOverlay.graphics.size)
+        }
+    }
+
+    @Test
     fun rasterConversionUsesExtentAndCellSizesAndIncludesImageEdges() {
         val rasterLayer = rasterLayer()
         val topLeft = requireNotNull(computeRasterPoint(DoubleXY(0.0, 0.0), rasterLayer))

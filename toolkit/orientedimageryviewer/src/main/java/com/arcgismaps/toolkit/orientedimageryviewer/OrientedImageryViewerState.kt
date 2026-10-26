@@ -100,6 +100,21 @@ public class OrientedImageryViewerState public constructor(
     private var markerOverlayInImage: GraphicsOverlay? = null
     private var imageCoordinateToRasterPoint: ((DoubleXY) -> Point?)? = null
 
+    private class ImageMarkerTarget(
+        val imageRevision: Long,
+        val owner: Any,
+        val prepareMarker: (DoubleXY) -> (() -> Unit)?
+    )
+
+    internal data class PanoramicMarker(val imagePoint: DoubleXY, val isFromGeoView: Boolean)
+
+    private var imageMarkerTarget: ImageMarkerTarget? = null
+    private val panoramicMarkers = mutableStateOf<List<PanoramicMarker>>(emptyList())
+    private var markerGeneration = 0L
+
+    internal val markerPointsInPanoramicImage: List<PanoramicMarker>
+        get() = panoramicMarkers.value
+
     internal val uiState: OrientedImageryViewerUiState
         get() = _uiState.value
 
@@ -148,7 +163,7 @@ public class OrientedImageryViewerState public constructor(
     /**
      * Searches for images at the tapped location when [isMarkingLocation] is false.
      * Otherwise, adds a map marker and, if covered by the active image and projected within its
-     * raster bounds, a corresponding raster image marker.
+     * bounds, a corresponding marker in the displayed raster or panoramic image.
      *
      * Returns a failed [Result] if searching, projection, or coverage validation fails.
      * Cancellation is rethrown. A map marker may already have been added when an operation fails.
@@ -160,26 +175,22 @@ public class OrientedImageryViewerState public constructor(
         } else {
             addImageLocationMarker(mapPoint)
             val revision = uiState.activeImageRevision
+            val generation = markerGeneration
             val image = activeOrientedImage ?: return@runCatching
-            val overlay = markerOverlayInImage ?: return@runCatching
-            val toRasterPoint = imageCoordinateToRasterPoint ?: return@runCatching
+            val target = imageMarkerTarget ?: return@runCatching
             fun isCurrent(): Boolean = isMarkingLocation && revision == uiState.activeImageRevision &&
-                        overlay === markerOverlayInImage && toRasterPoint === imageCoordinateToRasterPoint
+                        target.imageRevision == revision && target === imageMarkerTarget &&
+                        generation == markerGeneration
 
             if (!isCurrent()) return@runCatching
             val imagePoint = image.locationToImage(mapPoint).getOrThrow()
             currentCoroutineContext().ensureActive()
             if (!isCurrent()) return@runCatching
-            val rasterPoint = toRasterPoint(imagePoint) ?: return@runCatching
+            val addMarker = target.prepareMarker(imagePoint) ?: return@runCatching
             // Projection is not a visibility test: even a point outside coverage can
             // produce finite, in-bounds pixels. Only search after cheap pixel validation.
             if (!canImageSeeLocation(image, mapPoint) || !isCurrent()) return@runCatching
-            val graphic = Graphic(
-                geometry = rasterPoint,
-                symbol = SimpleMarkerSymbol(SimpleMarkerSymbolStyle.Diamond, Color.blue, 20f)
-            )
-            overlay.graphics.add(graphic)
-            markerGraphicsInImage += graphic
+            addMarker()
         }
         currentCoroutineContext().ensureActive()
     }.onFailure { error ->
@@ -217,6 +228,19 @@ public class OrientedImageryViewerState public constructor(
     ) {
         markerOverlayInImage = overlay
         imageCoordinateToRasterPoint = toRasterPoint
+        imageMarkerTarget = ImageMarkerTarget(uiState.activeImageRevision, toRasterPoint) { imagePoint ->
+                val rasterPoint = toRasterPoint(imagePoint)
+                if (rasterPoint == null) null else {
+                    {
+                        val graphic = Graphic(
+                            geometry = rasterPoint,
+                            symbol = SimpleMarkerSymbol(SimpleMarkerSymbolStyle.Diamond, Color.blue, 20f)
+                        )
+                        overlay.graphics.add(graphic)
+                        markerGraphicsInImage += graphic
+                    }
+                }
+            }
     }
 
     internal fun unregisterMarkerOverlayInImage(toRasterPoint: (DoubleXY) -> Point?) {
@@ -225,6 +249,29 @@ public class OrientedImageryViewerState public constructor(
         markerGraphicsInImage = emptyList()
         markerOverlayInImage = null
         imageCoordinateToRasterPoint = null
+        if (imageMarkerTarget?.owner === toRasterPoint) imageMarkerTarget = null
+    }
+
+    /** Registers a ready panorama and returns an ownership-aware disposal callback. */
+    internal fun registerMarkerInPanoramicImage(
+        imageRevision: Long,
+        width: Int,
+        height: Int
+    ): () -> Unit {
+        val target = ImageMarkerTarget(imageRevision, Any()) { imagePoint ->
+            // Longitude wraps at the panorama seam; latitude must stay within the image.
+            if (width <= 0 || height <= 0 || !imagePoint.x.isFinite() ||
+                !imagePoint.y.isFinite() || imagePoint.y !in 0.0..height.toDouble()
+            ) null else {
+                {
+                    panoramicMarkers.value = panoramicMarkers.value + PanoramicMarker(imagePoint, true)
+                }
+            }
+        }
+        imageMarkerTarget = target
+        return {
+            if (imageMarkerTarget === target) imageMarkerTarget = null
+        }
     }
 
     internal fun setInputLocation(point: Point?) {
@@ -412,6 +459,7 @@ public class OrientedImageryViewerState public constructor(
     public fun isActiveFootprintVisible(): Boolean = uiState.isActiveFootprintVisible
 
     public fun addMarker() {
+        ++markerGeneration
         updateUiState { uiState ->
             uiState.copy(isMarkingLocation = !uiState.isMarkingLocation)
         }
@@ -459,11 +507,37 @@ public class OrientedImageryViewerState public constructor(
         }
     }
 
+    internal suspend fun addMarkerToPanoramicImage(imagePoint: DoubleXY, imageRevision: Long) {
+        if (!isMarkingLocation || uiState.activeImageRevision != imageRevision) return
+        val image = activeOrientedImage ?: return
+        val generation = markerGeneration
+        currentCoroutineContext().ensureActive()
+        val result = image.imageToLocation(imagePoint)
+        currentCoroutineContext().ensureActive()
+        result.onSuccess { point ->
+            if (!isMarkingLocation || uiState.activeImageRevision != imageRevision ||
+                generation != markerGeneration
+            ) return@onSuccess
+
+            addImageLocationMarker(point)
+            panoramicMarkers.value = panoramicMarkers.value + PanoramicMarker(imagePoint, false)
+        }.onFailure { error ->
+            if (error is CancellationException) throw error
+            Log.e(
+                "PanoramicImage",
+                "imageToLocation failed for image coordinates: (${imagePoint.x}, ${imagePoint.y})",
+                error
+            )
+        }
+    }
+
     public fun selectMarker() {
         // Implementation for selecting a marker
     }
 
     public fun clearAllMarkers() {
+        ++markerGeneration
+        panoramicMarkers.value = emptyList()
         markerOverlayInImage?.graphics?.removeAll(markerGraphicsInImage)
         graphicsOverlay.graphics.removeAll(markerGraphicsInGeoView)
         markerGraphicsInImage = emptyList()
@@ -492,6 +566,7 @@ public class OrientedImageryViewerState public constructor(
         markerOverlayInImage?.graphics?.clear()
         markerOverlayInImage = null
         imageCoordinateToRasterPoint = null
+        imageMarkerTarget = null
         graphicsOverlay.graphics.clear()
         orientedImages = emptyList()
         additionalFootprints = emptyList()
@@ -519,6 +594,7 @@ public class OrientedImageryViewerState public constructor(
     }
 
     private fun setActiveImageInfo(value: OrientedImageInfo?) {
+        panoramicMarkers.value = emptyList()
         updateUiState { uiState ->
             uiState.copy(
                 activeImageInfo = value,

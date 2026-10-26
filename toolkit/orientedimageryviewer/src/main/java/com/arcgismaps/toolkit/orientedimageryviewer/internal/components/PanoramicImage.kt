@@ -37,11 +37,13 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -52,6 +54,7 @@ import androidx.core.net.toUri
 import com.arcgismaps.geometry.GeometryEngine
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.geometry.SpatialReference
+import com.arcgismaps.mapping.view.DoubleXY
 import com.arcgismaps.toolkit.orientedimageryviewer.OrientedImageryViewerState
 import com.google.android.filament.MaterialInstance
 import com.google.android.filament.Camera
@@ -63,9 +66,14 @@ import io.github.sceneview.node.CameraNode
 import io.github.sceneview.rememberCameraNode
 import io.github.sceneview.rememberEngine
 import io.github.sceneview.rememberMaterialLoader
+import io.github.sceneview.rememberOnGestureListener
+import io.github.sceneview.rememberView
 import io.github.sceneview.texture.ImageTexture
+import io.github.sceneview.utils.screenToRay
 import com.arcgismaps.toolkit.orientedimageryviewer.R
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import androidx.compose.ui.unit.dp
 import java.io.File
@@ -84,8 +92,17 @@ internal fun PanoramicImage(
     radiusMeters: Float = 10.0f
 ) {
     val imageSource = viewerState.uiState.activeImageInfo?.dataUri ?: return
+    val imageRevision = viewerState.uiState.activeImageRevision
     val engine = rememberEngine()
     val materialLoader = rememberMaterialLoader(engine)
+    val view = rememberView(engine)
+    // The loader owns this shared material and releases it with the renderer.
+    val markerMaterial = remember(materialLoader) {
+        materialLoader.createUnlitColorInstance(androidx.compose.ui.graphics.Color.Red)
+    }
+    val geoViewMarkerMaterial = remember(materialLoader) {
+        materialLoader.createUnlitColorInstance(androidx.compose.ui.graphics.Color.Blue)
+    }
     val context = LocalContext.current
     val readImagesPermission = remember(context, imageSource) { readImagesPermissionFor(context, imageSource) }
     // TODO: document that read image permission is required for local files outside of the app's private storage.
@@ -97,15 +114,18 @@ internal fun PanoramicImage(
     data class RenderState(
         val materialInstance: MaterialInstance,
         val initialDirection: Float3,
-        val footprintOrientation: PanoramicFootprintOrientation?
+        val footprintOrientation: PanoramicFootprintOrientation?,
+        val imageRevision: Long,
+        val width: Int,
+        val height: Int
     )
 
-    var renderState by remember(materialLoader) { mutableStateOf<RenderState?>(null) }
+    var renderState by remember(materialLoader, viewerState) { mutableStateOf<RenderState?>(null) }
     var loadErrorMessage by remember(materialLoader) { mutableStateOf<String?>(null) }
     val inputLocationData = viewerState.uiState.inputLocationData
     val sequentialNavigation = viewerState.uiState.isSequentialNavigationEnabled
 
-    LaunchedEffect(imageSource, materialLoader, context, hasReadImagesPermission, inputLocationData, sequentialNavigation) {
+    LaunchedEffect(viewerState, imageRevision, imageSource, materialLoader, context, hasReadImagesPermission, inputLocationData, sequentialNavigation) {
         loadErrorMessage = null
         if (!hasReadImagesPermission) {
             loadErrorMessage = permissionRequiredMessage
@@ -135,13 +155,17 @@ internal fun PanoramicImage(
                 if (footprintOrientation == null) {
                     Log.e("PanoramicImage", "Unable to calibrate geographic footprint orientation")
                 }
+                ensureActive()
                 val texture = ImageTexture.Builder()
                     .bitmap(it)
                     .build(materialLoader.engine)
                 renderState = RenderState(
                     materialInstance = materialLoader.createImageInstance(texture),
                     initialDirection = initialDirection,
-                    footprintOrientation = footprintOrientation
+                    footprintOrientation = footprintOrientation,
+                    imageRevision = imageRevision,
+                    width = it.width,
+                    height = it.height
                 )
             }
         }
@@ -165,6 +189,13 @@ internal fun PanoramicImage(
                 }
             }
             return@Box
+        }
+
+        DisposableEffect(viewerState, state, imageRevision) {
+            val unregister = if (state.imageRevision == imageRevision) {
+                viewerState.registerMarkerInPanoramicImage(imageRevision, state.width, state.height)
+            } else null
+            onDispose { unregister?.invoke() }
         }
 
         // Do not render or submit a default footprint before the map-to-image transform completes.
@@ -227,13 +258,33 @@ internal fun PanoramicImage(
             }
         }
         val footprintUpdateTracker = remember(cameraNode) { PanoramicFootprintUpdateTracker() }
+        val markerScope = key(viewerState, imageRevision) { rememberCoroutineScope() }
 
         SceneView(
             modifier = Modifier.fillMaxSize(),
             engine = engine,
+            view = view,
+            autoCenterContent = false,
             materialLoader = materialLoader,
             cameraNode = cameraNode,
             cameraManipulator = cameraManipulator,
+            onGestureListener = rememberOnGestureListener(
+                onSingleTapConfirmed = onTap@{ event, _ ->
+                    if (!viewerState.isMarkingLocation ||
+                        state.imageRevision != viewerState.uiState.activeImageRevision ||
+                        view.viewport.width <= 0 || view.viewport.height <= 0
+                    ) return@onTap
+
+                    val ray = view.screenToRay(event.x, event.y) ?: return@onTap
+                    val direction = ray.direction
+                    val imagePoint = panoramicImagePoint(
+                        Float3(direction.x, direction.y, direction.z), state.width, state.height
+                    ) ?: return@onTap
+                    markerScope.launch {
+                        viewerState.addMarkerToPanoramicImage(imagePoint, state.imageRevision)
+                    }
+                }
+            ),
             onFrame = {
                 val currentUiState = viewerState.uiState
                 if (
@@ -275,8 +326,39 @@ internal fun PanoramicImage(
                 materialInstance = state.materialInstance,
                 scale = Float3(-1f, 1f, 1f)
             )
+            if (state.imageRevision == viewerState.uiState.activeImageRevision) {
+                viewerState.markerPointsInPanoramicImage.forEach { marker ->
+                    val imagePoint = marker.imagePoint
+                    val direction = panoramicImageDirection(
+                        imagePoint.x, imagePoint.y, state.width, state.height
+                    ) ?: return@forEach
+                    // Keep markers inside the image sphere and outside its reflected transform.
+                    val distance = radiusMeters * 0.98f
+                    SphereNode(
+                        radius = radiusMeters * 0.012f,
+                        position = Float3(direction.x * distance, direction.y * distance, direction.z * distance),
+                        stacks = 8,
+                        slices = 16,
+                        materialInstance = if (marker.isFromGeoView) geoViewMarkerMaterial else markerMaterial
+                    )
+                }
+            }
         }
     }
+}
+
+/** Maps a renderer-space viewing ray to top-left-origin equirectangular image pixels. */
+internal fun panoramicImagePoint(direction: Float3, imageWidth: Int, imageHeight: Int): DoubleXY? {
+    val x = direction.x.toDouble()
+    val y = direction.y.toDouble()
+    val z = direction.z.toDouble()
+    if (imageWidth <= 0 || imageHeight <= 0 || !x.isFinite() || !y.isFinite() ||
+        !z.isFinite() || (x == 0.0 && y == 0.0 && z == 0.0)
+    ) return null
+
+    val u = (0.5 + atan2(z, x) / (2.0 * Math.PI) + 1.0) % 1.0
+    val v = atan2(hypot(x, z), y) / Math.PI
+    return DoubleXY(u * imageWidth, v * imageHeight)
 }
 
 private class PanoramicFootprintUpdateTracker {
