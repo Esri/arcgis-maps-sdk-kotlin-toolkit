@@ -28,7 +28,7 @@ import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import com.esri.microappslib.theme.MicroAppTheme
+import com.esri.microappslib.theme.MicroAppThemeSurface
 import com.arcgismaps.toolkit.geoviewcompose.GeoViewScope
 import com.arcgismaps.toolkit.geoviewcompose.theme.CalloutColors
 import com.arcgismaps.toolkit.geoviewcompose.theme.CalloutShapes
@@ -63,7 +63,7 @@ class CalloutTests {
     fun testCalloutVisibility() = runTest {
         val calloutScenarios = CalloutScenarios()
         composeTestRule.setContent {
-            MicroAppTheme {
+            MicroAppThemeSurface {
                 calloutScenarios.CalloutVisibility()
             }
         }

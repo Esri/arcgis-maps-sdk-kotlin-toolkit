@@ -25,7 +25,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.performClick
-import com.esri.microappslib.theme.MicroAppTheme
+import com.esri.microappslib.theme.MicroAppThemeSurface
 import org.junit.Test
 import org.junit.Assert.assertEquals
 import org.junit.Rule
@@ -52,7 +52,7 @@ class CompassTests {
         var rotation by mutableStateOf(90.0)
 
         composeTestRule.setContent {
-            MicroAppTheme {
+            MicroAppThemeSurface {
                 Compass(rotation = rotation)
             }
         }

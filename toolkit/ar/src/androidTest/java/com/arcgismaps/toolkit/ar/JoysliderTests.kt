@@ -23,7 +23,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.performTouchInput
-import com.esri.microappslib.theme.MicroAppTheme
+import com.esri.microappslib.theme.MicroAppThemeSurface
 import com.arcgismaps.toolkit.ar.internal.Joyslider
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
@@ -45,7 +45,7 @@ class JoysliderTests {
         val joysliderTestTag = "TestSlider"
 
         composeTestRule.setContent {
-            MicroAppTheme {
+            MicroAppThemeSurface {
                 Joyslider(
                     onValueChange = { value += it },
                     contentDescription = joysliderTestTag

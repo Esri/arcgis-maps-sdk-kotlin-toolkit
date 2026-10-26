@@ -17,7 +17,7 @@ import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.text.input.ImeAction
 import androidx.test.platform.app.InstrumentationRegistry
-import com.esri.microappslib.theme.MicroAppTheme
+import com.esri.microappslib.theme.MicroAppThemeSurface
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.exceptions.ArcGISAuthenticationException
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallengeResponse
@@ -108,7 +108,7 @@ class UsernamePasswordTests {
     @Test
     fun loginButtonEnabledState() = runTest {
         composeTestRule.setContent {
-            MicroAppTheme {
+            MicroAppThemeSurface {
                 UsernamePasswordAuthenticator(
                     UsernamePasswordChallenge(
                         url = "arcgis.com",

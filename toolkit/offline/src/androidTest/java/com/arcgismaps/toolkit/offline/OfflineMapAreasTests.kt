@@ -25,7 +25,7 @@ import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
-import com.esri.microappslib.theme.MicroAppTheme
+import com.esri.microappslib.theme.MicroAppThemeSurface
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
@@ -68,7 +68,7 @@ class OfflineMapAreasTests {
     fun testPreplannedWorkflow() = runTest {
         val mapViewModel = MapViewModel(OfflineMapMode.Preplanned)
         composeTestRule.setContent {
-            MicroAppTheme {
+            MicroAppThemeSurface {
                 OfflineScenario(mapViewModel)
             }
         }
@@ -124,7 +124,7 @@ class OfflineMapAreasTests {
     fun testOnDemandWorkflow() = runTest {
         val mapViewModel = MapViewModel(OfflineMapMode.OnDemand)
         composeTestRule.setContent {
-            MicroAppTheme {
+            MicroAppThemeSurface {
                 OfflineScenario(mapViewModel)
             }
         }
