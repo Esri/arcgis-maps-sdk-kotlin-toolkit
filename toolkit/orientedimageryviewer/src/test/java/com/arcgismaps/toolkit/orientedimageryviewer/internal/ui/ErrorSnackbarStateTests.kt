@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.arcgismaps.toolkit.orientedimageryviewer.internal
+package com.arcgismaps.toolkit.orientedimageryviewer.internal.ui
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
@@ -64,3 +64,4 @@ class ErrorSnackbarStateTests {
         assertEquals("No active image", state.hostState.currentSnackbarData?.visuals?.message)
     }
 }
+

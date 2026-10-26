@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.arcgismaps.toolkit.orientedimageryviewer.internal.components
+package com.arcgismaps.toolkit.orientedimageryviewer.internal.ui
 
 import android.os.SystemClock
 import android.view.KeyEvent
@@ -43,6 +43,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.dp
 import androidx.test.platform.app.InstrumentationRegistry
+import com.arcgismaps.toolkit.orientedimageryviewer.internal.ui.MarkerToolsButton
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test

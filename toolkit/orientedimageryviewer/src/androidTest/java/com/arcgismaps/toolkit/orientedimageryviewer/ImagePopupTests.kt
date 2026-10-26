@@ -160,7 +160,7 @@ class ImagePopupTests {
         compose.runOnIdle { state.setSequentialNavigationEnabled(true) }
         compose.onNodeWithContentDescription("close popup").assertIsDisplayed()
         compose.onNodeWithContentDescription("close popup").performClick()
-        compose.runOnIdle { assertTrue(state.isSequentialNavigationEnabled) }
+        compose.runOnIdle { assertTrue(state.uiState.isSequentialNavigationEnabled) }
         compose.onNodeWithText("Viewer title").assertIsDisplayed()
     }
 }

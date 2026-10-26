@@ -8,7 +8,7 @@
  * See the License for the specific language governing permissions and limitations under the License.
  */
 
-package com.arcgismaps.toolkit.orientedimageryviewer
+package com.arcgismaps.toolkit.orientedimageryviewer.internal.components
 
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import com.arcgismaps.data.ArcGISFeatureTable
@@ -25,8 +25,7 @@ import com.arcgismaps.mapping.view.DoubleXY
 import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.raster.Raster
 import com.arcgismaps.raster.RasterInfo
-import com.arcgismaps.toolkit.orientedimageryviewer.internal.components.computeRasterPoint
-import com.arcgismaps.toolkit.orientedimageryviewer.internal.components.computePixelCorners
+import com.arcgismaps.toolkit.orientedimageryviewer.OrientedImageryViewerState
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -536,3 +535,4 @@ class ImageLocationMarkerTests {
         tapResult = state.onSingleTapOnGeoView(location)
     }
 }
+

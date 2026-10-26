@@ -56,9 +56,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.mapping.layers.OrientedImageryLayer
 import com.arcgismaps.mapping.view.GraphicsOverlay
-import com.arcgismaps.toolkit.orientedimageryviewer.internal.ErrorSnackbarContainer
-import com.arcgismaps.toolkit.orientedimageryviewer.internal.components.MarkerToolsButton
-import com.arcgismaps.toolkit.orientedimageryviewer.internal.OrientedImagery
+import com.arcgismaps.toolkit.orientedimageryviewer.internal.ui.ErrorSnackbarContainer
+import com.arcgismaps.toolkit.orientedimageryviewer.internal.ui.MarkerToolsButton
+import com.arcgismaps.toolkit.orientedimageryviewer.internal.ui.OrientedImagery
 import com.arcgismaps.toolkit.popup.Popup
 import com.arcgismaps.toolkit.popup.PopupState
 import kotlinx.coroutines.launch

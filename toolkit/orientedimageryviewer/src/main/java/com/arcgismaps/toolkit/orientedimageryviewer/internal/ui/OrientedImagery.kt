@@ -16,7 +16,7 @@
  *
  */
 
-package com.arcgismaps.toolkit.orientedimageryviewer.internal
+package com.arcgismaps.toolkit.orientedimageryviewer.internal.ui
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -92,4 +92,5 @@ private fun PlaceholderMessage(message: String) {
         textAlign = TextAlign.Center
     )
 }
+
 

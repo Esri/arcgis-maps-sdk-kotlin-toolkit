@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.arcgismaps.toolkit.orientedimageryviewer.internal.components
+package com.arcgismaps.toolkit.orientedimageryviewer.internal.ui
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
@@ -130,4 +130,5 @@ internal fun MarkerToolsButton(
         }
     }
 }
+
 

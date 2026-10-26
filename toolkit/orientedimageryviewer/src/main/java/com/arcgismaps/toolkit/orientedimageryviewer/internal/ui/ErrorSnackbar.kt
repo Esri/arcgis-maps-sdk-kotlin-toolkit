@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.arcgismaps.toolkit.orientedimageryviewer.internal
+package com.arcgismaps.toolkit.orientedimageryviewer.internal.ui
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
@@ -64,3 +64,4 @@ internal fun ErrorSnackbarContainer(
         )
     }
 }
+

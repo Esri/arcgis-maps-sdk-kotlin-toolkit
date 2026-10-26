@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.arcgismaps.toolkit.orientedimageryviewer.internal.media
+package com.arcgismaps.toolkit.orientedimageryviewer.internal.components
 
 import dev.romainguy.kotlin.math.Float3
 import org.junit.Assert.assertEquals
@@ -257,3 +257,4 @@ class PanoramicFootprintUpdateTests {
         assertNotNull(panoramicFootprintUpdate(Float3(1f, 0f, 0f), 75.0, 60.0))
     }
 }
+
