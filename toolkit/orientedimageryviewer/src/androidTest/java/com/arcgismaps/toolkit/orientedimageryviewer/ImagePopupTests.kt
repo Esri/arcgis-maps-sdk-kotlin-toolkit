@@ -78,7 +78,19 @@ class ImagePopupTests {
 
     private fun openPopup() {
         compose.onNodeWithContentDescription("Image popup").performScrollTo().performClick()
-        compose.onNodeWithContentDescription("close popup").assertIsDisplayed()
+        assertPopupVisible()
+    }
+
+    private fun assertPopupVisible() {
+        // Both modes use "Close"; the hidden viewer toolbar identifies popup mode.
+        compose.onNodeWithText("Viewer title").assertDoesNotExist()
+        compose.onNodeWithContentDescription("Image popup").assertDoesNotExist()
+        compose.onNodeWithContentDescription("Close").assertIsDisplayed()
+    }
+
+    private fun assertViewerVisible() {
+        compose.onNodeWithText("Viewer title").assertIsDisplayed()
+        compose.onNodeWithContentDescription("Image popup").assertExists()
     }
 
     @Test
@@ -91,19 +103,16 @@ class ImagePopupTests {
         }
         compose.onNodeWithContentDescription("Image popup").performScrollTo().performClick()
         compose.onNodeWithText("Select an image before opening its popup.").assertIsDisplayed()
-        compose.onNodeWithText("Viewer title").assertIsDisplayed()
-        compose.onNodeWithContentDescription("close popup").assertDoesNotExist()
+        assertViewerVisible()
     }
 
     @Test
-    fun popupUsesOwnTopBarAndDismissalRestoresViewer() {
+    fun popupHidesViewerToolbarAndFloatingCloseRestoresViewer() {
         showViewer()
         openPopup()
-        compose.onNodeWithText("Viewer title").assertDoesNotExist()
-        compose.onNodeWithContentDescription("Image popup").assertDoesNotExist()
 
-        compose.onNodeWithContentDescription("close popup").performClick()
-        compose.onNodeWithText("Viewer title").assertIsDisplayed()
+        compose.onNodeWithContentDescription("Close").performClick()
+        assertViewerVisible()
         compose.runOnIdle { assertFalse(viewerDismissed) }
     }
 
@@ -117,13 +126,12 @@ class ImagePopupTests {
                 state.resetAll()
                 assertEquals(revision + 1, state.uiState.activeImageRevision)
             }
-            compose.onNodeWithContentDescription("close popup").assertDoesNotExist()
-            compose.onNodeWithText("Viewer title").assertIsDisplayed()
+            assertViewerVisible()
         }
     }
 
     @Test
-    fun repeatedTapsDoNotStartDuplicatePopupQueries() {
+    fun repeatedTapsDoNotStartDuplicatePopupCreationRequests() {
         val pending = CompletableDeferred<Result<Popup>>()
         var requests = 0
         showViewer(createPopup = {
@@ -137,7 +145,7 @@ class ImagePopupTests {
             assertEquals(1, requests)
             pending.complete(Result.success(Popup(Graphic(Point(0.0, 0.0)))))
         }
-        compose.onNodeWithContentDescription("close popup").assertIsDisplayed()
+        assertPopupVisible()
     }
 
     @Test
@@ -149,8 +157,7 @@ class ImagePopupTests {
             state.resetAll()
             pending.complete(Result.success(Popup(Graphic(Point(0.0, 0.0)))))
         }
-        compose.onNodeWithContentDescription("close popup").assertDoesNotExist()
-        compose.onNodeWithText("Viewer title").assertIsDisplayed()
+        assertViewerVisible()
     }
 
     @Test
@@ -158,9 +165,9 @@ class ImagePopupTests {
         showViewer()
         openPopup()
         compose.runOnIdle { state.setSequentialNavigationEnabled(true) }
-        compose.onNodeWithContentDescription("close popup").assertIsDisplayed()
-        compose.onNodeWithContentDescription("close popup").performClick()
+        assertPopupVisible()
+        compose.onNodeWithContentDescription("Close").performClick()
         compose.runOnIdle { assertTrue(state.uiState.isSequentialNavigationEnabled) }
-        compose.onNodeWithText("Viewer title").assertIsDisplayed()
+        assertViewerVisible()
     }
 }

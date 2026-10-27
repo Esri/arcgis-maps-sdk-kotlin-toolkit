@@ -28,6 +28,7 @@ import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
 import android.util.Log
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -49,13 +50,17 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.geometry.Offset
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import com.arcgismaps.geometry.GeometryEngine
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.geometry.SpatialReference
+import com.arcgismaps.mapping.symbology.SimpleMarkerSymbol
 import com.arcgismaps.mapping.view.DoubleXY
 import com.arcgismaps.toolkit.orientedimageryviewer.OrientedImageryViewerState
+import com.arcgismaps.toolkit.orientedimageryviewer.internal.ui.drawMarkerSymbol
 import com.google.android.filament.MaterialInstance
 import com.google.android.filament.Camera
 import dev.romainguy.kotlin.math.Float3
@@ -70,6 +75,7 @@ import io.github.sceneview.rememberOnGestureListener
 import io.github.sceneview.rememberView
 import io.github.sceneview.texture.ImageTexture
 import io.github.sceneview.utils.screenToRay
+import io.github.sceneview.utils.worldToScreen
 import com.arcgismaps.toolkit.orientedimageryviewer.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ensureActive
@@ -99,9 +105,6 @@ internal fun PanoramicImage(
     // The loader owns this shared material and releases it with the renderer.
     val markerMaterial = remember(materialLoader) {
         materialLoader.createUnlitColorInstance(androidx.compose.ui.graphics.Color.Red)
-    }
-    val geoViewMarkerMaterial = remember(materialLoader) {
-        materialLoader.createUnlitColorInstance(androidx.compose.ui.graphics.Color.Blue)
     }
     val context = LocalContext.current
     val readImagesPermission = remember(context, imageSource) { readImagesPermissionFor(context, imageSource) }
@@ -284,6 +287,9 @@ internal fun PanoramicImage(
         }
         val footprintUpdateTracker = remember(cameraNode) { PanoramicFootprintUpdateTracker() }
         val markerScope = key(viewerState, imageRevision) { rememberCoroutineScope() }
+        var projectedMarkers by remember(viewerState, state, imageRevision) {
+            mutableStateOf<List<Pair<Offset, SimpleMarkerSymbol>>>(emptyList())
+        }
 
         FilamentSceneView(
             modifier = Modifier.fillMaxSize(),
@@ -312,6 +318,27 @@ internal fun PanoramicImage(
             ),
             onFrame = {
                 val currentUiState = viewerState.uiState
+                projectedMarkers = if (state.imageRevision == currentUiState.activeImageRevision &&
+                    view.viewport.width > 0 && view.viewport.height > 0
+                ) {
+                    val forward = cameraNode.forwardDirection
+                    viewerState.markerPointsInPanoramicImage.mapNotNull { marker ->
+                        val direction = panoramicImageDirection(
+                            marker.imagePoint.x, marker.imagePoint.y, state.width, state.height
+                        ) ?: return@mapNotNull null
+                        // Projection alone would also show mirrored points behind the camera.
+                        if (direction.x * forward.x + direction.y * forward.y + direction.z * forward.z <= 0f) {
+                            return@mapNotNull null
+                        }
+                        val distance = radiusMeters * 0.98f
+                        val pixel = view.worldToScreen(Float3(
+                            direction.x * distance, direction.y * distance, direction.z * distance
+                        ))
+                            ?: return@mapNotNull null
+                        if (!pixel.x.isFinite() || !pixel.y.isFinite()) return@mapNotNull null
+                        Offset(pixel.x, pixel.y) to marker.symbol
+                    }
+                } else emptyList()
                 if (
                     currentUiState.activeImageInfo?.dataUri != imageSource ||
                     !currentUiState.isActiveFootprintVisible ||
@@ -362,22 +389,10 @@ internal fun PanoramicImage(
                         materialInstance = markerMaterial
                     )
                 }
-                viewerState.markerPointsInPanoramicImage.forEach { marker ->
-                    val imagePoint = marker.imagePoint
-                    val direction = panoramicImageDirection(
-                        imagePoint.x, imagePoint.y, state.width, state.height
-                    ) ?: return@forEach
-                    // Keep markers inside the image sphere and outside its reflected transform.
-                    val distance = radiusMeters * 0.98f
-                    SphereNode(
-                        radius = radiusMeters * 0.012f,
-                        position = Float3(direction.x * distance, direction.y * distance, direction.z * distance),
-                        stacks = 8,
-                        slices = 16,
-                        materialInstance = if (marker.isFromGeoView) geoViewMarkerMaterial else markerMaterial
-                    )
-                }
             }
+        }
+        Canvas(modifier = Modifier.fillMaxSize().clipToBounds()) {
+            projectedMarkers.forEach { (position, symbol) -> drawMarkerSymbol(symbol, position) }
         }
     }
 }

@@ -21,11 +21,13 @@ import com.arcgismaps.mapping.layers.OrientedImageryLayer
 import com.arcgismaps.mapping.layers.RasterLayer
 import com.arcgismaps.mapping.layers.orientedimagery.OrientedImage
 import com.arcgismaps.mapping.layers.orientedimagery.OrientedImageType
+import com.arcgismaps.mapping.symbology.SimpleMarkerSymbol
 import com.arcgismaps.mapping.view.DoubleXY
 import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.raster.Raster
 import com.arcgismaps.raster.RasterInfo
 import com.arcgismaps.toolkit.orientedimageryviewer.OrientedImageryViewerState
+import com.arcgismaps.toolkit.orientedimageryviewer.internal.ui.MarkerSymbols
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -93,6 +95,48 @@ class ImageLocationMarkerTests {
     @After
     fun tearDown() {
         compose.runOnIdle { scope.cancel() }
+    }
+
+    @Test
+    fun selectedSymbolIsUsedForRasterMarkersFromBothOrigins() {
+        compose.runOnIdle {
+            val selected = MarkerSymbols.symbols[1]
+            state.selectMarkerSymbol(selected)
+            tap()
+            coEvery { image.imageToLocation(any()) } returns Result.success(location)
+            scope.launch {
+                state.addMarkerToRasterImage(DoubleXY(3.0, 4.0), Point(3.0, 4.0), imageOverlay)
+            }
+            assertEquals(2, imageOverlay.graphics.size)
+            imageOverlay.graphics.forEach { graphic ->
+                val symbol = graphic.symbol as SimpleMarkerSymbol
+                assertEquals(selected.style, symbol.style)
+                assertEquals(selected.color, symbol.color)
+                assertEquals(selected.size, symbol.size)
+                assertEquals(selected.outline, symbol.outline)
+            }
+            state.selectMarkerSymbol(MarkerSymbols.symbols.last())
+            assertEquals(selected, imageOverlay.graphics.first().symbol)
+        }
+    }
+
+    @Test
+    fun panoramicMarkersSnapshotSelectedSymbolFromBothOrigins() {
+        compose.runOnIdle {
+            val revision = state.uiState.activeImageRevision
+            state.registerMarkerInPanoramicImage(revision, 20, 10)
+            val triangle = MarkerSymbols.symbols[1]
+            val diamond = MarkerSymbols.symbols[2]
+            state.selectMarkerSymbol(triangle)
+            coEvery { image.imageToLocation(any()) } returns Result.success(location)
+            scope.launch { state.addMarkerToPanoramicImage(DoubleXY(3.0, 4.0), revision) }
+            state.selectMarkerSymbol(diamond)
+            tap()
+            assertEquals(listOf(triangle, diamond), state.markerPointsInPanoramicImage.map { it.symbol })
+            assertEquals(listOf(false, true), state.markerPointsInPanoramicImage.map { it.isFromGeoView })
+            state.selectMarkerSymbol(MarkerSymbols.symbols.first())
+            assertEquals(triangle, state.markerPointsInPanoramicImage.first().symbol)
+        }
     }
 
     @Test

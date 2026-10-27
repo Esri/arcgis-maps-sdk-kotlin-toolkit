@@ -22,7 +22,9 @@ import android.util.Log
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.core.net.toUri
 import com.arcgismaps.Color
 import com.arcgismaps.data.Feature
@@ -34,7 +36,6 @@ import com.arcgismaps.mapping.layers.orientedimagery.OrientedImageSearchParamete
 import com.arcgismaps.mapping.layers.orientedimagery.SequenceStep
 import com.arcgismaps.mapping.popup.Popup
 import com.arcgismaps.mapping.symbology.SimpleMarkerSymbol
-import com.arcgismaps.mapping.symbology.SimpleMarkerSymbolStyle
 import com.arcgismaps.mapping.view.DoubleXY
 import com.arcgismaps.mapping.view.Graphic
 import com.arcgismaps.mapping.view.GraphicsOverlay
@@ -42,6 +43,7 @@ import com.arcgismaps.toolkit.orientedimageryviewer.internal.ImageDefaults
 import com.arcgismaps.toolkit.orientedimageryviewer.internal.OrientedImageInfo
 import com.arcgismaps.toolkit.orientedimageryviewer.internal.OrientedImageryViewerUiState
 import com.arcgismaps.toolkit.orientedimageryviewer.internal.PointData
+import com.arcgismaps.toolkit.orientedimageryviewer.internal.ui.MarkerSymbols
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.currentCoroutineContext
@@ -106,7 +108,17 @@ public class OrientedImageryViewerState public constructor(
         val prepareMarker: (DoubleXY) -> (() -> Unit)?
     )
 
-    internal data class PanoramicMarker(val imagePoint: DoubleXY, val isFromGeoView: Boolean)
+    internal data class PanoramicMarker(
+        val imagePoint: DoubleXY,
+        val isFromGeoView: Boolean,
+        val symbol: SimpleMarkerSymbol
+    )
+
+    internal var currentMarkerSymbol: SimpleMarkerSymbol by mutableStateOf(ImageDefaults.defaultMarkerSymbol())
+        private set
+
+    internal var isMarkerSelectionVisible: Boolean by mutableStateOf(false)
+        private set
 
     private var imageMarkerTarget: ImageMarkerTarget? = null
     private val panoramicMarkers = mutableStateOf<List<PanoramicMarker>>(emptyList())
@@ -234,7 +246,7 @@ public class OrientedImageryViewerState public constructor(
                     {
                         val graphic = Graphic(
                             geometry = rasterPoint,
-                            symbol = SimpleMarkerSymbol(SimpleMarkerSymbolStyle.Diamond, Color.blue, 20f)
+                            symbol = currentMarkerSymbol
                         )
                         overlay.graphics.add(graphic)
                         markerGraphicsInImage += graphic
@@ -259,12 +271,13 @@ public class OrientedImageryViewerState public constructor(
         height: Int
     ): () -> Unit {
         val target = ImageMarkerTarget(imageRevision, Any()) { imagePoint ->
+            val symbol = currentMarkerSymbol.clone()
             // Longitude wraps at the panorama seam; latitude must stay within the image.
             if (width <= 0 || height <= 0 || !imagePoint.x.isFinite() ||
                 !imagePoint.y.isFinite() || imagePoint.y !in 0.0..height.toDouble()
             ) null else {
                 {
-                    panoramicMarkers.value = panoramicMarkers.value + PanoramicMarker(imagePoint, true)
+                    panoramicMarkers.value = panoramicMarkers.value + PanoramicMarker(imagePoint, true, symbol)
                 }
             }
         }
@@ -466,7 +479,7 @@ public class OrientedImageryViewerState public constructor(
     }
 
     internal fun addImageLocationMarker(point: Point) {
-        val graphic = Graphic(point, ImageDefaults.inputLocationSymbol())
+        val graphic = Graphic(point, currentMarkerSymbol)
         graphicsOverlay.graphics.add(graphic)
         markerGraphicsInGeoView += graphic
     }
@@ -479,16 +492,18 @@ public class OrientedImageryViewerState public constructor(
         markerOverlayInImage = rasterGraphicsOverlay
         if (!isMarkingLocation) return
         val imageRevision = uiState.activeImageRevision
+        val generation = markerGeneration
+        val symbol = currentMarkerSymbol.clone()
         val result = imageToLocation(imagePoint)
         if (result != null) {
             result.onSuccess { point ->
                 if (!isMarkingLocation ||
-                    uiState.activeImageRevision != imageRevision
+                    uiState.activeImageRevision != imageRevision || generation != markerGeneration
                 ) return@onSuccess
 
                 val graphic = Graphic(
                     geometry = rasterPoint,
-                    symbol = SimpleMarkerSymbol(SimpleMarkerSymbolStyle.Diamond, Color.red, 20f)
+                    symbol = symbol
                 )
                 rasterGraphicsOverlay.graphics.add(graphic)
                 markerGraphicsInImage += graphic
@@ -511,6 +526,7 @@ public class OrientedImageryViewerState public constructor(
         if (!isMarkingLocation || uiState.activeImageRevision != imageRevision) return
         val image = activeOrientedImage ?: return
         val generation = markerGeneration
+        val symbol = currentMarkerSymbol.clone()
         currentCoroutineContext().ensureActive()
         val result = image.imageToLocation(imagePoint)
         currentCoroutineContext().ensureActive()
@@ -520,7 +536,7 @@ public class OrientedImageryViewerState public constructor(
             ) return@onSuccess
 
             addImageLocationMarker(point)
-            panoramicMarkers.value = panoramicMarkers.value + PanoramicMarker(imagePoint, false)
+            panoramicMarkers.value = panoramicMarkers.value + PanoramicMarker(imagePoint, false, symbol)
         }.onFailure { error ->
             if (error is CancellationException) throw error
             Log.e(
@@ -532,7 +548,16 @@ public class OrientedImageryViewerState public constructor(
     }
 
     public fun selectMarker() {
-        // Implementation for selecting a marker
+        isMarkerSelectionVisible = true
+    }
+
+    internal fun selectMarkerSymbol(symbol: SimpleMarkerSymbol) {
+        currentMarkerSymbol = symbol.clone()
+        dismissMarkerSelection()
+    }
+
+    internal fun dismissMarkerSelection() {
+        isMarkerSelectionVisible = false
     }
 
     public fun clearAllMarkers() {
@@ -594,6 +619,7 @@ public class OrientedImageryViewerState public constructor(
     }
 
     private fun setActiveImageInfo(value: OrientedImageInfo?) {
+        dismissMarkerSelection()
         panoramicMarkers.value = emptyList()
         updateUiState { uiState ->
             uiState.copy(

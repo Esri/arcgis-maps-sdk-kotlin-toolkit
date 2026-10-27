@@ -46,5 +46,9 @@ internal object ImageDefaults {
         Color.red,
         CAMERA_LOCATION_SYMBOL_SIZE
     )
+
+    fun defaultMarkerSymbol(): SimpleMarkerSymbol = SimpleMarkerSymbol(
+        SimpleMarkerSymbolStyle.Circle, Color.fromRgba(255, 0, 122, 194), 10f
+    )
 }
 

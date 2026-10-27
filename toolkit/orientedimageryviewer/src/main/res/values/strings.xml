@@ -28,6 +28,11 @@
     <string name="marker_tools_mark_location">Mark Location</string>
     <string name="marker_tools_select_marker">Select Marker</string>
     <string name="marker_tools_clear_all_markers">Clear All Markers</string>
+    <string name="marker_selection_title">Marker Selection</string>
+    <string name="marker_selection_back">Back to marker tools</string>
+    <string name="marker_symbol_violet_square">Violet square</string>
+    <string name="marker_symbol_yellow_triangle">Yellow triangle</string>
+    <string name="marker_symbol_orange_diamond">Orange diamond</string>
     <string name="popup_no_active_image">Select an image before opening its popup.</string>
     <string name="popup_creation_failed">Unable to create the image popup.</string>
 

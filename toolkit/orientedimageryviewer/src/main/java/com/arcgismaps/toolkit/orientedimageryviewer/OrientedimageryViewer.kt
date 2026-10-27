@@ -58,6 +58,7 @@ import com.arcgismaps.mapping.layers.OrientedImageryLayer
 import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.toolkit.orientedimageryviewer.internal.ui.ErrorSnackbarContainer
 import com.arcgismaps.toolkit.orientedimageryviewer.internal.ui.MarkerToolsButton
+import com.arcgismaps.toolkit.orientedimageryviewer.internal.ui.MarkerSelection
 import com.arcgismaps.toolkit.orientedimageryviewer.internal.ui.OrientedImagery
 import com.arcgismaps.toolkit.popup.Popup
 import com.arcgismaps.toolkit.popup.PopupState
@@ -192,6 +193,7 @@ internal fun ViewerLayout(
                                             val result = onCreateImagePopup()
                                             if (viewerState.uiState.activeImageRevision == imageRevision) {
                                                 result.onSuccess { popup ->
+                                                    viewerState.dismissMarkerSelection()
                                                     imagePopup = popup
                                                 }.onFailure {
                                                     errors.showError(
@@ -214,6 +216,14 @@ internal fun ViewerLayout(
             content = {
                 Box(modifier = Modifier.fillMaxSize()) {
                     OrientedImagery(viewerState = viewerState, modifier = Modifier.fillMaxSize())
+                    if (viewerState.isMarkerSelectionVisible && imagePopup == null) {
+                        MarkerSelection(
+                            currentMarkerSymbol = viewerState.currentMarkerSymbol,
+                            onSelectSymbol = viewerState::selectMarkerSymbol,
+                            onDismiss = viewerState::dismissMarkerSelection,
+                            modifier = Modifier.align(Alignment.TopStart).padding(8.dp)
+                        )
+                    }
                     imagePopup?.let { popup ->
                         // Scope evaluation to the popup's composition, including dismissal and image changes.
                         val popupScope = rememberCoroutineScope()
