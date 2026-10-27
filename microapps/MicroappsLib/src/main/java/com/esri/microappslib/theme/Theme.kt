@@ -99,10 +99,10 @@ fun MicroAppTheme(
 }
 
 @Composable
-fun MicroAppThemeSurface(content: @Composable () -> Unit) {
+fun MicroAppThemeSurface(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
     MicroAppTheme {
         Surface(
-            modifier = Modifier.fillMaxSize(),
+            modifier = modifier,
             content = content
         )
     }
