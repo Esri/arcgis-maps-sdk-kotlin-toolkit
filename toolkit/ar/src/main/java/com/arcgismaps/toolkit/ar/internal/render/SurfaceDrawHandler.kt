@@ -122,7 +122,7 @@ internal class SurfaceDrawHandler(glSurfaceView: GLSurfaceView, renderer: Render
             viewportWidth = this.viewportWidth
             viewportHeight = this.viewportHeight
         } else {
-            framebufferId = framebuffer.framebufferId
+            framebufferId = framebuffer.framebufferIdValue
             viewportWidth = framebuffer.width
             viewportHeight = framebuffer.height
         }
