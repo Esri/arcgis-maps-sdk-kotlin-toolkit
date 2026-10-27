@@ -17,6 +17,7 @@
 package com.arcgismaps.toolkit.orientedimageryviewer.internal.ui
 
 import androidx.activity.compose.BackHandler
+import androidx.annotation.StringRes
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -54,28 +55,50 @@ import com.arcgismaps.mapping.symbology.SimpleMarkerSymbolStyle
 import com.arcgismaps.toolkit.orientedimageryviewer.R
 import com.arcgismaps.Color as SymbolColor
 
-/** Each graphic receives its own symbol so later selections cannot change existing markers. */
+/** Identity is independent of symbol appearance and palette ordering. */
+internal enum class MarkerOptionId {
+    VioletSquare,
+    YellowTriangle,
+    OrangeDiamond
+}
+
+internal data class MarkerOption(
+    val id: MarkerOptionId,
+    val symbol: SimpleMarkerSymbol,
+    @StringRes val descriptionResId: Int
+)
+
+/** Symbol prototypes are cloned when selected so existing markers retain their appearance. */
 internal object MarkerSymbols {
-    val symbols: List<SimpleMarkerSymbol> = listOf(
-        SimpleMarkerSymbol(SimpleMarkerSymbolStyle.Square, SymbolColor.fromRgba(238, 130, 238), 12f),
-        SimpleMarkerSymbol(SimpleMarkerSymbolStyle.Triangle, SymbolColor.yellow, 12f),
-        SimpleMarkerSymbol(SimpleMarkerSymbolStyle.Diamond, SymbolColor.fromRgba(255, 165, 0), 12f)
-    ).onEach { it.outline = SimpleLineSymbol(SimpleLineSymbolStyle.Solid, SymbolColor.black, 1f) }
+    val options: List<MarkerOption> = listOf(
+        MarkerOption(
+            MarkerOptionId.VioletSquare,
+            SimpleMarkerSymbol(SimpleMarkerSymbolStyle.Square, SymbolColor.fromRgba(238, 130, 238), 12f),
+            R.string.marker_symbol_violet_square
+        ),
+        MarkerOption(
+            MarkerOptionId.YellowTriangle,
+            SimpleMarkerSymbol(SimpleMarkerSymbolStyle.Triangle, SymbolColor.yellow, 12f),
+            R.string.marker_symbol_yellow_triangle
+        ),
+        MarkerOption(
+            MarkerOptionId.OrangeDiamond,
+            SimpleMarkerSymbol(SimpleMarkerSymbolStyle.Diamond, SymbolColor.fromRgba(255, 165, 0), 12f),
+            R.string.marker_symbol_orange_diamond
+        )
+    ).onEach { it.symbol.outline = SimpleLineSymbol(SimpleLineSymbolStyle.Solid, SymbolColor.black, 1f) }
+
+    val symbols: List<SimpleMarkerSymbol> = options.map { it.symbol }
 }
 
 @Composable
 internal fun MarkerSelection(
-    currentMarkerSymbol: SimpleMarkerSymbol,
-    onSelectSymbol: (SimpleMarkerSymbol) -> Unit,
+    selectedOptionId: MarkerOptionId?,
+    onSelectOption: (MarkerOptionId) -> Unit,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     BackHandler(onBack = onDismiss)
-    val descriptions = listOf(
-        stringResource(R.string.marker_symbol_violet_square),
-        stringResource(R.string.marker_symbol_yellow_triangle),
-        stringResource(R.string.marker_symbol_orange_diamond)
-    )
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(24.dp),
@@ -96,18 +119,19 @@ internal fun MarkerSelection(
                 modifier = Modifier.align(Alignment.CenterHorizontally).selectableGroup(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                MarkerSymbols.symbols.forEachIndexed { index, symbol ->
+                MarkerSymbols.options.forEach { option ->
+                    val description = stringResource(option.descriptionResId)
                     Canvas(
                         modifier = Modifier
                             .size(48.dp)
                             .selectable(
-                                selected = currentMarkerSymbol.style == symbol.style,
+                                selected = selectedOptionId == option.id,
                                 role = Role.RadioButton,
-                                onClick = { onSelectSymbol(symbol) }
+                                onClick = { onSelectOption(option.id) }
                             )
-                            .semantics { contentDescription = descriptions[index] }
+                            .semantics { contentDescription = description }
                     ) {
-                        drawMarkerSymbol(symbol, center, 24.dp.toPx())
+                        drawMarkerSymbol(option.symbol, center, 24.dp.toPx())
                     }
                 }
             }

@@ -218,8 +218,8 @@ internal fun ViewerLayout(
                     OrientedImagery(viewerState = viewerState, modifier = Modifier.fillMaxSize())
                     if (viewerState.isMarkerSelectionVisible && imagePopup == null) {
                         MarkerSelection(
-                            currentMarkerSymbol = viewerState.currentMarkerSymbol,
-                            onSelectSymbol = viewerState::selectMarkerSymbol,
+                            selectedOptionId = viewerState.selectedMarkerOptionId,
+                            onSelectOption = viewerState::selectMarkerOption,
                             onDismiss = viewerState::dismissMarkerSelection,
                             modifier = Modifier.align(Alignment.TopStart).padding(8.dp)
                         )

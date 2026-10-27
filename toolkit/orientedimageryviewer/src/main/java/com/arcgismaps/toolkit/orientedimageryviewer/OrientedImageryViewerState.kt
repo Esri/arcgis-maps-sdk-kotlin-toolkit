@@ -43,6 +43,7 @@ import com.arcgismaps.toolkit.orientedimageryviewer.internal.ImageDefaults
 import com.arcgismaps.toolkit.orientedimageryviewer.internal.OrientedImageInfo
 import com.arcgismaps.toolkit.orientedimageryviewer.internal.OrientedImageryViewerUiState
 import com.arcgismaps.toolkit.orientedimageryviewer.internal.PointData
+import com.arcgismaps.toolkit.orientedimageryviewer.internal.ui.MarkerOptionId
 import com.arcgismaps.toolkit.orientedimageryviewer.internal.ui.MarkerSymbols
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
@@ -114,8 +115,20 @@ public class OrientedImageryViewerState public constructor(
         val symbol: SimpleMarkerSymbol
     )
 
-    internal var currentMarkerSymbol: SimpleMarkerSymbol by mutableStateOf(ImageDefaults.defaultMarkerSymbol())
-        private set
+    private data class MarkerSelectionState(
+        val optionId: MarkerOptionId?,
+        val symbol: SimpleMarkerSymbol
+    )
+
+    private var markerSelection by mutableStateOf(
+        MarkerSelectionState(null, ImageDefaults.defaultMarkerSymbol())
+    )
+
+    internal val currentMarkerSymbol: SimpleMarkerSymbol
+        get() = markerSelection.symbol
+
+    internal val selectedMarkerOptionId: MarkerOptionId?
+        get() = markerSelection.optionId
 
     internal var isMarkerSelectionVisible: Boolean by mutableStateOf(false)
         private set
@@ -551,8 +564,16 @@ public class OrientedImageryViewerState public constructor(
         isMarkerSelectionVisible = true
     }
 
+    internal fun selectMarkerOption(optionId: MarkerOptionId) {
+        val option = MarkerSymbols.options.first { it.id == optionId }
+        markerSelection = MarkerSelectionState(option.id, option.symbol.clone())
+        dismissMarkerSelection()
+    }
+
     internal fun selectMarkerSymbol(symbol: SimpleMarkerSymbol) {
-        currentMarkerSymbol = symbol.clone()
+        // Only registered prototypes carry palette identity; never infer it from appearance.
+        val optionId = MarkerSymbols.options.firstOrNull { it.symbol === symbol }?.id
+        markerSelection = MarkerSelectionState(optionId, symbol.clone())
         dismissMarkerSelection()
     }
 
