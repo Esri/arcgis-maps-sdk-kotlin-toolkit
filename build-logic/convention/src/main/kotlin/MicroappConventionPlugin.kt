@@ -17,6 +17,7 @@
  */
 
 import com.android.build.api.dsl.ApplicationExtension
+import com.arcgismaps.kotlin.toolkit.build_logic.convention.VaultTokenProvider
 import com.arcgismaps.kotlin.toolkit.build_logic.convention.arcgis
 import com.arcgismaps.kotlin.toolkit.build_logic.convention.implementation
 import com.arcgismaps.kotlin.toolkit.build_logic.convention.libs
@@ -27,6 +28,7 @@ import org.gradle.api.Project
 import org.gradle.api.tasks.testing.Test
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.dependencies
+import org.gradle.kotlin.dsl.of
 import org.gradle.kotlin.dsl.withType
 import org.jetbrains.kotlin.gradle.dsl.KotlinAndroidProjectExtension
 
@@ -66,6 +68,18 @@ class MicroappConventionPlugin : Plugin<Project> {
                     targetSdk = libs.findVersion("targetSdk").get().toString().toInt()
                     versionCode = 1
                     versionName = "1.0"
+
+                    val vaultTokenProvider = providers.of(VaultTokenProvider::class) {}
+                    val vaultToken = vaultTokenProvider.get().trim()
+                    if (vaultToken.isEmpty()) {
+                        // do not change the structure of the build config object
+                        // even if the vault token is unusable
+                        logger.warn("vault token not provided")
+                    }
+
+                    buildConfigField("String", "vaultToken", "\"${vaultToken}\"")
+                    testInstrumentationRunnerArguments["openbaoToken"] =
+                        vaultToken
                 }
 
                 buildTypes {

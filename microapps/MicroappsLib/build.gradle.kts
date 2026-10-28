@@ -22,10 +22,6 @@ plugins {
     alias(libs.plugins.kotlin.convention.plugin)
 }
 
-kotlin {
-    jvmToolchain(17)
-}
-
 android {
     namespace = "com.esri.microappslib"
     compileSdk = libs.versions.compileSdk.get().toInt()
