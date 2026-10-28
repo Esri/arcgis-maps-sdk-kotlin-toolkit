@@ -115,7 +115,7 @@ internal class BuildingSceneLayerState(
 
     // The list of building sublayer categories
     private val _categories = mutableListOf<BuildingSublayer>()
-    internal val categories: List<BuildingSublayer> = _categories.toList()
+    internal val categories: List<BuildingSublayer> get() = _categories.toList()
 
     private var overviewSublayer: BuildingSublayer? = null
     private var fullModelSublayer: BuildingSublayer? = null
