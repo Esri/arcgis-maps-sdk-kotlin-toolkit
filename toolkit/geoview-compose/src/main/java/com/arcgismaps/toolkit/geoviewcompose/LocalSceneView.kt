@@ -41,16 +41,15 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.ArcGISScene
-import com.arcgismaps.mapping.Basemap
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.mapping.ViewpointType
-import com.arcgismaps.mapping.floor.FloorAware
 import com.arcgismaps.mapping.view.AttributionBarLayoutChangeEvent
 import com.arcgismaps.mapping.view.Camera
 import com.arcgismaps.mapping.view.DoubleTapEvent
 import com.arcgismaps.mapping.view.DownEvent
 import com.arcgismaps.mapping.view.DrawStatus
 import com.arcgismaps.mapping.view.GeoView
+import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.mapping.view.InteractiveZoomingChangeEvent
 import com.arcgismaps.mapping.view.LocalSceneView
 import com.arcgismaps.mapping.view.LocalSceneViewInteractionOptions
@@ -147,7 +146,7 @@ import kotlinx.coroutines.launch
  * @since 300.0.0
  */
 @Deprecated(
-    message = "Use LocalSceneView with useSystemTextScale parameter instead. This deprecated function remains to maintain binary compatibility",
+    message = "Use LocalSceneView with useSystemTextScale and graphicsOverlay parameters instead. This deprecated function remains to maintain binary compatibility",
     level = DeprecationLevel.HIDDEN,
 )
 @Composable
@@ -190,6 +189,7 @@ public fun LocalSceneView(
         localSceneViewProxy = localSceneViewProxy,
         onViewpointChangedForCenterAndScale = onViewpointChangedForCenterAndScale,
         onViewpointChangedForBoundingGeometry = onViewpointChangedForBoundingGeometry,
+        graphicsOverlays = emptyList<GraphicsOverlay>(),
         interactionOptions = interactionOptions,
         selectionProperties = selectionProperties,
         isAttributionBarVisible = isAttributionBarVisible,
@@ -212,7 +212,7 @@ public fun LocalSceneView(
         onInteractiveZooming = onInteractiveZooming,
         onDrawStatusChanged = onDrawStatusChanged,
         canFocus = canFocus,
-        onGeoModelErrorChanged  = onGeoModelErrorChanged,
+        onGeoModelErrorChanged = onGeoModelErrorChanged,
         onCriticalErrorChanged = onCriticalErrorChanged,
         onWarningsChanged = onWarningsChanged,
         useSystemTextScale = true,
@@ -259,6 +259,7 @@ public fun LocalSceneView(
  * viewpoint type of [ViewpointType.CenterAndScale]
  * @param onViewpointChangedForBoundingGeometry lambda invoked when the viewpoint changes, passing a
  * viewpoint type of [ViewpointType.BoundingGeometry]
+ * @param graphicsOverlays graphics overlays used by this composable LocalSceneView
  * @param interactionOptions the [LocalSceneViewInteractionOptions] used by this composable LocalSceneView
  * @param selectionProperties the [SelectionProperties] used by the composable LocalSceneView
  * @param isAttributionBarVisible true if attribution bar is visible in the composable LocalSceneView,
@@ -309,6 +310,7 @@ public fun LocalSceneView(
     localSceneViewProxy: LocalSceneViewProxy? = null,
     onViewpointChangedForCenterAndScale: ((Viewpoint) -> Unit)? = null,
     onViewpointChangedForBoundingGeometry: ((Viewpoint) -> Unit)? = null,
+    graphicsOverlays: List<GraphicsOverlay> = remember { emptyList() },
     interactionOptions: LocalSceneViewInteractionOptions = remember { LocalSceneViewInteractionOptions() },
     selectionProperties: SelectionProperties = remember { SelectionProperties() },
     isAttributionBarVisible: Boolean = true,
@@ -358,6 +360,12 @@ public fun LocalSceneView(
             factory = { localSceneView },
             update = {
                 it.scene = scene
+                if (it.graphicsOverlays != graphicsOverlays) {
+                    it.graphicsOverlays.apply {
+                        clear()
+                        addAll(graphicsOverlays)
+                    }
+                }
                 it.useSystemTextScale = useSystemTextScale
                 it.isFocusable = isGeoViewFocusable
                 it.interactionOptions = interactionOptions
@@ -630,9 +638,10 @@ private fun ViewpointHandler(
                     currentViewpointCenterAndScale?.let(callback)
                 }
                 currentOnViewpointChangedForBoundingGeometry?.let { callback ->
-                    localSceneView.getCurrentViewpoint(ViewpointType.BoundingGeometry)?.let { currentViewpointBoundingGeometry ->
-                        callback.invoke(currentViewpointBoundingGeometry)
-                    }
+                    localSceneView.getCurrentViewpoint(ViewpointType.BoundingGeometry)
+                        ?.let { currentViewpointBoundingGeometry ->
+                            callback.invoke(currentViewpointBoundingGeometry)
+                        }
                 }
             }
         }
