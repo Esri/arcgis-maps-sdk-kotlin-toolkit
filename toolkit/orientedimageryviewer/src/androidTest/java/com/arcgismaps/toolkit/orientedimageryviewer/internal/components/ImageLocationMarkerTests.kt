@@ -513,6 +513,135 @@ class ImageLocationMarkerTests {
     }
 
     @Test
+    fun rasterConversionRoundTripsEdgesAndCenterWithNonzeroOriginAndUnequalCells() {
+        val layer = rasterLayer()
+        for (pixel in listOf(DoubleXY(0.0, 0.0), DoubleXY(3.25, 6.5), DoubleXY(10.0, 10.0))) {
+            val point = requireNotNull(computeRasterPoint(pixel, layer))
+            val roundTrip = requireNotNull(computeImagePoint(point, layer))
+            assertEquals(pixel.x, roundTrip.x, 1e-8)
+            assertEquals(pixel.y, roundTrip.y, 1e-8)
+        }
+        val center = requireNotNull(computeImageCenter(layer))
+        val centerPoint = requireNotNull(computeRasterPoint(center, layer))
+        assertEquals(110.0, centerPoint.x, 0.0)
+        assertEquals(220.0, centerPoint.y, 0.0)
+    }
+
+    @Test
+    fun inverseRasterConversionRejectsOutOfBoundsPoints() {
+        val layer = rasterLayer()
+        for (point in listOf(Point(99.0, 220.0), Point(121.0, 220.0), Point(110.0, 199.0), Point(110.0, 241.0))) {
+            assertNull(computeImagePoint(point, layer))
+        }
+    }
+
+    @Test
+    fun unreferencedRasterAcceptsMapViewLocalTapReference() {
+        // The unit-only reference produced by MapView is not constructible from SR JSON.
+        // Exercise its coordinate-system flags here; RasterImageTapTests uses the real view.
+        val localReference = mockk<SpatialReference>()
+        every { localReference.isGeographic } returns false
+        every { localReference.isProjected } returns false
+        val point = mockk<Point>()
+        every { point.spatialReference } returns localReference
+        every { point.x } returns 106.5
+        every { point.y } returns 214.0
+        val layer = rasterLayer()
+        val pixel = requireNotNull(computeImagePoint(point, layer))
+        assertEquals(3.25, pixel.x, 1e-8)
+        assertEquals(6.5, pixel.y, 1e-8)
+        every { point.x } returns 99.0
+        assertNull(computeImagePoint(point, layer))
+        every { point.x } returns Double.NaN
+        assertNull(computeImagePoint(point, layer))
+    }
+
+    @Test
+    fun unreferencedRasterDoesNotRelabelGeographicOrProjectedTapCoordinates() {
+        val layer = rasterLayer()
+        for (reference in listOf(SpatialReference.wgs84(), SpatialReference.webMercator())) {
+            assertNull(computeImagePoint(Point(110.0, 220.0, reference), layer))
+        }
+    }
+
+    @Test
+    fun georeferencedRasterProjectsTapIntoRasterReference() {
+        val reference = SpatialReference.webMercator()
+        val layer = rasterLayer(reference)
+        val geographicPoint = requireNotNull(GeometryEngine.projectOrNull(
+            Point(106.5, 214.0, reference), SpatialReference.wgs84()
+        ))
+        val pixel = requireNotNull(computeImagePoint(geographicPoint, layer))
+        assertEquals(3.25, pixel.x, 1e-6)
+        assertEquals(6.5, pixel.y, 1e-6)
+        assertNull(computeImagePoint(Point(106.5, 214.0), layer))
+    }
+
+    @Test
+    fun allRasterConversionsRejectInvalidCellSizes() {
+        val layer = rasterLayer()
+        val info = requireNotNull(layer.raster?.rasterInfo)
+        for (invalid in listOf(0.0, -1.0, Double.NaN, Double.POSITIVE_INFINITY)) {
+            for ((x, y) in listOf(invalid to 4.0, 2.0 to invalid)) {
+                every { info.cellSizeX } returns x
+                every { info.cellSizeY } returns y
+                assertNull(computeRasterPoint(DoubleXY(5.0, 5.0), layer))
+                assertNull(computeImagePoint(Point(110.0, 220.0), layer))
+                assertNull(computeImageCenter(layer))
+                assertNull(computePixelCorners(Viewpoint(Envelope(100.0, 200.0, 120.0, 240.0)), layer))
+            }
+        }
+    }
+
+    @Test
+    fun replacingRasterOverlayRemovesOnlyOwnedMarkersAndOldDisposalCannotRemoveReplacement() {
+        compose.runOnIdle {
+            val oldTransform: (DoubleXY) -> Point? = { Point(it.x, -it.y) }
+            state.registerMarkerOverlayInImage(imageOverlay, oldTransform)
+            val foreign = com.arcgismaps.mapping.view.Graphic(Point(0.0, 0.0))
+            imageOverlay.graphics.add(foreign)
+            tap()
+            assertEquals(2, imageOverlay.graphics.size)
+            val replacement = GraphicsOverlay()
+            state.registerMarkerOverlayInImage(replacement) { Point(it.x, -it.y) }
+            assertEquals(listOf(foreign), imageOverlay.graphics.toList())
+            state.unregisterMarkerOverlayInImage(oldTransform)
+            tap()
+            assertEquals(1, replacement.graphics.size)
+        }
+    }
+
+    @Test
+    fun rasterOriginProjectionCancellationDoesNotPlaceMarkers() {
+        compose.runOnIdle {
+            coEvery { image.imageToLocation(any()) } returns Result.failure(CancellationException("Cancelled"))
+            val job = scope.launch {
+                state.addMarkerToRasterImage(DoubleXY(5.0, 5.0), Point(110.0, 220.0), imageOverlay)
+            }
+            assertTrue(job.isCancelled)
+            assertTrue(imageOverlay.graphics.isEmpty())
+            assertTrue(mapOverlay.graphics.isEmpty())
+        }
+    }
+
+    @Test
+    fun rasterOriginProjectionCannotCommitToAReplacedOverlay() {
+        val projection = CompletableDeferred<Result<Point>>()
+        compose.runOnIdle {
+            coEvery { image.imageToLocation(any()) } coAnswers { projection.await() }
+            scope.launch {
+                state.addMarkerToRasterImage(DoubleXY(5.0, 5.0), Point(110.0, 220.0), imageOverlay)
+            }
+            val replacement = GraphicsOverlay()
+            state.registerMarkerOverlayInImage(replacement) { Point(it.x, -it.y) }
+            projection.complete(Result.success(location))
+            assertTrue(imageOverlay.graphics.isEmpty())
+            assertTrue(replacement.graphics.isEmpty())
+            assertTrue(mapOverlay.graphics.isEmpty())
+        }
+    }
+
+    @Test
     fun footprintClippingAcceptsDifferentVerticalReferences() {
         val vertical = SpatialReference(3857, 5773)
         val otherVertical = SpatialReference(3857, 115700)

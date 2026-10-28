@@ -51,6 +51,8 @@ import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 @Immutable
 public sealed interface ImageSearchStatus {
@@ -75,6 +77,13 @@ public sealed interface ImageNavigationStatus {
     public object BoundaryReached : ImageNavigationStatus
 }
 
+/**
+ * State for an oriented imagery viewer. Access this state on the main thread.
+ *
+ * Search and feature fetch share a latest-request-wins policy. Navigation requests are queued
+ * and processed one at a time. A search, fetch, or reset invalidates older pending operations,
+ * which throw [CancellationException] rather than changing the replacement session.
+ */
 @Stable
 public class OrientedImageryViewerState public constructor(
     private val orientedImageryLayer: OrientedImageryLayer,
@@ -91,6 +100,9 @@ public class OrientedImageryViewerState public constructor(
     private var activeOrientedImage: OrientedImage? = null
     private var activeFootprint: OrientedImageFootprint? = null
     private var activeCameraLocationGraphic: Graphic? = null
+    private var inputLocationGraphic: Graphic? = null
+    private var sessionGeneration = 0L
+    private val navigationMutex = Mutex()
     private var activeIndex = -1
     private var additionalCameraLocationGraphics: List<Graphic> = emptyList()
     private var additionalFootprints: List<OrientedImageFootprint> = emptyList()
@@ -249,6 +261,8 @@ public class OrientedImageryViewerState public constructor(
         overlay: GraphicsOverlay,
         toRasterPoint: (DoubleXY) -> Point?
     ) {
+        markerOverlayInImage?.graphics?.removeAll(markerGraphicsInImage)
+        markerGraphicsInImage = emptyList()
         markerOverlayInImage = overlay
         imageCoordinateToRasterPoint = toRasterPoint
         imageMarkerTarget = ImageMarkerTarget(uiState.activeImageRevision, toRasterPoint) { imagePoint ->
@@ -318,44 +332,26 @@ public class OrientedImageryViewerState public constructor(
      * Cancellation is rethrown. The active image may already have been changed when an operation fails.
      */
     public suspend fun searchImages(lastMapLocation: Point): Result<ImageSearchStatus> {
+        currentCoroutineContext().ensureActive()
         resetAll()
-        Log.i("OrientedImagery", "Searching for oriented images at map location: ${lastMapLocation.toJson()}")
+        val session = sessionGeneration
         setInputLocation(lastMapLocation)
-        return orientedImageryLayer.searchImages(
-            lastMapLocation,
-            OrientedImageSearchParameters().apply { applyHeightFilter = false }
-        ).fold(
-            onSuccess = { results ->
-                Log.i("OrientedImagery", "Found ${results.size} oriented images at location: $lastMapLocation")
-                if (results.isEmpty()) {
-                    Log.i("OrientedImagery", "No oriented images found at location: $lastMapLocation")
-                    Result.success(ImageSearchStatus.NoImagesFound)
-                } else {
-                    orientedImages = results
-                    val orientedImage = results[0]
-                    orientedImage.load().fold(
-                        onSuccess = {
-                            setActiveOrientedImage(orientedImage)
-                            activeIndex = 0
-                            Log.i("OrientedImagery", "Image URI: ${activeOrientedImage!!.dataUri}")
-                            Result.success(ImageSearchStatus.ImagesFound(results.size))
-                        },
-                        onFailure = { error ->
-                            setActiveOrientedImage(null)
-                            activeIndex = -1
-                            logOrientedImageLoadFailure(error, orientedImage)
-                            Result.failure(error)
-                        }
-                    )
-                }
-            },
-            onFailure = { error ->
-                setActiveOrientedImage(null)
-                activeIndex = -1
-                Log.i("OrientedImagery", "Failed to search for oriented images: ${error.message}")
-                Result.failure(error)
+        return inSession(session) {
+            val results = orientedImageryLayer.searchImages(
+                lastMapLocation,
+                OrientedImageSearchParameters().apply { applyHeightFilter = false }
+            ).getInSession(session)
+            if (results.isEmpty()) {
+                ImageSearchStatus.NoImagesFound
+            } else {
+                val image = results.first()
+                loadImage(image, session)
+                orientedImages = results
+                activeIndex = 0
+                setActiveOrientedImage(image)
+                ImageSearchStatus.ImagesFound(results.size)
             }
-        )
+        }
     }
 
     /**
@@ -365,32 +361,17 @@ public class OrientedImageryViewerState public constructor(
      * Cancellation is rethrown. The active image may already have been changed when an operation fails.
      */
     public suspend fun fetchImage(feature: Feature): Result<Unit> {
+        currentCoroutineContext().ensureActive()
         resetAll()
-        Log.i("OrientedImagery", "Fetching image for feature: ObjectID = ${feature.attributes["ObjectID"]}")
-        return orientedImageryLayer.fetchImageForFeature(feature).fold(
-            onSuccess = { orientedImage ->
-                orientedImage.load().fold(
-                    onSuccess = {
-                        setInputLocation(feature.geometry as? Point)
-                        setActiveOrientedImage(orientedImage)
-                        orientedImages = listOf(orientedImage)
-                        activeIndex = 0
-                        Log.i("OrientedImagery", "Image URI: ${activeOrientedImage!!.dataUri}")
-                        Result.success(Unit)
-                    },
-                    onFailure = { error ->
-                        setActiveOrientedImage(null)
-                        activeIndex = -1
-                        logOrientedImageLoadFailure(error, orientedImage)
-                        Result.failure(error)
-                    }
-                )
-            },
-            onFailure = { error ->
-                Log.i("OrientedImagery", "Failed to fetch oriented image for feature: $error")
-                Result.failure(error)
-            }
-        )
+        val session = sessionGeneration
+        return inSession(session) {
+            val image = orientedImageryLayer.fetchImageForFeature(feature).getInSession(session)
+            loadImage(image, session)
+            setInputLocation(feature.geometry as? Point)
+            orientedImages = listOf(image)
+            activeIndex = 0
+            setActiveOrientedImage(image)
+        }
     }
 
     /**
@@ -398,30 +379,53 @@ public class OrientedImageryViewerState public constructor(
      *
      * Returns a [Result] indicating the navigation status.
      */
-    public suspend fun navigateNextImage(): Result<ImageNavigationStatus> {
-        if (!hasActiveImage) {
-            return Result.success(ImageNavigationStatus.NoActiveImage)
-        }
-        return if (uiState.isSequentialNavigationEnabled) {
-            fetchAdjacentImage(SequenceStep.Next)
-        } else {
-            showNextImageInList()
-        }
-    }
+    public suspend fun navigateNextImage(): Result<ImageNavigationStatus> = navigate(SequenceStep.Next, 1)
 
     /**
      * Navigates to the previous oriented image.
      *
      * Returns a [Result] indicating the navigation status.
      */
-    public suspend fun navigatePreviousImage(): Result<ImageNavigationStatus> {
-        if (!hasActiveImage) {
-            return Result.success(ImageNavigationStatus.NoActiveImage)
-        }
-        return if (uiState.isSequentialNavigationEnabled) {
-            fetchAdjacentImage(SequenceStep.Previous)
-        } else {
-            showPreviousImageInList()
+    public suspend fun navigatePreviousImage(): Result<ImageNavigationStatus> = navigate(SequenceStep.Previous, -1)
+
+    private suspend fun ensureSession(session: Long) {
+        currentCoroutineContext().ensureActive()
+        if (session != sessionGeneration) throw CancellationException("The image session was superseded.")
+    }
+
+    private suspend fun <T> Result<T>.getInSession(session: Long): T {
+        ensureSession(session)
+        return getOrThrow()
+    }
+
+    private suspend fun <T> inSession(session: Long, operation: suspend () -> T): Result<T> = try {
+        ensureSession(session)
+        Result.success(operation())
+    } catch (error: Exception) {
+        ensureSession(session)
+        if (error is CancellationException) throw error
+        Log.e("OrientedImagery", "Image operation failed", error)
+        Result.failure(error)
+    }
+
+    private suspend fun loadImage(image: OrientedImage, session: Long) {
+        val result = image.load()
+        ensureSession(session)
+        result.onFailure { error ->
+            if (error is CancellationException) throw error
+            logOrientedImageLoadFailure(error, image)
+        }.getOrThrow()
+    }
+
+    private suspend fun navigate(step: SequenceStep, offset: Int): Result<ImageNavigationStatus> {
+        // Capture before waiting: queued commands belong to the session that received them.
+        val session = sessionGeneration
+        return navigationMutex.withLock {
+            inSession(session) {
+                if (!hasActiveImage) ImageNavigationStatus.NoActiveImage
+                else if (uiState.isSequentialNavigationEnabled) fetchAdjacentImage(step, session)
+                else showImageInList(offset, session)
+            }
         }
     }
 
@@ -499,12 +503,16 @@ public class OrientedImageryViewerState public constructor(
                     val updateToApply = pendingFootprintUpdate ?: break
                     pendingFootprintUpdate = null
 
-                    updateToApply(footprint).onSuccess {
+                    val result = updateToApply(footprint)
+                    currentCoroutineContext().ensureActive()
+                    if (activeFootprint !== footprint) break
+                    result.onSuccess {
                         Log.i(
                             "OrientedImageryViewerState",
                             "Footprint updated successfully for image: ${footprint.orientedImage.dataUri}"
                         )
                     }.onFailure {
+                        if (it is CancellationException) throw it
                         Log.i(
                             "OrientedImageryViewerState",
                             "Failed to update footprint for image: ${footprint.orientedImage.dataUri}",
@@ -542,16 +550,19 @@ public class OrientedImageryViewerState public constructor(
         rasterPoint: Point,
         rasterGraphicsOverlay: GraphicsOverlay
     ) {
-        markerOverlayInImage = rasterGraphicsOverlay
         if (!isMarkingLocation) return
+        currentCoroutineContext().ensureActive()
         val imageRevision = uiState.activeImageRevision
         val generation = markerGeneration
+        val target = imageMarkerTarget
         val symbol = currentMarkerSymbol.clone()
         val result = imageToLocation(imagePoint)
+        currentCoroutineContext().ensureActive()
         if (result != null) {
             result.onSuccess { point ->
                 if (!isMarkingLocation ||
-                    uiState.activeImageRevision != imageRevision || generation != markerGeneration
+                    uiState.activeImageRevision != imageRevision || generation != markerGeneration ||
+                    target !== imageMarkerTarget || markerOverlayInImage !== rasterGraphicsOverlay
                 ) return@onSuccess
 
                 val graphic = Graphic(
@@ -562,6 +573,7 @@ public class OrientedImageryViewerState public constructor(
                 markerGraphicsInImage += graphic
                 addImageLocationMarker(point)
             }.onFailure { error ->
+                if (error is CancellationException) throw error
                 Log.e(
                     "RasterImage",
                     "imageToLocation failed for image coordinates: (${imagePoint.x}, ${imagePoint.y}) with error: ${error.message}"
@@ -632,8 +644,19 @@ public class OrientedImageryViewerState public constructor(
 
     /**
      * Resets the viewer state to its initial state.
+     *
+     * Invalidates pending search, fetch, and navigation operations. Removes only graphics and
+     * footprints created by this viewer, retaining application-owned objects in shared collections.
      */
     public fun resetAll() {
+        ++sessionGeneration
+        cancelFootprintUpdateJob()
+        activeFootprint?.let { orientedImageryLayer.visibleFootprints.remove(it) }
+        orientedImageryLayer.visibleFootprints.removeAll(additionalFootprints)
+        activeCameraLocationGraphic?.let { graphicsOverlay.graphics.remove(it) }
+        inputLocationGraphic?.let { graphicsOverlay.graphics.remove(it) }
+        inputLocationGraphic = null
+        graphicsOverlay.graphics.removeAll(additionalCameraLocationGraphics)
         setActiveOrientedImage(null)
         activeFootprint = null
         activeIndex = -1
@@ -649,14 +672,10 @@ public class OrientedImageryViewerState public constructor(
                 inputLocationData = null
             )
         }
-        cancelFootprintUpdateJob()
-        orientedImageryLayer.visibleFootprints.clear()
         clearAllMarkers()
-        markerOverlayInImage?.graphics?.clear()
         markerOverlayInImage = null
         imageCoordinateToRasterPoint = null
         imageMarkerTarget = null
-        graphicsOverlay.graphics.clear()
         orientedImages = emptyList()
         additionalFootprints = emptyList()
         additionalCameraLocationGraphics = emptyList()
@@ -697,77 +716,28 @@ public class OrientedImageryViewerState public constructor(
         updateUiState { uiState -> uiState.copy(inputLocationData = value) }
     }
 
-    private suspend fun fetchAdjacentImage(step: SequenceStep): Result<ImageNavigationStatus> {
-        val currentImage = activeOrientedImage ?: return Result.success(ImageNavigationStatus.NoActiveImage)
-        Log.i(
-            "OrientedImagery",
-            "Fetching adjacent image for ${orientedImageryLayer.name} with supportSequentialNavigation = ${orientedImageryLayer.supportsSequentialNavigation}"
-        )
-        return orientedImageryLayer.fetchAdjacentImage(currentImage, step).fold(
-            onSuccess = { adjacentImage ->
-                adjacentImage.load().fold(
-                    onSuccess = {
-                        setActiveOrientedImage(adjacentImage)
-                        resetActive()
-                        Log.i("OrientedImagery", "Switched to ${step.javaClass.simpleName} image: ${adjacentImage.dataUri}")
-                        Result.success(ImageNavigationStatus.Moved)
-                    },
-                    onFailure = { error ->
-                        logOrientedImageLoadFailure(error, adjacentImage, "Failed to load ${step.javaClass.simpleName} image")
-                        Result.failure(error)
-                    }
-                )
-            },
-            onFailure = { error ->
-                Log.i("OrientedImagery", "Failed to fetch ${step.javaClass.simpleName} image: ${error.message}")
-                Result.failure(error)
-            }
-        )
+    private suspend fun fetchAdjacentImage(step: SequenceStep, session: Long): ImageNavigationStatus {
+        val currentImage = activeOrientedImage ?: return ImageNavigationStatus.NoActiveImage
+        val image = orientedImageryLayer.fetchAdjacentImage(currentImage, step).getInSession(session)
+        loadImage(image, session)
+        setActiveOrientedImage(image)
+        resetActive()
+        return ImageNavigationStatus.Moved
     }
 
-    private suspend fun showNextImageInList(): Result<ImageNavigationStatus> {
-        if (orientedImages.isEmpty() || (activeIndex + 1 >= orientedImages.size)) {
-            return Result.success(ImageNavigationStatus.BoundaryReached)
-        }
-        val nextImage = orientedImages[activeIndex + 1]
-        return nextImage.load().fold(
-            onSuccess = {
-                setActiveOrientedImage(nextImage)
-                ++activeIndex
-                resetActive()
-                Log.i("OrientedImagery", "Switched to next image in image result: ${nextImage.dataUri}")
-                Result.success(ImageNavigationStatus.Moved)
-            },
-            onFailure = { error ->
-                logOrientedImageLoadFailure(error, nextImage, "Failed to load next image in image result")
-                Result.failure(error)
-            }
-        )
-    }
-
-    private suspend fun showPreviousImageInList(): Result<ImageNavigationStatus> {
-        if (orientedImages.isEmpty() || (activeIndex - 1 < 0)) {
-            return Result.success(ImageNavigationStatus.BoundaryReached)
-        }
-        val previousImage = orientedImages[activeIndex - 1]
-        return previousImage.load().fold(
-            onSuccess = {
-                setActiveOrientedImage(previousImage)
-                --activeIndex
-                resetActive()
-                Log.i("OrientedImagery", "Switched to previous image in image result: ${previousImage.dataUri}")
-                Result.success(ImageNavigationStatus.Moved)
-            },
-            onFailure = { error ->
-                logOrientedImageLoadFailure(error, previousImage, "Failed to load previous image in image result")
-                Result.failure(error)
-            }
-        )
+    private suspend fun showImageInList(offset: Int, session: Long): ImageNavigationStatus {
+        val targetIndex = activeIndex + offset
+        val image = orientedImages.getOrNull(targetIndex) ?: return ImageNavigationStatus.BoundaryReached
+        loadImage(image, session)
+        activeIndex = targetIndex
+        setActiveOrientedImage(image)
+        resetActive()
+        return ImageNavigationStatus.Moved
     }
 
     private fun showActiveFootprint() {
         if (activeFootprint == null) {
-            activeFootprint = getOrCreateActiveFootprint()
+            activeFootprint = createActiveFootprint()
         } else {
             orientedImageryLayer.visibleFootprints.add(activeFootprint!!)
             activeCameraLocationGraphic?.isVisible = true
@@ -812,6 +782,8 @@ public class OrientedImageryViewerState public constructor(
             graphicsOverlay.graphics.remove(graphic)
         }
         activeCameraLocationGraphic = null
+        inputLocationGraphic?.let { graphicsOverlay.graphics.remove(it) }
+        inputLocationGraphic = null
         if (additionalFootprints.isNotEmpty()) {
             orientedImageryLayer.visibleFootprints.removeAll(additionalFootprints)
             additionalFootprints = emptyList()
@@ -862,28 +834,28 @@ public class OrientedImageryViewerState public constructor(
         )
     }
 
-    private fun getOrCreateActiveFootprint(): OrientedImageFootprint {
+    private fun createActiveFootprint(): OrientedImageFootprint {
         val activeImage = requireNotNull(activeOrientedImage) {
             "An active oriented image is required to create a footprint."
         }
 
-        return orientedImageryLayer.visibleFootprints
-            .firstOrNull { footprint -> footprint.orientedImage.dataUri == activeImage.dataUri }
-            ?: OrientedImageFootprint(activeImage).also { footprint ->
-                Log.i("OrientedImageryViewerState", "Creating new footprint for active image: ${activeImage.dataUri}")
-                footprint.outlineColor = Color.transparent
-                orientedImageryLayer.visibleFootprints.add(footprint)
+        // Never adopt a footprint owned by the application, even if its image URI matches.
+        return OrientedImageFootprint(activeImage).also { footprint ->
+            Log.i("OrientedImageryViewerState", "Creating new footprint for active image: ${activeImage.dataUri}")
+            footprint.outlineColor = Color.transparent
+            orientedImageryLayer.visibleFootprints.add(footprint)
 
-                if (uiState.isSequentialNavigationEnabled) {
-                    graphicsOverlay.graphics.clear()
-                } else {
-                    inputLocation()?.let { inputLoc ->
-                        val graphicInputLocation = Graphic(inputLoc, ImageDefaults.inputLocationSymbol())
-                        graphicsOverlay.graphics.add(graphicInputLocation)
-                    }
+            inputLocationGraphic?.let { graphicsOverlay.graphics.remove(it) }
+            inputLocationGraphic = null
+            if (!uiState.isSequentialNavigationEnabled) {
+                inputLocation()?.let { inputLoc ->
+                    val graphicInputLocation = Graphic(inputLoc, ImageDefaults.inputLocationSymbol())
+                    inputLocationGraphic = graphicInputLocation
+                    graphicsOverlay.graphics.add(graphicInputLocation)
                 }
-                activeCameraLocationGraphic = Graphic(activeImage.geometry, ImageDefaults.activeCameraLocationSymbol())
-                graphicsOverlay.graphics.add(activeCameraLocationGraphic!!)
             }
+            activeCameraLocationGraphic = Graphic(activeImage.geometry, ImageDefaults.activeCameraLocationSymbol())
+            graphicsOverlay.graphics.add(activeCameraLocationGraphic!!)
+        }
     }
 }

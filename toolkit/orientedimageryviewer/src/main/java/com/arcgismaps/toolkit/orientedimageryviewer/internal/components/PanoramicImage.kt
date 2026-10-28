@@ -70,6 +70,8 @@ import io.github.sceneview.utils.screenToRay
 import io.github.sceneview.utils.worldToScreen
 import com.arcgismaps.toolkit.orientedimageryviewer.R
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -122,11 +124,16 @@ internal fun PanoramicImage(
         val bitmap = runCatching {
             loadBitmapFromPath(context, imageSource)
         }.onFailure { throwable ->
+            if (throwable is CancellationException) throw throwable
+            ensureActive()
+            if (viewerState.uiState.activeImageRevision != imageRevision) return@LaunchedEffect
             loadErrorMessage = loadFailedMessage
             Log.e("PanoramicImage", loadFailedMessage, throwable)
         }.getOrNull()
 
         bitmap?.let {
+            ensureActive()
+            if (viewerState.uiState.activeImageRevision != imageRevision) return@LaunchedEffect
             // Aim at the searched/selected map location, as the raster viewer does. Renderer
             // axes alone cannot identify the correct side or elevation of an oriented image.
             val imagePoint = if (sequentialNavigation) {
@@ -134,19 +141,23 @@ internal fun PanoramicImage(
             } else {
                 inputLocationData?.toPoint()?.let { location ->
                     viewerState.locationToImage(location)?.onFailure { error ->
+                        if (error is CancellationException) throw error
                         Log.e("PanoramicImage", "Unable to locate the initial view in the panorama", error)
                     }?.getOrNull()
                 }
             }
+            ensureActive()
+            if (viewerState.uiState.activeImageRevision != imageRevision) return@LaunchedEffect
             val initialMarkerDirection = imagePoint?.let { point ->
                 panoramicImageDirection(point.x, point.y, it.width, it.height)
             }
             val initialDirection = initialMarkerDirection ?: Float3(1f, 0f, 0f)
-            val footprintOrientation = loadPanoramicFootprintOrientation(viewerState, it.width, it.height)
+            val footprintOrientation = loadPanoramicFootprintOrientation(viewerState, it.width, it.height, imageRevision)
             if (footprintOrientation == null) {
                 Log.e("PanoramicImage", "Unable to calibrate geographic footprint orientation")
             }
             ensureActive()
+            if (viewerState.uiState.activeImageRevision != imageRevision) return@LaunchedEffect
             val texture = ImageTexture.Builder()
                 .bitmap(it)
                 .build(materialLoader.engine)
@@ -173,6 +184,7 @@ internal fun PanoramicImage(
             result.onSuccess { point ->
                 viewerState.setInputLocation(point)
             }.onFailure { error ->
+                if (error is CancellationException) throw error
                 Log.e("PanoramicImage", "Unable to locate the panorama image center", error)
             }
         } else {
@@ -321,6 +333,7 @@ internal fun PanoramicImage(
                     }
                 } else emptyList()
                 if (
+                    state.imageRevision != currentUiState.activeImageRevision ||
                     currentUiState.activeImageInfo?.dataUri != imageSource ||
                     !currentUiState.isActiveFootprintVisible ||
                     currentUiState.isSequentialNavigationEnabled
@@ -430,14 +443,20 @@ internal fun panoramicImageDirection(
 private suspend fun loadPanoramicFootprintOrientation(
     viewerState: OrientedImageryViewerState,
     width: Int,
-    height: Int
+    height: Int,
+    imageRevision: Long
 ): PanoramicFootprintOrientation? {
     val camera = viewerState.uiState.activeImageInfo?.cameraLocationData?.toPoint() ?: return null
     val projected = GeometryEngine.projectOrNull(camera, SpatialReference(3857)) ?: return null
     val cameraZ = projected.z?.takeIf { it.isFinite() } ?: return null
     val sr = projected.spatialReference ?: return null
     suspend fun directionAt(point: Point): Float3? {
-        val pixel = viewerState.locationToImage(point)?.getOrNull() ?: return null
+        currentCoroutineContext().ensureActive()
+        if (viewerState.uiState.activeImageRevision != imageRevision) return null
+        val result = viewerState.locationToImage(point)
+        currentCoroutineContext().ensureActive()
+        if (viewerState.uiState.activeImageRevision != imageRevision) return null
+        val pixel = result?.onFailure { if (it is CancellationException) throw it }?.getOrNull() ?: return null
         return panoramicImageDirection(pixel.x, pixel.y, width, height)
     }
 
