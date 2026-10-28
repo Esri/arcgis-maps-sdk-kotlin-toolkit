@@ -1,17 +1,24 @@
 /*
  * Copyright 2026 Esri
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
- * Unless required by applicable law or agreed to in writing, software distributed under the
- * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND.
- * See the License for the specific language governing permissions and limitations under the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package com.arcgismaps.toolkit.orientedimageryviewer.internal.components
 
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import com.arcgismaps.data.ArcGISFeatureTable
+import com.arcgismaps.data.Feature
 import com.arcgismaps.geometry.Envelope
 import com.arcgismaps.geometry.GeometryEngine
 import com.arcgismaps.geometry.Point
@@ -69,11 +76,13 @@ class ImageLocationMarkerTests {
         every { image.type } returns OrientedImageType.Horizontal
         every { image.geometry } returns Point(0.0, 0.0, SpatialReference.wgs84())
         every { image.attributes } returns mutableMapOf("OBJECTID" to 42L)
+        coEvery { image.load() } returns Result.success(Unit)
         // Even an uncovered location can project to valid, in-bounds pixels.
         coEvery { image.locationToImage(any()) } returns Result.success(DoubleXY(5.0, 5.0))
         layer = mockk()
         every { layer.name } returns "Markers"
         every { layer.supportsSequentialNavigation } returns false
+        every { layer.visibleFootprints } returns mutableListOf()
         val table = mockk<ArcGISFeatureTable>()
         every { table.objectIdField } returns "OBJECTID"
         every { layer.featureTable } returns table
@@ -83,9 +92,7 @@ class ImageLocationMarkerTests {
             mapOverlay = GraphicsOverlay()
             imageOverlay = GraphicsOverlay()
             state = OrientedImageryViewerState(layer, mapOverlay, scope)
-            OrientedImageryViewerState::class.java.getDeclaredMethod(
-                "setActiveOrientedImage", OrientedImage::class.java
-            ).apply { isAccessible = true }.invoke(state, image)
+            activateImage()
             val rasterLayer = rasterLayer()
             state.registerMarkerOverlayInImage(imageOverlay) { computeRasterPoint(it, rasterLayer) }
             state.addMarker()
@@ -311,9 +318,7 @@ class ImageLocationMarkerTests {
         compose.runOnIdle {
             coEvery { image.locationToImage(any()) } coAnswers { projection.await() }
             tap()
-            OrientedImageryViewerState::class.java.getDeclaredMethod(
-                "setActiveOrientedImage", OrientedImage::class.java
-            ).apply { isAccessible = true }.invoke(state, image)
+            activateImage()
             projection.complete(Result.success(DoubleXY(5.0, 5.0)))
         }
         compose.runOnIdle { assertEquals(0, imageOverlay.graphics.size) }
@@ -337,9 +342,7 @@ class ImageLocationMarkerTests {
         compose.runOnIdle {
             coEvery { layer.searchImages(any(), any()) } coAnswers { coverage.await() }
             tap()
-            OrientedImageryViewerState::class.java.getDeclaredMethod(
-                "setActiveOrientedImage", OrientedImage::class.java
-            ).apply { isAccessible = true }.invoke(state, image)
+            activateImage()
             coverage.complete(Result.success(listOf(image)))
         }
         compose.runOnIdle { assertEquals(0, imageOverlay.graphics.size) }
@@ -686,6 +689,58 @@ class ImageLocationMarkerTests {
         ))
         val viewpoint = Viewpoint(geographicBounds)
         assertNotNull(computePixelCorners(viewpoint, rasterLayer))
+    }
+
+    @Test
+    fun mapOriginMarkersKeepTheTapSymbolWhenSelectionChangesDuringProjection() {
+        val projection = CompletableDeferred<Result<DoubleXY>>()
+        compose.runOnIdle {
+            val selected = MarkerSymbols.symbols[1]
+            state.selectMarkerSymbol(selected)
+            coEvery { image.locationToImage(any()) } coAnswers { projection.await() }
+            tap()
+            state.selectMarkerSymbol(MarkerSymbols.symbols[2])
+            projection.complete(Result.success(DoubleXY(5.0, 5.0)))
+            assertEquals(selected, mapOverlay.graphics.single().symbol)
+            assertEquals(selected, imageOverlay.graphics.single().symbol)
+        }
+    }
+
+    @Test
+    fun imageOriginMarkersKeepTheTapSymbolInBothViewsDuringProjection() {
+        val projection = CompletableDeferred<Result<Point>>()
+        compose.runOnIdle {
+            val selected = MarkerSymbols.symbols[1]
+            state.selectMarkerSymbol(selected)
+            coEvery { image.imageToLocation(any()) } coAnswers { projection.await() }
+            scope.launch { state.addMarkerToRasterImage(DoubleXY(5.0, 5.0), Point(110.0, 220.0), imageOverlay) }
+            state.selectMarkerSymbol(MarkerSymbols.symbols[2])
+            projection.complete(Result.success(location))
+            assertEquals(selected, mapOverlay.graphics.single().symbol)
+            assertEquals(selected, imageOverlay.graphics.single().symbol)
+        }
+    }
+
+    @Test
+    fun panoramaDisposalDuringImageOriginProjectionDiscardsBothMarkers() {
+        val projection = CompletableDeferred<Result<Point>>()
+        compose.runOnIdle {
+            val revision = state.uiState.activeImageRevision
+            val unregister = state.registerMarkerInPanoramicImage(revision, 20, 10)
+            coEvery { image.imageToLocation(any()) } coAnswers { projection.await() }
+            scope.launch { state.addMarkerToPanoramicImage(DoubleXY(3.0, 4.0), revision) }
+            unregister()
+            projection.complete(Result.success(location))
+            assertTrue(state.markerPointsInPanoramicImage.isEmpty())
+            assertTrue(mapOverlay.graphics.isEmpty())
+        }
+    }
+
+    private fun activateImage() {
+        val feature = mockk<Feature>()
+        every { feature.geometry } returns location
+        coEvery { layer.fetchImageForFeature(feature) } returns Result.success(image)
+        scope.launch { state.fetchImage(feature).getOrThrow() }
     }
 
     private fun rasterLayer(spatialReference: SpatialReference? = null): RasterLayer {

@@ -1,19 +1,17 @@
 /*
+ * Copyright 2026 Esri
  *
- *  Copyright 2026 Esri
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
- *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package com.arcgismaps.toolkit.orientedimageryviewer.internal
@@ -51,11 +49,17 @@ internal data class PointData(
     val x: Double,
     val y: Double,
     val z: Double? = null,
-    val spatialReferenceWkid: Int? = null
+    val spatialReferenceJson: String? = null
 ) {
-    internal fun toPoint(): Point = if (z == null) {
-        spatialReferenceWkid?.let { wkid -> Point(x, y, SpatialReference(wkid)) } ?: Point(x, y)
-    } else {
-        spatialReferenceWkid?.let { wkid -> Point(x, y, z, SpatialReference(wkid)) } ?: Point(x, y, z)
+    internal fun toPoint(): Point {
+        val reference = spatialReferenceJson?.let { json ->
+            requireNotNull(SpatialReference.fromJsonOrNull(json)) { "Invalid spatial reference snapshot." }
+        }
+        return if (z == null) Point(x, y, reference) else Point(x, y, z, reference)
     }
 }
+
+/**
+ * Converts a [Point] to a [PointData] snapshot for use in [OrientedImageryViewerUiState].
+ */
+internal fun Point.toPointData(): PointData = PointData(x, y, z, spatialReference?.toJson())

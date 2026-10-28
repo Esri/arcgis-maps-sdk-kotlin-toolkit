@@ -1,19 +1,17 @@
 /*
+ * Copyright 2026 Esri
  *
- *  Copyright 2026 Esri
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
- *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package com.arcgismaps.toolkit.orientedimageryviewer.internal.components
@@ -61,7 +59,8 @@ import kotlinx.coroutines.awaitCancellation
 @Composable
 internal fun RasterImage(
     viewerState: OrientedImageryViewerState,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    graphicsOverlay: GraphicsOverlay = remember { GraphicsOverlay() }
 ) {
     val viewerUiState = viewerState.uiState
     val imageRevision = viewerUiState.activeImageRevision
@@ -71,12 +70,8 @@ internal fun RasterImage(
         MapViewProxy()
     }
 
-    val graphicsOverlay = remember {
-        GraphicsOverlay()
-    }
-
     val referenceOverlay = remember { GraphicsOverlay() }
-    val graphicOverlays = remember {
+    val graphicOverlays = remember(graphicsOverlay, referenceOverlay) {
         listOf(graphicsOverlay, referenceOverlay)
     }
 
@@ -213,6 +208,7 @@ internal fun computeImagePoint(rasterPoint: Point, rasterLayer: RasterLayer): Do
             ) return null
             rasterPoint
         }
+
         sourceReference == null -> return null
         else -> GeometryEngine.projectOrNull(rasterPoint, targetReference) ?: return null
     }
@@ -221,7 +217,7 @@ internal fun computeImagePoint(rasterPoint: Point, rasterLayer: RasterLayer): Do
 
 private data class RasterTransform(val extent: Envelope, val cellSizeX: Double, val cellSizeY: Double) {
     fun contains(x: Double, y: Double): Boolean = x.isFinite() && y.isFinite() &&
-        x in extent.xMin..extent.xMax && y in extent.yMin..extent.yMax
+            x in extent.xMin..extent.xMax && y in extent.yMin..extent.yMax
 
     fun toImagePoint(point: Point): DoubleXY? {
         if (!contains(point.x, point.y)) return null

@@ -64,4 +64,3 @@ class ErrorSnackbarStateTests {
         assertEquals("No active image", state.hostState.currentSnackbarData?.visuals?.message)
     }
 }
-

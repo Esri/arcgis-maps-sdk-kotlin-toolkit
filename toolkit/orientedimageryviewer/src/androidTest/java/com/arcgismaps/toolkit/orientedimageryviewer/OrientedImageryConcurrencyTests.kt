@@ -1,11 +1,17 @@
 /*
  * Copyright 2026 Esri
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
- * Unless required by applicable law or agreed to in writing, software distributed under the
- * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND.
- * See the License for the specific language governing permissions and limitations under the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package com.arcgismaps.toolkit.orientedimageryviewer
@@ -13,6 +19,7 @@ package com.arcgismaps.toolkit.orientedimageryviewer
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import com.arcgismaps.data.Feature
 import com.arcgismaps.geometry.Point
+import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.layers.OrientedImageryLayer
 import com.arcgismaps.mapping.layers.orientedimagery.OrientedImage
 import com.arcgismaps.mapping.layers.orientedimagery.OrientedImageFootprint
@@ -292,6 +299,20 @@ class OrientedImageryConcurrencyTests {
                 state.navigateNextImage().getOrThrow()
                 assertImage("second")
             }
+        }
+    }
+
+    @Test
+    fun searchingPreservesInputAndCameraVerticalReferences() {
+        compose.runOnIdle {
+            val input = Point(1.0, 2.0, 3.0, SpatialReference(3857, 5773))
+            val camera = Point(4.0, 5.0, 6.0, SpatialReference(3857, 115700))
+            val image = image("vertical")
+            every { image.geometry } returns camera
+            coEvery { layer.searchImages(input, any()) } returns Result.success(listOf(image))
+            scope.launch { state.searchImages(input).getOrThrow() }
+            assertEquals(input.spatialReference, state.inputLocationData?.toPoint()?.spatialReference)
+            assertEquals(camera.spatialReference, state.uiState.activeImageInfo?.cameraLocationData?.toPoint()?.spatialReference)
         }
     }
 

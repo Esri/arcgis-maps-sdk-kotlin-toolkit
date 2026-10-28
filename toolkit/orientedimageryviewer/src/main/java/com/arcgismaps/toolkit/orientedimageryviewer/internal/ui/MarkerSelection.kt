@@ -17,7 +17,6 @@
 package com.arcgismaps.toolkit.orientedimageryviewer.internal.ui
 
 import androidx.activity.compose.BackHandler
-import androidx.annotation.StringRes
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -38,59 +37,21 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.drawscope.DrawScope
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
-import com.arcgismaps.mapping.symbology.SimpleLineSymbol
-import com.arcgismaps.mapping.symbology.SimpleLineSymbolStyle
-import com.arcgismaps.mapping.symbology.SimpleMarkerSymbol
-import com.arcgismaps.mapping.symbology.SimpleMarkerSymbolStyle
 import com.arcgismaps.toolkit.orientedimageryviewer.R
-import com.arcgismaps.Color as SymbolColor
 
-/** Identity is independent of symbol appearance and palette ordering. */
-internal enum class MarkerOptionId {
-    VioletSquare,
-    YellowTriangle,
-    OrangeDiamond
-}
-
-internal data class MarkerOption(
-    val id: MarkerOptionId,
-    val symbol: SimpleMarkerSymbol,
-    @StringRes val descriptionResId: Int
-)
-
-/** Symbol prototypes are cloned when selected so existing markers retain their appearance. */
-internal object MarkerSymbols {
-    val options: List<MarkerOption> = listOf(
-        MarkerOption(
-            MarkerOptionId.VioletSquare,
-            SimpleMarkerSymbol(SimpleMarkerSymbolStyle.Square, SymbolColor.fromRgba(238, 130, 238), 12f),
-            R.string.marker_symbol_violet_square
-        ),
-        MarkerOption(
-            MarkerOptionId.YellowTriangle,
-            SimpleMarkerSymbol(SimpleMarkerSymbolStyle.Triangle, SymbolColor.yellow, 12f),
-            R.string.marker_symbol_yellow_triangle
-        ),
-        MarkerOption(
-            MarkerOptionId.OrangeDiamond,
-            SimpleMarkerSymbol(SimpleMarkerSymbolStyle.Diamond, SymbolColor.fromRgba(255, 165, 0), 12f),
-            R.string.marker_symbol_orange_diamond
-        )
-    ).onEach { it.symbol.outline = SimpleLineSymbol(SimpleLineSymbolStyle.Solid, SymbolColor.black, 1f) }
-
-    val symbols: List<SimpleMarkerSymbol> = options.map { it.symbol }
-}
-
+/**
+ * A simple UI for selecting a marker symbol. The selected symbol is indicated by a radio button.
+ *
+ * @param selectedOptionId The currently selected marker option ID, or null if none is selected.
+ * @param onSelectOption Callback invoked when a marker option is selected.
+ * @param onDismiss Callback invoked when the selection UI is dismissed.
+ * @param modifier Optional [Modifier] for styling and layout adjustments.
+ */
 @Composable
 internal fun MarkerSelection(
     selectedOptionId: MarkerOptionId?,
@@ -136,42 +97,5 @@ internal fun MarkerSelection(
                 }
             }
         }
-    }
-}
-
-/** Screen-space rendering keeps panoramic symbols upright and the same size as raster symbols. */
-internal fun DrawScope.drawMarkerSymbol(
-    symbol: SimpleMarkerSymbol,
-    center: Offset,
-    diameter: Float = symbol.size.dp.toPx()
-) {
-    val half = diameter / 2f
-    val path = Path().apply {
-        when (symbol.style) {
-            SimpleMarkerSymbolStyle.Triangle -> {
-                moveTo(center.x, center.y - half)
-                lineTo(center.x + half, center.y + half)
-                lineTo(center.x - half, center.y + half)
-            }
-
-            SimpleMarkerSymbolStyle.Diamond -> {
-                moveTo(center.x, center.y - half)
-                lineTo(center.x + half, center.y)
-                lineTo(center.x, center.y + half)
-                lineTo(center.x - half, center.y)
-            }
-
-            else -> {
-                moveTo(center.x - half, center.y - half)
-                lineTo(center.x + half, center.y - half)
-                lineTo(center.x + half, center.y + half)
-                lineTo(center.x - half, center.y + half)
-            }
-        }
-        close()
-    }
-    drawPath(path, Color(symbol.color.argb))
-    symbol.outline?.let { outline ->
-        drawPath(path, Color(outline.color.argb), style = Stroke(outline.width.dp.toPx()))
     }
 }

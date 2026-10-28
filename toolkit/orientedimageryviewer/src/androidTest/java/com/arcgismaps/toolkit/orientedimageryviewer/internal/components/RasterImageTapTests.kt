@@ -1,12 +1,20 @@
 /*
  * Copyright 2026 Esri
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
- * Unless required by applicable law or agreed to in writing, software distributed under the
- * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND.
- * See the License for the specific language governing permissions and limitations under the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
+
 
 package com.arcgismaps.toolkit.orientedimageryviewer.internal.components
 
@@ -78,6 +86,7 @@ class RasterImageTapTests {
         every { layer.visibleFootprints } returns mutableListOf()
         coEvery { layer.searchImages(any(), any()) } returns Result.success(listOf(image))
         val mapOverlay = GraphicsOverlay()
+        val imageOverlay = GraphicsOverlay()
         val state = OrientedImageryViewerState(layer, mapOverlay, scope)
         try {
             compose.runOnIdle {
@@ -87,7 +96,7 @@ class RasterImageTapTests {
                 }
             }
             compose.setContent {
-                RasterImage(state, Modifier.size(300.dp).testTag("raster"))
+                RasterImage(state, Modifier.size(300.dp).testTag("raster"), imageOverlay)
             }
             compose.waitUntil(20_000) { initialized.get() }
             compose.waitForIdle()
@@ -99,11 +108,8 @@ class RasterImageTapTests {
                 assertEquals(40.0, pixel.y, 2.0)
                 assertEquals(1, mapOverlay.graphics.size)
                 assertEquals(location, mapOverlay.graphics.single().geometry)
-                val overlay = OrientedImageryViewerState::class.java
-                    .getDeclaredField("markerOverlayInImage").apply { isAccessible = true }
-                    .get(state) as GraphicsOverlay
-                assertEquals(1, overlay.graphics.size)
-                val rasterPoint = overlay.graphics.single().geometry as Point
+                assertEquals(1, imageOverlay.graphics.size)
+                val rasterPoint = imageOverlay.graphics.single().geometry as Point
                 assertTrue(rasterPoint.x.isFinite() && rasterPoint.y.isFinite())
             }
         } finally {
