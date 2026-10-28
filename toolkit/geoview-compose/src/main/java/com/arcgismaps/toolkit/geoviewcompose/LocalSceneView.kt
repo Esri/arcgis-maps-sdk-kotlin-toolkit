@@ -189,7 +189,7 @@ public fun LocalSceneView(
         localSceneViewProxy = localSceneViewProxy,
         onViewpointChangedForCenterAndScale = onViewpointChangedForCenterAndScale,
         onViewpointChangedForBoundingGeometry = onViewpointChangedForBoundingGeometry,
-        graphicsOverlays = emptyList<GraphicsOverlay>(),
+        graphicsOverlays = emptyList(),
         interactionOptions = interactionOptions,
         selectionProperties = selectionProperties,
         isAttributionBarVisible = isAttributionBarVisible,
