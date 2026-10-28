@@ -18,15 +18,9 @@
 
 package com.arcgismaps.toolkit.orientedimageryviewer.internal.components
 
-import android.Manifest
-import android.content.ContentUris
 import android.content.Context
-import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.net.Uri
-import android.os.Build
-import android.provider.MediaStore
 import android.util.Log
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
@@ -52,8 +46,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Offset
-import androidx.core.content.ContextCompat
-import androidx.core.net.toUri
 import com.arcgismaps.geometry.GeometryEngine
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.geometry.SpatialReference
@@ -83,8 +75,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import androidx.compose.ui.unit.dp
 import java.io.File
-import java.net.HttpURLConnection
-import java.net.URL
 import kotlin.math.abs
 import kotlin.math.atan2
 import kotlin.math.cos
@@ -107,11 +97,7 @@ internal fun PanoramicImage(
         materialLoader.createUnlitColorInstance(androidx.compose.ui.graphics.Color.Red)
     }
     val context = LocalContext.current
-    val readImagesPermission = remember(context, imageSource) { readImagesPermissionFor(context, imageSource) }
-    // TODO: document that read image permission is required for local files outside of the app's private storage.
-    val permissionRequiredMessage = stringResource(R.string.panoramic_image_permission_required, imageSource)
     val loadFailedMessage = stringResource(R.string.panoramic_image_load_failed, imageSource)
-    val hasReadImagesPermission = readImagesPermission == null || context.hasPermission(readImagesPermission)
 
     // Preserve the previous panorama until the replacement image is fully ready.
     data class RenderState(
@@ -131,53 +117,48 @@ internal fun PanoramicImage(
     // Updating the input location from the center must not reload the sequential image.
     val inputLocationData = viewerState.uiState.inputLocationData.takeUnless { sequentialNavigation }
 
-    LaunchedEffect(viewerState, imageRevision, imageSource, materialLoader, context, hasReadImagesPermission, inputLocationData, sequentialNavigation) {
+    LaunchedEffect(viewerState, imageRevision, imageSource, materialLoader, context, inputLocationData, sequentialNavigation) {
         loadErrorMessage = null
-        if (!hasReadImagesPermission) {
-            loadErrorMessage = permissionRequiredMessage
-            Log.e("PanoramicImage", permissionRequiredMessage)
-        } else {
-            val bitmap = runCatching {
-                loadBitmapFromUri(context, imageSource)
-            }.onFailure { throwable ->
-                loadErrorMessage = loadFailedMessage
-                Log.e("PanoramicImage", loadFailedMessage, throwable)
-            }.getOrNull()
+        val bitmap = runCatching {
+            loadBitmapFromPath(context, imageSource)
+        }.onFailure { throwable ->
+            loadErrorMessage = loadFailedMessage
+            Log.e("PanoramicImage", loadFailedMessage, throwable)
+        }.getOrNull()
 
-            bitmap?.let {
-                // Aim at the searched/selected map location, as the raster viewer does. Renderer
-                // axes alone cannot identify the correct side or elevation of an oriented image.
-                val imagePoint = if (sequentialNavigation) {
-                    DoubleXY(it.width / 2.0, it.height / 2.0)
-                } else {
-                    inputLocationData?.toPoint()?.let { location ->
-                        viewerState.locationToImage(location)?.onFailure { error ->
-                            Log.e("PanoramicImage", "Unable to locate the initial view in the panorama", error)
-                        }?.getOrNull()
-                    }
+        bitmap?.let {
+            // Aim at the searched/selected map location, as the raster viewer does. Renderer
+            // axes alone cannot identify the correct side or elevation of an oriented image.
+            val imagePoint = if (sequentialNavigation) {
+                DoubleXY(it.width / 2.0, it.height / 2.0)
+            } else {
+                inputLocationData?.toPoint()?.let { location ->
+                    viewerState.locationToImage(location)?.onFailure { error ->
+                        Log.e("PanoramicImage", "Unable to locate the initial view in the panorama", error)
+                    }?.getOrNull()
                 }
-                val initialMarkerDirection = imagePoint?.let { point ->
-                    panoramicImageDirection(point.x, point.y, it.width, it.height)
-                }
-                val initialDirection = initialMarkerDirection ?: Float3(1f, 0f, 0f)
-                val footprintOrientation = loadPanoramicFootprintOrientation(viewerState, it.width, it.height)
-                if (footprintOrientation == null) {
-                    Log.e("PanoramicImage", "Unable to calibrate geographic footprint orientation")
-                }
-                ensureActive()
-                val texture = ImageTexture.Builder()
-                    .bitmap(it)
-                    .build(materialLoader.engine)
-                renderState = RenderState(
-                    materialInstance = materialLoader.createImageInstance(texture),
-                    initialDirection = initialDirection,
-                    initialMarkerDirection = initialMarkerDirection,
-                    footprintOrientation = footprintOrientation,
-                    imageRevision = imageRevision,
-                    width = it.width,
-                    height = it.height
-                )
             }
+            val initialMarkerDirection = imagePoint?.let { point ->
+                panoramicImageDirection(point.x, point.y, it.width, it.height)
+            }
+            val initialDirection = initialMarkerDirection ?: Float3(1f, 0f, 0f)
+            val footprintOrientation = loadPanoramicFootprintOrientation(viewerState, it.width, it.height)
+            if (footprintOrientation == null) {
+                Log.e("PanoramicImage", "Unable to calibrate geographic footprint orientation")
+            }
+            ensureActive()
+            val texture = ImageTexture.Builder()
+                .bitmap(it)
+                .build(materialLoader.engine)
+            renderState = RenderState(
+                materialInstance = materialLoader.createImageInstance(texture),
+                initialDirection = initialDirection,
+                initialMarkerDirection = initialMarkerDirection,
+                footprintOrientation = footprintOrientation,
+                imageRevision = imageRevision,
+                width = it.width,
+                height = it.height
+            )
         }
     }
 
@@ -543,137 +524,13 @@ private fun angularDifferenceDegrees(left: Double, right: Double): Double {
 
 private const val FOOTPRINT_UPDATE_EPSILON_DEGREES = 0.1
 
-private fun Context.hasPermission(permission: String): Boolean =
-    ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED
-
-private fun readImagesPermissionFor(context: Context, imageSource: String): String? {
-    val localFile = imageSource.toLocalFileOrNull() ?: return null
-    if (localFile.isInAppPrivateStorage(context)) {
-        return null
-    }
-
-    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-        Manifest.permission.READ_MEDIA_IMAGES
-    } else {
-        @Suppress("DEPRECATION")
-        Manifest.permission.READ_EXTERNAL_STORAGE
-    }
-}
-
-private fun String.toLocalFileOrNull(): File? {
-    val uri = toUri()
-    return when (uri.scheme?.lowercase()) {
-        null, "" -> File(this)
-        "file" -> uri.path?.let(::File)
-        else -> null
-    }
-}
-
-private fun File.isInAppPrivateStorage(context: Context): Boolean {
-    val appDataPath = runCatching { File(context.applicationInfo.dataDir).canonicalPath }.getOrNull() ?: return false
-    val localFilePath = runCatching { canonicalPath }.getOrNull() ?: return false
-    return localFilePath == appDataPath || localFilePath.startsWith("$appDataPath${File.separator}")
-}
-
-private suspend fun loadBitmapFromUri(context: Context, imageSource: String): Bitmap =
+/** Reads the local image path supplied by the loaded OrientedImage.dataUri. */
+private suspend fun loadBitmapFromPath(context: Context, imagePath: String): Bitmap =
     withContext(Dispatchers.IO) {
-        val imageBytes = loadImageBytesFromUri(context, imageSource)
-        val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
-            ?: throw IllegalArgumentException(context.getString(R.string.panoramic_image_decode_failed, imageSource))
-
-        bitmap
-    }
-
-private fun loadImageBytesFromUri(context: Context, imageSource: String): ByteArray {
-    val uri = imageSource.toUri()
-    return when (uri.scheme?.lowercase()) {
-        "https" -> loadImageBytesFromUrl(context, imageSource)
-        "content" -> loadImageBytesFromContentUri(context, uri, imageSource)
-        "file" -> loadImageBytesFromFilePath(context, uri.path, imageSource)
-        null, "" -> loadImageBytesFromFilePath(context, imageSource, imageSource)
-        else -> loadImageBytesFromFilePathIfPresent(imageSource)
-            ?: throw IllegalArgumentException(
-                context.getString(R.string.panoramic_image_source_unsupported, imageSource)
-            )
-    }
-}
-
-private fun loadImageBytesFromUrl(context: Context, imageUrl: String): ByteArray {
-    val connection = (URL(imageUrl).openConnection() as HttpURLConnection).apply {
-        connectTimeout = 15_000
-        readTimeout = 30_000
-        instanceFollowRedirects = true
-    }
-
-    return try {
-        val responseCode = connection.responseCode
-        if (responseCode !in 200..299) {
-            throw IllegalArgumentException(
-                context.getString(R.string.panoramic_image_http_error, responseCode, imageUrl)
-            )
-        }
-
-        connection.inputStream.use { inputStream ->
-            inputStream.readBytes()
-        }
-    } finally {
-        connection.disconnect()
-    }
-}
-
-private fun loadImageBytesFromContentUri(context: Context, uri: Uri, imageSource: String): ByteArray =
-    context.contentResolver.openInputStream(uri)?.use { inputStream ->
-        inputStream.readBytes()
-    } ?: throw IllegalArgumentException(context.getString(R.string.panoramic_image_open_failed, imageSource))
-
-private fun loadImageBytesFromFilePath(context: Context, filePath: String?, imageSource: String): ByteArray {
-    val path = requireNotNull(filePath) {
-        context.getString(R.string.panoramic_image_missing_file_path, imageSource)
-    }
-    val directFileResult = runCatching { loadImageBytesFromFilePathIfPresent(path) }
-    if (directFileResult.isSuccess) {
-        directFileResult.getOrNull()?.let { return it }
-    }
-
-    loadImageBytesFromMediaStorePath(context, path, imageSource)?.let { return it }
-
-    directFileResult.exceptionOrNull()?.let { throwable ->
-        throw IllegalArgumentException(
-            context.getString(R.string.panoramic_image_shared_storage_access_hint, imageSource),
-            throwable
-        )
-    }
-
-    throw IllegalArgumentException(context.getString(R.string.panoramic_image_decode_failed, imageSource))
-}
-
-private fun loadImageBytesFromFilePathIfPresent(filePath: String): ByteArray? {
-    val file = File(filePath)
-    if (!file.isFile) {
-        return null
-    }
-
-    return file.inputStream().use { inputStream ->
-        inputStream.readBytes()
-    }
-}
-
-private fun loadImageBytesFromMediaStorePath(context: Context, filePath: String, imageSource: String): ByteArray? {
-    val collection = MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL)
-
-    return context.contentResolver.query(
-        collection,
-        arrayOf(MediaStore.Images.Media._ID),
-        "${MediaStore.Images.Media.DATA} = ?",
-        arrayOf(filePath),
-        null
-    )?.use { cursor ->
-        if (!cursor.moveToFirst()) {
-            null
-        } else {
-            val id = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID))
-            val imageUri = ContentUris.withAppendedId(collection, id)
-            loadImageBytesFromContentUri(context, imageUri, imageSource)
+        File(imagePath).inputStream().use { inputStream ->
+            BitmapFactory.decodeStream(inputStream)
+                ?: throw IllegalArgumentException(
+                    context.getString(R.string.panoramic_image_decode_failed, imagePath)
+                )
         }
     }
-}

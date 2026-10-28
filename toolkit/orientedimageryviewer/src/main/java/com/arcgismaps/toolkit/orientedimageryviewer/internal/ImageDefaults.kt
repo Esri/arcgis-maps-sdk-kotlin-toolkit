@@ -51,4 +51,3 @@ internal object ImageDefaults {
         SimpleMarkerSymbolStyle.Circle, Color.fromRgba(255, 0, 122, 194), 10f
     )
 }
-

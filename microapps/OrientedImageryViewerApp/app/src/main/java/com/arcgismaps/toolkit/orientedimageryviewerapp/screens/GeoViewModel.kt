@@ -44,7 +44,7 @@ import kotlinx.coroutines.launch
 class GeoViewModel(application: Application) : AndroidViewModel(application) {
 
     val arcGISMap: ArcGISMap =
-        ArcGISMap("https://runtimecoretest.maps.arcgis.com/home/item.html?id=c820cf66dc4a45aea7f84a94bd071a8d")
+        ArcGISMap("https://runtimecoretest.maps.arcgis.com/home/item.html?id=0e320b4e87934a44a86643ba85b3946e")
 
     val arcGISScene: ArcGISScene =
         ArcGISScene("https://www.arcgis.com/home/item.html?id=aa1c036445824e06a2d1b0e12e02a924")

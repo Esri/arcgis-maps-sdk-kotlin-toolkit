@@ -156,8 +156,7 @@ public class OrientedImageryViewerState public constructor(
         get() = uiState.activeImageInfo != null
 
     /**
-     * Creates a popup for the currently active oriented image by wrapping its geometry and
-     * attributes in a [Graphic].
+     * Creates a popup for the currently active oriented image.
      *
      * Returns a failed [Result] if there is no active image or popup creation fails.
      */
@@ -166,6 +165,7 @@ public class OrientedImageryViewerState public constructor(
             ?: return Result.failure(IllegalStateException("An active oriented image is required to create a popup."))
 
         return runCatching {
+            // TODO: replace with the Popup constructor with OrientedImage when a core bug is fixed
             Popup(Graphic(image.geometry, image.attributes))
         }.onFailure { error ->
             if (error is CancellationException) throw error
@@ -212,8 +212,6 @@ public class OrientedImageryViewerState public constructor(
             currentCoroutineContext().ensureActive()
             if (!isCurrent()) return@runCatching
             val addMarker = target.prepareMarker(imagePoint) ?: return@runCatching
-            // Projection is not a visibility test: even a point outside coverage can
-            // produce finite, in-bounds pixels. Only search after cheap pixel validation.
             if (!canImageSeeLocation(image, mapPoint) || !isCurrent()) return@runCatching
             addMarker()
         }
@@ -311,6 +309,14 @@ public class OrientedImageryViewerState public constructor(
         })
     }
 
+    /**
+     * Returns a [Result] indicating whether oriented images were found at the specified map location.
+     * If images are found, the first image is loaded and set as the active image.
+     * If no images are found, the active image is cleared.
+     *
+     * Returns a failed [Result] if searching or loading fails.
+     * Cancellation is rethrown. The active image may already have been changed when an operation fails.
+     */
     public suspend fun searchImages(lastMapLocation: Point): Result<ImageSearchStatus> {
         resetAll()
         Log.i("OrientedImagery", "Searching for oriented images at map location: ${lastMapLocation.toJson()}")
@@ -352,6 +358,12 @@ public class OrientedImageryViewerState public constructor(
         )
     }
 
+    /**
+     * Fetches the oriented image for the specified feature and sets it as the active image.
+     *
+     * Returns a failed [Result] if fetching or loading fails.
+     * Cancellation is rethrown. The active image may already have been changed when an operation fails.
+     */
     public suspend fun fetchImage(feature: Feature): Result<Unit> {
         resetAll()
         Log.i("OrientedImagery", "Fetching image for feature: ObjectID = ${feature.attributes["ObjectID"]}")
@@ -381,6 +393,11 @@ public class OrientedImageryViewerState public constructor(
         )
     }
 
+    /**
+     * Navigates to the next oriented image.
+     *
+     * Returns a [Result] indicating the navigation status.
+     */
     public suspend fun navigateNextImage(): Result<ImageNavigationStatus> {
         if (!hasActiveImage) {
             return Result.success(ImageNavigationStatus.NoActiveImage)
@@ -392,6 +409,11 @@ public class OrientedImageryViewerState public constructor(
         }
     }
 
+    /**
+     * Navigates to the previous oriented image.
+     *
+     * Returns a [Result] indicating the navigation status.
+     */
     public suspend fun navigatePreviousImage(): Result<ImageNavigationStatus> {
         if (!hasActiveImage) {
             return Result.success(ImageNavigationStatus.NoActiveImage)
@@ -403,6 +425,9 @@ public class OrientedImageryViewerState public constructor(
         }
     }
 
+    /**
+     * Toggles the visibility of the active footprint.
+     */
     public fun toggleActiveFootprint() {
         val shouldShow = !uiState.isActiveFootprintVisible
         updateUiState { uiState -> uiState.copy(isActiveFootprintVisible = shouldShow) }
@@ -417,6 +442,9 @@ public class OrientedImageryViewerState public constructor(
         }
     }
 
+    /**
+     * Toggles the visibility of the additional footprints.
+     */
     public fun toggleAdditionalFootprints() {
         val shouldShow = !uiState.isAdditionalFootprintsVisible
         updateUiState { uiState -> uiState.copy(isAdditionalFootprintsVisible = shouldShow) }
@@ -428,6 +456,9 @@ public class OrientedImageryViewerState public constructor(
         }
     }
 
+    /**
+     * Toggles the visibility of the additional camera locations.
+     */
     public fun toggleAdditionalCameraLocations() {
         val shouldShow = !uiState.isAdditionalCameraLocationsVisible
         updateUiState { uiState -> uiState.copy(isAdditionalCameraLocationsVisible = shouldShow) }
@@ -439,6 +470,9 @@ public class OrientedImageryViewerState public constructor(
         }
     }
 
+    /**
+     * Toggles the sequential navigation mode.
+     */
     public fun toggleSequentialNavigation() {
         setSequentialNavigationEnabled(!uiState.isSequentialNavigationEnabled)
     }
@@ -482,8 +516,14 @@ public class OrientedImageryViewerState public constructor(
         }
     }
 
+    /**
+     * Returns `true` if the active footprint is visible.
+     */
     public fun isActiveFootprintVisible(): Boolean = uiState.isActiveFootprintVisible
 
+    /**
+     * Adds a marker at the current location.
+     */
     public fun addMarker() {
         ++markerGeneration
         updateUiState { uiState ->
@@ -590,6 +630,9 @@ public class OrientedImageryViewerState public constructor(
         markerGraphicsInGeoView = emptyList()
     }
 
+    /**
+     * Resets the viewer state to its initial state.
+     */
     public fun resetAll() {
         setActiveOrientedImage(null)
         activeFootprint = null

@@ -36,13 +36,7 @@
     <string name="popup_no_active_image">Select an image before opening its popup.</string>
     <string name="popup_creation_failed">Unable to create the image popup.</string>
 
-    <string name="panoramic_image_permission_required">Cannot load local panoramic image until image read permission is granted: %1$s</string>
-    <string name="panoramic_image_load_failed">Failed to load panoramic image from %1$s</string>
-    <string name="panoramic_image_decode_failed">Failed to decode panoramic image from %1$s</string>
-    <string name="panoramic_image_source_unsupported">Unsupported panoramic image source: %1$s</string>
-    <string name="panoramic_image_http_error">HTTP %1$d while loading panoramic image from %2$s</string>
-    <string name="panoramic_image_open_failed">Failed to open panoramic image from %1$s</string>
-    <string name="panoramic_image_missing_file_path">Missing file path for panoramic image source: %1$s</string>
-    <string name="panoramic_image_shared_storage_access_hint">Failed to open panoramic image from %1$s. Android may block direct access to shared-storage file paths. Use a content:// URI from the Android photo/file picker, or request the appropriate image read permission before loading this file.</string>
+    <string name="panoramic_image_load_failed">Failed to load panoramic image from local file: %1$s</string>
+    <string name="panoramic_image_decode_failed">Failed to decode panoramic image from local file: %1$s</string>
 </resources>
 

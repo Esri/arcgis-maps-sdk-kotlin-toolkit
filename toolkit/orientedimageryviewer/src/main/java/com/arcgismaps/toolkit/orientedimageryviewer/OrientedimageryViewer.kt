@@ -328,13 +328,6 @@ private fun OrientedImageryToolbar(
                 tint = Color.Blue
             )
         }
-//        IconButton(onClick = onAdditionalCameraLocations) {
-//            Icon(
-//                painter = painterResource(R.drawable.additional_cameras_24),
-//                contentDescription = stringResource(R.string.toolbar_additional_camera_locations),
-//                tint = Color.Unspecified
-//            )
-//        }
         IconToggleButton(
             checked = isSequentialNavigationEnabled,
             enabled = supportsSequentialNavigation,
@@ -357,16 +350,8 @@ private fun OrientedImageryToolbar(
             onSelectMarker = onSelectMarker,
             onClearAllMarkers =onClearAllMarkers
         )
-//        IconButton(onClick = onReset) {
-//            Icon(
-//                painter = painterResource(R.drawable.reset_24),
-//                contentDescription = stringResource(R.string.toolbar_reset),
-//                tint = Color.Unspecified
-//            )
-//        }
     }
 }
-
 
 @Preview
 @Composable

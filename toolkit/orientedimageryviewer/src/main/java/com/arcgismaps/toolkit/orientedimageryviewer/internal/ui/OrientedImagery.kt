@@ -92,5 +92,3 @@ private fun PlaceholderMessage(message: String) {
         textAlign = TextAlign.Center
     )
 }
-
-
