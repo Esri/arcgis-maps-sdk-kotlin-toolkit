@@ -22,20 +22,23 @@ import android.app.Application
 import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.arcgismaps.LoadStatus
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.ArcGISScene
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.mapping.layers.OrientedImageryLayer
 import com.arcgismaps.mapping.view.GraphicsOverlay
-import com.arcgismaps.mapping.view.IdentifyLayerResult
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
 import com.arcgismaps.toolkit.geoviewcompose.SceneViewProxy
-import com.arcgismaps.toolkit.orientedimageryviewer.ImageSearchStatus
 import com.arcgismaps.toolkit.orientedimageryviewer.OrientedImageryViewerState
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 class GeoViewModel(application: Application) : AndroidViewModel(application) {
@@ -66,131 +69,138 @@ class GeoViewModel(application: Application) : AndroidViewModel(application) {
     val isLoading: Boolean
         get() = _isLoading.value
 
+    private val _isHandlingTap: MutableState<Boolean> = mutableStateOf(false)
+    val isHandlingTap: Boolean
+        get() = _isHandlingTap.value
+
     private val _statusMessage: MutableState<String?> = mutableStateOf(null)
     val statusMessage: String?
         get() = _statusMessage.value
 
+    private var loadGeoViewJob: Job? = null
+    private var tapJob: Job? = null
+
     init {
-        viewModelScope.launch {
-            try {
-                arcGISMap.load()
-                    .onSuccess {
-                        val orientedImageryLayer = arcGISMap.operationalLayers
-                            .filterIsInstance<OrientedImageryLayer>()
-                            .lastOrNull()
-
-                        if (orientedImageryLayer == null) {
-                            _statusMessage.value = "No OrientedImageryLayers found in the Map."
-                            return@onSuccess
-                        }
-
-                        orientedImageryLayer.load()
-                            .onSuccess {
-                                _statusMessage.value = null
-                                orientedImageryLayer.fullExtent?.let { extent ->
-                                    mapViewProxy.setViewpoint(Viewpoint(extent))
-                                }
-                            }
-                            .onFailure { error ->
-                                _statusMessage.value = "Failed to load the oriented imagery layer."
-                                Log.e("GeoViewModel", "Load oriented imagery layer failed: ${error.message}",error)
-                            }
-                    }
-                    .onFailure { error ->
-                        _statusMessage.value = "Failed to load the map."
-                        Log.e("GeoViewModel", "Load map failed: ${error.message}", error)
-                    }
-            } finally {
-                _isLoading.value = false
-            }
-        }
+        loadGeoView(geoViewType)
     }
 
-    fun handleSingleTap(event: SingleTapConfirmedEvent) {
-        viewModelScope.launch {
-            _isLoading.value = true
-            try {
-                when (_geoViewType.value) {
-                    GeoViewType.MapViewType -> {
-                        mapViewProxy.identifyLayers(event.screenCoordinate, 20.dp, false)
-                            .onSuccess { identifyResults ->
-                                createViewerState(identifyResults)
-                            }.onFailure { error ->
-                                _statusMessage.value = "Failed to identify layers in the map."
-                                Log.e("GeoViewModel", "Identify layers on map failed: ${error.message}")
-                            }
-                    }
-
-                    GeoViewType.SceneViewType -> {
-                        sceneviewProxy.identifyLayers(event.screenCoordinate, 20.dp, false)
-                            .onSuccess { identifyResults ->
-                                createViewerState(identifyResults)
-                            }.onFailure { error ->
-                                _statusMessage.value = "Failed to identify layers in the scene."
-                                Log.e("GeoViewModel", "Identify layers on scene failed: ${error.message}")
-                            }
-                    }
-                }
-                val lastMapLocation = if (_orientedImageryViewerState.value != null) {
-                    when (_geoViewType.value) {
-                        GeoViewType.MapViewType -> event.mapPoint
-                        GeoViewType.SceneViewType -> sceneviewProxy.screenToLocation(event.screenCoordinate).getOrNull()
-                    }
-                } else {
-                    null
-                }
-                lastMapLocation?.let { point ->
-                    _orientedImageryViewerState.value!!.searchImages(point)
-                        .onSuccess { outcome ->
-                            _statusMessage.value = null
-                            if (outcome is ImageSearchStatus.NoImagesFound) {
-                                _statusMessage.value = "No oriented images were found at the selected location."
-                                Log.i(
-                                    "GeoViewModel",
-                                    "No oriented images found at location: $point"
-                                )
-                            }
-                        }
-                        .onFailure { error ->
-                            _statusMessage.value = "Search for oriented images failed."
-                            Log.e("GeoViewModel", "Search images failed: ${error.message}", error)
-                        }
-                }
-            } finally {
-                _isLoading.value = false
-            }
+    private fun loadGeoView(geoViewType: GeoViewType) {
+        loadGeoViewJob?.cancel()
+        val geoModel = when (geoViewType) {
+            GeoViewType.MapViewType -> arcGISMap
+            GeoViewType.SceneViewType -> arcGISScene
         }
-    }
+        val graphicsOverlay = when (geoViewType) {
+            GeoViewType.MapViewType -> mapGraphicsOverlay
+            GeoViewType.SceneViewType -> sceneGraphicsOverlay
+        }
+        val modelName = when (geoViewType) {
+            GeoViewType.MapViewType -> "map"
+            GeoViewType.SceneViewType -> "scene"
+        }
 
-    private fun createViewerState(identifyResults: List<IdentifyLayerResult>) {
-        if (identifyResults.isNotEmpty()) {
-            val identifyResult = identifyResults.firstOrNull { it.layerContent is OrientedImageryLayer }
-            if (identifyResult != null) {
-                val orientedImageryLayer = identifyResult.layerContent as OrientedImageryLayer
-                _statusMessage.value = null
+        _isLoading.value = true
+        _statusMessage.value = null
+        loadGeoViewJob = viewModelScope.launch {
+            var failureMessage = "Failed to load the $modelName."
+            try {
+                val needsLoading = geoModel.loadStatus.value != LoadStatus.Loaded
+                if (needsLoading) {
+                    geoModel.load().getOrThrow()
+                }
+                currentCoroutineContext().ensureActive()
+
+                val orientedImageryLayer = geoModel.operationalLayers
+                    .filterIsInstance<OrientedImageryLayer>()
+                    .firstOrNull()
+                if (orientedImageryLayer == null) {
+                    _statusMessage.value = "No OrientedImageryLayers found in the $modelName."
+                    return@launch
+                }
+
+                failureMessage = "Failed to load the oriented imagery layer."
+                if (orientedImageryLayer.loadStatus.value != LoadStatus.Loaded) {
+                    orientedImageryLayer.load().getOrThrow()
+                }
+                currentCoroutineContext().ensureActive()
+
+                if (needsLoading) {
+                    orientedImageryLayer.fullExtent?.let { extent ->
+                        when (geoViewType) {
+                            GeoViewType.MapViewType -> mapViewProxy.setViewpoint(Viewpoint(extent))
+                            GeoViewType.SceneViewType -> sceneviewProxy.setViewpoint(Viewpoint(extent))
+                        }
+                    }
+                }
+                currentCoroutineContext().ensureActive()
                 _orientedImageryViewerState.value = OrientedImageryViewerState(
-                    orientedImageryLayer, currentGraphicsOverlay(), viewModelScope
+                    orientedImageryLayer,
+                    graphicsOverlay,
+                    viewModelScope
                 )
-            } else {
-                _statusMessage.value =
-                    "No oriented imagery layer was found at the selected location."
+            } catch (error: CancellationException) {
+                throw error
+            } catch (error: Exception) {
+                currentCoroutineContext().ensureActive()
+                _statusMessage.value = failureMessage
+                Log.e("GeoViewModel", "$failureMessage ${error.message}", error)
+            } finally {
+                if (currentCoroutineContext().isActive) {
+                    _isLoading.value = false
+                }
             }
-        } else {
-            _statusMessage.value = "No identifiable layers were found at the selected location."
         }
     }
 
-    private fun currentGraphicsOverlay(): GraphicsOverlay = when (_geoViewType.value) {
-        GeoViewType.MapViewType -> mapGraphicsOverlay
-        GeoViewType.SceneViewType -> sceneGraphicsOverlay
+    fun onSingleTapOnGeoView(event: SingleTapConfirmedEvent) {
+        if (isLoading || isHandlingTap) return
+        val viewerState = orientedImageryViewerState ?: return
+        val geoViewType = geoViewType
+        val isMarkingLocation = viewerState.isMarkingLocation
+        _statusMessage.value = null
+        _isHandlingTap.value = true
+        tapJob = viewModelScope.launch {
+            val failureMessage = if (isMarkingLocation) {
+                "Failed to mark the selected location."
+            } else {
+                "Search for oriented images failed."
+            }
+            try {
+                val mapPoint = when (geoViewType) {
+                    GeoViewType.MapViewType -> event.mapPoint
+                    GeoViewType.SceneViewType -> sceneviewProxy
+                        .screenToLocation(event.screenCoordinate).getOrThrow()
+                } ?: throw IllegalStateException("No map location was found for the selected point.")
+                currentCoroutineContext().ensureActive()
+                viewerState.onSingleTapOnGeoView(mapPoint).getOrThrow()
+                currentCoroutineContext().ensureActive()
+                if (!isMarkingLocation && !viewerState.hasActiveImage) {
+                    _statusMessage.value = "No oriented images were found at the selected location."
+                }
+            } catch (error: CancellationException) {
+                throw error
+            } catch (error: Exception) {
+                currentCoroutineContext().ensureActive()
+                _statusMessage.value = error.message?.let { "$failureMessage $it" } ?: failureMessage
+                Log.e("GeoViewModel", failureMessage, error)
+            } finally {
+                if (currentCoroutineContext().isActive) {
+                    _isHandlingTap.value = false
+                }
+            }
+        }
     }
 
     fun toggleGeoViewType() {
+        tapJob?.cancel()
+        _isHandlingTap.value = false
         resetGraphicsOverlay()
+        _orientedImageryViewerState.value = null
         _geoViewType.value = when (_geoViewType.value) {
             GeoViewType.MapViewType -> GeoViewType.SceneViewType
             GeoViewType.SceneViewType -> GeoViewType.MapViewType
         }
+        loadGeoView(geoViewType)
     }
 
     private fun resetGraphicsOverlay() {

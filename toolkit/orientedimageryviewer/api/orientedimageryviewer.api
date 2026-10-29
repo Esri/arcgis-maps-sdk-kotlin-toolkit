@@ -1,24 +1,67 @@
+public abstract interface class com/arcgismaps/toolkit/orientedimageryviewer/ImageNavigationStatus {
+}
 
-public final class com/arcgismaps/toolkit/orientedimageryviewer/OrientedimageryViewerKt {
-	public static final fun OrientedImageryViewer (Lcom/arcgismaps/toolkit/orientedimageryviewer/OrientedImageryViewerState;Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function0;ZLandroidx/compose/runtime/Composer;II)V
+public final class com/arcgismaps/toolkit/orientedimageryviewer/ImageNavigationStatus$BoundaryReached : com/arcgismaps/toolkit/orientedimageryviewer/ImageNavigationStatus {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/arcgismaps/toolkit/orientedimageryviewer/ImageNavigationStatus$BoundaryReached;
+}
+
+public final class com/arcgismaps/toolkit/orientedimageryviewer/ImageNavigationStatus$Moved : com/arcgismaps/toolkit/orientedimageryviewer/ImageNavigationStatus {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/arcgismaps/toolkit/orientedimageryviewer/ImageNavigationStatus$Moved;
+}
+
+public final class com/arcgismaps/toolkit/orientedimageryviewer/ImageNavigationStatus$NoActiveImage : com/arcgismaps/toolkit/orientedimageryviewer/ImageNavigationStatus {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/arcgismaps/toolkit/orientedimageryviewer/ImageNavigationStatus$NoActiveImage;
+}
+
+public abstract interface class com/arcgismaps/toolkit/orientedimageryviewer/ImageSearchStatus {
+}
+
+public final class com/arcgismaps/toolkit/orientedimageryviewer/ImageSearchStatus$ImagesFound : com/arcgismaps/toolkit/orientedimageryviewer/ImageSearchStatus {
+	public static final field $stable I
+	public fun <init> (I)V
+	public final fun component1 ()I
+	public final fun copy (I)Lcom/arcgismaps/toolkit/orientedimageryviewer/ImageSearchStatus$ImagesFound;
+	public static synthetic fun copy$default (Lcom/arcgismaps/toolkit/orientedimageryviewer/ImageSearchStatus$ImagesFound;IILjava/lang/Object;)Lcom/arcgismaps/toolkit/orientedimageryviewer/ImageSearchStatus$ImagesFound;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCount ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/arcgismaps/toolkit/orientedimageryviewer/ImageSearchStatus$NoImagesFound : com/arcgismaps/toolkit/orientedimageryviewer/ImageSearchStatus {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/arcgismaps/toolkit/orientedimageryviewer/ImageSearchStatus$NoImagesFound;
 }
 
 public final class com/arcgismaps/toolkit/orientedimageryviewer/OrientedImageryViewerState {
 	public static final field $stable I
 	public fun <init> (Lcom/arcgismaps/mapping/layers/OrientedImageryLayer;Lcom/arcgismaps/mapping/view/GraphicsOverlay;Lkotlinx/coroutines/CoroutineScope;)V
-	public final fun fetchImage (Lcom/arcgismaps/data/Feature;)V
+	public final fun addMarker ()V
+	public final fun clearAllMarkers ()V
+	public final fun createImagePopup-d1pmJ48 ()Ljava/lang/Object;
+	public final fun fetchImage-gIAlu-s (Lcom/arcgismaps/data/Feature;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun getHasActiveImage ()Z
 	public final fun getSupportsSequentialNavigation ()Z
 	public final fun getTitle ()Ljava/lang/String;
 	public final fun isActiveFootprintVisible ()Z
-	public final fun isSequentialNavigationEnabled ()Z
-	public final fun navigateNextImage ()V
-	public final fun navigatePreviousImage ()V
+	public final fun isMarkingLocation ()Z
+	public final fun navigateNextImage-IoAF18A (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun navigatePreviousImage-IoAF18A (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun onSingleTapOnGeoView-gIAlu-s (Lcom/arcgismaps/geometry/Point;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun resetAll ()V
-	public final fun searchImages (Lcom/arcgismaps/geometry/Point;)V
+	public final fun searchImages-gIAlu-s (Lcom/arcgismaps/geometry/Point;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun selectMarker ()V
 	public final fun setSequentialNavigationEnabled (Z)V
 	public final fun toggleActiveFootprint ()V
 	public final fun toggleAdditionalCameraLocations ()V
 	public final fun toggleAdditionalFootprints ()V
 	public final fun toggleSequentialNavigation ()V
 }
+
+public final class com/arcgismaps/toolkit/orientedimageryviewer/OrientedimageryViewerKt {
+	public static final fun OrientedImageryViewer (Lcom/arcgismaps/toolkit/orientedimageryviewer/OrientedImageryViewerState;Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function0;ZLandroidx/compose/runtime/Composer;II)V
+}
+

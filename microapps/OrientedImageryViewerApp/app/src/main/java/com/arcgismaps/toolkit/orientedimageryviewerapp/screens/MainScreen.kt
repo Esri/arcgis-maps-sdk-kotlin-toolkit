@@ -137,9 +137,10 @@ fun MainScreen() {
                         modifier = Modifier
                             .consumeWindowInsets(paddingValues)
                             .fillMaxSize(),
-                        onSingleTapConfirmed = viewModel::handleSingleTap
+                        onSingleTapConfirmed = viewModel::onSingleTapOnGeoView
                     )
                 }
+
                 GeoViewType.SceneViewType -> {
                     SceneView(
                         arcGISScene = viewModel.arcGISScene,
@@ -148,7 +149,7 @@ fun MainScreen() {
                         modifier = Modifier
                             .consumeWindowInsets(paddingValues)
                             .fillMaxSize(),
-                        onSingleTapConfirmed = viewModel::handleSingleTap,
+                        onSingleTapConfirmed = viewModel::onSingleTapOnGeoView,
                         onSpatialReferenceChanged = {
                             Log.i("MainScreen", "SceneView spatial reference changed to: ${it?.wkid}")
                         }
@@ -157,7 +158,7 @@ fun MainScreen() {
             }
         }
 
-        if (viewModel.isLoading) {
+        if (viewModel.isLoading || viewModel.isHandlingTap) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
