@@ -27,6 +27,12 @@ import org.gradle.kotlin.dsl.getByType
 fun DependencyHandler.implementation(dependencyNotation: Any): Dependency? =
     add("implementation", dependencyNotation)
 
+fun DependencyHandler.androidTestImplementation(dependencyNotation: Any): Dependency? =
+    add("androidTestImplementation", dependencyNotation)
+
+fun DependencyHandler.api(dependencyNotation: Any): Dependency? =
+    add("api", dependencyNotation)
+
 fun DependencyHandler.debugImplementation(dependencyNotation: Any): Dependency? =
     add("debugImplementation", dependencyNotation)
 

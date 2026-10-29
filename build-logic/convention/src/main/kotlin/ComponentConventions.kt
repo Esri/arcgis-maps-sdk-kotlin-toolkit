@@ -18,6 +18,9 @@
 
 import com.android.build.api.dsl.LibraryExtension
 import com.arcgismaps.kotlin.toolkit.build_logic.convention.VaultTokenProvider
+import com.arcgismaps.kotlin.toolkit.build_logic.convention.androidTestImplementation
+import com.arcgismaps.kotlin.toolkit.build_logic.convention.api
+import com.arcgismaps.kotlin.toolkit.build_logic.convention.arcgis
 import com.arcgismaps.kotlin.toolkit.build_logic.convention.libs
 import kotlinx.validation.ApiValidationExtension
 import kotlinx.validation.KotlinApiBuildTask
@@ -28,6 +31,7 @@ import org.gradle.api.Project
 import org.gradle.api.tasks.Copy
 import org.gradle.internal.Actions.with
 import org.gradle.kotlin.dsl.configure
+import org.gradle.kotlin.dsl.dependencies
 import org.gradle.kotlin.dsl.extra
 import org.gradle.kotlin.dsl.of
 import org.gradle.kotlin.dsl.withType
@@ -107,6 +111,10 @@ class ComponentConventions : Plugin<Project> {
                         }
                         project.tasks.maybeCreate("apiDump").dependsOn(apiDump)
                         project.tasks.named("check").configure(Action { dependsOn(apiCheck) })
+
+                        val packagePrefix = "com.arcgismaps.toolkit.${project.name.replace("-", ".")}"
+                        println("ignoring $packagePrefix.BuildConfig")
+                        apiValidation.ignoredClasses.add("$packagePrefix.BuildConfig")
                     }
                 }
 
@@ -186,7 +194,13 @@ class ComponentConventions : Plugin<Project> {
                 defaultConfig.testInstrumentationRunnerArguments["openbaoToken"] =
                     vaultToken
             }
+
+            dependencies {
+                api(arcgis.findLibrary("mapsSdk").get())
+                androidTestImplementation(arcgis.findLibrary("mapsSdkTestFixtures").get())
+            }
         }
+
     }
 }
 

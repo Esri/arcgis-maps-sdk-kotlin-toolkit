@@ -35,6 +35,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arcgismaps.ApiKey
 import com.arcgismaps.ArcGISEnvironment
+import com.arcgismaps.sharedtestutilities.OpenBaoTestSecretsStore
 import com.arcgismaps.toolkit.artabletopapp.screens.MainScreen
 import com.esri.microappslib.theme.MicroAppTheme
 import com.google.ar.core.ArCoreApk
@@ -51,7 +52,14 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        ArcGISEnvironment.apiKey = ApiKey.create(BuildConfig.API_KEY)
+        ArcGISEnvironment.apiKey = ApiKey.create(
+            OpenBaoTestSecretsStore.getSecretValue(
+                "tests/api-key",
+                "production",
+                "apikey"
+            )
+        )
+
         setContent {
             MicroAppTheme {
                 if (isGooglePlayServicesArInstalled.collectAsStateWithLifecycle().value) {

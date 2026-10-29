@@ -128,6 +128,7 @@ class MicroappConventionPlugin : Plugin<Project> {
                 "buildWithSourceCodeImplementation"(project(":geoview-compose"))
                 "buildWithMavenArtifactsImplementation"(arcgis.findLibrary("geoview-compose").get())
                 implementation(arcgis.findLibrary("mapsSdk").get())
+                implementation(arcgis.findLibrary("mapsSdkTestFixtures").get())
 
                 val composeBom = libs.findLibrary("androidx-compose-bom").get()
                 implementation(platform(composeBom))

@@ -37,13 +37,20 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import com.arcgismaps.ApiKey
 import com.arcgismaps.ArcGISEnvironment
+import com.arcgismaps.sharedtestutilities.OpenBaoTestSecretsStore
 import com.arcgismaps.toolkit.offlinemapareasapp.screens.MainScreen
 import com.esri.microappslib.theme.MicroAppTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        ArcGISEnvironment.apiKey = ApiKey.create(BuildConfig.API_KEY)
+        ArcGISEnvironment.apiKey = ApiKey.create(
+            OpenBaoTestSecretsStore.getSecretValue(
+                "tests/api-key",
+                "production",
+                "apikey"
+            )
+        )
         setContent {
             MicroAppTheme {
                 OfflineMapAreasApp()
