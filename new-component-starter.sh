@@ -52,10 +52,10 @@
 	    exit 1
 	fi
 	
-	if [ -z "${name}" ]; then
-	    echo "error: the name of the new toolkit component must be specified at the command line"
-	    _display_help_dialog 1
-	fi
+if ! (LC_ALL=C; [[ "$name" =~ ^[A-Za-z][A-Za-z0-9]*$ ]]); then
+    echo "error: the name must start with an ASCII letter and contain only ASCII letters and digits (no spaces)." >&2
+    exit 1
+fi
 
 	componentName="${name,,}"
 	composableFunctionName="${name^}"
@@ -166,14 +166,17 @@ EOM
     fi
 
     # prompt for component name
-    echo "Please enter the name of the new toolkit component without spaces:"
-    read name
+    echo "Please enter the name of the new toolkit component (start with an ASCII letter; letters and digits only):"
+    if ! IFS= read -r name; then
+        echo "error: could not read the component name." >&2
+        exit 1
+    fi
+    _check_options_and_set_variables
 
     # prompt for microapp creation
     echo "Do you want to create a microapp? (yes/no)"
     read createMicroapp
 
-    _check_options_and_set_variables
     echo copying and converting files, estimated time 1 minute.
     cd "${toolkitDir}"
     rm -rf "./toolkit/template/build" > /dev/null 2>&1
@@ -181,7 +184,7 @@ EOM
     convertTemplate
     # Call the create-microapp-starter.sh script if the user answered "yes"
     if [ "$createMicroapp" = "yes" ]; then
-        ./new-microapp-starter.sh
+        ./new-microapp-starter.sh || exit $?
     fi
     addToSettings
     if [ ! -z $publish ]; then

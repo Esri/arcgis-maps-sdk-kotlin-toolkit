@@ -81,5 +81,6 @@ dependencies {
     testImplementation(libs.bundles.unitTest)
     androidTestImplementation(libs.bundles.composeTest)
     androidTestImplementation(project(":geoview-compose"))
+    androidTestImplementation(project(":microapps-lib"))
     debugImplementation(libs.bundles.debug)
 }

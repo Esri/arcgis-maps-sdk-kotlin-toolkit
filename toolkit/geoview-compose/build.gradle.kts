@@ -123,6 +123,7 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     testImplementation(libs.bundles.unitTest)
     androidTestImplementation(libs.bundles.composeTest)
+    androidTestImplementation(project(":microapps-lib"))
     androidTestImplementation(libs.androidx.uiautomator)
     debugImplementation(libs.bundles.debug)
 

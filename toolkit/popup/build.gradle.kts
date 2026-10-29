@@ -118,4 +118,5 @@ dependencies {
     androidTestImplementation(libs.androidx.test.runner)
     androidTestImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(project(":geoview-compose"))
+    androidTestImplementation(project(":microapps-lib"))
 }
