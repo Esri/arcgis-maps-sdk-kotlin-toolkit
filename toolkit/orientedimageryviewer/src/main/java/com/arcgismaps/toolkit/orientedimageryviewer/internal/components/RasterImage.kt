@@ -53,6 +53,14 @@ import kotlinx.coroutines.awaitCancellation
 /**
  * RasterImage is a small, secondary [MapView] which displays georeferenced raster image.
  *
+ * [MapView] is used intentionally because image formats such as TIFF and other less common formats
+ * are not supported natively by commonly-used Compose image components such as AsyncImage. Rendering
+ * the image as a RasterLayer allows the Maps SDK to handle rendering and georeferencing consistently.
+ *
+ * Note: Converting TIFFs to Bitmaps with a third-party decoder would bypass raster-specific
+ * capabilities such as overviews/pyramids and typically only exposes the first page of a
+ * multipage TIFF. Using RasterLayer preserves the full raster rendering and georeferencing capabilities.
+ *
  * @param viewerState the [OrientedImageryViewerState] which contains the active oriented image and its associated data
  * @param modifier the modifier to apply
  */

@@ -96,7 +96,7 @@ internal class FootprintManager(
         if (additionalFootprints.isEmpty()) {
             additionalFootprints = additionalImages().map { image ->
                 createFootprint(image).apply {
-                    fillColor = ImageDefaults.ADDITIONAL_FOOTPRINT_COLOR
+                    fillColor = ImageDefaults.additionalFootprintColor
                     outlineColor = Color.transparent
                 }
             }

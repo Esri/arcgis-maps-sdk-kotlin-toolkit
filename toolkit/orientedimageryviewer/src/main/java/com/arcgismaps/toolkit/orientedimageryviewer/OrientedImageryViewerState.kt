@@ -80,6 +80,10 @@ public sealed interface ImageNavigationStatus {
  * and processed one at a time. A search, fetch, or reset invalidates older pending operations,
  * which throw [CancellationException] rather than changing the replacement session.
  * Image sessions, marker operations, and footprint resources have independent internal owners.
+ *
+ * @param orientedImageryLayer The oriented imagery layer associated with this viewer state.
+ * @param graphicsOverlay The graphics overlay used to display camera locations and footprints.
+ * @param coroutineScope The coroutine scope for managing asynchronous operations.
  */
 @Stable
 public class OrientedImageryViewerState public constructor(
