@@ -100,6 +100,18 @@ android {
     }
 }
 
+apiValidation {
+    // Compose generates public singletons for internal composable lambdas.
+    // Remove when https://github.com/Kotlin/binary-compatibility-validator/issues/74 is resolved.
+    ignoredClasses.addAll(
+        listOf(
+            "com.arcgismaps.toolkit.orientedimageryviewer.ComposableSingletons\$OrientedimageryViewerKt",
+            "com.arcgismaps.toolkit.orientedimageryviewer.internal.ui.ComposableSingletons\$MarkerSelectionKt",
+            "com.arcgismaps.toolkit.orientedimageryviewer.internal.ui.ComposableSingletons\$MarkerToolsButtonKt"
+        )
+    )
+}
+
 dependencies {
     api(arcgis.mapsSdk)
     implementation(project(":geoview-compose"))
