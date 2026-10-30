@@ -113,7 +113,6 @@ class ComponentConventions : Plugin<Project> {
                         project.tasks.named("check").configure(Action { dependsOn(apiCheck) })
 
                         val packagePrefix = "com.arcgismaps.toolkit.${project.name.replace("-", ".")}"
-                        println("ignoring $packagePrefix.BuildConfig")
                         apiValidation.ignoredClasses.add("$packagePrefix.BuildConfig")
                     }
                 }
