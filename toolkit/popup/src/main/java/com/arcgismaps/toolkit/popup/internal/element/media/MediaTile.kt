@@ -72,7 +72,8 @@ internal fun MediaTile(
                     ViewableFile(
                         name = state.title,
                         path = state.imageUri.value,
-                        type = ViewableFileType.Image
+                        type = ViewableFileType.Image,
+                        caption = state.caption
                     )
                 )
             }

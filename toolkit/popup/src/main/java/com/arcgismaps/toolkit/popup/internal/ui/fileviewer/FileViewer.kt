@@ -114,17 +114,18 @@ private fun FileViewerContent(
         contentAlignment = Alignment.Center
     ) {
         when (fileState.type) {
-            is ViewableFileType.Image ->
+            is ViewableFileType.Image ->{
+                val contentDesc = if (fileState.caption == null) fileState.name else fileState.name + "\n" + fileState.caption
                 AsyncImage(
                     modifier = Modifier
                         .fillMaxSize()
                         .semantics{
-                            contentDescription = fileState.name
+                            contentDescription = contentDesc
                         },
                     model = fileState.path,
                     contentDescription = null
                 )
-
+            }
             is ViewableFileType.Video, ViewableFileType.Audio -> VideoViewer(path = fileState.path, name = fileState.name)
             else -> {
                 throw UnsupportedOperationException("Cannot view this file type")
@@ -229,7 +230,7 @@ private fun ViewerActions(
 }
 
 @Composable
-internal fun VideoViewer(path: String, name: String) {
+internal fun VideoViewer(path: String, name: String, caption : String? = null) {
     val context = LocalContext.current
     val exoPlayer = remember {
         ExoPlayer.Builder(context).build().apply {
@@ -240,12 +241,12 @@ internal fun VideoViewer(path: String, name: String) {
             prepare()
         }
     }
-
+    val contentDesc = if (caption == null) name else name + "\n" + caption
     AndroidView(
         factory = {
             PlayerView(context).apply {
                 player = exoPlayer
-                contentDescription = name
+                contentDescription = contentDesc
             }
         }
     )
