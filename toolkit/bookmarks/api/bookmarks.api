@@ -1,0 +1,4 @@
+public final class com/arcgismaps/toolkit/bookmarks/BookmarksKt {
+	public static final fun BookmarksListView-cf5BqRc (Ljava/util/List;Lkotlin/jvm/functions/Function1;JLandroidx/compose/ui/text/TextStyle;Landroidx/compose/runtime/Composer;II)V
+}
+
