@@ -30,6 +30,7 @@ import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallenge
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallengeHandler
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallengeResponse
 import com.arcgismaps.httpcore.authentication.TokenCredential
+import com.arcgismaps.sharedtestutilities.OpenBaoTestSecretsStore
 import com.arcgismaps.toolkit.popupapp.screens.mapscreen.MainScreen
 import com.arcgismaps.toolkit.popupapp.ui.theme.PopupAppTheme
 
@@ -39,8 +40,11 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         ArcGISEnvironment.authenticationManager.arcGISAuthenticationChallengeHandler =
             TestArcGISAuthenticationChallengeHandler(
-                BuildConfig.webMapUser,
-                BuildConfig.webMapPassword
+                OpenBaoTestSecretsStore.getCredential(
+                    "tests/token",
+                    "c_api_publisher"
+                ).username,
+                OpenBaoTestSecretsStore.getCredential("tests/token", "c_api_publisher").password
             )
         setContent {
             PopupAppTheme {

@@ -17,39 +17,16 @@
  */
 
 plugins {
-    alias(libs.plugins.binary.compatibility.validator)
-    id("com.android.library")
-    id("org.jetbrains.kotlin.plugin.compose")
-    alias(libs.plugins.kotlin.convention.plugin)
+    alias(libs.plugins.component.convention.plugin)
 }
 
 /**
  * Include this if any internal-only tests are required
  */
 val toolkitTests = project.findProperty("toolkitTestDir") as String
-kotlin {
-    jvmToolchain(17)
-}
 
 android {
     namespace = "com.arcgismaps.toolkit.template"
-    compileSdk = libs.versions.compileSdk.get().toInt()
-
-    defaultConfig {
-        minSdk = libs.versions.minSdk.get().toInt()
-
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        consumerProguardFiles("consumer-rules.pro")
-    }
-
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-        }
-    }
-    buildFeatures {
-        compose = true
-    }
 
     sourceSets {
         var file = file("$toolkitTests/${project.name}/androidTest")
@@ -75,27 +52,6 @@ android {
                 }
             }
         }
-    }
-
-    // If this were not an android project, we would just write `explicitApi()` in the Kotlin scope.
-    // but as an android project could write `freeCompilerArgs = listOf("-Xexplicit-api=strict")`
-    // in the kotlinOptions above, but that would enforce api rules on the test code, which we don't want.
-    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-        if ("Test" !in name) {
-            compilerOptions {
-                freeCompilerArgs.add("-Xexplicit-api=strict")
-            }
-        }
-    }
-
-    /**
-     * Configures the test report for connected (instrumented) tests to be copied to a central
-     * folder in the project's root directory.
-     */
-    testOptions {
-        targetSdk = libs.versions.compileSdk.get().toInt()
-        val connectedTestReportsPath: String = rootProject.extra["connectedTestReportsPath"] as String
-        reportDir = "$connectedTestReportsPath/${project.name}"
     }
 }
 

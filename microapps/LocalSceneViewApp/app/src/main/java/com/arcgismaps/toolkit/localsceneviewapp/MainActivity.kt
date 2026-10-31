@@ -32,6 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.arcgismaps.ApiKey
 import com.arcgismaps.ArcGISEnvironment
+import com.arcgismaps.sharedtestutilities.OpenBaoTestSecretsStore
 import com.arcgismaps.toolkit.localsceneviewapp.screens.MainScreen
 import com.esri.microappslib.theme.MicroAppTheme
 
@@ -39,8 +40,13 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        ArcGISEnvironment.apiKey = ApiKey.create(BuildConfig.API_KEY)
-
+        ArcGISEnvironment.apiKey = ApiKey.create(
+            OpenBaoTestSecretsStore.getSecretValue(
+                "tests/api-key",
+                "production",
+                "apikey"
+            )
+        )
         setContent {
             MicroAppTheme {
                 LocalSceneViewApp()

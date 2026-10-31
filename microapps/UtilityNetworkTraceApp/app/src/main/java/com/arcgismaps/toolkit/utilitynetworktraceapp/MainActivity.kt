@@ -51,6 +51,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.httpcore.authentication.TokenCredential
+import com.arcgismaps.sharedtestutilities.OpenBaoTestSecretsStore
 import com.arcgismaps.toolkit.utilitynetworktraceapp.screens.MainScreen
 import com.arcgismaps.toolkit.utilitynetworktraceapp.screens.TraceViewModel
 import com.esri.microappslib.theme.MicroAppTheme
@@ -78,10 +79,15 @@ fun UtilityNetworkTraceApp(traceViewModel: TraceViewModel) {
             val tokenCred =
                 TokenCredential.create(
                     "https://sampleserver7.arcgisonline.com/portal/sharing/rest",
-                    username = BuildConfig.traceToolUser,
-                    password = BuildConfig.traceToolPassword
+                    username = OpenBaoTestSecretsStore.getCredential(
+                        "tests/token",
+                        "editor01"
+                    ).username,
+                    password = OpenBaoTestSecretsStore.getCredential(
+                        "tests/token",
+                        "editor01"
+                    ).password
                 ).getOrThrow()
-
             ArcGISEnvironment.authenticationManager.arcGISCredentialStore.add(tokenCred)
             initialized = true
         } catch (e: Exception) {

@@ -25,6 +25,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import com.arcgismaps.ApiKey
 import com.arcgismaps.ArcGISEnvironment
+import com.arcgismaps.sharedtestutilities.OpenBaoTestSecretsStore
 import com.arcgismaps.toolkit.sceneviewanalysisoverlayapp.screens.MainScreen
 import com.esri.microappslib.theme.MicroAppTheme
 
@@ -32,7 +33,13 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         ArcGISEnvironment.apiKey =
-            ApiKey.create(BuildConfig.API_KEY)
+            ApiKey.create(
+                OpenBaoTestSecretsStore.getSecretValue(
+                    "tests/api-key",
+                    "production",
+                    "apikey"
+                )
+            )
         setContent {
             MicroAppTheme {
                 SceneViewAnalysisOverlayApp()
