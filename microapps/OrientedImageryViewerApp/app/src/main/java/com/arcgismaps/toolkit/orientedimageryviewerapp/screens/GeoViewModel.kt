@@ -33,6 +33,7 @@ import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
 import com.arcgismaps.toolkit.geoviewcompose.SceneViewProxy
+import com.arcgismaps.toolkit.orientedimageryviewer.GeoViewInteractionStatus
 import com.arcgismaps.toolkit.orientedimageryviewer.OrientedImageryViewerState
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
@@ -156,25 +157,24 @@ class GeoViewModel(application: Application) : AndroidViewModel(application) {
         if (isLoading || isHandlingTap) return
         val viewerState = orientedImageryViewerState ?: return
         val geoViewType = geoViewType
-        val isMarkingLocation = viewerState.isMarkingLocation
+        val interactionStatus = viewerState.geoViewInteractionStatus
+        if (interactionStatus == GeoViewInteractionStatus.None) return
         _statusMessage.value = null
         _isHandlingTap.value = true
         tapJob = viewModelScope.launch {
-            val failureMessage = if (isMarkingLocation) {
-                "Failed to mark the selected location."
-            } else {
-                "Search for oriented images failed."
+            val failureMessage = when (interactionStatus) {
+                GeoViewInteractionStatus.AddMarkers -> "Failed to mark the selected location."
+                GeoViewInteractionStatus.DisplayImage -> "Failed to display the selected image."
+                else -> "Search for oriented images failed."
             }
             try {
-                val mapPoint = when (geoViewType) {
-                    GeoViewType.MapViewType -> event.mapPoint
+                val geoViewProxy = when (geoViewType) {
+                    GeoViewType.MapViewType -> mapViewProxy
                     GeoViewType.SceneViewType -> sceneviewProxy
-                        .screenToLocation(event.screenCoordinate).getOrThrow()
-                } ?: throw IllegalStateException("No map location was found for the selected point.")
+                }
+                viewerState.onSingleTapOnGeoView(event, geoViewProxy).getOrThrow()
                 currentCoroutineContext().ensureActive()
-                viewerState.onSingleTapOnGeoView(mapPoint).getOrThrow()
-                currentCoroutineContext().ensureActive()
-                if (!isMarkingLocation && !viewerState.hasActiveImage) {
+                if (interactionStatus == GeoViewInteractionStatus.FindImages && !viewerState.hasActiveImage) {
                     _statusMessage.value = "No oriented images were found at the selected location."
                 }
             } catch (error: CancellationException) {

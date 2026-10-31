@@ -20,6 +20,7 @@ import androidx.compose.runtime.Immutable
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.layers.orientedimagery.OrientedImageType
+import com.arcgismaps.toolkit.orientedimageryviewer.GeoViewInteractionStatus
 import com.arcgismaps.toolkit.orientedimageryviewer.OrientedImageryViewerState
 
 /**
@@ -29,13 +30,20 @@ import com.arcgismaps.toolkit.orientedimageryviewer.OrientedImageryViewerState
 internal data class OrientedImageryViewerUiState(
     val activeImageInfo: OrientedImageInfo? = null,
     val activeImageRevision: Long = 0,
+    val noImagesFoundRevision: Long? = null,
     val inputLocationData: PointData? = null,
     val isSequentialNavigationEnabled: Boolean = false,
+    val isFindImagesSelected: Boolean = true,
+    val isDisplayImageSelected: Boolean = false,
+    val imageInteractionStatus: GeoViewInteractionStatus = GeoViewInteractionStatus.FindImages,
     val isMarkingLocation: Boolean = false,
     val isActiveFootprintVisible: Boolean = false,
     val isAdditionalFootprintsVisible: Boolean = false,
     val isAdditionalCameraLocationsVisible: Boolean = false
-)
+) {
+    val geoViewInteractionStatus: GeoViewInteractionStatus
+        get() = if (isMarkingLocation) GeoViewInteractionStatus.AddMarkers else imageInteractionStatus
+}
 
 @Immutable
 internal data class OrientedImageInfo(

@@ -31,8 +31,10 @@ import com.arcgismaps.mapping.layers.orientedimagery.OrientedImageType
 import com.arcgismaps.mapping.symbology.SimpleMarkerSymbol
 import com.arcgismaps.mapping.view.DoubleXY
 import com.arcgismaps.mapping.view.GraphicsOverlay
+import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 import com.arcgismaps.raster.Raster
 import com.arcgismaps.raster.RasterInfo
+import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
 import com.arcgismaps.toolkit.orientedimageryviewer.OrientedImageryViewerState
 import com.arcgismaps.toolkit.orientedimageryviewer.internal.ui.MarkerSymbols
 import io.mockk.coEvery
@@ -760,7 +762,9 @@ class ImageLocationMarkerTests {
     }
 
     private fun tap() = scope.launch {
-        tapResult = state.onSingleTapOnGeoView(location)
+        val event = mockk<SingleTapConfirmedEvent>()
+        every { event.mapPoint } returns location
+        tapResult = state.onSingleTapOnGeoView(event, MapViewProxy())
     }
 }
 

@@ -20,6 +20,7 @@ import android.util.Log
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.unit.dp
 import com.arcgismaps.data.Feature
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.layers.OrientedImageryLayer
@@ -30,6 +31,10 @@ import com.arcgismaps.mapping.symbology.SimpleMarkerSymbol
 import com.arcgismaps.mapping.view.DoubleXY
 import com.arcgismaps.mapping.view.Graphic
 import com.arcgismaps.mapping.view.GraphicsOverlay
+import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
+import com.arcgismaps.toolkit.geoviewcompose.GeoViewProxy
+import com.arcgismaps.toolkit.geoviewcompose.LocalSceneViewProxy
+import com.arcgismaps.toolkit.geoviewcompose.SceneViewProxy
 import com.arcgismaps.toolkit.orientedimageryviewer.internal.FootprintManager
 import com.arcgismaps.toolkit.orientedimageryviewer.internal.ImageSession
 import com.arcgismaps.toolkit.orientedimageryviewer.internal.MarkerCoordinator
@@ -43,6 +48,21 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
+
+/** Mutually exclusive operations performed when the user taps the GeoView. */
+public enum class GeoViewInteractionStatus {
+    /** Ignores GeoView taps. */
+    None,
+
+    /** Searches for images covering the tapped location. */
+    FindImages,
+
+    /** Identifies and displays the first image feature at the tapped screen coordinate. */
+    DisplayImage,
+
+    /** Adds markers at the tapped location. */
+    AddMarkers
+}
 
 /**
  * Status of an oriented imagery search operation.
@@ -87,7 +107,7 @@ public sealed interface ImageNavigationStatus {
  */
 @Stable
 public class OrientedImageryViewerState public constructor(
-    orientedImageryLayer: OrientedImageryLayer,
+    private val orientedImageryLayer: OrientedImageryLayer,
     graphicsOverlay: GraphicsOverlay,
     coroutineScope: CoroutineScope
 ) {
@@ -97,6 +117,7 @@ public class OrientedImageryViewerState public constructor(
     public val title: String = orientedImageryLayer.name.ifBlank { "Oriented imagery" }
 
     private val _uiState = mutableStateOf(OrientedImageryViewerUiState())
+    private var interactionRevision: Long = 0
     private val session: ImageSession = ImageSession(
         orientedImageryLayer,
         onImageChanged = ::publishActiveImage,
@@ -140,6 +161,77 @@ public class OrientedImageryViewerState public constructor(
     public val isMarkingLocation: Boolean
         get() = uiState.isMarkingLocation
 
+    /**
+     * The operation performed on a GeoView tap. Defaults to [GeoViewInteractionStatus.FindImages].
+     * Changing this status invalidates pending identify and marker operations.
+     * Assigning an image mode selects it and unselects the other image option.
+     * Assigning [GeoViewInteractionStatus.None] clears both image selections.
+     * Assigning [GeoViewInteractionStatus.AddMarkers] clears both image selections and enables marker placement.
+     */
+    public var geoViewInteractionStatus: GeoViewInteractionStatus
+        get() = uiState.geoViewInteractionStatus
+        set(value) {
+            when (value) {
+                GeoViewInteractionStatus.FindImages, GeoViewInteractionStatus.DisplayImage ->
+                    setImageModeSelected(value, true)
+
+                GeoViewInteractionStatus.AddMarkers -> updateInteractionState {
+                    it.copy(
+                        isFindImagesSelected = false,
+                        isDisplayImageSelected = false,
+                        imageInteractionStatus = GeoViewInteractionStatus.None,
+                        isMarkingLocation = true
+                    )
+                }
+
+                GeoViewInteractionStatus.None -> updateInteractionState {
+                    it.copy(
+                        isFindImagesSelected = false,
+                        isDisplayImageSelected = false,
+                        imageInteractionStatus = GeoViewInteractionStatus.None,
+                        isMarkingLocation = false
+                    )
+                }
+            }
+        }
+
+    /** Selects at most one image mode; unselecting the active option leaves neither selected. */
+    internal fun setImageModeSelected(mode: GeoViewInteractionStatus, selected: Boolean) {
+        require(mode == GeoViewInteractionStatus.FindImages || mode == GeoViewInteractionStatus.DisplayImage)
+        updateInteractionState { current ->
+            val findImages = if (mode == GeoViewInteractionStatus.FindImages) {
+                selected
+            } else {
+                !selected && current.isFindImagesSelected
+            }
+            val displayImage = if (mode == GeoViewInteractionStatus.DisplayImage) {
+                selected
+            } else {
+                !selected && current.isDisplayImageSelected
+            }
+            val activeMode = when {
+                findImages -> GeoViewInteractionStatus.FindImages
+                displayImage -> GeoViewInteractionStatus.DisplayImage
+                else -> GeoViewInteractionStatus.None
+            }
+            current.copy(
+                isFindImagesSelected = findImages,
+                isDisplayImageSelected = displayImage,
+                imageInteractionStatus = activeMode,
+                isMarkingLocation = false
+            )
+        }
+    }
+
+    private fun updateInteractionState(transform: (OrientedImageryViewerUiState) -> OrientedImageryViewerUiState) {
+        val next = transform(uiState)
+        if (next.geoViewInteractionStatus != geoViewInteractionStatus) {
+            interactionRevision++
+            markers.invalidateOperations()
+        }
+        _uiState.value = next
+    }
+
     public val hasActiveImage: Boolean
         get() = uiState.activeImageInfo != null
 
@@ -172,24 +264,80 @@ public class OrientedImageryViewerState public constructor(
         session.activeImage?.locationToImage(mapPoint)
 
     /**
-     * Searches for images at the tapped location when [isMarkingLocation] is false.
-     * Otherwise, adds a map marker and, if covered by the active image and projected within its
-     * bounds, a corresponding marker in the displayed raster or panoramic image.
+     * Handles a GeoView tap according to [geoViewInteractionStatus]. Searches for images,
+     * identifies the first feature in the associated oriented imagery layer and displays its image,
+     * adds markers, or does nothing. An identify error or missing feature shows a snackbar in the
+     * viewer and leaves the active image unchanged.
+     * Scene locations are resolved against the scene content through [geoViewProxy].
      *
-     * Returns a failed [Result] if searching, projection, or coverage validation fails.
+     * Returns a failed [Result] if location resolution, identify, search, fetch, or marker placement fails.
      * Cancellation is rethrown. A map marker may already have been added when an operation fails.
      */
-    public suspend fun onSingleTapOnGeoView(mapPoint: Point): Result<Unit> = runCatching {
+    public suspend fun onSingleTapOnGeoView(
+        event: SingleTapConfirmedEvent,
+        geoViewProxy: GeoViewProxy
+    ): Result<Unit> = runCatching {
         currentCoroutineContext().ensureActive()
-        if (!isMarkingLocation) {
-            searchImages(mapPoint).getOrThrow()
-        } else {
-            markers.addFromMap(mapPoint)
+        when (val status = geoViewInteractionStatus) {
+            GeoViewInteractionStatus.None -> Unit
+            GeoViewInteractionStatus.DisplayImage -> {
+                val revision = ++interactionRevision
+                val result = geoViewProxy.identify(
+                    layer = orientedImageryLayer,
+                    screenCoordinate = event.screenCoordinate,
+                    tolerance = 20.dp
+                )
+                ensureCurrentInteraction(revision)
+                val identified = result.getOrElse { error ->
+                    if (error is CancellationException) throw error
+                    updateUiState { it.copy(noImagesFoundRevision = revision) }
+                    throw error
+                }
+                identified.error?.let { error ->
+                    if (error is CancellationException) throw error
+                    updateUiState { it.copy(noImagesFoundRevision = revision) }
+                    throw error
+                }
+                val feature = identified.geoElements.firstOrNull() as? Feature
+                if (feature == null) {
+                    updateUiState { it.copy(noImagesFoundRevision = revision) }
+                } else {
+                    fetchImage(feature).getOrThrow()
+                }
+            }
+
+            GeoViewInteractionStatus.FindImages, GeoViewInteractionStatus.AddMarkers -> {
+                val revision = ++interactionRevision
+                val mapPoint = when (geoViewProxy) {
+                    is SceneViewProxy -> geoViewProxy.screenToLocation(event.screenCoordinate).getOrThrow()
+
+                    is LocalSceneViewProxy -> geoViewProxy.screenToLocation(event.screenCoordinate).getOrThrow()
+
+                    else -> event.mapPoint
+                } ?: throw IllegalStateException("No map location was found for the selected point.")
+                ensureCurrentInteraction(revision)
+                if (status == GeoViewInteractionStatus.FindImages) {
+                    searchImages(mapPoint).getOrThrow()
+                } else {
+                    markers.addFromMap(mapPoint)
+                }
+            }
         }
         currentCoroutineContext().ensureActive()
     }.onFailure { error ->
         if (error is CancellationException) throw error
         currentCoroutineContext().ensureActive()
+    }
+
+    internal fun consumeNoImagesFound(revision: Long) {
+        updateUiState {
+            if (it.noImagesFoundRevision == revision) it.copy(noImagesFoundRevision = null) else it
+        }
+    }
+
+    private suspend fun ensureCurrentInteraction(revision: Long) {
+        currentCoroutineContext().ensureActive()
+        if (revision != interactionRevision) throw CancellationException("GeoView interaction was superseded.")
     }
 
     internal fun registerMarkerOverlayInImage(
@@ -224,7 +372,7 @@ public class OrientedImageryViewerState public constructor(
      */
     public suspend fun searchImages(lastMapLocation: Point): Result<ImageSearchStatus> {
         currentCoroutineContext().ensureActive()
-        resetAll()
+        resetImageState()
         setInputLocation(lastMapLocation)
         return session.search(lastMapLocation)
     }
@@ -237,7 +385,7 @@ public class OrientedImageryViewerState public constructor(
      */
     public suspend fun fetchImage(feature: Feature): Result<Unit> {
         currentCoroutineContext().ensureActive()
-        resetAll()
+        resetImageState()
         return session.fetch(feature)
     }
 
@@ -308,12 +456,14 @@ public class OrientedImageryViewerState public constructor(
     public fun isActiveFootprintVisible(): Boolean = uiState.isActiveFootprintVisible
 
     /**
-     * Adds a marker at the current location.
+     * Toggles marker placement, clearing image selections when enabled and returning to
+     * [GeoViewInteractionStatus.None] when disabled.
      */
     public fun addMarker() {
-        markers.invalidateOperations()
-        updateUiState { uiState ->
-            uiState.copy(isMarkingLocation = !uiState.isMarkingLocation)
+        geoViewInteractionStatus = if (isMarkingLocation) {
+            GeoViewInteractionStatus.None
+        } else {
+            GeoViewInteractionStatus.AddMarkers
         }
     }
 
@@ -360,17 +510,30 @@ public class OrientedImageryViewerState public constructor(
      * footprints created by this viewer, retaining application-owned objects in shared collections.
      */
     public fun resetAll() {
+        resetImageState()
+        updateInteractionState {
+            it.copy(
+                isFindImagesSelected = true,
+                isDisplayImageSelected = false,
+                imageInteractionStatus = GeoViewInteractionStatus.FindImages,
+                isMarkingLocation = false
+            )
+        }
+    }
+
+    private fun resetImageState() {
+        interactionRevision++
         footprints.reset()
         session.reset()
         markers.reset()
         updateUiState { uiState ->
             uiState.copy(
-                isMarkingLocation = false,
                 isActiveFootprintVisible = false,
                 isAdditionalFootprintsVisible = false,
                 isAdditionalCameraLocationsVisible = false,
                 activeImageInfo = null,
-                inputLocationData = null
+                inputLocationData = null,
+                noImagesFoundRevision = null
             )
         }
     }

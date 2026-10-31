@@ -37,6 +37,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -45,8 +46,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -56,6 +55,7 @@ import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.toolkit.orientedimageryviewer.internal.ui.ErrorSnackbarContainer
 import com.arcgismaps.toolkit.orientedimageryviewer.internal.ui.MarkerToolsButton
 import com.arcgismaps.toolkit.orientedimageryviewer.internal.ui.MarkerSelection
+import com.arcgismaps.toolkit.orientedimageryviewer.internal.ui.ModeSelectionButton
 import com.arcgismaps.toolkit.orientedimageryviewer.internal.ui.OrientedImagery
 import com.arcgismaps.toolkit.popup.Popup
 import com.arcgismaps.toolkit.popup.PopupState
@@ -137,8 +137,16 @@ internal fun ViewerLayout(
     }
     val noActiveImageMessage = stringResource(R.string.popup_no_active_image)
     val creationFailedMessage = stringResource(R.string.popup_creation_failed)
+    val noImagesFoundMessage = stringResource(R.string.no_images_found_for_tapped_location)
+    val noImagesFoundRevision = viewerState.uiState.noImagesFoundRevision
 
     ErrorSnackbarContainer(modifier = modifier) { errors ->
+        LaunchedEffect(viewerState, noImagesFoundRevision) {
+            noImagesFoundRevision?.let { revision ->
+                errors.showError(noImagesFoundMessage)
+                viewerState.consumeNoImagesFound(revision)
+            }
+        }
         ViewerLayout(
             showTopBar = imagePopup == null,
             topBar = {
@@ -178,6 +186,15 @@ internal fun ViewerLayout(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         OrientedImageryToolbar(
+                            interactionStatus = viewerState.geoViewInteractionStatus,
+                            isFindImagesSelected = viewerState.uiState.isFindImagesSelected,
+                            isDisplayImageSelected = viewerState.uiState.isDisplayImageSelected,
+                            onFindImagesSelectedChange = {
+                                viewerState.setImageModeSelected(GeoViewInteractionStatus.FindImages, it)
+                            },
+                            onDisplayImageSelectedChange = {
+                                viewerState.setImageModeSelected(GeoViewInteractionStatus.DisplayImage, it)
+                            },
                             isMarkingLocation = viewerState.uiState.isMarkingLocation,
                             onPreviousImage = onPreviousImage,
                             onNextImage = onNextImage,
@@ -283,6 +300,11 @@ internal fun ViewerLayout(
 
 @Composable
 private fun OrientedImageryToolbar(
+    interactionStatus: GeoViewInteractionStatus,
+    isFindImagesSelected: Boolean,
+    isDisplayImageSelected: Boolean,
+    onFindImagesSelectedChange: (Boolean) -> Unit,
+    onDisplayImageSelectedChange: (Boolean) -> Unit,
     isMarkingLocation: Boolean,
     onPreviousImage: (() -> Unit)?,
     onNextImage: (() -> Unit)?,
@@ -299,56 +321,13 @@ private fun OrientedImageryToolbar(
     onReset: () -> Unit,
 ) {
     Row(verticalAlignment = Alignment.CenterVertically) {
-        IconButton(
-            enabled = onPreviousImage != null,
-            onClick = { onPreviousImage?.invoke() }
-        ) {
-            Icon(
-                painter = painterResource(R.drawable.arrow_bold_left_24),
-                contentDescription = stringResource(R.string.toolbar_previous_image),
-                tint = Color.Unspecified
-            )
-        }
-        IconButton(
-            enabled = onNextImage != null,
-            onClick = { onNextImage?.invoke() }
-        ) {
-            Icon(
-                painter = painterResource(R.drawable.arrow_bold_right_24),
-                contentDescription = stringResource(R.string.toolbar_next_image),
-                tint = Color.Unspecified
-            )
-        }
-        IconButton(onClick = onCurrentFootprint) {
-            Icon(
-                painter = painterResource(R.drawable.footprint_24),
-                contentDescription = stringResource(R.string.toolbar_current_footprint),
-                tint = Color.Red
-            )
-        }
-        IconButton(onClick = onAdditionalFootprints) {
-            Icon(
-                painter = painterResource(R.drawable.footprint_24),
-                contentDescription = stringResource(R.string.toolbar_additional_footprints),
-                tint = Color.Blue
-            )
-        }
-        IconToggleButton(
-            checked = isSequentialNavigationEnabled,
-            enabled = supportsSequentialNavigation,
-            onCheckedChange = { onSequentialNavigation() }
-        ) {
-            Icon(
-                painter = painterResource(R.drawable.sequential_navigation_24),
-                contentDescription = stringResource(R.string.toolbar_sequential_navigation)
-            )
-        }
-        IconButton(onClick = onPopup) {
-            Icon(
-                painter = painterResource(R.drawable.popup_24),
-                contentDescription = stringResource(R.string.toolbar_popup)
-            )
-        }
+        ModeSelectionButton(
+            interactionStatus = interactionStatus,
+            isFindImagesSelected = isFindImagesSelected,
+            isDisplayImageSelected = isDisplayImageSelected,
+            onFindImagesSelectedChange = onFindImagesSelectedChange,
+            onDisplayImageSelectedChange = onDisplayImageSelectedChange
+        )
         MarkerToolsButton(
             isMarkingLocation = isMarkingLocation,
             onAddMarker = onAddMarker,

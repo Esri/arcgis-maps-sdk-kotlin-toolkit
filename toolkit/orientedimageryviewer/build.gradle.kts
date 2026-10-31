@@ -107,14 +107,15 @@ apiValidation {
         listOf(
             "com.arcgismaps.toolkit.orientedimageryviewer.ComposableSingletons\$OrientedimageryViewerKt",
             "com.arcgismaps.toolkit.orientedimageryviewer.internal.ui.ComposableSingletons\$MarkerSelectionKt",
-            "com.arcgismaps.toolkit.orientedimageryviewer.internal.ui.ComposableSingletons\$MarkerToolsButtonKt"
+            "com.arcgismaps.toolkit.orientedimageryviewer.internal.ui.ComposableSingletons\$MarkerToolsButtonKt",
+            "com.arcgismaps.toolkit.orientedimageryviewer.internal.ui.ComposableSingletons\$ModeSelectionButtonKt"
         )
     )
 }
 
 dependencies {
     api(arcgis.mapsSdk)
-    implementation(project(":geoview-compose"))
+    api(project(":geoview-compose"))
     implementation(project(":popup"))
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.composeCore)
