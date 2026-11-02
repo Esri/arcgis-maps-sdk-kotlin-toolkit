@@ -134,7 +134,18 @@ public class OrientedImageryViewerState internal constructor(
         orientedImageryLayer,
         onImageChanged = ::publishActiveImage,
         onInputLocationChanged = ::setInputLocation,
-        onImageActivated = { footprints.imageChanged() }
+        onImageActivated = { footprints.imageChanged() },
+        scope = coroutineScope,
+        isSequential = { uiState.isSequentialNavigationEnabled },
+        onAdjacentImageChanged = { step, available, error ->
+            updateUiState {
+                if (step == SequenceStep.Previous) {
+                    it.copy(canNavigatePrevious = available, previousImageError = error)
+                } else {
+                    it.copy(canNavigateNext = available, nextImageError = error)
+                }
+            }
+        }
     )
     private val markers: MarkerCoordinator = MarkerCoordinator(
         orientedImageryLayer, graphicsOverlay,
@@ -164,6 +175,13 @@ public class OrientedImageryViewerState internal constructor(
 
     internal val uiState: OrientedImageryViewerUiState
         get() = _uiState.value
+
+    internal val searchResultImages: List<OrientedImage>
+        get() {
+            // Observe replacement sessions without exposing SDK objects in the immutable UI snapshot.
+            uiState.imageSessionRevision
+            return session.images
+        }
 
     public val supportsSequentialNavigation: Boolean =
         orientedImageryLayer.supportsSequentialNavigation
@@ -430,6 +448,12 @@ public class OrientedImageryViewerState internal constructor(
     public suspend fun navigatePreviousImage(): Result<ImageNavigationStatus> =
         session.navigate(SequenceStep.Previous, -1) { uiState.isSequentialNavigationEnabled }
 
+    internal suspend fun navigateFirstImage(): Result<ImageNavigationStatus> =
+        session.navigateToBoundary(last = false) { uiState.isSequentialNavigationEnabled }
+
+    internal suspend fun navigateLastImage(): Result<ImageNavigationStatus> =
+        session.navigateToBoundary(last = true) { uiState.isSequentialNavigationEnabled }
+
     /**
      * Toggles the visibility of the active footprint.
      */
@@ -550,6 +574,7 @@ public class OrientedImageryViewerState internal constructor(
                 isAdditionalCameraLocationsVisible = preferredAdditionalCameraLocationsVisible,
                 isFindImagesSelected = true,
                 isDisplayImageSelected = false,
+                isSequentialNavigationEnabled = false,
                 imageInteractionStatus = GeoViewInteractionStatus.FindImages,
                 isMarkingLocation = false
             )
@@ -572,9 +597,14 @@ public class OrientedImageryViewerState internal constructor(
 
     /**
      * Sets whether sequential navigation is enabled for the viewer.
+     * Enabling clears the input location and additional images. Disabling retains the currently
+     * displayed image as the sole result, without restoring the previous search context.
+     * Mode changes invalidate pending navigation requests.
      */
     public fun setSequentialNavigationEnabled(enabled: Boolean) {
+        if (enabled == uiState.isSequentialNavigationEnabled) return
         updateUiState { uiState -> uiState.copy(isSequentialNavigationEnabled = enabled) }
+        session.navigationModeChanged()
         footprints.navigationModeChanged()
     }
 
@@ -593,6 +623,9 @@ public class OrientedImageryViewerState internal constructor(
                 // Both additional overlays are built lazily from these images when selected.
                 hasAdditionalImages = orientedImage != null && session.additionalImages.isNotEmpty(),
                 activeImageRevision = uiState.activeImageRevision + 1,
+                imageSessionRevision = uiState.imageSessionRevision + if (orientedImage == null) 1 else 0,
+                searchResultCount = session.images.size,
+                selectedResultIndex = session.activeIndex,
                 isActiveFootprintVisible = if (orientedImage != null) {
                     preferredActiveFootprintVisible
                 } else uiState.isActiveFootprintVisible,

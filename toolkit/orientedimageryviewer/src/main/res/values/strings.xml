@@ -18,6 +18,10 @@
     <string name="toolbar_close">Close</string>
     <string name="toolbar_previous_image">Previous image</string>
     <string name="toolbar_next_image">Next image</string>
+    <string name="toolbar_first_image">First image</string>
+    <string name="toolbar_last_image">Last image</string>
+    <string name="image_load_failed">Unable to load the image.</string>
+    <string name="image_navigation_failed">Unable to navigate to the image.</string>
     <string name="toolbar_current_footprint">Current footprint</string>
     <string name="toolbar_additional_footprints">Additional footprints</string>
     <string name="toolbar_additional_camera_locations">Additional camera locations</string>
@@ -27,6 +31,8 @@
     <string name="toolbar_markers">Markers</string>
     <string name="toolbar_mode">Mode</string>
     <string name="toolbar_overlays">Overlays</string>
+    <string name="toolbar_explore">Explore</string>
+    <string name="explore_sequential">Sequential</string>
     <string name="overlay_selection_title">Overlays Selection</string>
     <string name="overlay_selection_current_footprint">Show Current Footprint</string>
     <string name="overlay_selection_additional_footprints">Show Additional Footprints</string>

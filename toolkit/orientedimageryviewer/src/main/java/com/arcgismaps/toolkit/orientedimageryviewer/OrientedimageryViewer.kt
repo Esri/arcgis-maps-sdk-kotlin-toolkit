@@ -52,6 +52,7 @@ import androidx.compose.ui.unit.dp
 import com.arcgismaps.mapping.layers.OrientedImageryLayer
 import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.toolkit.orientedimageryviewer.internal.ui.ErrorSnackbarContainer
+import com.arcgismaps.toolkit.orientedimageryviewer.internal.ui.ExploreButton
 import com.arcgismaps.toolkit.orientedimageryviewer.internal.ui.MarkerToolsButton
 import com.arcgismaps.toolkit.orientedimageryviewer.internal.ui.MarkerSelection
 import com.arcgismaps.toolkit.orientedimageryviewer.internal.ui.ModeSelectionButton
@@ -353,6 +354,12 @@ private fun OrientedImageryToolbar(
             onAddMarker = onAddMarker,
             onSelectMarker = onSelectMarker,
             onClearAllMarkers =onClearAllMarkers
+        )
+        ExploreButton(
+            supportsSequentialNavigation = supportsSequentialNavigation,
+            hasActiveImage = hasActiveImage,
+            isSequentialNavigationEnabled = isSequentialNavigationEnabled,
+            onSequentialNavigation = onSequentialNavigation
         )
     }
 }

@@ -47,8 +47,8 @@ import androidx.compose.ui.unit.dp
 import com.arcgismaps.geometry.GeometryEngine
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.geometry.SpatialReference
+import com.arcgismaps.mapping.layers.orientedimagery.OrientedImage
 import com.arcgismaps.mapping.symbology.SimpleMarkerSymbol
-import com.arcgismaps.mapping.view.DoubleXY
 import com.arcgismaps.toolkit.orientedimageryviewer.OrientedImageryViewerState
 import com.arcgismaps.toolkit.orientedimageryviewer.R
 import com.arcgismaps.toolkit.orientedimageryviewer.internal.ui.drawMarkerSymbol
@@ -70,10 +70,15 @@ import io.github.sceneview.SceneView as FilamentSceneView
 internal fun PanoramicImage(
     viewerState: OrientedImageryViewerState,
     modifier: Modifier = Modifier,
-    radiusMeters: Float = 10.0f
+    radiusMeters: Float = 10.0f,
+    pageImage: OrientedImage? = null,
+    isActive: Boolean = true
 ) {
-    val imageSource = viewerState.uiState.activeImageInfo?.dataUri ?: return
+    val imageSource = (if (pageImage != null) pageImage.dataUri else viewerState.uiState.activeImageInfo?.dataUri) ?: return
     val imageRevision = viewerState.uiState.activeImageRevision
+    // A pager page owns its image even while another page is active.
+    val sourceKey: Any = pageImage ?: imageSource
+    fun isCurrent() = isActive && viewerState.uiState.activeImageRevision == imageRevision
     val engine = rememberEngine()
     val materialLoader = rememberMaterialLoader(engine)
     val resources = remember(materialLoader, viewerState) { PanoramicImageMaterials(materialLoader) }
@@ -88,8 +93,7 @@ internal fun PanoramicImage(
     // Preserve the previous panorama until the replacement image is fully ready.
     data class PreparedImage(
         val image: PanoramicImageMaterial,
-        val footprintOrientation: PanoramicFootprintOrientation?,
-        val imageRevision: Long
+        val sourceKey: Any
     )
     data class RenderState(
         val image: PanoramicImageMaterial,
@@ -107,42 +111,44 @@ internal fun PanoramicImage(
     var loadErrorMessage by remember(resources) { mutableStateOf<String?>(null) }
     val sequentialNavigation = viewerState.supportsSequentialNavigation &&
             viewerState.uiState.isSequentialNavigationEnabled
-    // Updating the input location from the center must not reload the sequential image.
+    // Sequential images have no input-location reference marker.
     val inputLocationData = viewerState.uiState.inputLocationData.takeUnless { sequentialNavigation }
 
     // Only a new image source/session decodes and uploads a texture. Aiming never reloads pixels.
-    LaunchedEffect(viewerState, imageRevision, imageSource, resources, context) {
+    LaunchedEffect(viewerState, sourceKey, imageSource, resources, context) {
         loadErrorMessage = null
         var bitmap: Bitmap? = null
         try {
             bitmap = loadPanoramicBitmap(context, imageSource)
             ensureActive()
-            if (viewerState.uiState.activeImageRevision != imageRevision) return@LaunchedEffect
-            val orientation = loadPanoramicFootprintOrientation(viewerState, bitmap.width, bitmap.height, imageRevision)
-            ensureActive()
-            if (viewerState.uiState.activeImageRevision != imageRevision) return@LaunchedEffect
             val decoded = bitmap
             bitmap = null // create takes ownership, including on failure.
-            preparedImage = PreparedImage(resources.create(decoded), orientation, imageRevision)
+            preparedImage = PreparedImage(resources.create(decoded), sourceKey)
         } catch (error: Exception) {
             if (error is CancellationException) throw error
             ensureActive()
-            if (viewerState.uiState.activeImageRevision == imageRevision) {
-                loadErrorMessage = loadFailedMessage
-                Log.e("PanoramicImage", loadFailedMessage, error)
-            }
+            loadErrorMessage = loadFailedMessage
+            Log.e("PanoramicImage", loadFailedMessage, error)
         } finally {
             bitmap?.recycle()
         }
     }
 
-    LaunchedEffect(viewerState, preparedImage, imageRevision, inputLocationData, sequentialNavigation) {
+    LaunchedEffect(viewerState, preparedImage, sourceKey, imageRevision, isActive, inputLocationData, sequentialNavigation) {
         val prepared = preparedImage ?: return@LaunchedEffect
-        if (prepared.imageRevision != imageRevision) return@LaunchedEffect
+        if (prepared.sourceKey != sourceKey) return@LaunchedEffect
         val image = prepared.image
+        if (!isCurrent()) {
+            // Inactive pages render their own pixels but never query or mutate active-image state.
+            renderState = RenderState(image, Float3(1f, 0f, 0f), null, null, -1)
+            return@LaunchedEffect
+        }
+        val orientation = loadPanoramicFootprintOrientation(viewerState, image.width, image.height, imageRevision)
+        ensureActive()
+        if (!isCurrent()) return@LaunchedEffect
         // Renderer axes alone do not identify the geographic location within an oriented image.
         val imagePoint = if (sequentialNavigation) {
-            DoubleXY(image.width / 2.0, image.height / 2.0)
+            null
         } else {
             inputLocationData?.toPoint()?.let { location ->
                 viewerState.locationToImage(location)?.onFailure { error ->
@@ -152,36 +158,20 @@ internal fun PanoramicImage(
             }
         }
         ensureActive()
-        if (viewerState.uiState.activeImageRevision != imageRevision) return@LaunchedEffect
+        if (!isCurrent()) return@LaunchedEffect
         val initialMarkerDirection = imagePoint?.let { point ->
             panoramicImageDirection(point.x, point.y, image.width, image.height)
         }
         renderState = RenderState(
             image = image,
-            initialDirection = initialMarkerDirection ?: Float3(1f, 0f, 0f),
+            // A mode toggle must not reset a camera that the user has panned or zoomed.
+            initialDirection = initialMarkerDirection
+                ?: renderState?.takeIf { it.image === image }?.initialDirection
+                ?: Float3(1f, 0f, 0f),
             initialMarkerDirection = initialMarkerDirection,
-            footprintOrientation = prepared.footprintOrientation,
+            footprintOrientation = orientation,
             imageRevision = imageRevision
         )
-    }
-
-    LaunchedEffect(viewerState, renderState, imageRevision, sequentialNavigation) {
-        val state = renderState ?: return@LaunchedEffect
-        if (!sequentialNavigation || state.imageRevision != imageRevision) return@LaunchedEffect
-        val imageCenter = DoubleXY(state.width / 2.0, state.height / 2.0)
-        val result = viewerState.imageToLocation(imageCenter)
-        ensureActive()
-        if (viewerState.uiState.activeImageRevision != state.imageRevision) return@LaunchedEffect
-        if (result != null) {
-            result.onSuccess { point ->
-                viewerState.setInputLocation(point)
-            }.onFailure { error ->
-                if (error is CancellationException) throw error
-                Log.e("PanoramicImage", "Unable to locate the panorama image center", error)
-            }
-        } else {
-            Log.e("PanoramicImage", "No active oriented image for the panorama image center")
-        }
     }
 
     Box(modifier = modifier.fillMaxSize()) {
@@ -204,8 +194,8 @@ internal fun PanoramicImage(
             return@Box
         }
 
-        DisposableEffect(viewerState, state, imageRevision) {
-            val unregister = if (state.imageRevision == imageRevision) {
+        DisposableEffect(viewerState, state, imageRevision, isActive) {
+            val unregister = if (isCurrent() && state.imageRevision == imageRevision) {
                 viewerState.registerMarkerInPanoramicImage(imageRevision, state.width, state.height)
             } else null
             onDispose { unregister?.invoke() }
@@ -220,7 +210,7 @@ internal fun PanoramicImage(
                 position = Float3(0f, 0f, 0f)
             }
             val cameraManipulator = remember(
-                cameraNode, state.imageRevision,
+                cameraNode, state.image,
                 state.initialDirection.x, state.initialDirection.y, state.initialDirection.z
             ) {
                 cameraNode.lookAt(state.initialDirection)
@@ -246,10 +236,10 @@ internal fun PanoramicImage(
                 materialLoader = materialLoader,
                 cameraNode = cameraNode,
                 cameraManipulator = cameraManipulator,
-                onGestureListener = key(viewerState, state, imageRevision) {
+                onGestureListener = key(viewerState, state, imageRevision, isActive) {
                     rememberOnGestureListener(
                         onSingleTapConfirmed = onTap@{ event, _ ->
-                            if (!viewerState.isMarkingLocation ||
+                            if (!isCurrent() || !viewerState.isMarkingLocation ||
                                 state.imageRevision != viewerState.uiState.activeImageRevision ||
                                 view.viewport.width <= 0 || view.viewport.height <= 0
                             ) return@onTap
@@ -260,6 +250,7 @@ internal fun PanoramicImage(
                                 Float3(direction.x, direction.y, direction.z), state.width, state.height
                             ) ?: return@onTap
                             markerScope.launch {
+                                if (!isCurrent()) return@launch
                                 viewerState.addMarkerToPanoramicImage(imagePoint, state.imageRevision)
                             }
                         }
@@ -267,7 +258,7 @@ internal fun PanoramicImage(
                 },
                 onFrame = {
                     val currentUiState = viewerState.uiState
-                    projectedMarkers = if (state.imageRevision == currentUiState.activeImageRevision &&
+                    projectedMarkers = if (isCurrent() && state.imageRevision == currentUiState.activeImageRevision &&
                         view.viewport.width > 0 && view.viewport.height > 0
                     ) {
                         val forward = cameraNode.forwardDirection
@@ -289,6 +280,7 @@ internal fun PanoramicImage(
                         }
                     } else emptyList()
                     if (
+                        !isCurrent() ||
                         state.imageRevision != currentUiState.activeImageRevision ||
                         currentUiState.activeImageInfo?.dataUri != imageSource ||
                         !currentUiState.isActiveFootprintVisible ||
@@ -334,7 +326,7 @@ internal fun PanoramicImage(
                         }
                     )
                 }
-                if (state.imageRevision == viewerState.uiState.activeImageRevision) {
+                if (!sequentialNavigation && isCurrent() && state.imageRevision == viewerState.uiState.activeImageRevision) {
                     state.initialMarkerDirection?.let { direction ->
                         val distance = radiusMeters * 0.98f
                         SphereNode(

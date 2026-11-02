@@ -25,14 +25,17 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.click
 import androidx.compose.ui.test.junit4.v2.createComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.pinch
 import androidx.compose.ui.test.swipe
 import androidx.compose.ui.unit.dp
 import androidx.test.platform.app.InstrumentationRegistry
 import com.arcgismaps.data.Feature
+import com.arcgismaps.exceptions.ArcGISException
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.layers.OrientedImageryLayer
 import com.arcgismaps.mapping.layers.orientedimagery.OrientedImage
@@ -40,7 +43,9 @@ import com.arcgismaps.mapping.layers.orientedimagery.OrientedImageType
 import com.arcgismaps.mapping.view.DoubleXY
 import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.toolkit.orientedimageryviewer.OrientedImageryViewerState
+import com.arcgismaps.toolkit.orientedimageryviewer.internal.ui.OrientedImagery
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.CompletableDeferred
@@ -50,6 +55,8 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import org.junit.After
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
@@ -78,6 +85,9 @@ class PanoramicImageLifecycleTests {
         every { layer.name } returns "Panorama lifecycle"
         every { layer.supportsSequentialNavigation } returns true
         every { layer.visibleFootprints } returns mutableListOf()
+        val boundary = mockk<ArcGISException>()
+        every { boundary.errorCode } returns 20
+        coEvery { layer.fetchAdjacentImage(any(), any()) } returns Result.failure(boundary)
         compose.runOnIdle {
             state = OrientedImageryViewerState(layer, GraphicsOverlay(), scope)
             state.toggleActiveFootprint()
@@ -210,6 +220,53 @@ class PanoramicImageLifecycleTests {
     }
 
     @Test
+    fun mixedPagerKeepsInactivePagesIsolatedAndPreservesPanoramaGestures() {
+        val first = image(localImage().absolutePath)
+        val second = image(localImage().absolutePath)
+        val third = image(localImage().absolutePath)
+        every { first.type } returns OrientedImageType.Horizontal
+        every { third.type } returns OrientedImageType.Horizontal
+        compose.runOnIdle {
+            coEvery { layer.searchImages(any(), any()) } returns Result.success(listOf(first, second, third))
+            scope.launch { state.searchImages(Point(0.0, 0.0)).getOrThrow() }
+        }
+        compose.setContent {
+            if (visible.value) OrientedImagery(state, Modifier.size(300.dp).testTag("panorama"))
+        }
+        awaitFrameCondition { projections.get() > 0 }
+        compose.mainClock.advanceTimeBy(1_000)
+        compose.onNodeWithText("1").assertIsDisplayed()
+        compose.runOnIdle {
+            coVerify(exactly = 0) { second.locationToImage(any()) }
+            coVerify(exactly = 0) { third.locationToImage(any()) }
+        }
+        val count = projections.get()
+        compose.onNodeWithContentDescription("Next image").performClick()
+        awaitFrameCondition { projections.get() > count }
+        compose.mainClock.advanceTimeBy(1_000)
+        compose.onNodeWithText("2").assertIsDisplayed()
+
+        val beforePan = tapPixel()
+        compose.onNodeWithTag("OrientedImagePager").performTouchInput {
+            swipe(Offset(width * 0.4f, height * 0.5f), Offset(width * 0.6f, height * 0.5f), 400)
+        }
+        compose.mainClock.advanceTimeBy(1_000)
+        val afterPan = tapPixel()
+        assertTrue("Panorama rotation must not page", abs(afterPan.x - beforePan.x) > 0.1)
+        compose.onNodeWithText("2").assertIsDisplayed()
+        compose.runOnIdle { coVerify(exactly = 0) { third.locationToImage(any()) } }
+
+        val beforeLast = projections.get()
+        compose.onNodeWithContentDescription("Last image").performClick()
+        awaitFrameCondition { projections.get() > beforeLast }
+        compose.mainClock.advanceTimeBy(1_000)
+        compose.onNodeWithText("3").assertIsDisplayed()
+        compose.onNodeWithContentDescription("First image").performClick()
+        compose.mainClock.advanceTimeBy(1_000)
+        compose.onNodeWithText("1").assertIsDisplayed()
+    }
+
+    @Test
     fun changingAimAndNavigationModeDoesNotReloadTheImageFile() {
         val file = localImage()
         activate(image(file.absolutePath))
@@ -220,9 +277,50 @@ class PanoramicImageLifecycleTests {
         val count = projections.get()
         compose.runOnIdle { state.setInputLocation(Point(1.0, 2.0)) }
         awaitFrameCondition { projections.get() > count }
-        compose.runOnIdle { state.setSequentialNavigationEnabled(true) }
-        awaitFrameCondition { centers.get() > 0 }
-        compose.onNodeWithText("Failed to load panoramic image", substring = true).assertDoesNotExist()
+        for (enabled in listOf(true, false)) {
+            compose.runOnIdle { state.setSequentialNavigationEnabled(enabled) }
+            compose.mainClock.advanceTimeBy(1_000)
+            compose.waitForIdle()
+            compose.onNodeWithText("Failed to load panoramic image", substring = true).assertDoesNotExist()
+            compose.runOnIdle { assertNull(state.uiState.inputLocationData) }
+        }
+        assertEquals(0, centers.get())
+    }
+
+    @Test
+    fun pagerModeChangesRetainNonzeroPageTextureAndCamera() {
+        val first = image(localImage().absolutePath)
+        val file = localImage()
+        val second = image(file.absolutePath)
+        compose.runOnIdle {
+            coEvery { layer.searchImages(any(), any()) } returns Result.success(listOf(first, second))
+            scope.launch {
+                state.searchImages(Point(0.0, 0.0)).getOrThrow()
+                state.navigateNextImage().getOrThrow()
+            }
+        }
+        compose.setContent {
+            if (visible.value) OrientedImagery(state, Modifier.size(300.dp).testTag("panorama"))
+        }
+        awaitFrameCondition { projections.get() > 0 }
+        compose.mainClock.advanceTimeBy(1_000)
+        compose.onNodeWithText("2").assertIsDisplayed()
+        compose.onNodeWithTag("OrientedImagePager").performTouchInput {
+            swipe(Offset(width * 0.4f, height * 0.5f), Offset(width * 0.6f, height * 0.5f), 400)
+        }
+        compose.mainClock.advanceTimeBy(1_000)
+        val before = tapPixel()
+        assertTrue(file.delete())
+
+        for (enabled in listOf(true, false)) {
+            compose.runOnIdle { state.setSequentialNavigationEnabled(enabled) }
+            compose.mainClock.advanceTimeBy(1_000)
+            compose.waitForIdle()
+            compose.onNodeWithText("Failed to load panoramic image", substring = true).assertDoesNotExist()
+            val after = tapPixel()
+            assertEquals("Mode toggles must preserve yaw", before.x, after.x, 0.1)
+            assertEquals("Mode toggles must preserve pitch", before.y, after.y, 0.1)
+        }
     }
 
     @Test

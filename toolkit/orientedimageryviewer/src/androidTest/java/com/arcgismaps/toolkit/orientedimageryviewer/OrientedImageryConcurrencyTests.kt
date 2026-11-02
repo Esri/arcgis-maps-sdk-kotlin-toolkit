@@ -18,6 +18,7 @@ package com.arcgismaps.toolkit.orientedimageryviewer
 
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import com.arcgismaps.data.Feature
+import com.arcgismaps.exceptions.ArcGISException
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.layers.OrientedImageryLayer
@@ -35,9 +36,11 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -68,6 +71,7 @@ class OrientedImageryConcurrencyTests {
             every { layer.name } returns "Concurrency"
             every { layer.supportsSequentialNavigation } returns true
             every { layer.visibleFootprints } returns footprints
+            coEvery { layer.fetchAdjacentImage(any(), any()) } returns Result.failure(noAdjacentImage())
             feature = mockk()
             every { feature.geometry } returns otherLocation
             overlay = GraphicsOverlay()
@@ -90,6 +94,11 @@ class OrientedImageryConcurrencyTests {
 
     private fun assertImage(path: String?) {
         assertEquals(path, state.uiState.activeImageInfo?.dataUri)
+    }
+
+    private fun noAdjacentImage(): ArcGISException = mockk<ArcGISException>().also {
+        every { it.errorCode } returns 20
+        every { it.message } returns "No adjacent image query result is available"
     }
 
     private fun search(vararg images: OrientedImage) {
@@ -394,10 +403,10 @@ class OrientedImageryConcurrencyTests {
             val second = image("second")
             val third = image("third")
             search(first)
-            state.setSequentialNavigationEnabled(true)
             val pending = CompletableDeferred<Result<OrientedImage>>()
             coEvery { layer.fetchAdjacentImage(first, SequenceStep.Next) } coAnswers { pending.await() }
             coEvery { layer.fetchAdjacentImage(second, SequenceStep.Next) } returns Result.success(third)
+            state.setSequentialNavigationEnabled(true)
             scope.launch { state.navigateNextImage().getOrThrow() }
             val queued = scope.launch { state.navigateNextImage().getOrThrow() }
             coVerify(exactly = 0) { layer.fetchAdjacentImage(second, any()) }
@@ -422,6 +431,268 @@ class OrientedImageryConcurrencyTests {
                 state.navigateNextImage().getOrThrow()
                 assertImage("second")
             }
+        }
+    }
+
+    @Test
+    fun boundaryNavigationPublishesSearchResultIndicesAndPreservesFailedSelection() {
+        compose.runOnIdle {
+            val first = image("first")
+            val last = image("last")
+            search(first, image("middle"), last)
+            assertEquals(3, state.uiState.searchResultCount)
+            assertEquals(0, state.uiState.selectedResultIndex)
+            scope.launch {
+                assertEquals(ImageNavigationStatus.BoundaryReached, state.navigateFirstImage().getOrThrow())
+                assertEquals(ImageNavigationStatus.Moved, state.navigateLastImage().getOrThrow())
+                assertImage("last")
+                assertEquals(2, state.uiState.selectedResultIndex)
+                coEvery { first.load() } returns Result.failure(IllegalStateException("Load failed"))
+                assertTrue(state.navigateFirstImage().isFailure)
+                assertImage("last")
+                assertEquals(2, state.uiState.selectedResultIndex)
+                coEvery { first.load() } returns Result.success(Unit)
+                assertEquals(ImageNavigationStatus.Moved, state.navigateFirstImage().getOrThrow())
+                assertImage("first")
+                assertEquals(0, state.uiState.selectedResultIndex)
+            }
+        }
+    }
+
+    @Test
+    fun sequentialModeClearsSearchContextAndPreservesDisplayedImageOnExit() {
+        compose.runOnIdle {
+            val selected = image("selected")
+            val adjacent = image("adjacent")
+            search(image("first"), selected, image("last"))
+            scope.launch { state.navigateNextImage().getOrThrow() }
+            coEvery { layer.fetchAdjacentImage(selected, SequenceStep.Next) } returns Result.success(adjacent)
+            state.setSequentialNavigationEnabled(true)
+            assertNull(state.inputLocationData)
+            assertFalse(state.uiState.hasAdditionalImages)
+            assertEquals(listOf(selected), state.searchResultImages)
+            assertEquals(1, overlay.graphics.size)
+            assertEquals(1, footprints.size)
+            scope.launch { state.navigateNextImage().getOrThrow() }
+            state.setInputLocation(otherLocation)
+            assertImage("adjacent")
+            assertEquals(0, state.uiState.selectedResultIndex)
+            scope.launch {
+                assertEquals(ImageNavigationStatus.BoundaryReached, state.navigateFirstImage().getOrThrow())
+                assertEquals(ImageNavigationStatus.BoundaryReached, state.navigateLastImage().getOrThrow())
+            }
+            state.setSequentialNavigationEnabled(false)
+            assertImage("adjacent")
+            assertEquals(otherLocation.x, state.inputLocationData!!.x, 0.0)
+            assertEquals(listOf(adjacent), state.searchResultImages)
+            assertEquals(0, state.uiState.selectedResultIndex)
+            coVerify(exactly = 1) { selected.load() }
+            coVerify(exactly = 1) { adjacent.load() }
+            val revision = state.uiState.activeImageRevision
+            state.setSequentialNavigationEnabled(false)
+            assertEquals(revision, state.uiState.activeImageRevision)
+            scope.launch {
+                assertEquals(ImageNavigationStatus.BoundaryReached, state.navigateNextImage().getOrThrow())
+            }
+            assertImage("adjacent")
+        }
+    }
+
+    @Test
+    fun leavingSequentialModeInvalidatesRunningAndQueuedAdjacentRequests() {
+        compose.runOnIdle {
+            val first = image("first")
+            search(first, image("second"))
+            val pending = CompletableDeferred<Result<OrientedImage>>()
+            coEvery { layer.fetchAdjacentImage(first, SequenceStep.Next) } coAnswers { pending.await() }
+            state.setSequentialNavigationEnabled(true)
+            val running = scope.launch { state.navigateNextImage() }
+            val queued = scope.launch { state.navigatePreviousImage() }
+            state.setSequentialNavigationEnabled(false)
+            assertImage("first")
+            pending.complete(Result.success(image("obsolete adjacent")))
+            assertTrue(running.isCancelled)
+            assertTrue(queued.isCancelled)
+            assertImage("first")
+            assertEquals(0, state.uiState.selectedResultIndex)
+        }
+    }
+
+    @Test
+    fun enteringSequentialModeInvalidatesPendingResultLoad() {
+        compose.runOnIdle {
+            val second = image("second")
+            search(image("first"), second)
+            val pending = CompletableDeferred<Result<Unit>>()
+            coEvery { second.load() } coAnswers { pending.await() }
+            val running = scope.launch { state.navigateLastImage() }
+            state.setSequentialNavigationEnabled(true)
+            pending.complete(Result.success(Unit))
+            assertTrue(running.isCancelled)
+            assertImage("first")
+            state.setSequentialNavigationEnabled(false)
+            assertImage("first")
+            assertEquals(0, state.uiState.selectedResultIndex)
+        }
+    }
+
+    @Test
+    fun resetClearsSequentialModeAndResultSelection() {
+        compose.runOnIdle {
+            search(image("first"), image("second"))
+            state.setSequentialNavigationEnabled(true)
+            state.resetAll()
+            assertFalse(state.uiState.isSequentialNavigationEnabled)
+            assertEquals(0, state.uiState.searchResultCount)
+            assertEquals(-1, state.uiState.selectedResultIndex)
+            assertTrue(state.searchResultImages.isEmpty())
+            assertFalse(state.uiState.canNavigatePrevious)
+            assertFalse(state.uiState.canNavigateNext)
+        }
+    }
+
+    @Test
+    fun adjacentPrefetchesResolveIndependentlyWithoutLoadingImages() {
+        compose.runOnIdle {
+            val first = image("first")
+            val previous = image("previous")
+            val next = image("next")
+            val previousFetch = CompletableDeferred<Result<OrientedImage>>()
+            val nextFetch = CompletableDeferred<Result<OrientedImage>>()
+            coEvery { layer.fetchAdjacentImage(first, SequenceStep.Previous) } coAnswers { previousFetch.await() }
+            coEvery { layer.fetchAdjacentImage(first, SequenceStep.Next) } coAnswers { nextFetch.await() }
+            search(first)
+            state.setSequentialNavigationEnabled(true)
+            assertFalse(state.uiState.canNavigatePrevious)
+            assertFalse(state.uiState.canNavigateNext)
+            coVerify(exactly = 1) { layer.fetchAdjacentImage(first, SequenceStep.Previous) }
+            coVerify(exactly = 1) { layer.fetchAdjacentImage(first, SequenceStep.Next) }
+            previousFetch.complete(Result.success(previous))
+            assertTrue(state.uiState.canNavigatePrevious)
+            assertFalse(state.uiState.canNavigateNext)
+            nextFetch.complete(Result.success(next))
+            assertTrue(state.uiState.canNavigateNext)
+            coVerify(exactly = 0) { previous.load() }
+            coVerify(exactly = 0) { next.load() }
+            scope.launch { state.navigateNextImage().getOrThrow() }
+            assertImage("next")
+            coVerify(exactly = 1) { next.load() }
+            coVerify(exactly = 1) { layer.fetchAdjacentImage(first, SequenceStep.Next) }
+            coVerify(exactly = 1) { layer.fetchAdjacentImage(next, SequenceStep.Previous) }
+            coVerify(exactly = 1) { layer.fetchAdjacentImage(next, SequenceStep.Next) }
+            assertFalse(state.uiState.canNavigatePrevious)
+            assertFalse(state.uiState.canNavigateNext)
+        }
+    }
+
+    @Test
+    fun expectedBoundaryIsSilentButUnexpectedFetchErrorIsPublished() {
+        compose.runOnIdle {
+            val first = image("first")
+            val failure = IllegalStateException("Network unavailable")
+            coEvery { layer.fetchAdjacentImage(first, SequenceStep.Next) } returns Result.failure(failure)
+            search(first)
+            state.setSequentialNavigationEnabled(true)
+            assertFalse(state.uiState.canNavigatePrevious)
+            assertFalse(state.uiState.canNavigateNext)
+            assertNull(state.uiState.previousImageError)
+            assertEquals("Network unavailable", state.uiState.nextImageError)
+            scope.launch {
+                assertEquals(ImageNavigationStatus.BoundaryReached, state.navigatePreviousImage().getOrThrow())
+                assertEquals(failure, state.navigateNextImage().exceptionOrNull())
+            }
+            state.setSequentialNavigationEnabled(false)
+            assertNull(state.uiState.nextImageError)
+        }
+    }
+
+    @Test
+    fun boundaryMessageWithoutSdkNoDataCodeIsAnUnexpectedError() {
+        compose.runOnIdle {
+            val first = image("first")
+            val failure = mockk<ArcGISException>()
+            every { failure.errorCode } returns 19
+            every { failure.message } returns "No adjacent image query result is available"
+            coEvery { layer.fetchAdjacentImage(first, SequenceStep.Next) } returns Result.failure(failure)
+            search(first)
+            state.setSequentialNavigationEnabled(true)
+            assertEquals(failure.message, state.uiState.nextImageError)
+            assertFalse(state.uiState.canNavigateNext)
+        }
+    }
+
+    @Test
+    fun adjacentLoadFailurePreservesImageAndAllowsRetryWithoutRefetching() {
+        compose.runOnIdle {
+            val first = image("first")
+            val adjacent = image("adjacent")
+            coEvery { layer.fetchAdjacentImage(first, SequenceStep.Next) } returns Result.success(adjacent)
+            coEvery { adjacent.load() } returns Result.failure(IllegalStateException("Load failed"))
+            search(first)
+            state.setSequentialNavigationEnabled(true)
+            assertTrue(state.uiState.canNavigateNext)
+            scope.launch {
+                assertTrue(state.navigateNextImage().isFailure)
+                assertImage("first")
+                coEvery { adjacent.load() } returns Result.success(Unit)
+                state.navigateNextImage().getOrThrow()
+                assertImage("adjacent")
+                coVerify(exactly = 1) { layer.fetchAdjacentImage(first, SequenceStep.Next) }
+            }
+        }
+    }
+
+    @Test
+    fun exitingDuringAdjacentLoadKeepsCommittedImageAndCancelsNavigation() {
+        compose.runOnIdle {
+            val first = image("first")
+            val adjacent = image("adjacent")
+            val pending = CompletableDeferred<Result<Unit>>()
+            coEvery { layer.fetchAdjacentImage(first, SequenceStep.Next) } returns Result.success(adjacent)
+            coEvery { adjacent.load() } coAnswers { pending.await() }
+            search(first)
+            state.setSequentialNavigationEnabled(true)
+            val running = scope.launch { state.navigateNextImage() }
+            state.setSequentialNavigationEnabled(false)
+            pending.complete(Result.success(Unit))
+            assertTrue(running.isCancelled)
+            assertImage("first")
+            assertEquals(listOf(first), state.searchResultImages)
+        }
+    }
+
+    @Test
+    fun obsoletePrefetchCannotPublishAvailabilityOrErrorsAfterReplacement() {
+        compose.runOnIdle {
+            val first = image("first")
+            val pending = CompletableDeferred<Result<OrientedImage>>()
+            coEvery { layer.fetchAdjacentImage(first, SequenceStep.Next) } coAnswers {
+                withContext(NonCancellable) { pending.await() }
+            }
+            search(first)
+            state.setSequentialNavigationEnabled(true)
+            state.resetAll()
+            search(image("replacement"))
+            pending.complete(Result.failure(IllegalStateException("Obsolete error")))
+            assertImage("replacement")
+            assertFalse(state.uiState.canNavigateNext)
+            assertNull(state.uiState.nextImageError)
+        }
+    }
+
+    @Test
+    fun enteringSequentialModeBeforeSearchingStillPreservesDisplayedImageOnExit() {
+        compose.runOnIdle {
+            val first = image("first")
+            val adjacent = image("adjacent")
+            coEvery { layer.fetchAdjacentImage(first, SequenceStep.Next) } returns Result.success(adjacent)
+            state.setSequentialNavigationEnabled(true)
+            search(first, image("additional"))
+            assertFalse(state.uiState.hasAdditionalImages)
+            scope.launch { state.navigateNextImage().getOrThrow() }
+            state.setSequentialNavigationEnabled(false)
+            assertImage("adjacent")
+            assertEquals(listOf(adjacent), state.searchResultImages)
         }
     }
 

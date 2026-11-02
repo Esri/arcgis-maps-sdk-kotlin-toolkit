@@ -34,6 +34,7 @@ import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.Basemap
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.mapping.layers.RasterLayer
+import com.arcgismaps.mapping.layers.orientedimagery.OrientedImage
 import com.arcgismaps.mapping.symbology.SimpleMarkerSymbol
 import com.arcgismaps.mapping.symbology.SimpleMarkerSymbolStyle
 import com.arcgismaps.mapping.view.BackgroundGrid
@@ -68,10 +69,13 @@ import kotlinx.coroutines.awaitCancellation
 internal fun RasterImage(
     viewerState: OrientedImageryViewerState,
     modifier: Modifier = Modifier,
-    graphicsOverlay: GraphicsOverlay = remember { GraphicsOverlay() }
+    graphicsOverlay: GraphicsOverlay = remember { GraphicsOverlay() },
+    pageImage: OrientedImage? = null,
+    isActive: Boolean = true
 ) {
     val viewerUiState = viewerState.uiState
     val imageRevision = viewerUiState.activeImageRevision
+    fun isCurrent() = isActive && viewerState.uiState.activeImageRevision == imageRevision
     val coroutineScope = key(viewerState, imageRevision) { rememberCoroutineScope() }
 
     val proxy = remember {
@@ -83,7 +87,7 @@ internal fun RasterImage(
         listOf(graphicsOverlay, referenceOverlay)
     }
 
-    val rasterPath = viewerUiState.activeImageInfo?.dataUri ?: return
+    val rasterPath = (if (pageImage != null) pageImage.dataUri else viewerUiState.activeImageInfo?.dataUri) ?: return
     val rasterLayer = remember(rasterPath) {
         RasterLayer(Raster.createWithPath(rasterPath))
     }
@@ -92,11 +96,11 @@ internal fun RasterImage(
         ArcGISMap(Basemap(rasterLayer))
     }
 
-    DisposableEffect(viewerState, rasterLayer, viewerUiState.activeImageRevision) {
+    DisposableEffect(viewerState, rasterLayer, imageRevision, isActive) {
         val toRasterPoint: (DoubleXY) -> Point? = { imagePoint ->
             computeRasterPoint(imagePoint, rasterLayer)
         }
-        viewerState.registerMarkerOverlayInImage(graphicsOverlay, toRasterPoint)
+        if (isCurrent()) viewerState.registerMarkerOverlayInImage(graphicsOverlay, toRasterPoint)
         onDispose {
             viewerState.unregisterMarkerOverlayInImage(toRasterPoint)
         }
@@ -111,13 +115,11 @@ internal fun RasterImage(
         backgroundGrid = BackgroundGrid().apply { isVisible = false },
         mapViewInteractionOptions = MapViewInteractionOptions(isEnabled = true),
         onSingleTapConfirmed = onTap@{ event ->
-            if (!viewerState.isMarkingLocation ||
-                viewerState.uiState.activeImageRevision != imageRevision
-            ) return@onTap
+            if (!viewerState.isMarkingLocation || !isCurrent()) return@onTap
             val rasterPoint = event.mapPoint ?: return@onTap
             val imagePoint = computeImagePoint(rasterPoint, rasterLayer) ?: return@onTap
             coroutineScope.launch {
-                if (viewerState.uiState.activeImageRevision != imageRevision) return@launch
+                if (!isCurrent()) return@launch
                 viewerState.addMarkerToRasterImage(
                     imagePoint,
                     rasterPoint,
@@ -127,7 +129,7 @@ internal fun RasterImage(
         },
         onViewpointChangedForBoundingGeometry = { viewpoint ->
             val currentUiState = viewerState.uiState
-            if (currentUiState.activeImageRevision == imageRevision &&
+            if (isCurrent() &&
                 currentUiState.activeImageInfo != null && currentUiState.isActiveFootprintVisible &&
                 !currentUiState.isSequentialNavigationEnabled
             ) {
@@ -142,29 +144,26 @@ internal fun RasterImage(
 
     val sequentialNavigation = viewerState.supportsSequentialNavigation && viewerUiState.isSequentialNavigationEnabled
     val inputLocationData = viewerUiState.inputLocationData.takeUnless { sequentialNavigation }
-    LaunchedEffect(viewerState, rasterLayer, imageRevision, sequentialNavigation, inputLocationData) {
+    // Frame every page independently, including an incoming/outgoing page during pager animation.
+    LaunchedEffect(rasterLayer) {
+        try {
+            rasterLayer.load().getOrThrow()
+            rasterLayer.fullExtent?.let { proxy.setViewpointGeometry(it) }
+        } catch (error: CancellationException) {
+            throw error
+        } catch (error: Exception) {
+            Log.e("RasterImage", "Unable to frame the raster image", error)
+        }
+    }
+    LaunchedEffect(viewerState, rasterLayer, imageRevision, isActive, sequentialNavigation, inputLocationData) {
+        if (!isCurrent() || sequentialNavigation) return@LaunchedEffect
         var referenceGraphic: Graphic? = null
-        fun isCurrent() = viewerState.uiState.activeImageRevision == imageRevision
         try {
             rasterLayer.load().getOrThrow()
             ensureActive()
             if (!isCurrent()) return@LaunchedEffect
-            rasterLayer.fullExtent?.let { fullExtent ->
-                proxy.setViewpointGeometry(fullExtent)
-            }
-            ensureActive()
-            if (!isCurrent()) return@LaunchedEffect
-            val imagePoint = if (sequentialNavigation) {
-                val center = computeImageCenter(rasterLayer) ?: return@LaunchedEffect
-                val location = viewerState.imageToLocation(center)?.getOrThrow() ?: return@LaunchedEffect
-                ensureActive()
-                if (!isCurrent()) return@LaunchedEffect
-                viewerState.setInputLocation(location)
-                center
-            } else {
-                val location = inputLocationData?.toPoint() ?: return@LaunchedEffect
-                viewerState.locationToImage(location)?.getOrThrow() ?: return@LaunchedEffect
-            }
+            val location = inputLocationData?.toPoint() ?: return@LaunchedEffect
+            val imagePoint = viewerState.locationToImage(location)?.getOrThrow() ?: return@LaunchedEffect
             ensureActive()
             if (!isCurrent()) return@LaunchedEffect
             val rasterPoint = computeRasterPoint(imagePoint, rasterLayer) ?: return@LaunchedEffect
