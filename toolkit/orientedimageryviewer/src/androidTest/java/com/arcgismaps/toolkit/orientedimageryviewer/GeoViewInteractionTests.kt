@@ -84,6 +84,8 @@ class GeoViewInteractionTests {
             every { layer.visibleFootprints } returns mutableListOf()
             overlay = GraphicsOverlay()
             state = OrientedImageryViewerState(layer, overlay, scope)
+            state.toggleActiveFootprint()
+            state.toggleAdditionalCameraLocations()
             proxy = mockk()
             event = mockk()
             every { event.mapPoint } returns location

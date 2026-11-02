@@ -78,7 +78,11 @@ class PanoramicImageLifecycleTests {
         every { layer.name } returns "Panorama lifecycle"
         every { layer.supportsSequentialNavigation } returns true
         every { layer.visibleFootprints } returns mutableListOf()
-        compose.runOnIdle { state = OrientedImageryViewerState(layer, GraphicsOverlay(), scope) }
+        compose.runOnIdle {
+            state = OrientedImageryViewerState(layer, GraphicsOverlay(), scope)
+            state.toggleActiveFootprint()
+            state.toggleAdditionalCameraLocations()
+        }
     }
 
     @After

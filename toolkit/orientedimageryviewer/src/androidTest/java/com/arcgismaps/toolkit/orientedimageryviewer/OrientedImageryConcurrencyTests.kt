@@ -71,7 +71,7 @@ class OrientedImageryConcurrencyTests {
             feature = mockk()
             every { feature.geometry } returns otherLocation
             overlay = GraphicsOverlay()
-            state = OrientedImageryViewerState(layer, overlay, scope)
+            state = OrientedImageryViewerState(layer, overlay, scope) { mockk(relaxed = true) }
         }
     }
 
@@ -97,6 +97,128 @@ class OrientedImageryConcurrencyTests {
         scope.launch { state.searchImages(location).getOrThrow() }
     }
 
+    private fun assertOverlays(active: Boolean, additional: Boolean, cameras: Boolean) {
+        assertEquals(active, state.uiState.isActiveFootprintVisible)
+        assertEquals(additional, state.uiState.isAdditionalFootprintsVisible)
+        assertEquals(cameras, state.uiState.isAdditionalCameraLocationsVisible)
+    }
+
+    @Test
+    fun overlayAvailabilityFollowsImageSessionRatherThanCreatedFootprints() {
+        compose.runOnIdle {
+            assertFalse(state.hasActiveImage)
+            assertFalse(state.uiState.hasAdditionalImages)
+            search(image("first"), image("second"))
+            assertTrue(state.hasActiveImage)
+            assertTrue(state.uiState.hasAdditionalImages)
+            assertFalse(state.uiState.isAdditionalFootprintsVisible)
+            assertEquals(1, footprints.size)
+            coEvery { layer.fetchImageForFeature(feature) } returns Result.success(image("feature"))
+            scope.launch { state.fetchImage(feature).getOrThrow() }
+            assertTrue(state.hasActiveImage)
+            assertFalse(state.uiState.hasAdditionalImages)
+            search()
+            assertFalse(state.hasActiveImage)
+            assertFalse(state.uiState.hasAdditionalImages)
+            search(image("replacement"), image("additional"))
+            val pending = CompletableDeferred<Result<List<OrientedImage>>>()
+            coEvery { layer.searchImages(any(), any()) } coAnswers { pending.await() }
+            scope.launch { assertTrue(state.searchImages(location).isFailure) }
+            assertFalse(state.hasActiveImage)
+            assertFalse(state.uiState.hasAdditionalImages)
+            pending.complete(Result.failure(IllegalStateException("Search failed")))
+            assertFalse(state.hasActiveImage)
+            assertFalse(state.uiState.hasAdditionalImages)
+            search(image("recovered"), image("additional"))
+            state.resetAll()
+            assertFalse(state.hasActiveImage)
+            assertFalse(state.uiState.hasAdditionalImages)
+        }
+    }
+
+    @Test
+    fun overlaysDefaultToCurrentFootprintAndCameraLocations() {
+        compose.runOnIdle {
+            assertOverlays(true, false, true)
+            state.toggleActiveFootprint()
+            state.toggleAdditionalFootprints()
+            state.toggleAdditionalCameraLocations()
+            assertOverlays(false, true, false)
+            state.resetAll()
+            assertOverlays(true, false, true)
+        }
+    }
+
+    @Test
+    fun allOverlayCombinationsSurviveEmptySearchAndFeatureFetch() {
+        compose.runOnIdle {
+            for (selection in 0..7) {
+                state.resetAll()
+                val active = selection and 1 != 0
+                val additional = selection and 2 != 0
+                val cameras = selection and 4 != 0
+                if (!active) state.toggleActiveFootprint()
+                if (additional) state.toggleAdditionalFootprints()
+                if (!cameras) state.toggleAdditionalCameraLocations()
+                search(image("first"))
+                assertOverlays(active, additional, cameras)
+                search()
+                assertImage(null)
+                assertOverlays(false, false, false)
+                // Repeated empty results must not overwrite remembered choices.
+                search()
+                coEvery { layer.fetchImageForFeature(feature) } returns Result.success(image("feature"))
+                scope.launch { state.fetchImage(feature).getOrThrow() }
+                assertImage("feature")
+                assertOverlays(active, additional, cameras)
+            }
+        }
+    }
+
+    @Test
+    fun searchAndFetchErrorsClearChecksWithoutLosingPreferences() {
+        compose.runOnIdle {
+            state.toggleAdditionalCameraLocations()
+            coEvery { layer.searchImages(any(), any()) } returns Result.failure(IllegalStateException("Search failed"))
+            scope.launch { assertTrue(state.searchImages(location).isFailure) }
+            assertOverlays(false, false, false)
+            coEvery { layer.fetchImageForFeature(feature) } returns Result.failure(IllegalStateException("Fetch failed"))
+            scope.launch { assertTrue(state.fetchImage(feature).isFailure) }
+            assertOverlays(false, false, false)
+            search(image("recovered"))
+            assertOverlays(true, false, false)
+        }
+    }
+
+    @Test
+    fun imageLoadFailureClearsChecksAndSuccessfulSearchRestoresThem() {
+        compose.runOnIdle {
+            state.toggleAdditionalFootprints()
+            val broken = image("broken")
+            coEvery { broken.load() } returns Result.failure(IllegalStateException("Load failed"))
+            coEvery { layer.fetchImageForFeature(feature) } returns Result.success(broken)
+            scope.launch { assertTrue(state.fetchImage(feature).isFailure) }
+            assertOverlays(false, false, false)
+            search(image("recovered"))
+            assertOverlays(true, true, true)
+        }
+    }
+
+    @Test
+    fun pendingSearchUsesLatestOverlayChoices() {
+        compose.runOnIdle {
+            val pending = CompletableDeferred<Result<List<OrientedImage>>>()
+            coEvery { layer.searchImages(any(), any()) } coAnswers { pending.await() }
+            scope.launch { state.searchImages(location).getOrThrow() }
+            assertOverlays(true, false, true)
+            state.toggleActiveFootprint()
+            state.toggleAdditionalFootprints()
+            pending.complete(Result.success(listOf(image("loaded"))))
+            assertImage("loaded")
+            assertOverlays(false, true, true)
+        }
+    }
+
     @Test
     fun newerSearchWinsEvenWhenOlderSearchCompletesLast() {
         compose.runOnIdle {
@@ -108,9 +230,10 @@ class OrientedImageryConcurrencyTests {
             val oldJob = scope.launch { state.searchImages(location) }
             scope.launch { state.searchImages(otherLocation).getOrThrow() }
             assertImage("latest")
-            pending.complete(Result.success(listOf(old)))
+            pending.complete(Result.success(listOf(old, image("obsolete additional"))))
             assertTrue(oldJob.isCancelled)
             assertImage("latest")
+            assertFalse(state.uiState.hasAdditionalImages)
             coVerify(exactly = 0) { old.load() }
         }
     }
@@ -328,6 +451,9 @@ class OrientedImageryConcurrencyTests {
             assertEquals(listOf(foreignGraphic), overlay.graphics.toList())
             assertEquals(listOf(foreignFootprint), footprints)
             search(image("replacement"))
+            assertTrue(foreignGraphic in overlay.graphics)
+            assertTrue(foreignFootprint in footprints)
+            state.resetAll()
             assertEquals(listOf(foreignGraphic), overlay.graphics.toList())
             assertEquals(listOf(foreignFootprint), footprints)
         }

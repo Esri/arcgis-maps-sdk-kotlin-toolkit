@@ -25,6 +25,7 @@ import com.arcgismaps.data.Feature
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.layers.OrientedImageryLayer
 import com.arcgismaps.mapping.layers.orientedimagery.OrientedImage
+import com.arcgismaps.mapping.layers.orientedimagery.OrientedImageFootprint
 import com.arcgismaps.mapping.layers.orientedimagery.SequenceStep
 import com.arcgismaps.mapping.popup.Popup
 import com.arcgismaps.mapping.symbology.SimpleMarkerSymbol
@@ -106,23 +107,34 @@ public sealed interface ImageNavigationStatus {
  * @param coroutineScope The coroutine scope for managing asynchronous operations.
  */
 @Stable
-public class OrientedImageryViewerState public constructor(
+public class OrientedImageryViewerState internal constructor(
     private val orientedImageryLayer: OrientedImageryLayer,
     graphicsOverlay: GraphicsOverlay,
-    coroutineScope: CoroutineScope
+    coroutineScope: CoroutineScope,
+    createFootprint: (OrientedImage) -> OrientedImageFootprint
 ) {
+    public constructor(
+        orientedImageryLayer: OrientedImageryLayer,
+        graphicsOverlay: GraphicsOverlay,
+        coroutineScope: CoroutineScope
+    ) : this(orientedImageryLayer, graphicsOverlay, coroutineScope, ::OrientedImageFootprint)
+
     /**
      * The title to display for the viewer.
      */
     public val title: String = orientedImageryLayer.name.ifBlank { "Oriented imagery" }
 
     private val _uiState = mutableStateOf(OrientedImageryViewerUiState())
+    // Failed image requests clear the displayed checks, not these user preferences.
+    private var preferredActiveFootprintVisible = uiState.isActiveFootprintVisible
+    private var preferredAdditionalFootprintsVisible = uiState.isAdditionalFootprintsVisible
+    private var preferredAdditionalCameraLocationsVisible = uiState.isAdditionalCameraLocationsVisible
     private var interactionRevision: Long = 0
     private val session: ImageSession = ImageSession(
         orientedImageryLayer,
         onImageChanged = ::publishActiveImage,
         onInputLocationChanged = ::setInputLocation,
-        onNavigated = { footprints.imageChanged() }
+        onImageActivated = { footprints.imageChanged() }
     )
     private val markers: MarkerCoordinator = MarkerCoordinator(
         orientedImageryLayer, graphicsOverlay,
@@ -134,7 +146,8 @@ public class OrientedImageryViewerState public constructor(
         activeImage = { session.activeImage },
         additionalImages = { session.additionalImages },
         inputLocation = { uiState.inputLocationData?.toPoint() },
-        uiState = { uiState }
+        uiState = { uiState },
+        createFootprint = createFootprint
     )
 
     internal val currentMarkerSymbol: SimpleMarkerSymbol
@@ -374,7 +387,7 @@ public class OrientedImageryViewerState public constructor(
         currentCoroutineContext().ensureActive()
         resetImageState()
         setInputLocation(lastMapLocation)
-        return session.search(lastMapLocation)
+        return session.search(lastMapLocation).also { clearOverlayChecksIfNoImage() }
     }
 
     /**
@@ -386,7 +399,19 @@ public class OrientedImageryViewerState public constructor(
     public suspend fun fetchImage(feature: Feature): Result<Unit> {
         currentCoroutineContext().ensureActive()
         resetImageState()
-        return session.fetch(feature)
+        return session.fetch(feature).also { clearOverlayChecksIfNoImage() }
+    }
+
+    private fun clearOverlayChecksIfNoImage() {
+        if (!hasActiveImage) {
+            updateUiState {
+                it.copy(
+                    isActiveFootprintVisible = false,
+                    isAdditionalFootprintsVisible = false,
+                    isAdditionalCameraLocationsVisible = false
+                )
+            }
+        }
     }
 
     /**
@@ -410,6 +435,7 @@ public class OrientedImageryViewerState public constructor(
      */
     public fun toggleActiveFootprint() {
         val shouldShow = !uiState.isActiveFootprintVisible
+        preferredActiveFootprintVisible = shouldShow
         updateUiState { uiState -> uiState.copy(isActiveFootprintVisible = shouldShow) }
 
         footprints.setActiveVisible(shouldShow)
@@ -420,6 +446,7 @@ public class OrientedImageryViewerState public constructor(
      */
     public fun toggleAdditionalFootprints() {
         val shouldShow = !uiState.isAdditionalFootprintsVisible
+        preferredAdditionalFootprintsVisible = shouldShow
         updateUiState { uiState -> uiState.copy(isAdditionalFootprintsVisible = shouldShow) }
 
         footprints.setAdditionalFootprintsVisible(shouldShow)
@@ -430,6 +457,7 @@ public class OrientedImageryViewerState public constructor(
      */
     public fun toggleAdditionalCameraLocations() {
         val shouldShow = !uiState.isAdditionalCameraLocationsVisible
+        preferredAdditionalCameraLocationsVisible = shouldShow
         updateUiState { uiState -> uiState.copy(isAdditionalCameraLocationsVisible = shouldShow) }
 
         footprints.setAdditionalCamerasVisible(shouldShow)
@@ -511,8 +539,15 @@ public class OrientedImageryViewerState public constructor(
      */
     public fun resetAll() {
         resetImageState()
+        val defaults = OrientedImageryViewerUiState()
+        preferredActiveFootprintVisible = defaults.isActiveFootprintVisible
+        preferredAdditionalFootprintsVisible = defaults.isAdditionalFootprintsVisible
+        preferredAdditionalCameraLocationsVisible = defaults.isAdditionalCameraLocationsVisible
         updateInteractionState {
             it.copy(
+                isActiveFootprintVisible = preferredActiveFootprintVisible,
+                isAdditionalFootprintsVisible = preferredAdditionalFootprintsVisible,
+                isAdditionalCameraLocationsVisible = preferredAdditionalCameraLocationsVisible,
                 isFindImagesSelected = true,
                 isDisplayImageSelected = false,
                 imageInteractionStatus = GeoViewInteractionStatus.FindImages,
@@ -528,9 +563,6 @@ public class OrientedImageryViewerState public constructor(
         markers.reset()
         updateUiState { uiState ->
             uiState.copy(
-                isActiveFootprintVisible = false,
-                isAdditionalFootprintsVisible = false,
-                isAdditionalCameraLocationsVisible = false,
                 activeImageInfo = null,
                 inputLocationData = null,
                 noImagesFoundRevision = null
@@ -558,7 +590,18 @@ public class OrientedImageryViewerState public constructor(
         updateUiState { uiState ->
             uiState.copy(
                 activeImageInfo = info,
-                activeImageRevision = uiState.activeImageRevision + 1
+                // Both additional overlays are built lazily from these images when selected.
+                hasAdditionalImages = orientedImage != null && session.additionalImages.isNotEmpty(),
+                activeImageRevision = uiState.activeImageRevision + 1,
+                isActiveFootprintVisible = if (orientedImage != null) {
+                    preferredActiveFootprintVisible
+                } else uiState.isActiveFootprintVisible,
+                isAdditionalFootprintsVisible = if (orientedImage != null) {
+                    preferredAdditionalFootprintsVisible
+                } else uiState.isAdditionalFootprintsVisible,
+                isAdditionalCameraLocationsVisible = if (orientedImage != null) {
+                    preferredAdditionalCameraLocationsVisible
+                } else uiState.isAdditionalCameraLocationsVisible
             )
         }
     }

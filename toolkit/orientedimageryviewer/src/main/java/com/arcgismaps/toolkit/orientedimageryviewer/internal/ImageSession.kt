@@ -39,13 +39,13 @@ import kotlinx.coroutines.sync.withLock
  * @param layer The oriented imagery layer to interact with.
  * @param onImageChanged Callback invoked when the active image changes.
  * @param onInputLocationChanged Callback invoked when the input location changes.
- * @param onNavigated Callback invoked after a successful navigation operation.
+ * @param onImageActivated Callback invoked after a non-null active image is published.
  */
 internal class ImageSession(
     private val layer: OrientedImageryLayer,
     private val onImageChanged: (OrientedImage?) -> Unit,
     private val onInputLocationChanged: (Point?) -> Unit,
-    private val onNavigated: () -> Unit
+    private val onImageActivated: () -> Unit
 ) {
     var activeImage: OrientedImage? = null
         private set
@@ -107,7 +107,6 @@ internal class ImageSession(
                     load(image, session)
                     if (!sequential) activeIndex = targetIndex
                     commit(image)
-                    onNavigated()
                     ImageNavigationStatus.Moved
                 }
             }
@@ -117,6 +116,7 @@ internal class ImageSession(
     private fun commit(image: OrientedImage?) {
         activeImage = image
         onImageChanged(image)
+        if (image != null) onImageActivated()
     }
 
     private suspend fun ensureSession(session: Long) {

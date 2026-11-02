@@ -94,6 +94,8 @@ class ImageLocationMarkerTests {
             mapOverlay = GraphicsOverlay()
             imageOverlay = GraphicsOverlay()
             state = OrientedImageryViewerState(layer, mapOverlay, scope)
+            state.toggleActiveFootprint()
+            state.toggleAdditionalCameraLocations()
             activateImage()
             val rasterLayer = rasterLayer()
             state.registerMarkerOverlayInImage(imageOverlay) { computeRasterPoint(it, rasterLayer) }

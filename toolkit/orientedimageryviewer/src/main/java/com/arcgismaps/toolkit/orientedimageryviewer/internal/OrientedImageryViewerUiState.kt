@@ -29,6 +29,7 @@ import com.arcgismaps.toolkit.orientedimageryviewer.OrientedImageryViewerState
 @Immutable
 internal data class OrientedImageryViewerUiState(
     val activeImageInfo: OrientedImageInfo? = null,
+    val hasAdditionalImages: Boolean = false,
     val activeImageRevision: Long = 0,
     val noImagesFoundRevision: Long? = null,
     val inputLocationData: PointData? = null,
@@ -37,9 +38,9 @@ internal data class OrientedImageryViewerUiState(
     val isDisplayImageSelected: Boolean = false,
     val imageInteractionStatus: GeoViewInteractionStatus = GeoViewInteractionStatus.FindImages,
     val isMarkingLocation: Boolean = false,
-    val isActiveFootprintVisible: Boolean = false,
+    val isActiveFootprintVisible: Boolean = true,
     val isAdditionalFootprintsVisible: Boolean = false,
-    val isAdditionalCameraLocationsVisible: Boolean = false
+    val isAdditionalCameraLocationsVisible: Boolean = true
 ) {
     val geoViewInteractionStatus: GeoViewInteractionStatus
         get() = if (isMarkingLocation) GeoViewInteractionStatus.AddMarkers else imageInteractionStatus

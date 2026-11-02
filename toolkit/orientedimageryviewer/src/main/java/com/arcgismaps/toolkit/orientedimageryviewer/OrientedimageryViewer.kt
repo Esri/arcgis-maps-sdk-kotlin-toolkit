@@ -32,7 +32,6 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.Surface
@@ -57,6 +56,7 @@ import com.arcgismaps.toolkit.orientedimageryviewer.internal.ui.MarkerToolsButto
 import com.arcgismaps.toolkit.orientedimageryviewer.internal.ui.MarkerSelection
 import com.arcgismaps.toolkit.orientedimageryviewer.internal.ui.ModeSelectionButton
 import com.arcgismaps.toolkit.orientedimageryviewer.internal.ui.OrientedImagery
+import com.arcgismaps.toolkit.orientedimageryviewer.internal.ui.OverlaySelectionButton
 import com.arcgismaps.toolkit.popup.Popup
 import com.arcgismaps.toolkit.popup.PopupState
 import kotlinx.coroutines.launch
@@ -196,6 +196,11 @@ internal fun ViewerLayout(
                                 viewerState.setImageModeSelected(GeoViewInteractionStatus.DisplayImage, it)
                             },
                             isMarkingLocation = viewerState.uiState.isMarkingLocation,
+                            hasActiveImage = viewerState.hasActiveImage,
+                            hasAdditionalImages = viewerState.uiState.hasAdditionalImages,
+                            isActiveFootprintVisible = viewerState.uiState.isActiveFootprintVisible,
+                            isAdditionalFootprintsVisible = viewerState.uiState.isAdditionalFootprintsVisible,
+                            isAdditionalCameraLocationsVisible = viewerState.uiState.isAdditionalCameraLocationsVisible,
                             onPreviousImage = onPreviousImage,
                             onNextImage = onNextImage,
                             onCurrentFootprint = onCurrentFootprint,
@@ -306,6 +311,11 @@ private fun OrientedImageryToolbar(
     onFindImagesSelectedChange: (Boolean) -> Unit,
     onDisplayImageSelectedChange: (Boolean) -> Unit,
     isMarkingLocation: Boolean,
+    hasActiveImage: Boolean,
+    hasAdditionalImages: Boolean,
+    isActiveFootprintVisible: Boolean,
+    isAdditionalFootprintsVisible: Boolean,
+    isAdditionalCameraLocationsVisible: Boolean,
     onPreviousImage: (() -> Unit)?,
     onNextImage: (() -> Unit)?,
     onCurrentFootprint: () -> Unit,
@@ -327,6 +337,16 @@ private fun OrientedImageryToolbar(
             isDisplayImageSelected = isDisplayImageSelected,
             onFindImagesSelectedChange = onFindImagesSelectedChange,
             onDisplayImageSelectedChange = onDisplayImageSelectedChange
+        )
+        OverlaySelectionButton(
+            hasActiveImage = hasActiveImage,
+            hasAdditionalImages = hasAdditionalImages,
+            isActiveFootprintVisible = isActiveFootprintVisible,
+            isAdditionalFootprintsVisible = isAdditionalFootprintsVisible,
+            isAdditionalCameraLocationsVisible = isAdditionalCameraLocationsVisible,
+            onCurrentFootprint = onCurrentFootprint,
+            onAdditionalFootprints = onAdditionalFootprints,
+            onAdditionalCameraLocations = onAdditionalCameraLocations
         )
         MarkerToolsButton(
             isMarkingLocation = isMarkingLocation,

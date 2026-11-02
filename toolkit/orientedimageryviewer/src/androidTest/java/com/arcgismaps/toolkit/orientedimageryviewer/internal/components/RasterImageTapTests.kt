@@ -90,6 +90,8 @@ class RasterImageTapTests {
         val state = OrientedImageryViewerState(layer, mapOverlay, scope)
         try {
             compose.runOnIdle {
+                state.toggleActiveFootprint()
+                state.toggleAdditionalCameraLocations()
                 scope.launch {
                     state.searchImages(location).getOrThrow()
                     state.addMarker()

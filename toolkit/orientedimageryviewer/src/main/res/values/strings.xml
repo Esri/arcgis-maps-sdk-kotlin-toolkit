@@ -26,6 +26,11 @@
     <string name="toolbar_popup">Image popup</string>
     <string name="toolbar_markers">Markers</string>
     <string name="toolbar_mode">Mode</string>
+    <string name="toolbar_overlays">Overlays</string>
+    <string name="overlay_selection_title">Overlays Selection</string>
+    <string name="overlay_selection_current_footprint">Show Current Footprint</string>
+    <string name="overlay_selection_additional_footprints">Show Additional Footprints</string>
+    <string name="overlay_selection_camera_locations">Show Camera Locations</string>
     <string name="mode_selection_title">Mode Selection</string>
     <string name="mode_selection_find_images">Find Images</string>
     <string name="mode_selection_display_image">Display Image</string>
