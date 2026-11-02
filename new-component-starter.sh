@@ -109,19 +109,19 @@
     }
 
     # removes the default plugin block from the toolkit component's build.gradle.kts
-    # and adds one back that has publishing capabilities.
-function makeProjectPublishable {
-    pushd toolkit > /dev/null
-    local gradleFile="${componentName}/build.gradle.kts"
-    read -r -d '' pluginsBlock <<-EOM
+    # and adds one back that has no publishing capabilities.
+    function makeProjectNonPublishable {
+	pushd toolkit > /dev/null
+	local gradleFile="${componentName}/build.gradle.kts"
+	read -r -d '' pluginsBlock <<-EOM
 plugins {
     alias(libs.plugins.binary.compatibility.validator) apply true
     id("com.android.library")
-    id("artifact-deploy")
     id("org.jetbrains.kotlin.plugin.compose")
     alias(libs.plugins.kotlin.convention.plugin)
 }
 EOM
+
     # Find the line number of the old plugin block start
     local startLine=$(awk '/plugins {/{ print NR; exit }' "${gradleFile}")
     # Find the line number of the old plugin block end
@@ -184,8 +184,8 @@ EOM
         ./new-microapp-starter.sh
     fi
     addToSettings
-    if [ ! -z $publish ]; then
-	makeProjectPublishable
+    if [ -z $publish ]; then
+	makeProjectNonPublishable
     fi
     echo "Done"
 }
