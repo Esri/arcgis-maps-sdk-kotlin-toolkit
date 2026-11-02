@@ -51,7 +51,9 @@ class ComponentConventions : Plugin<Project> {
                 apply("org.jetbrains.kotlin.plugin.compose")
                 apply("kotlin-convention-plugin")
                 apply("org.jetbrains.kotlinx.binary-compatibility-validator")
-                apply("artifact-deploy")
+                if (project.name != "template") {
+                    apply("artifact-deploy")
+                }
 
                 withPlugin("org.jetbrains.kotlinx.binary-compatibility-validator") {
                     withPlugin("com.android.library") {
