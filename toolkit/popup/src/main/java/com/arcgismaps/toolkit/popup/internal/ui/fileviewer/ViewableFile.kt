@@ -46,8 +46,7 @@ internal data class ViewableFile(
     val size: Long = 0,
     val path: String,
     @TypeParceler<ViewableFileType, ViewableFileTypeParceler>() val type: ViewableFileType,
-    val contentType: String = "image/jpeg",
-    val caption: String? = null
+    val contentType: String = "image/jpeg"
 ) : Parcelable
 
 private object ViewableFileTypeParceler : Parceler<ViewableFileType> {

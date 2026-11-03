@@ -115,15 +115,11 @@ private fun FileViewerContent(
     ) {
         when (fileState.type) {
             is ViewableFileType.Image ->{
-                val contentDesc = if (fileState.caption == null) fileState.name else fileState.name + "\n" + fileState.caption
                 AsyncImage(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .semantics{
-                            contentDescription = contentDesc
-                        },
+                        .fillMaxSize(),
                     model = fileState.path,
-                    contentDescription = null
+                    contentDescription = fileState.name
                 )
             }
             is ViewableFileType.Video, ViewableFileType.Audio -> VideoViewer(path = fileState.path, name = fileState.name)
