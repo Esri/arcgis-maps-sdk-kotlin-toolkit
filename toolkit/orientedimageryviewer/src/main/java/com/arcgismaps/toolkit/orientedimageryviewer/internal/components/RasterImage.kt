@@ -17,13 +17,18 @@
 package com.arcgismaps.toolkit.orientedimageryviewer.internal.components
 
 import android.util.Log
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import com.arcgismaps.Color
 import com.arcgismaps.geometry.Envelope
 import com.arcgismaps.geometry.GeometryEngine
@@ -46,6 +51,7 @@ import com.arcgismaps.raster.Raster
 import com.arcgismaps.toolkit.orientedimageryviewer.OrientedImageryViewerState
 import com.arcgismaps.toolkit.geoviewcompose.MapView
 import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
+import com.arcgismaps.toolkit.orientedimageryviewer.internal.ui.ImageInfoButton
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.ensureActive
@@ -71,7 +77,8 @@ internal fun RasterImage(
     modifier: Modifier = Modifier,
     graphicsOverlay: GraphicsOverlay = remember { GraphicsOverlay() },
     pageImage: OrientedImage? = null,
-    isActive: Boolean = true
+    isActive: Boolean = true,
+    onPopup: (() -> Unit)? = null
 ) {
     val viewerUiState = viewerState.uiState
     val imageRevision = viewerUiState.activeImageRevision
@@ -106,41 +113,49 @@ internal fun RasterImage(
         }
     }
 
-    MapView(
-        modifier = modifier,
-        arcGISMap = arcGISMap,
-        mapViewProxy = proxy,
-        graphicsOverlays = graphicOverlays,
-        isAttributionBarVisible = false,
-        backgroundGrid = BackgroundGrid().apply { isVisible = false },
-        mapViewInteractionOptions = MapViewInteractionOptions(isEnabled = true),
-        onSingleTapConfirmed = onTap@{ event ->
-            if (!viewerState.isMarkingLocation || !isCurrent()) return@onTap
-            val rasterPoint = event.mapPoint ?: return@onTap
-            val imagePoint = computeImagePoint(rasterPoint, rasterLayer) ?: return@onTap
-            coroutineScope.launch {
-                if (!isCurrent()) return@launch
-                viewerState.addMarkerToRasterImage(
-                    imagePoint,
-                    rasterPoint,
-                    graphicsOverlay
-                )
-            }
-        },
-        onViewpointChangedForBoundingGeometry = { viewpoint ->
-            val currentUiState = viewerState.uiState
-            if (isCurrent() &&
-                currentUiState.activeImageInfo != null && currentUiState.isActiveFootprintVisible &&
-                !currentUiState.isSequentialNavigationEnabled
-            ) {
-                val imageCoordinates = computePixelCorners(viewpoint, rasterLayer)
-                if (imageCoordinates != null) {
-                    viewerState.updateFootprints(imageCoordinates)
+    Box(modifier = modifier) {
+        MapView(
+            modifier = Modifier.fillMaxSize(),
+            arcGISMap = arcGISMap,
+            mapViewProxy = proxy,
+            graphicsOverlays = graphicOverlays,
+            isAttributionBarVisible = false,
+            backgroundGrid = BackgroundGrid().apply { isVisible = false },
+            mapViewInteractionOptions = MapViewInteractionOptions(isEnabled = true),
+            onSingleTapConfirmed = onTap@{ event ->
+                if (!viewerState.isMarkingLocation || !isCurrent()) return@onTap
+                val rasterPoint = event.mapPoint ?: return@onTap
+                val imagePoint = computeImagePoint(rasterPoint, rasterLayer) ?: return@onTap
+                coroutineScope.launch {
+                    if (!isCurrent()) return@launch
+                    viewerState.addMarkerToRasterImage(
+                        imagePoint,
+                        rasterPoint,
+                        graphicsOverlay
+                    )
                 }
+            },
+            onViewpointChangedForBoundingGeometry = { viewpoint ->
+                val currentUiState = viewerState.uiState
+                if (isCurrent() &&
+                    currentUiState.activeImageInfo != null && currentUiState.isActiveFootprintVisible &&
+                    !currentUiState.isSequentialNavigationEnabled
+                ) {
+                    val imageCoordinates = computePixelCorners(viewpoint, rasterLayer)
+                    if (imageCoordinates != null) {
+                        viewerState.updateFootprints(imageCoordinates)
+                    }
+                }
+                Log.i("RasterImage", "Viewpoint changed for bounding geometry: ${viewpoint.targetGeometry.toJson()}")
             }
-            Log.i("RasterImage", "Viewpoint changed for bounding geometry: ${viewpoint.targetGeometry.toJson()}")
+        )
+        if (isCurrent() && onPopup != null) {
+            ImageInfoButton(
+                onClick = { if (isCurrent()) onPopup() },
+                modifier = Modifier.align(Alignment.TopEnd).padding(16.dp)
+            )
         }
-    )
+    }
 
     val sequentialNavigation = viewerState.supportsSequentialNavigation && viewerUiState.isSequentialNavigationEnabled
     val inputLocationData = viewerUiState.inputLocationData.takeUnless { sequentialNavigation }

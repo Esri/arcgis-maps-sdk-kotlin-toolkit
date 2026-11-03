@@ -28,6 +28,8 @@
     <string name="toolbar_sequential_navigation">Location-image</string>
     <string name="toolbar_reset">Reset</string>
     <string name="toolbar_popup">Image popup</string>
+    <string name="image_details_title">Image details</string>
+    <string name="image_details_close">Close image details</string>
     <string name="toolbar_markers">Markers</string>
     <string name="toolbar_mode">Mode</string>
     <string name="toolbar_overlays">Overlays</string>

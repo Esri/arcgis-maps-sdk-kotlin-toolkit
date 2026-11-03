@@ -16,8 +16,10 @@
 
 package com.arcgismaps.toolkit.orientedimageryviewer
 
+import android.graphics.Bitmap
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.assertIsDisplayed
@@ -25,39 +27,90 @@ import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performScrollTo
+import androidx.test.platform.app.InstrumentationRegistry
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.layers.OrientedImageryLayer
+import com.arcgismaps.mapping.layers.orientedimagery.OrientedImage
+import com.arcgismaps.mapping.layers.orientedimagery.OrientedImageType
 import com.arcgismaps.mapping.popup.Popup
+import com.arcgismaps.mapping.view.DoubleXY
 import com.arcgismaps.mapping.view.Graphic
 import com.arcgismaps.mapping.view.GraphicsOverlay
+import io.mockk.coEvery
+import io.mockk.every
+import io.mockk.mockk
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import org.junit.After
+import org.junit.Before
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
+import java.io.File
 
 class ImagePopupTests {
     @get:Rule
     val compose = createComposeRule()
 
     private lateinit var state: OrientedImageryViewerState
+    private lateinit var scope: CoroutineScope
+    private lateinit var layer: OrientedImageryLayer
+    private lateinit var imageFile: File
+    private val location = Point(0.0, 0.0)
     private var viewerDismissed = false
+
+    @Before
+    fun createLocalImage() {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        imageFile = File.createTempFile("image-popup", ".png", context.cacheDir)
+        val bitmap = Bitmap.createBitmap(100, 80, Bitmap.Config.ARGB_8888)
+        try {
+            imageFile.outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
+        } finally {
+            bitmap.recycle()
+        }
+        val image = mockk<OrientedImage>()
+        every { image.dataUri } returns imageFile.absolutePath
+        every { image.type } returns OrientedImageType.Horizontal
+        every { image.geometry } returns location
+        every { image.attributes } returns mutableMapOf("Description" to "Test image")
+        coEvery { image.load() } returns Result.success(Unit)
+        coEvery { image.locationToImage(any()) } returns Result.success(DoubleXY(50.0, 40.0))
+        layer = mockk()
+        every { layer.name } returns "Popup test"
+        every { layer.supportsSequentialNavigation } returns false
+        every { layer.visibleFootprints } returns mutableListOf()
+        coEvery { layer.searchImages(any(), any()) } returns Result.success(listOf(image))
+    }
+
+    @After
+    fun deleteLocalImage() {
+        imageFile.delete()
+    }
 
     private fun showViewer(
         useTestPopup: Boolean = true,
-        createPopup: (suspend () -> Result<Popup>)? = null
+        createPopup: (suspend () -> Result<Popup>)? = null,
+        activateImage: Boolean = true
     ) {
         compose.setContent {
-            val scope = rememberCoroutineScope()
+            scope = rememberCoroutineScope()
             state = androidx.compose.runtime.remember {
                 OrientedImageryViewerState(
-                    OrientedImageryLayer("https://example.com/FeatureServer/0"),
+                    layer,
                     GraphicsOverlay(),
                     scope
                 )
+            }
+            LaunchedEffect(state) {
+                // These tests do not need SDK footprints or camera overlays.
+                state.toggleActiveFootprint()
+                state.toggleAdditionalCameraLocations()
+                if (activateImage) state.searchImages(location).getOrThrow()
             }
             MaterialTheme {
                 ViewerLayout(
@@ -74,44 +127,58 @@ class ImagePopupTests {
                 )
             }
         }
+        if (activateImage) compose.waitUntil(10_000) { state.hasActiveImage }
     }
 
     private fun openPopup() {
-        compose.onNodeWithContentDescription("Image popup").performScrollTo().performClick()
+        compose.onNodeWithContentDescription("Image popup").assertIsDisplayed().performClick()
         assertPopupVisible()
     }
 
     private fun assertPopupVisible() {
-        // Both modes use "Close"; the hidden viewer toolbar identifies popup mode.
         compose.onNodeWithText("Viewer title").assertDoesNotExist()
         compose.onNodeWithContentDescription("Image popup").assertDoesNotExist()
-        compose.onNodeWithContentDescription("Close").assertIsDisplayed()
+        compose.onNodeWithText("Image details").assertIsDisplayed()
+        compose.onNodeWithContentDescription("Close image details").assertIsDisplayed()
     }
 
     private fun assertViewerVisible() {
         compose.onNodeWithText("Viewer title").assertIsDisplayed()
         compose.onNodeWithContentDescription("Image popup").assertExists()
+        compose.onNodeWithText("Image details").assertDoesNotExist()
     }
 
     @Test
-    fun noActiveImageShowsSnackbarAndKeepsViewerVisible() {
-        showViewer(useTestPopup = false)
+    fun noActiveImageHasNoFabAndCannotCreatePopup() {
+        showViewer(useTestPopup = false, activateImage = false)
         compose.runOnIdle {
             runBlocking {
                 assertTrue(state.createImagePopup().exceptionOrNull() is IllegalStateException)
             }
         }
-        compose.onNodeWithContentDescription("Image popup").performScrollTo().performClick()
-        compose.onNodeWithText("Select an image before opening its popup.").assertIsDisplayed()
+        compose.onNodeWithContentDescription("Image popup").assertDoesNotExist()
+        compose.onNodeWithText("Viewer title").assertIsDisplayed()
+    }
+
+    @Test
+    fun popupCreationFailureShowsSnackbarAndKeepsViewerVisible() {
+        showViewer(createPopup = { Result.failure(IllegalStateException("Test failure")) })
+        compose.onNodeWithContentDescription("Image popup").performClick()
+        compose.onNodeWithText("Unable to create the image popup.").assertIsDisplayed()
         assertViewerVisible()
     }
 
     @Test
-    fun popupHidesViewerToolbarAndFloatingCloseRestoresViewer() {
-        showViewer()
+    fun fabCreatesActiveImagePopupAndHeaderCloseRestoresViewer() {
+        showViewer(useTestPopup = false)
         openPopup()
 
-        compose.onNodeWithContentDescription("Close").performClick()
+        val titleBounds = compose.onNodeWithText("Image details").fetchSemanticsNode().boundsInRoot
+        val closeBounds = compose.onNodeWithContentDescription("Close image details")
+            .fetchSemanticsNode().boundsInRoot
+        assertTrue(titleBounds.right <= closeBounds.left)
+        assertTrue(titleBounds.center.y in closeBounds.top..closeBounds.bottom)
+        compose.onNodeWithContentDescription("Close image details").performClick()
         assertViewerVisible()
         compose.runOnIdle { assertFalse(viewerDismissed) }
     }
@@ -126,6 +193,14 @@ class ImagePopupTests {
                 state.resetAll()
                 assertEquals(revision + 1, state.uiState.activeImageRevision)
             }
+            compose.onNodeWithText("Viewer title").assertIsDisplayed()
+            compose.onNodeWithContentDescription("Image popup").assertDoesNotExist()
+            compose.runOnIdle {
+                state.toggleActiveFootprint()
+                state.toggleAdditionalCameraLocations()
+                scope.launch { state.searchImages(location).getOrThrow() }
+            }
+            compose.waitUntil(10_000) { state.hasActiveImage }
             assertViewerVisible()
         }
     }
@@ -139,7 +214,7 @@ class ImagePopupTests {
             pending.await()
         })
         repeat(2) {
-            compose.onNodeWithContentDescription("Image popup").performScrollTo().performClick()
+            compose.onNodeWithContentDescription("Image popup").performClick()
         }
         compose.runOnIdle {
             assertEquals(1, requests)
@@ -152,22 +227,24 @@ class ImagePopupTests {
     fun imageChangeDiscardsPendingPopup() {
         val pending = CompletableDeferred<Result<Popup>>()
         showViewer(createPopup = { pending.await() })
-        compose.onNodeWithContentDescription("Image popup").performScrollTo().performClick()
+        compose.onNodeWithContentDescription("Image popup").performClick()
         compose.runOnIdle {
             state.resetAll()
             pending.complete(Result.success(Popup(Graphic(Point(0.0, 0.0)))))
         }
-        assertViewerVisible()
+        compose.onNodeWithText("Viewer title").assertIsDisplayed()
+        compose.onNodeWithContentDescription("Image popup").assertDoesNotExist()
+        compose.onNodeWithContentDescription("Close image details").assertDoesNotExist()
     }
 
     @Test
     fun unrelatedToolbarStateDoesNotClosePopupAndSurvivesDismissal() {
         showViewer()
         openPopup()
-        compose.runOnIdle { state.setSequentialNavigationEnabled(true) }
+        compose.runOnIdle { state.addMarker() }
         assertPopupVisible()
-        compose.onNodeWithContentDescription("Close").performClick()
-        compose.runOnIdle { assertTrue(state.uiState.isSequentialNavigationEnabled) }
+        compose.onNodeWithContentDescription("Close image details").performClick()
+        compose.runOnIdle { assertTrue(state.isMarkingLocation) }
         assertViewerVisible()
     }
 }

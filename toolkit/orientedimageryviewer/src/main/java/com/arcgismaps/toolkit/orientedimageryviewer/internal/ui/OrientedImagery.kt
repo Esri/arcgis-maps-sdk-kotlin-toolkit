@@ -75,6 +75,7 @@ import kotlinx.coroutines.launch
 internal fun OrientedImagery(
     viewerState: OrientedImageryViewerState,
     modifier: Modifier = Modifier,
+    onPopup: (() -> Unit)? = null,
 ) {
     val viewerUiState = viewerState.uiState
 
@@ -128,7 +129,7 @@ internal fun OrientedImagery(
                             when {
                                 loaded == null -> CircularProgressIndicator()
                                 loaded?.isFailure == true -> PlaceholderMessage(stringResource(R.string.image_load_failed))
-                                else -> ImageContent(viewerState, image, active)
+                                else -> ImageContent(viewerState, image, active, onPopup)
                             }
                             if (!viewerUiState.isSequentialNavigationEnabled) Surface(
                                 modifier = Modifier.align(Alignment.BottomEnd).padding(12.dp),
@@ -165,18 +166,19 @@ private class ImagePageKeys {
 private fun ImageContent(
     viewerState: OrientedImageryViewerState,
     image: OrientedImage? = null,
-    isActive: Boolean = true
+    isActive: Boolean = true,
+    onPopup: (() -> Unit)? = null
 ) {
     val dataUri = if (image != null) image.dataUri else viewerState.uiState.activeImageInfo?.dataUri
     val type = if (image != null) image.type else viewerState.uiState.activeImageInfo?.type
     when {
         dataUri == null -> PlaceholderMessage("The selected image is missing a data URI.")
         type == OrientedImageType.Image360 -> PanoramicImage(
-            viewerState, Modifier.fillMaxSize(), pageImage = image, isActive = isActive
+            viewerState, Modifier.fillMaxSize(), pageImage = image, isActive = isActive, onPopup = onPopup
         )
         type == OrientedImageType.Horizontal || type == OrientedImageType.Inspection ||
                 type == OrientedImageType.Nadir || type == OrientedImageType.Oblique -> RasterImage(
-            viewerState, Modifier.fillMaxSize(), pageImage = image, isActive = isActive
+            viewerState, Modifier.fillMaxSize(), pageImage = image, isActive = isActive, onPopup = onPopup
         )
         else -> PlaceholderMessage("This image type is not supported.")
     }

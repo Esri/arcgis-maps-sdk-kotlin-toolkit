@@ -51,6 +51,7 @@ import com.arcgismaps.mapping.layers.orientedimagery.OrientedImage
 import com.arcgismaps.mapping.symbology.SimpleMarkerSymbol
 import com.arcgismaps.toolkit.orientedimageryviewer.OrientedImageryViewerState
 import com.arcgismaps.toolkit.orientedimageryviewer.R
+import com.arcgismaps.toolkit.orientedimageryviewer.internal.ui.ImageInfoButton
 import com.arcgismaps.toolkit.orientedimageryviewer.internal.ui.drawMarkerSymbol
 import dev.romainguy.kotlin.math.Float3
 import io.github.sceneview.rememberCameraNode
@@ -72,7 +73,8 @@ internal fun PanoramicImage(
     modifier: Modifier = Modifier,
     radiusMeters: Float = 10.0f,
     pageImage: OrientedImage? = null,
-    isActive: Boolean = true
+    isActive: Boolean = true,
+    onPopup: (() -> Unit)? = null
 ) {
     val imageSource = (if (pageImage != null) pageImage.dataUri else viewerState.uiState.activeImageInfo?.dataUri) ?: return
     val imageRevision = viewerState.uiState.activeImageRevision
@@ -190,6 +192,12 @@ internal fun PanoramicImage(
                         modifier = Modifier.padding(top = 16.dp)
                     )
                 }
+            }
+            if (isCurrent() && onPopup != null) {
+                ImageInfoButton(
+                    onClick = { if (isCurrent()) onPopup() },
+                    modifier = Modifier.align(Alignment.TopEnd).padding(16.dp)
+                )
             }
             return@Box
         }
@@ -345,6 +353,12 @@ internal fun PanoramicImage(
         }
         loadErrorMessage?.let { message ->
             Text(message, modifier = Modifier.align(Alignment.BottomCenter).padding(16.dp))
+        }
+        if (isCurrent() && onPopup != null) {
+            ImageInfoButton(
+                onClick = { if (isCurrent()) onPopup() },
+                modifier = Modifier.align(Alignment.TopEnd).padding(16.dp)
+            )
         }
     }
     // Scene nodes above have committed their replacement before old native resources are released.

@@ -21,20 +21,18 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -148,6 +146,29 @@ internal fun ViewerLayout(
                 viewerState.consumeNoImagesFound(revision)
             }
         }
+        val onPopup: () -> Unit = {
+            if (!isCreatingPopup) {
+                isCreatingPopup = true
+                coroutineScope.launch {
+                    try {
+                        val result = onCreateImagePopup()
+                        if (viewerState.uiState.activeImageRevision == imageRevision) {
+                            result.onSuccess { popup ->
+                                viewerState.dismissMarkerSelection()
+                                imagePopup = popup
+                            }.onFailure {
+                                errors.showError(
+                                    if (viewerState.hasActiveImage) creationFailedMessage
+                                    else noActiveImageMessage
+                                )
+                            }
+                        }
+                    } finally {
+                        isCreatingPopup = false
+                    }
+                }
+            }
+        }
         ViewerLayout(
             showTopBar = imagePopup == null,
             topBar = {
@@ -217,29 +238,6 @@ internal fun ViewerLayout(
                             supportsSequentialNavigation = viewerState.supportsSequentialNavigation,
                             isSequentialNavigationEnabled = isSequentialNavigationEnabled,
                             onSequentialNavigation = onSequentialNavigation,
-                            onPopup = {
-                                if (!isCreatingPopup) {
-                                    isCreatingPopup = true
-                                    coroutineScope.launch {
-                                        try {
-                                            val result = onCreateImagePopup()
-                                            if (viewerState.uiState.activeImageRevision == imageRevision) {
-                                                result.onSuccess { popup ->
-                                                    viewerState.dismissMarkerSelection()
-                                                    imagePopup = popup
-                                                }.onFailure {
-                                                    errors.showError(
-                                                        if (viewerState.hasActiveImage) creationFailedMessage
-                                                        else noActiveImageMessage
-                                                    )
-                                                }
-                                            }
-                                        } finally {
-                                            isCreatingPopup = false
-                                        }
-                                    }
-                                }
-                            },
                             onReset = onReset
                         )
                     }
@@ -247,33 +245,49 @@ internal fun ViewerLayout(
             },
             content = {
                 Box(modifier = Modifier.fillMaxSize()) {
-                    OrientedImagery(viewerState = viewerState, modifier = Modifier.fillMaxSize())
+                    OrientedImagery(
+                        viewerState = viewerState,
+                        modifier = Modifier.fillMaxSize(),
+                        onPopup = onPopup.takeIf { imagePopup == null }
+                    )
                     imagePopup?.let { popup ->
                         // Scope evaluation to the popup's composition, including dismissal and image changes.
                         val popupScope = rememberCoroutineScope()
                         val popupState = remember(popup) { PopupState(popup, popupScope) }
-                        Popup(
-                            popupState = popupState,
-                            modifier = Modifier.fillMaxSize(),
-                            onDismiss = { imagePopup = null },
-                            showCloseIcon = false
-                        )
+                        // Cover the renderer with an opaque surface, including the popup header.
                         Surface(
-                            modifier = Modifier
-                                .align(Alignment.TopEnd)
-                                .padding(top = 16.dp, end = 16.dp),
-                            shape = CircleShape,
-                            color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                            tonalElevation = 2.dp,
+                            modifier = Modifier.fillMaxSize(),
+                            color = MaterialTheme.colorScheme.surface,
+                            contentColor = MaterialTheme.colorScheme.onSurface
                         ) {
-                            IconButton(
-                                onClick = { imagePopup = null },
-                                modifier = Modifier.size(40.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Close,
-                                    contentDescription = stringResource(R.string.toolbar_close),
-                                    tint = MaterialTheme.colorScheme.onSurface
+                            Column(modifier = Modifier.fillMaxSize()) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth()
+                                        .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                                        .padding(start = 16.dp, end = 8.dp, top = 8.dp, bottom = 8.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        text = stringResource(R.string.image_details_title),
+                                        modifier = Modifier.weight(1f).padding(end = 8.dp),
+                                        style = MaterialTheme.typography.titleLarge,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                    IconButton(onClick = { imagePopup = null }) {
+                                        Icon(
+                                            imageVector = Icons.Default.Close,
+                                            contentDescription = stringResource(R.string.image_details_close),
+                                            tint = MaterialTheme.colorScheme.onSurface
+                                        )
+                                    }
+                                }
+                                HorizontalDivider()
+                                Popup(
+                                    popupState = popupState,
+                                    modifier = Modifier.weight(1f).fillMaxWidth(),
+                                    onDismiss = { imagePopup = null },
+                                    showCloseIcon = false
                                 )
                             }
                         }
@@ -328,7 +342,6 @@ private fun OrientedImageryToolbar(
     supportsSequentialNavigation: Boolean,
     isSequentialNavigationEnabled: Boolean,
     onSequentialNavigation: () -> Unit,
-    onPopup: () -> Unit,
     onReset: () -> Unit,
 ) {
     Row(verticalAlignment = Alignment.CenterVertically) {
