@@ -70,9 +70,12 @@ internal class MarkerCoordinator(
         val symbol: SimpleMarkerSymbol
     )
 
+    // Selected symbols are shared by markers and must not be mutated after selection.
     private data class Selection(val id: MarkerOptionId?, val symbol: SimpleMarkerSymbol)
 
-    private var selection by mutableStateOf(Selection(null, ImageDefaults.defaultMarkerSymbol()))
+    private var selection by mutableStateOf(
+        MarkerSymbols.options.first().let { Selection(it.id, it.symbol) }
+    )
     val currentSymbol: SimpleMarkerSymbol get() = selection.symbol
     val selectedOptionId: MarkerOptionId? get() = selection.id
     var isSelectionVisible by mutableStateOf(false)
@@ -85,13 +88,14 @@ internal class MarkerCoordinator(
     private var mapGraphics: List<Graphic> = emptyList()
 
     fun selectOption(id: MarkerOptionId) {
-        selection = Selection(id, MarkerSymbols.options.first { it.id == id }.symbol.clone())
+        selection = Selection(id, MarkerSymbols.options.first { it.id == id }.symbol)
         isSelectionVisible = false
     }
 
     fun selectSymbol(symbol: SimpleMarkerSymbol) {
         val id = MarkerSymbols.options.firstOrNull { it.symbol === symbol }?.id
-        selection = Selection(id, symbol.clone())
+        // SDK clone shares the outline; copy it too to isolate subsequent caller mutations.
+        selection = Selection(id, symbol.clone().apply { outline = symbol.outline?.clone() })
         isSelectionVisible = false
     }
 
@@ -143,7 +147,7 @@ internal class MarkerCoordinator(
         val image = activeImage() ?: return null
         val currentTarget = target ?: return null
         if (currentTarget.revision != state.activeImageRevision) return null
-        return Operation(image, state.activeImageRevision, generation, currentTarget, currentSymbol.clone())
+        return Operation(image, state.activeImageRevision, generation, currentTarget, currentSymbol)
     }
 
     private fun isCurrent(operation: Operation): Boolean = uiState().let { state ->
@@ -153,9 +157,9 @@ internal class MarkerCoordinator(
 
     suspend fun addFromMap(point: Point) {
         currentCoroutineContext().ensureActive()
-        // Snapshot once, before either projection or coverage can suspend.
+        // Capture the symbol reference once, before either projection or coverage can suspend.
         val operation = snapshot()
-        addMapMarker(point, operation?.symbol ?: currentSymbol.clone())
+        addMapMarker(point, operation?.symbol ?: currentSymbol)
         if (operation == null) return
         val pixel = operation.image.locationToImage(point).getOrThrow()
         currentCoroutineContext().ensureActive()
@@ -191,7 +195,7 @@ internal class MarkerCoordinator(
             currentCoroutineContext().ensureActive()
             if (!isCurrent(operation) || !accepts()) return
             commit(operation.symbol)
-            addMapMarker(point, operation.symbol.clone())
+            addMapMarker(point, operation.symbol)
         } catch (error: Exception) {
             if (error is CancellationException) throw error
             currentCoroutineContext().ensureActive()
@@ -199,14 +203,14 @@ internal class MarkerCoordinator(
         }
     }
 
-    fun addMapMarker(point: Point, symbol: SimpleMarkerSymbol = currentSymbol.clone()) {
+    fun addMapMarker(point: Point, symbol: SimpleMarkerSymbol = currentSymbol) {
         val graphic = Graphic(point, symbol)
         mapOverlay.graphics.add(graphic)
         mapGraphics += graphic
     }
 
     private fun addRasterMarker(overlay: GraphicsOverlay, point: Point, symbol: SimpleMarkerSymbol) {
-        val graphic = Graphic(point, symbol.clone())
+        val graphic = Graphic(point, symbol)
         overlay.graphics.add(graphic)
         imageGraphics += graphic
     }

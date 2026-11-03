@@ -34,9 +34,10 @@ import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.toolkit.orientedimageryviewer.OrientedImageryViewer
 import com.arcgismaps.toolkit.orientedimageryviewer.OrientedImageryViewerState
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotSame
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertSame
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 
@@ -58,29 +59,35 @@ class MarkerSelectionTests {
     }
 
     private fun openSelection() {
-        compose.onNodeWithText("Markers").performScrollTo().performClick()
+        compose.runOnIdle {
+            if (!state.isMarkingLocation) state.addMarker()
+        }
+        if (compose.onAllNodes(androidx.compose.ui.test.hasText("Marker Tools")).fetchSemanticsNodes().isEmpty()) {
+            compose.onNodeWithText("Markers").performScrollTo().performClick()
+        }
         compose.onNodeWithText("Select Marker").performClick()
         compose.onNodeWithText("Marker Selection").assertIsDisplayed()
     }
 
     @Test
-    fun selectingEachSymbolClosesPanelAndUpdatesCurrentSymbol() {
+    fun selectingEachSymbolReturnsToToolsAndSharesPaletteSymbol() {
         showViewer()
         listOf("Violet square", "Yellow triangle", "Orange diamond").forEachIndexed { index, description ->
             openSelection()
             compose.onNodeWithContentDescription(description).performClick()
             compose.onNodeWithText("Marker Selection").assertDoesNotExist()
+            compose.onNodeWithText("Marker Tools").assertIsDisplayed()
             compose.runOnIdle {
                 val expected = MarkerSymbols.symbols[index]
                 assertEquals(MarkerSymbols.options[index].id, state.selectedMarkerOptionId)
-                assertNotSame(expected, state.currentMarkerSymbol)
+                assertSame(expected, state.currentMarkerSymbol)
                 assertEquals(expected.style, state.currentMarkerSymbol.style)
                 assertEquals(expected.color, state.currentMarkerSymbol.color)
                 assertEquals(12f, state.currentMarkerSymbol.size)
                 assertEquals(Color.black, state.currentMarkerSymbol.outline!!.color)
                 assertEquals(1f, state.currentMarkerSymbol.outline!!.width)
                 assertEquals(SimpleLineSymbolStyle.Solid, state.currentMarkerSymbol.outline!!.style)
-                assertFalse(state.isMarkingLocation)
+                assertTrue(state.isMarkingLocation)
             }
             openSelection()
             compose.onNodeWithContentDescription(description).assertIsSelected()
@@ -89,11 +96,16 @@ class MarkerSelectionTests {
     }
 
     @Test
-    fun defaultAndCustomSymbolsHaveNoPaletteIdentity() {
+    fun defaultSelectsFirstPaletteOptionAndCustomSymbolsHaveNoPaletteIdentity() {
         showViewer()
-        compose.runOnIdle { assertNull(state.selectedMarkerOptionId) }
+        compose.runOnIdle {
+            val defaultOption = MarkerSymbols.options.first()
+            assertEquals(defaultOption.id, state.selectedMarkerOptionId)
+            assertSame(defaultOption.symbol, state.currentMarkerSymbol)
+        }
         openSelection()
-        listOf("Violet square", "Yellow triangle", "Orange diamond").forEach {
+        compose.onNodeWithContentDescription("Violet square").assertIsSelected()
+        listOf("Yellow triangle", "Orange diamond").forEach {
             compose.onNodeWithContentDescription(it).assertIsNotSelected()
         }
         compose.runOnIdle {
@@ -103,6 +115,9 @@ class MarkerSelectionTests {
             state.selectMarkerSymbol(customSymbol)
             assertNull(state.selectedMarkerOptionId)
             assertEquals(customSymbol, state.currentMarkerSymbol)
+            assertNotSame(customSymbol, state.currentMarkerSymbol)
+            customSymbol.color = Color.yellow
+            assertEquals(Color.black, state.currentMarkerSymbol.color)
         }
         openSelection()
         compose.onNodeWithContentDescription("Violet square").assertIsNotSelected()
@@ -113,7 +128,8 @@ class MarkerSelectionTests {
     fun selectionIdentityDoesNotDependOnSymbolStyle() {
         showViewer()
         compose.runOnIdle {
-            state.selectMarkerOption(MarkerOptionId.OrangeDiamond)
+            // selectSymbol clones at the boundary, so this test does not mutate the shared palette.
+            state.selectMarkerSymbol(MarkerSymbols.symbols.last())
             // Even when styles match, only the explicitly selected ID should be highlighted.
             state.currentMarkerSymbol.style = MarkerSymbols.symbols.first().style
         }
@@ -123,7 +139,7 @@ class MarkerSelectionTests {
     }
 
     @Test
-    fun backAndCloseDismissWithoutChangingSymbol() {
+    fun backReturnsToToolsAndCloseDismissesWithoutChangingSymbol() {
         showViewer()
         val initialSymbol = compose.runOnIdle { state.currentMarkerSymbol }
         listOf("Back to marker tools", "Close").forEach { description ->
@@ -134,9 +150,14 @@ class MarkerSelectionTests {
                 compose.onAllNodes(androidx.compose.ui.test.hasContentDescription(description))[1].performClick()
             } else compose.onNodeWithContentDescription(description).performClick()
             compose.onNodeWithText("Marker Selection").assertDoesNotExist()
+            if (description == "Back to marker tools") {
+                compose.onNodeWithText("Marker Tools").assertIsDisplayed()
+            } else {
+                compose.onNodeWithText("Marker Tools").assertDoesNotExist()
+            }
             compose.runOnIdle {
                 assertEquals(initialSymbol, state.currentMarkerSymbol)
-                assertNull(state.selectedMarkerOptionId)
+                assertEquals(MarkerSymbols.options.first().id, state.selectedMarkerOptionId)
             }
         }
     }

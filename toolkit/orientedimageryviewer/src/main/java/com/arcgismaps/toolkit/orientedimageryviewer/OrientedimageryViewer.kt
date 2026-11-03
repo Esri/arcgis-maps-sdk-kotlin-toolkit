@@ -54,7 +54,7 @@ import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.toolkit.orientedimageryviewer.internal.ui.ErrorSnackbarContainer
 import com.arcgismaps.toolkit.orientedimageryviewer.internal.ui.ExploreButton
 import com.arcgismaps.toolkit.orientedimageryviewer.internal.ui.MarkerToolsButton
-import com.arcgismaps.toolkit.orientedimageryviewer.internal.ui.MarkerSelection
+import com.arcgismaps.toolkit.orientedimageryviewer.internal.ui.MarkerOptionId
 import com.arcgismaps.toolkit.orientedimageryviewer.internal.ui.ModeSelectionButton
 import com.arcgismaps.toolkit.orientedimageryviewer.internal.ui.OrientedImagery
 import com.arcgismaps.toolkit.orientedimageryviewer.internal.ui.OverlaySelectionButton
@@ -197,6 +197,10 @@ internal fun ViewerLayout(
                                 viewerState.setImageModeSelected(GeoViewInteractionStatus.DisplayImage, it)
                             },
                             isMarkingLocation = viewerState.uiState.isMarkingLocation,
+                            isMarkerSelectionVisible = viewerState.isMarkerSelectionVisible,
+                            selectedMarkerOptionId = viewerState.selectedMarkerOptionId,
+                            onSelectMarkerOption = viewerState::selectMarkerOption,
+                            onDismissMarkerSelection = viewerState::dismissMarkerSelection,
                             hasActiveImage = viewerState.hasActiveImage,
                             hasAdditionalImages = viewerState.uiState.hasAdditionalImages,
                             isActiveFootprintVisible = viewerState.uiState.isActiveFootprintVisible,
@@ -244,14 +248,6 @@ internal fun ViewerLayout(
             content = {
                 Box(modifier = Modifier.fillMaxSize()) {
                     OrientedImagery(viewerState = viewerState, modifier = Modifier.fillMaxSize())
-                    if (viewerState.isMarkerSelectionVisible && imagePopup == null) {
-                        MarkerSelection(
-                            selectedOptionId = viewerState.selectedMarkerOptionId,
-                            onSelectOption = viewerState::selectMarkerOption,
-                            onDismiss = viewerState::dismissMarkerSelection,
-                            modifier = Modifier.align(Alignment.TopStart).padding(8.dp)
-                        )
-                    }
                     imagePopup?.let { popup ->
                         // Scope evaluation to the popup's composition, including dismissal and image changes.
                         val popupScope = rememberCoroutineScope()
@@ -312,6 +308,10 @@ private fun OrientedImageryToolbar(
     onFindImagesSelectedChange: (Boolean) -> Unit,
     onDisplayImageSelectedChange: (Boolean) -> Unit,
     isMarkingLocation: Boolean,
+    isMarkerSelectionVisible: Boolean,
+    selectedMarkerOptionId: MarkerOptionId?,
+    onSelectMarkerOption: (MarkerOptionId) -> Unit,
+    onDismissMarkerSelection: () -> Unit,
     hasActiveImage: Boolean,
     hasAdditionalImages: Boolean,
     isActiveFootprintVisible: Boolean,
@@ -353,7 +353,11 @@ private fun OrientedImageryToolbar(
             isMarkingLocation = isMarkingLocation,
             onAddMarker = onAddMarker,
             onSelectMarker = onSelectMarker,
-            onClearAllMarkers =onClearAllMarkers
+            onClearAllMarkers = onClearAllMarkers,
+            isMarkerSelectionVisible = isMarkerSelectionVisible,
+            selectedOptionId = selectedMarkerOptionId,
+            onSelectOption = onSelectMarkerOption,
+            onDismissSelection = onDismissMarkerSelection
         )
         ExploreButton(
             supportsSequentialNavigation = supportsSequentialNavigation,

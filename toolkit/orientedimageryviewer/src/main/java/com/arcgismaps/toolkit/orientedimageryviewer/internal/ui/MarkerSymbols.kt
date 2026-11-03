@@ -33,7 +33,7 @@ internal data class MarkerOption(
     @StringRes val descriptionResId: Int
 )
 
-/** Symbol prototypes are cloned when selected so existing markers retain their appearance. */
+/** Palette symbols are shared by selections and markers; do not mutate them after initialization. */
 internal object MarkerSymbols {
     val options: List<MarkerOption> = listOf(
         MarkerOption(

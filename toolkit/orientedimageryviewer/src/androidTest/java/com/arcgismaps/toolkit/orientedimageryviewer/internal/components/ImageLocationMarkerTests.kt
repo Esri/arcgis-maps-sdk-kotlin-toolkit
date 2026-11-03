@@ -17,6 +17,7 @@
 package com.arcgismaps.toolkit.orientedimageryviewer.internal.components
 
 import androidx.compose.ui.test.junit4.v2.createComposeRule
+import com.arcgismaps.Color
 import com.arcgismaps.data.ArcGISFeatureTable
 import com.arcgismaps.data.Feature
 import com.arcgismaps.geometry.Envelope
@@ -37,6 +38,7 @@ import com.arcgismaps.raster.RasterInfo
 import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
 import com.arcgismaps.toolkit.orientedimageryviewer.OrientedImageryViewerState
 import com.arcgismaps.toolkit.orientedimageryviewer.internal.ui.MarkerSymbols
+import com.arcgismaps.toolkit.orientedimageryviewer.internal.ui.MarkerOptionId
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -53,6 +55,8 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNotSame
+import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
@@ -112,7 +116,8 @@ class ImageLocationMarkerTests {
     fun selectedSymbolIsUsedForRasterMarkersFromBothOrigins() {
         compose.runOnIdle {
             val selected = MarkerSymbols.symbols[1]
-            state.selectMarkerSymbol(selected)
+            state.selectMarkerOption(MarkerOptionId.YellowTriangle)
+            assertSame(selected, state.currentMarkerSymbol)
             tap()
             coEvery { image.imageToLocation(any()) } returns Result.success(location)
             scope.launch {
@@ -138,15 +143,42 @@ class ImageLocationMarkerTests {
             state.registerMarkerInPanoramicImage(revision, 20, 10)
             val triangle = MarkerSymbols.symbols[1]
             val diamond = MarkerSymbols.symbols[2]
-            state.selectMarkerSymbol(triangle)
+            state.selectMarkerOption(MarkerOptionId.YellowTriangle)
             coEvery { image.imageToLocation(any()) } returns Result.success(location)
             scope.launch { state.addMarkerToPanoramicImage(DoubleXY(3.0, 4.0), revision) }
-            state.selectMarkerSymbol(diamond)
+            state.selectMarkerOption(MarkerOptionId.OrangeDiamond)
             tap()
             assertEquals(listOf(triangle, diamond), state.markerPointsInPanoramicImage.map { it.symbol })
+            assertSame(triangle, state.markerPointsInPanoramicImage.first().symbol)
+            assertSame(diamond, state.markerPointsInPanoramicImage.last().symbol)
             assertEquals(listOf(false, true), state.markerPointsInPanoramicImage.map { it.isFromGeoView })
             state.selectMarkerSymbol(MarkerSymbols.symbols.first())
             assertEquals(triangle, state.markerPointsInPanoramicImage.first().symbol)
+        }
+    }
+
+    @Test
+    fun suppliedSymbolIsIsolatedFromCallerAndSharedByPanoramicMarkers() {
+        compose.runOnIdle {
+            val supplied = MarkerSymbols.symbols.first().clone().apply { outline = outline?.clone() }
+            state.selectMarkerSymbol(supplied)
+            val selected = state.currentMarkerSymbol
+            assertNotSame(supplied, selected)
+            val originalColor = selected.color
+            val originalOutlineColor = selected.outline!!.color
+            supplied.color = Color.black
+            supplied.outline!!.color = Color.yellow
+            assertEquals(originalColor, selected.color)
+            assertEquals(originalOutlineColor, selected.outline!!.color)
+
+            val revision = state.uiState.activeImageRevision
+            state.registerMarkerInPanoramicImage(revision, 20, 10)
+            tap()
+            coEvery { image.imageToLocation(any()) } returns Result.success(location)
+            scope.launch { state.addMarkerToPanoramicImage(DoubleXY(3.0, 4.0), revision) }
+            assertEquals(2, state.markerPointsInPanoramicImage.size)
+            state.markerPointsInPanoramicImage.forEach { assertSame(selected, it.symbol) }
+            mapOverlay.graphics.forEach { assertEquals(selected, it.symbol) }
         }
     }
 
@@ -700,10 +732,10 @@ class ImageLocationMarkerTests {
         val projection = CompletableDeferred<Result<DoubleXY>>()
         compose.runOnIdle {
             val selected = MarkerSymbols.symbols[1]
-            state.selectMarkerSymbol(selected)
+            state.selectMarkerOption(MarkerOptionId.YellowTriangle)
             coEvery { image.locationToImage(any()) } coAnswers { projection.await() }
             tap()
-            state.selectMarkerSymbol(MarkerSymbols.symbols[2])
+            state.selectMarkerOption(MarkerOptionId.OrangeDiamond)
             projection.complete(Result.success(DoubleXY(5.0, 5.0)))
             assertEquals(selected, mapOverlay.graphics.single().symbol)
             assertEquals(selected, imageOverlay.graphics.single().symbol)
@@ -715,10 +747,10 @@ class ImageLocationMarkerTests {
         val projection = CompletableDeferred<Result<Point>>()
         compose.runOnIdle {
             val selected = MarkerSymbols.symbols[1]
-            state.selectMarkerSymbol(selected)
+            state.selectMarkerOption(MarkerOptionId.YellowTriangle)
             coEvery { image.imageToLocation(any()) } coAnswers { projection.await() }
             scope.launch { state.addMarkerToRasterImage(DoubleXY(5.0, 5.0), Point(110.0, 220.0), imageOverlay) }
-            state.selectMarkerSymbol(MarkerSymbols.symbols[2])
+            state.selectMarkerOption(MarkerOptionId.OrangeDiamond)
             projection.complete(Result.success(location))
             assertEquals(selected, mapOverlay.graphics.single().symbol)
             assertEquals(selected, imageOverlay.graphics.single().symbol)

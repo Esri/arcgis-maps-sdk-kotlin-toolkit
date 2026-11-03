@@ -16,23 +16,23 @@
 
 package com.arcgismaps.toolkit.orientedimageryviewer.internal.ui
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -45,55 +45,53 @@ import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.orientedimageryviewer.R
 
 /**
- * A simple UI for selecting a marker symbol. The selected symbol is indicated by a radio button.
+ * Bottom-sheet content for selecting a marker symbol, with radio-button selection semantics.
  *
  * @param selectedOptionId The currently selected marker option ID, or null if none is selected.
  * @param onSelectOption Callback invoked when a marker option is selected.
  * @param onDismiss Callback invoked when the selection UI is dismissed.
  * @param modifier Optional [Modifier] for styling and layout adjustments.
+ * @param onBack Callback invoked when navigating back to marker tools without closing the sheet.
  */
 @Composable
 internal fun MarkerSelection(
     selectedOptionId: MarkerOptionId?,
     onSelectOption: (MarkerOptionId) -> Unit,
     onDismiss: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onBack: () -> Unit = onDismiss
 ) {
-    BackHandler(onBack = onDismiss)
-    Surface(
-        modifier = modifier,
-        shape = RoundedCornerShape(24.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerHigh,
-        tonalElevation = 3.dp
-    ) {
-        Column(modifier = Modifier.padding(4.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                IconButton(onClick = onDismiss) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.marker_selection_back))
-                }
-                Text(stringResource(R.string.marker_selection_title), style = MaterialTheme.typography.titleLarge)
-                IconButton(onClick = onDismiss) {
-                    Icon(Icons.Default.Close, stringResource(R.string.toolbar_close))
-                }
+    Column(modifier = modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(16.dp)) {
+        IconButton(onClick = onBack) {
+            Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.marker_selection_back))
+        }
+        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                stringResource(R.string.marker_selection_title),
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.weight(1f)
+            )
+            IconButton(onClick = onDismiss) {
+                Icon(Icons.Default.Close, stringResource(R.string.toolbar_close))
             }
-            Row(
-                modifier = Modifier.align(Alignment.CenterHorizontally).selectableGroup(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                MarkerSymbols.options.forEach { option ->
-                    val description = stringResource(option.descriptionResId)
-                    Canvas(
-                        modifier = Modifier
-                            .size(48.dp)
-                            .selectable(
-                                selected = selectedOptionId == option.id,
-                                role = Role.RadioButton,
-                                onClick = { onSelectOption(option.id) }
-                            )
-                            .semantics { contentDescription = description }
-                    ) {
-                        drawMarkerSymbol(option.symbol, center, 24.dp.toPx())
-                    }
+        }
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp).selectableGroup(),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            MarkerSymbols.options.forEach { option ->
+                val description = stringResource(option.descriptionResId)
+                Canvas(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .selectable(
+                            selected = selectedOptionId == option.id,
+                            role = Role.RadioButton,
+                            onClick = { onSelectOption(option.id) }
+                        )
+                        .semantics { contentDescription = description }
+                ) {
+                    drawMarkerSymbol(option.symbol, center, 24.dp.toPx())
                 }
             }
         }
