@@ -138,6 +138,7 @@ class ModeSelectionButtonTests {
         compose.runOnIdle {
             assertEquals(GeoViewInteractionStatus.AddMarkers, state.geoViewInteractionStatus)
         }
+        compose.onNodeWithContentDescription("Close").performClick()
         compose.onNodeWithText("Mode").assertIsEnabled().assertIsNotSelected().performClick()
         compose.onNodeWithText("Find Images").assertIsNotSelected()
         compose.onNodeWithText("Display Image").assertIsNotSelected()
@@ -179,6 +180,7 @@ class ModeSelectionButtonTests {
             compose.runOnIdle {
                 assertEquals(GeoViewInteractionStatus.AddMarkers, state.geoViewInteractionStatus)
             }
+            compose.onNodeWithContentDescription("Close").performClick()
             compose.onNodeWithText("Mode").assertIsNotSelected().performClick()
             compose.onNodeWithText("Find Images").assertIsNotSelected()
             compose.onNodeWithText("Display Image").assertIsNotSelected()
@@ -188,6 +190,7 @@ class ModeSelectionButtonTests {
             compose.runOnIdle {
                 assertEquals(GeoViewInteractionStatus.None, state.geoViewInteractionStatus)
             }
+            compose.onNodeWithContentDescription("Close").performClick()
             compose.onNodeWithText("Mode").assertIsNotSelected()
         }
         compose.onNodeWithText("Mode").performClick()

@@ -111,7 +111,8 @@ apiValidation {
             "com.arcgismaps.toolkit.orientedimageryviewer.internal.ui.ComposableSingletons\$MarkerToolsButtonKt",
             "com.arcgismaps.toolkit.orientedimageryviewer.internal.ui.ComposableSingletons\$ModeSelectionButtonKt",
             "com.arcgismaps.toolkit.orientedimageryviewer.internal.ui.ComposableSingletons\$OrientedImageryKt",
-            "com.arcgismaps.toolkit.orientedimageryviewer.internal.ui.ComposableSingletons\$OverlaySelectionButtonKt"
+            "com.arcgismaps.toolkit.orientedimageryviewer.internal.ui.ComposableSingletons\$OverlaySelectionButtonKt",
+            "com.arcgismaps.toolkit.orientedimageryviewer.internal.ui.material3.ComposableSingletons\$ModalBottomSheetKt"
         )
     )
 }
