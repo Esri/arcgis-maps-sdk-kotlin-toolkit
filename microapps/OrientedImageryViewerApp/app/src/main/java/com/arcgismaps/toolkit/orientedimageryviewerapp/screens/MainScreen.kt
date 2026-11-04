@@ -26,7 +26,6 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.material3.BottomSheetScaffold
@@ -43,7 +42,6 @@ import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -54,7 +52,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arcgismaps.toolkit.geoviewcompose.MapView
 import com.arcgismaps.toolkit.geoviewcompose.SceneView
 import com.arcgismaps.toolkit.orientedimageryviewer.OrientedImageryViewer
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -68,15 +65,14 @@ fun MainScreen() {
         )
     )
 
-    val scope = rememberCoroutineScope()
     val mapGraphicsOverlays = remember(viewModel) { listOf(viewModel.mapGraphicsOverlay) }
     val sceneGraphicsOverlays = remember(viewModel) { listOf(viewModel.sceneGraphicsOverlay) }
     val orientedImageryViewerState = viewModel.orientedImageryViewerState
     val statusMessage = viewModel.statusMessage
-    val visibleViewerState = orientedImageryViewerState?.takeIf { it.hasActiveImage }
+    val visibleViewerState = orientedImageryViewerState?.takeIf { viewModel.isViewerVisible }
     val shouldShowBottomSheet = visibleViewerState != null
 
-    LaunchedEffect(shouldShowBottomSheet) {
+    LaunchedEffect(orientedImageryViewerState, shouldShowBottomSheet) {
         if (shouldShowBottomSheet) {
             scaffoldState.bottomSheetState.expand()
         } else {
@@ -99,13 +95,8 @@ fun MainScreen() {
                 visibleViewerState?.let { state ->
                     OrientedImageryViewer(
                         orientedImageryViewerState = state,
-                        modifier = Modifier.heightIn(max = maxHeight),
-                        onDismiss = {
-                            state.resetAll()
-                            scope.launch {
-                                scaffoldState.bottomSheetState.hide()
-                            }
-                        }
+                        modifier = Modifier.height(maxHeight),
+                        onDismiss = viewModel::dismissViewer
                     )
                 }
             },

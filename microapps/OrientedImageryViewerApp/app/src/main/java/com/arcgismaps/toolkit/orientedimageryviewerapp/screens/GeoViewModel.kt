@@ -66,6 +66,10 @@ class GeoViewModel(application: Application) : AndroidViewModel(application) {
     val orientedImageryViewerState: OrientedImageryViewerState?
         get() = _orientedImageryViewerState.value
 
+    private val _isViewerVisible = mutableStateOf(false)
+    val isViewerVisible: Boolean
+        get() = _isViewerVisible.value
+
     private val _isLoading: MutableState<Boolean> = mutableStateOf(true)
     val isLoading: Boolean
         get() = _isLoading.value
@@ -139,6 +143,7 @@ class GeoViewModel(application: Application) : AndroidViewModel(application) {
                     graphicsOverlay,
                     viewModelScope
                 )
+                _isViewerVisible.value = true
             } catch (error: CancellationException) {
                 throw error
             } catch (error: Exception) {
@@ -159,6 +164,9 @@ class GeoViewModel(application: Application) : AndroidViewModel(application) {
         val geoViewType = geoViewType
         val interactionStatus = viewerState.geoViewInteractionStatus
         if (interactionStatus == GeoViewInteractionStatus.None) return
+        if (interactionStatus != GeoViewInteractionStatus.AddMarkers) {
+            _isViewerVisible.value = true
+        }
         _statusMessage.value = null
         _isHandlingTap.value = true
         tapJob = viewModelScope.launch {
@@ -175,13 +183,18 @@ class GeoViewModel(application: Application) : AndroidViewModel(application) {
                 viewerState.onSingleTapOnGeoView(event, geoViewProxy).getOrThrow()
                 currentCoroutineContext().ensureActive()
                 if (interactionStatus == GeoViewInteractionStatus.FindImages && !viewerState.hasActiveImage) {
-                    _statusMessage.value = "No oriented images were found at the selected location."
+                    viewerState.showMessage("No oriented images were found at the selected location.")
                 }
             } catch (error: CancellationException) {
                 throw error
             } catch (error: Exception) {
                 currentCoroutineContext().ensureActive()
-                _statusMessage.value = error.message?.let { "$failureMessage $it" } ?: failureMessage
+                val message = error.message?.let { "$failureMessage $it" } ?: failureMessage
+                if (interactionStatus == GeoViewInteractionStatus.AddMarkers) {
+                    _statusMessage.value = message
+                } else {
+                    viewerState.showMessage(message)
+                }
                 Log.e("GeoViewModel", failureMessage, error)
             } finally {
                 if (currentCoroutineContext().isActive) {
@@ -191,11 +204,19 @@ class GeoViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun dismissViewer() {
+        tapJob?.cancel()
+        _isHandlingTap.value = false
+        orientedImageryViewerState?.resetAll()
+        _isViewerVisible.value = false
+    }
+
     fun toggleGeoViewType() {
         tapJob?.cancel()
         _isHandlingTap.value = false
         resetGraphicsOverlay()
         _orientedImageryViewerState.value = null
+        _isViewerVisible.value = false
         _geoViewType.value = when (_geoViewType.value) {
             GeoViewType.MapViewType -> GeoViewType.SceneViewType
             GeoViewType.SceneViewType -> GeoViewType.MapViewType

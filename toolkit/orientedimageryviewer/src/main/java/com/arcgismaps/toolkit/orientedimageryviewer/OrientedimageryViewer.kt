@@ -34,7 +34,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -136,16 +135,8 @@ internal fun ViewerLayout(
     }
     val noActiveImageMessage = stringResource(R.string.popup_no_active_image)
     val creationFailedMessage = stringResource(R.string.popup_creation_failed)
-    val noImagesFoundMessage = stringResource(R.string.no_images_found_for_tapped_location)
-    val noImagesFoundRevision = viewerState.uiState.noImagesFoundRevision
 
     ErrorSnackbarContainer(modifier = modifier) { errors ->
-        LaunchedEffect(viewerState, noImagesFoundRevision) {
-            noImagesFoundRevision?.let { revision ->
-                errors.showError(noImagesFoundMessage)
-                viewerState.consumeNoImagesFound(revision)
-            }
-        }
         val onPopup: () -> Unit = {
             if (!isCreatingPopup) {
                 isCreatingPopup = true

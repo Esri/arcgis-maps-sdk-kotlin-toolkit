@@ -51,10 +51,14 @@
     <string name="marker_symbol_violet_square">Violet square</string>
     <string name="marker_symbol_yellow_triangle">Yellow triangle</string>
     <string name="marker_symbol_orange_diamond">Orange diamond</string>
+
     <string name="popup_no_active_image">Select an image before opening its popup.</string>
     <string name="popup_creation_failed">Unable to create the image popup.</string>
     <string name="no_images_found_for_tapped_location">No images found for the tapped location</string>
-
+    <string name="message_no_image">No Image to display</string>
+    <string name="message_search_guidance">Tap on the map to search\nusing %1$s or %2$s mode</string>
+    <string name="image_search_failed">Search for oriented images failed.</string>
+    <string name="image_fetch_failed">Failed to display the selected image.</string>
     <string name="panoramic_image_load_failed">Failed to load panoramic image from local file: %1$s</string>
     <string name="panoramic_image_decode_failed">Failed to decode panoramic image from local file: %1$s</string>
 </resources>

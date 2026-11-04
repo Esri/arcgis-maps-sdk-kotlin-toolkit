@@ -96,6 +96,8 @@ public sealed interface ImageNavigationStatus {
 
 /**
  * State for an oriented imagery viewer. Access this state on the main thread.
+ * A newly constructed or reset state displays guidance for selecting an image. Image request
+ * failures and empty results display a persistent message instead of image content.
  *
  * Search and feature fetch share a latest-request-wins policy. Navigation requests are queued
  * and processed one at a time. A search, fetch, or reset invalidates older pending operations,
@@ -297,8 +299,8 @@ public class OrientedImageryViewerState internal constructor(
     /**
      * Handles a GeoView tap according to [geoViewInteractionStatus]. Searches for images,
      * identifies the first feature in the associated oriented imagery layer and displays its image,
-     * adds markers, or does nothing. An identify error or missing feature shows a snackbar in the
-     * viewer and leaves the active image unchanged.
+     * adds markers, or does nothing. An image-operation error or missing feature clears the active
+     * image and displays a message in the viewer. Marker failures retain the active image.
      * Scene locations are resolved against the scene content through [geoViewProxy].
      *
      * Returns a failed [Result] if location resolution, identify, search, fetch, or marker placement fails.
@@ -307,63 +309,80 @@ public class OrientedImageryViewerState internal constructor(
     public suspend fun onSingleTapOnGeoView(
         event: SingleTapConfirmedEvent,
         geoViewProxy: GeoViewProxy
-    ): Result<Unit> = runCatching {
-        currentCoroutineContext().ensureActive()
-        when (val status = geoViewInteractionStatus) {
-            GeoViewInteractionStatus.None -> Unit
-            GeoViewInteractionStatus.DisplayImage -> {
-                val revision = ++interactionRevision
-                val result = geoViewProxy.identify(
-                    layer = orientedImageryLayer,
-                    screenCoordinate = event.screenCoordinate,
-                    tolerance = 20.dp
-                )
-                ensureCurrentInteraction(revision)
-                val identified = result.getOrElse { error ->
-                    if (error is CancellationException) throw error
-                    updateUiState { it.copy(noImagesFoundRevision = revision) }
-                    throw error
+    ): Result<Unit> {
+        val status = geoViewInteractionStatus
+        return runCatching {
+            currentCoroutineContext().ensureActive()
+            when (status) {
+                GeoViewInteractionStatus.None -> Unit
+                GeoViewInteractionStatus.DisplayImage -> {
+                    val revision = ++interactionRevision
+                    val result = runCatching {
+                        geoViewProxy.identify(
+                            layer = orientedImageryLayer,
+                            screenCoordinate = event.screenCoordinate,
+                            tolerance = 20.dp
+                        ).getOrThrow()
+                    }
+                    ensureCurrentInteraction(revision)
+                    val identified = result.getOrThrow()
+                    identified.error?.let { throw it }
+                    val feature = identified.geoElements.firstOrNull() as? Feature
+                    if (feature == null) {
+                        showMessage(R.string.no_images_found_for_tapped_location)
+                    } else {
+                        fetchImage(feature).getOrThrow()
+                    }
                 }
-                identified.error?.let { error ->
-                    if (error is CancellationException) throw error
-                    updateUiState { it.copy(noImagesFoundRevision = revision) }
-                    throw error
-                }
-                val feature = identified.geoElements.firstOrNull() as? Feature
-                if (feature == null) {
-                    updateUiState { it.copy(noImagesFoundRevision = revision) }
-                } else {
-                    fetchImage(feature).getOrThrow()
+
+                GeoViewInteractionStatus.FindImages, GeoViewInteractionStatus.AddMarkers -> {
+                    val revision = ++interactionRevision
+                    val location = runCatching {
+                        when (geoViewProxy) {
+                            is SceneViewProxy -> geoViewProxy.screenToLocation(event.screenCoordinate).getOrThrow()
+                            is LocalSceneViewProxy -> geoViewProxy.screenToLocation(event.screenCoordinate).getOrThrow()
+                            else -> event.mapPoint
+                        }
+                    }
+                    ensureCurrentInteraction(revision)
+                    val mapPoint = location.getOrThrow()
+                        ?: throw IllegalStateException("No map location was found for the selected point.")
+                    if (status == GeoViewInteractionStatus.FindImages) {
+                        searchImages(mapPoint).getOrThrow()
+                    } else {
+                        markers.addFromMap(mapPoint)
+                    }
                 }
             }
-
-            GeoViewInteractionStatus.FindImages, GeoViewInteractionStatus.AddMarkers -> {
-                val revision = ++interactionRevision
-                val mapPoint = when (geoViewProxy) {
-                    is SceneViewProxy -> geoViewProxy.screenToLocation(event.screenCoordinate).getOrThrow()
-
-                    is LocalSceneViewProxy -> geoViewProxy.screenToLocation(event.screenCoordinate).getOrThrow()
-
-                    else -> event.mapPoint
-                } ?: throw IllegalStateException("No map location was found for the selected point.")
-                ensureCurrentInteraction(revision)
-                if (status == GeoViewInteractionStatus.FindImages) {
-                    searchImages(mapPoint).getOrThrow()
-                } else {
-                    markers.addFromMap(mapPoint)
+            currentCoroutineContext().ensureActive()
+        }.onFailure { error ->
+            if (error is CancellationException) throw error
+            currentCoroutineContext().ensureActive()
+            if (status == GeoViewInteractionStatus.FindImages || status == GeoViewInteractionStatus.DisplayImage) {
+                val resourceId = if (status == GeoViewInteractionStatus.FindImages) R.string.image_search_failed
+                    else R.string.image_fetch_failed
+                if (uiState.messageResourceId != resourceId || uiState.message != error.message) {
+                    showMessage(resourceId, error.message)
                 }
             }
         }
-        currentCoroutineContext().ensureActive()
-    }.onFailure { error ->
-        if (error is CancellationException) throw error
-        currentCoroutineContext().ensureActive()
     }
 
-    internal fun consumeNoImagesFound(revision: Long) {
-        updateUiState {
-            if (it.noImagesFoundRevision == revision) it.copy(noImagesFoundRevision = null) else it
-        }
+    /**
+     * Clears the image session and displays an error or warning message in the viewer.
+     * Invalidates pending image and marker operations, retaining the toolbar's user preferences.
+     * A new search, fetch, or reset restores the initial guidance until an image is available.
+     */
+    public fun showMessage(message: String) {
+        resetImageState()
+        clearOverlayChecksIfNoImage()
+        updateUiState { it.copy(message = message) }
+    }
+
+    private fun showMessage(resourceId: Int, details: String? = null) {
+        resetImageState()
+        clearOverlayChecksIfNoImage()
+        updateUiState { it.copy(messageResourceId = resourceId, message = details) }
     }
 
     private suspend fun ensureCurrentInteraction(revision: Long) {
@@ -396,28 +415,37 @@ public class OrientedImageryViewerState internal constructor(
     /**
      * Returns a [Result] indicating whether oriented images were found at the specified map location.
      * If images are found, the first image is loaded and set as the active image.
-     * If no images are found, the active image is cleared.
+     * If no images are found, the active image is cleared and a warning message is displayed.
      *
-     * Returns a failed [Result] if searching or loading fails.
+     * Returns a failed [Result] if searching or loading fails and displays the failure in the viewer.
      * Cancellation is rethrown. The active image may already have been changed when an operation fails.
      */
     public suspend fun searchImages(lastMapLocation: Point): Result<ImageSearchStatus> {
         currentCoroutineContext().ensureActive()
         resetImageState()
         setInputLocation(lastMapLocation)
-        return session.search(lastMapLocation).also { clearOverlayChecksIfNoImage() }
+        return session.search(lastMapLocation).also { result ->
+            result.onFailure { showMessage(R.string.image_search_failed, it.message) }
+            if (result.getOrNull() == ImageSearchStatus.NoImagesFound) {
+                showMessage(R.string.no_images_found_for_tapped_location)
+            }
+            clearOverlayChecksIfNoImage()
+        }
     }
 
     /**
      * Fetches the oriented image for the specified feature and sets it as the active image.
      *
-     * Returns a failed [Result] if fetching or loading fails.
+     * Returns a failed [Result] if fetching or loading fails and displays the failure in the viewer.
      * Cancellation is rethrown. The active image may already have been changed when an operation fails.
      */
     public suspend fun fetchImage(feature: Feature): Result<Unit> {
         currentCoroutineContext().ensureActive()
         resetImageState()
-        return session.fetch(feature).also { clearOverlayChecksIfNoImage() }
+        return session.fetch(feature).also { result ->
+            result.onFailure { showMessage(R.string.image_fetch_failed, it.message) }
+            clearOverlayChecksIfNoImage()
+        }
     }
 
     private fun clearOverlayChecksIfNoImage() {
@@ -590,7 +618,8 @@ public class OrientedImageryViewerState internal constructor(
             uiState.copy(
                 activeImageInfo = null,
                 inputLocationData = null,
-                noImagesFoundRevision = null
+                message = null,
+                messageResourceId = null
             )
         }
     }
@@ -620,6 +649,8 @@ public class OrientedImageryViewerState internal constructor(
         updateUiState { uiState ->
             uiState.copy(
                 activeImageInfo = info,
+                message = if (orientedImage != null) null else uiState.message,
+                messageResourceId = if (orientedImage != null) null else uiState.messageResourceId,
                 // Both additional overlays are built lazily from these images when selected.
                 hasAdditionalImages = orientedImage != null && session.additionalImages.isNotEmpty(),
                 activeImageRevision = uiState.activeImageRevision + 1,

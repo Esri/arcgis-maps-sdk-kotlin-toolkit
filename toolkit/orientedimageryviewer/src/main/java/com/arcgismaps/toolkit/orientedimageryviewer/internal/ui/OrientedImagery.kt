@@ -91,7 +91,12 @@ internal fun OrientedImagery(
         ) {
             when {
                 viewerUiState.activeImageInfo == null -> {
-                    PlaceholderMessage("No image is currently selected.")
+                    val localizedMessage = viewerUiState.messageResourceId?.let { stringResource(it) }
+                    MessageScreen(
+                        message = listOfNotNull(localizedMessage, viewerUiState.message)
+                            .takeIf { it.isNotEmpty() }?.joinToString(" "),
+                        modifier = Modifier.fillMaxSize()
+                    )
                 }
                 else -> key(viewerState) {
                     val images = viewerState.searchResultImages
