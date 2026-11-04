@@ -55,9 +55,9 @@ import kotlin.time.Duration.Companion.milliseconds
  */
 @Composable
 public fun BookmarksListView(
-    modifier: Modifier = Modifier,
     bookmarks: SnapshotStateList<Bookmark>,
     onSelected: (Bookmark) -> Unit,
+    modifier: Modifier = Modifier,
     backgroundColor: Color = MaterialTheme.colorScheme.surfaceContainer,
     textStyle : TextStyle = LocalTextStyle.current
 ) {

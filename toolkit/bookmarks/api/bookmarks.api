@@ -1,4 +1,4 @@
 public final class com/arcgismaps/toolkit/bookmarks/BookmarksKt {
-	public static final fun BookmarksListView-uDo3WH8 (Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/snapshots/SnapshotStateList;Lkotlin/jvm/functions/Function1;JLandroidx/compose/ui/text/TextStyle;Landroidx/compose/runtime/Composer;II)V
+	public static final fun BookmarksListView-uDo3WH8 (Landroidx/compose/runtime/snapshots/SnapshotStateList;Lkotlin/jvm/functions/Function1;Landroidx/compose/ui/Modifier;JLandroidx/compose/ui/text/TextStyle;Landroidx/compose/runtime/Composer;II)V
 }
 
