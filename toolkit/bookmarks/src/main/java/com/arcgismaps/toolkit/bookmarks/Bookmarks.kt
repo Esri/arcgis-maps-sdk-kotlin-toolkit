@@ -40,10 +40,12 @@ import com.arcgismaps.mapping.Bookmark
 
 /**
  * A composable that displays a list of bookmarks.
- * [MutableList<Bookmark>] is used to allow for dynamic updates to the list of bookmarks.
- * [onSelected] is a callback that is invoked when a bookmark is selected.
- * [backgroundColor] is the background color of the list.
- * [textStyle] is the style to be applied to the bookmark text.
+ * @param bookmarks is used to allow for dynamic updates to the list of bookmarks.
+ * @param onSelected is a callback that is invoked when a bookmark is selected.
+ * @param backgroundColor is the background color of the list.
+ * @textStyle is the style to be applied to the bookmark text.
+ * @since 300.2.0 
+ 
  */
 @Composable
 public fun BookmarksListView(
