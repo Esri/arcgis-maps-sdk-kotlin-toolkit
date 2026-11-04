@@ -58,11 +58,12 @@ public fun BookmarksListView(
     bookmarks: SnapshotStateList<Bookmark>,
     onSelected: (Bookmark) -> Unit,
     backgroundColor: Color = MaterialTheme.colorScheme.surfaceContainer,
-    textStyle : TextStyle = LocalTextStyle.current
+    textStyle : TextStyle = LocalTextStyle.current,
+    modifier: Modifier = Modifier
 ) {
     LazyColumn(
         modifier =
-            Modifier.fillMaxWidth().background(color = backgroundColor)
+            modifier.fillMaxWidth().background(color = backgroundColor)
     ) {
         items(bookmarks.size) { index ->
             val bookmark = bookmarks.elementAt(index)
