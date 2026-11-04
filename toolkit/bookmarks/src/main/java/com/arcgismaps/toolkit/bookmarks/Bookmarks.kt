@@ -55,11 +55,11 @@ import kotlin.time.Duration.Companion.milliseconds
  */
 @Composable
 public fun BookmarksListView(
+    modifier: Modifier = Modifier,
     bookmarks: SnapshotStateList<Bookmark>,
     onSelected: (Bookmark) -> Unit,
     backgroundColor: Color = MaterialTheme.colorScheme.surfaceContainer,
-    textStyle : TextStyle = LocalTextStyle.current,
-    modifier: Modifier = Modifier
+    textStyle : TextStyle = LocalTextStyle.current
 ) {
     LazyColumn(
         modifier =
