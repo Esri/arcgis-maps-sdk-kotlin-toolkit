@@ -85,6 +85,7 @@ fun MainScreen() {
         ) { paddingValues ->
             LocalSceneView(
                 scene = viewModel.scene,
+                localSceneViewProxy = viewModel.localSceneViewProxy,
                 modifier = Modifier.padding(paddingValues),
                 onCriticalErrorChanged = { throwable ->
                     throwable?.let {
