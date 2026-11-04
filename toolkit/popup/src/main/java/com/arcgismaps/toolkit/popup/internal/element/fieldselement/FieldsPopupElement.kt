@@ -21,7 +21,6 @@ import android.util.Log
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.TweenSpec
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
@@ -30,19 +29,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.text.withLink
 import androidx.compose.ui.tooling.preview.Preview
 import com.arcgismaps.toolkit.popup.internal.ui.expandablecard.ExpandableCard
 import com.arcgismaps.toolkit.popup.internal.ui.expandablecard.theme.LocalExpandableCardColorScheme
 import com.arcgismaps.toolkit.popup.internal.ui.expandablecard.theme.LocalExpandableCardTypography
+import androidx.core.net.toUri
 
 /**
  * Composable that displays the fields of a popup element.
@@ -90,32 +88,28 @@ internal fun FieldsPopupElement(
                         supportingContent = {
                             // build annotated string if the text is an URL
                             if (it.value.startsWith("https")) {
-                                val annotatedString = buildAnnotatedString {
-                                    pushStringAnnotation("url", it.value)
-                                    withStyle(
-                                        style = SpanStyle(
-                                            color = Color.Blue,
-                                            fontWeight = FontWeight.Bold,
-                                            textDecoration = TextDecoration.Underline
-                                        )
-                                    ) {
-                                        append("View")
-                                    }
-                                }
-                                ClickableText(text = annotatedString, onClick = { offset ->
-                                    annotatedString.getStringAnnotations(tag = "url", start = offset, end = offset)
-                                        .firstOrNull()?.let {
-                                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(it.item)).apply {
-                                                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                                Text(
+                                    text = buildAnnotatedString {
+                                        withLink(
+                                            LinkAnnotation.Url(
+                                                it.value
+                                            ){ linkAnnotation ->
+                                                val clickedUrl = (linkAnnotation as LinkAnnotation.Url).url
+                                                val intent = Intent(Intent.ACTION_VIEW,
+                                                    clickedUrl.toUri()).apply {
+                                                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                                                }
+                                                runCatching {
+                                                    localContext.startActivity(intent)
+                                                }.onFailure { exception ->
+                                                    Log.e("ArcGISMapsSDK", "Failed to open link: ${exception.message}")
+                                                }
                                             }
-
-                                            runCatching {
-                                                localContext.startActivity(intent)
-                                            }.onFailure { exception ->
-                                                Log.e("ArcGISMapsSDK", "Failed to open link: ${exception.message}")
-                                            }
+                                        ) {
+                                            append("View")
                                         }
-                                })
+                                    }
+                                )
                             } else {
                                 Text(text = it.value.ifEmpty { "--" }, color = MaterialTheme.colorScheme.onBackground)
                             }
