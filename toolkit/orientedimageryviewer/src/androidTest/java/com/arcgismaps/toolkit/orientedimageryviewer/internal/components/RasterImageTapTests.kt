@@ -35,6 +35,7 @@ import com.arcgismaps.mapping.layers.orientedimagery.OrientedImage
 import com.arcgismaps.mapping.layers.orientedimagery.OrientedImageType
 import com.arcgismaps.mapping.view.DoubleXY
 import com.arcgismaps.mapping.view.GraphicsOverlay
+import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
 import com.arcgismaps.toolkit.orientedimageryviewer.OrientedImageryViewerState
 import io.mockk.coEvery
 import io.mockk.every
@@ -87,7 +88,7 @@ class RasterImageTapTests {
         coEvery { layer.searchImages(any(), any()) } returns Result.success(listOf(image))
         val mapOverlay = GraphicsOverlay()
         val imageOverlay = GraphicsOverlay()
-        val state = OrientedImageryViewerState(layer, mapOverlay, scope)
+        val state = OrientedImageryViewerState(MapViewProxy(), layer, mapOverlay, scope)
         try {
             compose.runOnIdle {
                 state.toggleActiveFootprint()

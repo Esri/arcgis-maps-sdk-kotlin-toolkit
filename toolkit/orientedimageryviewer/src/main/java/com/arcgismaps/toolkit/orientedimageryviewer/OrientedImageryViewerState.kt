@@ -16,7 +16,6 @@
 
 package com.arcgismaps.toolkit.orientedimageryviewer
 
-import android.util.Log
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.mutableStateOf
@@ -104,22 +103,25 @@ public sealed interface ImageNavigationStatus {
  * which throw [CancellationException] rather than changing the replacement session.
  * Image sessions, marker operations, and footprint resources have independent internal owners.
  *
+ * @param geoViewProxy The proxy for the GeoView whose taps are handled by this viewer.
  * @param orientedImageryLayer The oriented imagery layer associated with this viewer state.
  * @param graphicsOverlay The graphics overlay used to display camera locations and footprints.
  * @param coroutineScope The coroutine scope for managing asynchronous operations.
  */
 @Stable
 public class OrientedImageryViewerState internal constructor(
+    private val geoViewProxy: GeoViewProxy,
     private val orientedImageryLayer: OrientedImageryLayer,
     graphicsOverlay: GraphicsOverlay,
     coroutineScope: CoroutineScope,
     createFootprint: (OrientedImage) -> OrientedImageFootprint
 ) {
     public constructor(
+        geoViewProxy: GeoViewProxy,
         orientedImageryLayer: OrientedImageryLayer,
         graphicsOverlay: GraphicsOverlay,
         coroutineScope: CoroutineScope
-    ) : this(orientedImageryLayer, graphicsOverlay, coroutineScope, ::OrientedImageFootprint)
+    ) : this(geoViewProxy, orientedImageryLayer, graphicsOverlay, coroutineScope, ::OrientedImageFootprint)
 
     /**
      * The title to display for the viewer.
@@ -127,6 +129,12 @@ public class OrientedImageryViewerState internal constructor(
     public val title: String = orientedImageryLayer.name.ifBlank { "Oriented imagery" }
 
     private val _uiState = mutableStateOf(OrientedImageryViewerUiState())
+    private val _isViewerVisible = mutableStateOf(true)
+
+    /** Whether the host should display the viewer. Image-mode taps reopen a dismissed viewer. */
+    public val isViewerVisible: Boolean
+        get() = _isViewerVisible.value
+
     // Failed image requests clear the displayed checks, not these user preferences.
     private var preferredActiveFootprintVisible = uiState.isActiveFootprintVisible
     private var preferredAdditionalFootprintsVisible = uiState.isAdditionalFootprintsVisible
@@ -282,7 +290,6 @@ public class OrientedImageryViewerState internal constructor(
             Popup(Graphic(image.geometry, image.attributes))
         }.onFailure { error ->
             if (error is CancellationException) throw error
-            Log.e("OrientedImagery", "Unable to create the image popup", error)
         }
     }
 
@@ -300,17 +307,20 @@ public class OrientedImageryViewerState internal constructor(
      * Handles a GeoView tap according to [geoViewInteractionStatus]. Searches for images,
      * identifies the first feature in the associated oriented imagery layer and displays its image,
      * adds markers, or does nothing. An image-operation error or missing feature clears the active
-     * image and displays a message in the viewer. Marker failures retain the active image.
+     * image and displays a message in the viewer. Image-mode taps make the viewer visible.
+     * Marker failures retain the active image and visibility without displaying a message.
      * Scene locations are resolved against the scene content through [geoViewProxy].
      *
      * Returns a failed [Result] if location resolution, identify, search, fetch, or marker placement fails.
      * Cancellation is rethrown. A map marker may already have been added when an operation fails.
      */
-    public suspend fun onSingleTapOnGeoView(
-        event: SingleTapConfirmedEvent,
-        geoViewProxy: GeoViewProxy
-    ): Result<Unit> {
+    public suspend fun onSingleTapOnGeoView(event: SingleTapConfirmedEvent): Result<Unit> {
+        currentCoroutineContext().ensureActive()
         val status = geoViewInteractionStatus
+        if (status == GeoViewInteractionStatus.None) return Result.success(Unit)
+        if (status != GeoViewInteractionStatus.AddMarkers) {
+            _isViewerVisible.value = true
+        }
         return runCatching {
             currentCoroutineContext().ensureActive()
             when (status) {
@@ -607,6 +617,12 @@ public class OrientedImageryViewerState internal constructor(
                 isMarkingLocation = false
             )
         }
+    }
+
+    /** Hides and resets the viewer, invalidating pending image and marker operations. */
+    public fun dismissViewer() {
+        resetAll()
+        _isViewerVisible.value = false
     }
 
     private fun resetImageState() {

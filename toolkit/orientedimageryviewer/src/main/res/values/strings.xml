@@ -22,6 +22,10 @@
     <string name="toolbar_last_image">Last image</string>
     <string name="image_load_failed">Unable to load the image.</string>
     <string name="image_navigation_failed">Unable to navigate to the image.</string>
+    <string name="image_source_missing">The selected image is missing an image source.</string>
+    <string name="image_type_unsupported">This image type is not supported.</string>
+    <string name="image_framing_failed">Unable to frame the image.</string>
+    <string name="image_reference_location_failed">Unable to locate the selected location in the image.</string>
     <string name="toolbar_current_footprint">Current footprint</string>
     <string name="toolbar_additional_footprints">Additional footprints</string>
     <string name="toolbar_additional_camera_locations">Additional camera locations</string>
@@ -59,7 +63,7 @@
     <string name="message_search_guidance">Tap on the map to search\nusing %1$s or %2$s mode</string>
     <string name="image_search_failed">Search for oriented images failed.</string>
     <string name="image_fetch_failed">Failed to display the selected image.</string>
-    <string name="panoramic_image_load_failed">Failed to load panoramic image from local file: %1$s</string>
+    <string name="panoramic_image_load_failed">Unable to load the panoramic image.</string>
     <string name="panoramic_image_decode_failed">Failed to decode panoramic image from local file: %1$s</string>
 </resources>
 

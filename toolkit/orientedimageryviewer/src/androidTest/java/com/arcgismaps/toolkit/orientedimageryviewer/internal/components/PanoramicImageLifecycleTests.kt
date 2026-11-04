@@ -42,6 +42,7 @@ import com.arcgismaps.mapping.layers.orientedimagery.OrientedImage
 import com.arcgismaps.mapping.layers.orientedimagery.OrientedImageType
 import com.arcgismaps.mapping.view.DoubleXY
 import com.arcgismaps.mapping.view.GraphicsOverlay
+import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
 import com.arcgismaps.toolkit.orientedimageryviewer.OrientedImageryViewerState
 import com.arcgismaps.toolkit.orientedimageryviewer.internal.ui.OrientedImagery
 import io.mockk.coEvery
@@ -89,7 +90,7 @@ class PanoramicImageLifecycleTests {
         every { boundary.errorCode } returns 20
         coEvery { layer.fetchAdjacentImage(any(), any()) } returns Result.failure(boundary)
         compose.runOnIdle {
-            state = OrientedImageryViewerState(layer, GraphicsOverlay(), scope)
+            state = OrientedImageryViewerState(MapViewProxy(), layer, GraphicsOverlay(), scope)
             state.toggleActiveFootprint()
             state.toggleAdditionalCameraLocations()
         }

@@ -28,6 +28,7 @@ import com.arcgismaps.mapping.layers.orientedimagery.OrientedImageType
 import com.arcgismaps.mapping.layers.orientedimagery.SequenceStep
 import com.arcgismaps.mapping.view.Graphic
 import com.arcgismaps.mapping.view.GraphicsOverlay
+import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -75,7 +76,7 @@ class OrientedImageryConcurrencyTests {
             feature = mockk()
             every { feature.geometry } returns otherLocation
             overlay = GraphicsOverlay()
-            state = OrientedImageryViewerState(layer, overlay, scope) { mockk(relaxed = true) }
+            state = OrientedImageryViewerState(MapViewProxy(), layer, overlay, scope) { mockk(relaxed = true) }
         }
     }
 

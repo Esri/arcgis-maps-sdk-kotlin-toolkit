@@ -97,7 +97,7 @@ class ImageLocationMarkerTests {
         compose.runOnIdle {
             mapOverlay = GraphicsOverlay()
             imageOverlay = GraphicsOverlay()
-            state = OrientedImageryViewerState(layer, mapOverlay, scope)
+            state = OrientedImageryViewerState(MapViewProxy(), layer, mapOverlay, scope)
             state.toggleActiveFootprint()
             state.toggleAdditionalCameraLocations()
             activateImage()
@@ -798,7 +798,7 @@ class ImageLocationMarkerTests {
     private fun tap() = scope.launch {
         val event = mockk<SingleTapConfirmedEvent>()
         every { event.mapPoint } returns location
-        tapResult = state.onSingleTapOnGeoView(event, MapViewProxy())
+        tapResult = state.onSingleTapOnGeoView(event)
     }
 }
 

@@ -16,8 +16,6 @@
 
 package com.arcgismaps.toolkit.orientedimageryviewer.internal
 
-import android.util.Log
-import androidx.core.net.toUri
 import com.arcgismaps.data.Feature
 import com.arcgismaps.exceptions.ArcGISException
 import com.arcgismaps.geometry.Point
@@ -240,21 +238,12 @@ internal class ImageSession(
         ensureSession(session)
         navigation?.let { ensureNavigation(it) }
         if (error is CancellationException) throw error
-        Log.e("OrientedImagery", "Image operation failed", error)
         Result.failure(error)
     }
 
     private suspend fun load(image: OrientedImage, session: Long) {
         val result = image.load()
         ensureSession(session)
-        result.onFailure { error ->
-            if (error is CancellationException) throw error
-            val originalUri = image.attributes["ImagePath"]?.toString().orEmpty()
-            if (originalUri.startsWith("http://", ignoreCase = true)) {
-                val host = runCatching { originalUri.toUri().host }.getOrNull().orEmpty()
-                Log.w("OrientedImagery", "Cleartext HTTP image source for host '$host' may be blocked by Android.")
-            }
-            Log.e("OrientedImagery", "Failed to load oriented image: ${image.dataUri.orEmpty()}", error)
-        }.getOrThrow()
+        result.getOrThrow()
     }
 }

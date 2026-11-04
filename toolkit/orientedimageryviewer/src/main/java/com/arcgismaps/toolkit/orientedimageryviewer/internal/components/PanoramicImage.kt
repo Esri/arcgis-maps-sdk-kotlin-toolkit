@@ -17,16 +17,11 @@
 package com.arcgismaps.toolkit.orientedimageryviewer.internal.components
 
 import android.graphics.Bitmap
-import android.util.Log
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -36,6 +31,7 @@ import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -52,6 +48,7 @@ import com.arcgismaps.mapping.symbology.SimpleMarkerSymbol
 import com.arcgismaps.toolkit.orientedimageryviewer.OrientedImageryViewerState
 import com.arcgismaps.toolkit.orientedimageryviewer.R
 import com.arcgismaps.toolkit.orientedimageryviewer.internal.ui.ImageInfoButton
+import com.arcgismaps.toolkit.orientedimageryviewer.internal.ui.MessageScreen
 import com.arcgismaps.toolkit.orientedimageryviewer.internal.ui.drawMarkerSymbol
 import dev.romainguy.kotlin.math.Float3
 import io.github.sceneview.rememberCameraNode
@@ -74,13 +71,16 @@ internal fun PanoramicImage(
     radiusMeters: Float = 10.0f,
     pageImage: OrientedImage? = null,
     isActive: Boolean = true,
-    onPopup: (() -> Unit)? = null
+    onPopup: (() -> Unit)? = null,
+    onError: (String) -> Unit = {}
 ) {
     val imageSource = (if (pageImage != null) pageImage.dataUri else viewerState.uiState.activeImageInfo?.dataUri) ?: return
     val imageRevision = viewerState.uiState.activeImageRevision
     // A pager page owns its image even while another page is active.
     val sourceKey: Any = pageImage ?: imageSource
-    fun isCurrent() = isActive && viewerState.uiState.activeImageRevision == imageRevision
+    val active by rememberUpdatedState(isActive)
+    val reportError by rememberUpdatedState(onError)
+    fun isCurrent() = active && viewerState.uiState.activeImageRevision == imageRevision
     val engine = rememberEngine()
     val materialLoader = rememberMaterialLoader(engine)
     val resources = remember(materialLoader, viewerState) { PanoramicImageMaterials(materialLoader) }
@@ -90,7 +90,8 @@ internal fun PanoramicImage(
         materialLoader.createUnlitColorInstance(androidx.compose.ui.graphics.Color.Red)
     }
     val context = LocalContext.current
-    val loadFailedMessage = stringResource(R.string.panoramic_image_load_failed, imageSource)
+    val loadFailedMessage = stringResource(R.string.panoramic_image_load_failed)
+    val referenceFailedMessage = stringResource(R.string.image_reference_location_failed)
 
     // Preserve the previous panorama until the replacement image is fully ready.
     data class PreparedImage(
@@ -110,7 +111,8 @@ internal fun PanoramicImage(
 
     var preparedImage by remember(resources) { mutableStateOf<PreparedImage?>(null) }
     var renderState by remember(resources) { mutableStateOf<RenderState?>(null) }
-    var loadErrorMessage by remember(resources) { mutableStateOf<String?>(null) }
+    var loadErrorMessage by remember(resources, sourceKey, imageSource) { mutableStateOf<String?>(null) }
+    var loadFailureReported by remember(resources, sourceKey, imageSource) { mutableStateOf(false) }
     val sequentialNavigation = viewerState.supportsSequentialNavigation &&
             viewerState.uiState.isSequentialNavigationEnabled
     // Sequential images have no input-location reference marker.
@@ -130,9 +132,16 @@ internal fun PanoramicImage(
             if (error is CancellationException) throw error
             ensureActive()
             loadErrorMessage = loadFailedMessage
-            Log.e("PanoramicImage", loadFailedMessage, error)
         } finally {
             bitmap?.recycle()
+        }
+    }
+
+    LaunchedEffect(loadErrorMessage, imageRevision, isActive) {
+        val message = loadErrorMessage
+        if (message != null && renderState != null && isCurrent() && !loadFailureReported) {
+            loadFailureReported = true
+            reportError(message)
         }
     }
 
@@ -155,7 +164,8 @@ internal fun PanoramicImage(
             inputLocationData?.toPoint()?.let { location ->
                 viewerState.locationToImage(location)?.onFailure { error ->
                     if (error is CancellationException) throw error
-                    Log.e("PanoramicImage", "Unable to locate the initial view in the panorama", error)
+                    ensureActive()
+                    if (isCurrent()) reportError(referenceFailedMessage)
                 }?.getOrNull()
             }
         }
@@ -179,19 +189,10 @@ internal fun PanoramicImage(
     Box(modifier = modifier.fillMaxSize()) {
         val state = renderState
         if (state == null) {
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                if (loadErrorMessage == null) CircularProgressIndicator()
-                if (loadErrorMessage != null) {
-                    Text(
-                        text = loadErrorMessage.orEmpty(),
-                        style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.padding(top = 16.dp)
-                    )
-                }
+            if (loadErrorMessage != null) {
+                MessageScreen(modifier = Modifier.fillMaxSize(), message = loadErrorMessage)
+            } else {
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
             }
             if (isCurrent() && onPopup != null) {
                 ImageInfoButton(
@@ -305,11 +306,6 @@ internal fun PanoramicImage(
                     }
 
                     footprintUpdateTracker.lastUpdate = currentUpdate
-                    Log.d(
-                        "PanoramicImage",
-                        "Updating footprint: yaw=${currentUpdate.yaw}, pitch=${currentUpdate.pitch}, " +
-                                "horizontalFov=${currentUpdate.horizontalFov}, verticalFov=${currentUpdate.verticalFov}"
-                    )
                     viewerState.updateFootprints(
                         yaw = currentUpdate.yaw,
                         pitch = currentUpdate.pitch,
@@ -350,9 +346,6 @@ internal fun PanoramicImage(
             Canvas(modifier = Modifier.fillMaxSize().clipToBounds()) {
                 projectedMarkers.forEach { (position, symbol) -> drawMarkerSymbol(symbol, position) }
             }
-        }
-        loadErrorMessage?.let { message ->
-            Text(message, modifier = Modifier.align(Alignment.BottomCenter).padding(16.dp))
         }
         if (isCurrent() && onPopup != null) {
             ImageInfoButton(

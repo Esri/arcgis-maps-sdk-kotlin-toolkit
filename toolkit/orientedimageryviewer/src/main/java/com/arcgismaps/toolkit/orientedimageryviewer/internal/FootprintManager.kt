@@ -16,7 +16,6 @@
 
 package com.arcgismaps.toolkit.orientedimageryviewer.internal
 
-import android.util.Log
 import com.arcgismaps.Color
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.layers.OrientedImageryLayer
@@ -131,7 +130,7 @@ internal class FootprintManager(
                 } catch (error: Exception) {
                     if (error is CancellationException) throw error
                     currentCoroutineContext().ensureActive()
-                    Log.w("OrientedImagery", "Unable to update the active footprint", error)
+                    // Footprint updates are best-effort and do not interrupt image viewing.
                 }
                 currentCoroutineContext().ensureActive()
                 if (active !== footprint) break

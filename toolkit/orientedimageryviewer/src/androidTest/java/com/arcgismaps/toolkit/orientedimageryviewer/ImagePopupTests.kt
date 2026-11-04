@@ -36,6 +36,7 @@ import com.arcgismaps.mapping.popup.Popup
 import com.arcgismaps.mapping.view.DoubleXY
 import com.arcgismaps.mapping.view.Graphic
 import com.arcgismaps.mapping.view.GraphicsOverlay
+import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -101,6 +102,7 @@ class ImagePopupTests {
             scope = rememberCoroutineScope()
             state = androidx.compose.runtime.remember {
                 OrientedImageryViewerState(
+                    MapViewProxy(),
                     layer,
                     GraphicsOverlay(),
                     scope

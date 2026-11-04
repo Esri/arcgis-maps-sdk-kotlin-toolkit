@@ -38,6 +38,7 @@ import com.arcgismaps.mapping.layers.orientedimagery.OrientedImage
 import com.arcgismaps.mapping.layers.orientedimagery.OrientedImageType
 import com.arcgismaps.mapping.layers.orientedimagery.SequenceStep
 import com.arcgismaps.mapping.view.GraphicsOverlay
+import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
 import com.arcgismaps.toolkit.orientedimageryviewer.OrientedImageryViewerState
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -89,7 +90,7 @@ class ImagePagerTests {
         coEvery { layer.searchImages(any(), any()) } returns Result.success(images)
         compose.setContent {
             state = remember {
-                OrientedImageryViewerState(layer, GraphicsOverlay(), scope) { mockk(relaxed = true) }
+                OrientedImageryViewerState(MapViewProxy(), layer, GraphicsOverlay(), scope) { mockk(relaxed = true) }
             }
             MaterialTheme { OrientedImagery(state, Modifier.fillMaxSize()) }
         }

@@ -48,6 +48,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.mapping.layers.OrientedImageryLayer
 import com.arcgismaps.mapping.view.GraphicsOverlay
+import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
 import com.arcgismaps.toolkit.orientedimageryviewer.internal.ui.ErrorSnackbarContainer
 import com.arcgismaps.toolkit.orientedimageryviewer.internal.ui.ExploreButton
 import com.arcgismaps.toolkit.orientedimageryviewer.internal.ui.MarkerToolsButton
@@ -239,7 +240,8 @@ internal fun ViewerLayout(
                     OrientedImagery(
                         viewerState = viewerState,
                         modifier = Modifier.fillMaxSize(),
-                        onPopup = onPopup.takeIf { imagePopup == null }
+                        onPopup = onPopup.takeIf { imagePopup == null },
+                        onError = errors::showError
                     )
                     imagePopup?.let { popup ->
                         // Scope evaluation to the popup's composition, including dismissal and image changes.
@@ -379,6 +381,7 @@ internal fun ViewerLayoutPreview() {
 
     ViewerLayout(
         viewerState = OrientedImageryViewerState(
+            geoViewProxy = MapViewProxy(),
             orientedImageryLayer = OrientedImageryLayer("https://example.com/oriented-imagery-layer"),
             GraphicsOverlay(),
             coroutineScope = coroutineScope

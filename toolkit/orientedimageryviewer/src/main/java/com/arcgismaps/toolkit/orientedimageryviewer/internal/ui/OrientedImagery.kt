@@ -46,13 +46,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.mapping.layers.orientedimagery.OrientedImage
 import com.arcgismaps.mapping.layers.orientedimagery.OrientedImageType
@@ -62,6 +62,7 @@ import com.arcgismaps.toolkit.orientedimageryviewer.R
 import com.arcgismaps.toolkit.orientedimageryviewer.internal.components.PanoramicImage
 import com.arcgismaps.toolkit.orientedimageryviewer.internal.components.RasterImage
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
 
 /**
@@ -76,6 +77,7 @@ internal fun OrientedImagery(
     viewerState: OrientedImageryViewerState,
     modifier: Modifier = Modifier,
     onPopup: (() -> Unit)? = null,
+    onError: (String) -> Unit = {},
 ) {
     val viewerUiState = viewerState.uiState
 
@@ -93,8 +95,7 @@ internal fun OrientedImagery(
                 viewerUiState.activeImageInfo == null -> {
                     val localizedMessage = viewerUiState.messageResourceId?.let { stringResource(it) }
                     MessageScreen(
-                        message = listOfNotNull(localizedMessage, viewerUiState.message)
-                            .takeIf { it.isNotEmpty() }?.joinToString(" "),
+                        message = localizedMessage ?: viewerUiState.message,
                         modifier = Modifier.fillMaxSize()
                     )
                 }
@@ -133,8 +134,11 @@ internal fun OrientedImagery(
                         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                             when {
                                 loaded == null -> CircularProgressIndicator()
-                                loaded?.isFailure == true -> PlaceholderMessage(stringResource(R.string.image_load_failed))
-                                else -> ImageContent(viewerState, image, active, onPopup)
+                                loaded?.isFailure == true -> MessageScreen(
+                                    modifier = Modifier.fillMaxSize(),
+                                    message = stringResource(R.string.image_load_failed)
+                                )
+                                else -> ImageContent(viewerState, image, active, onPopup, onError)
                             }
                             if (!viewerUiState.isSequentialNavigationEnabled) Surface(
                                 modifier = Modifier.align(Alignment.BottomEnd).padding(12.dp),
@@ -152,7 +156,7 @@ internal fun OrientedImagery(
                 }
             }
         }
-        if (viewerUiState.activeImageInfo != null) ImageNavigationControls(viewerState)
+        if (viewerUiState.activeImageInfo != null) ImageNavigationControls(viewerState, onError)
     }
 }
 
@@ -172,38 +176,65 @@ private fun ImageContent(
     viewerState: OrientedImageryViewerState,
     image: OrientedImage? = null,
     isActive: Boolean = true,
-    onPopup: (() -> Unit)? = null
+    onPopup: (() -> Unit)? = null,
+    onError: (String) -> Unit = {}
 ) {
     val dataUri = if (image != null) image.dataUri else viewerState.uiState.activeImageInfo?.dataUri
     val type = if (image != null) image.type else viewerState.uiState.activeImageInfo?.type
     when {
-        dataUri == null -> PlaceholderMessage("The selected image is missing a data URI.")
+        dataUri == null -> MessageScreen(
+            modifier = Modifier.fillMaxSize(), message = stringResource(R.string.image_source_missing)
+        )
         type == OrientedImageType.Image360 -> PanoramicImage(
-            viewerState, Modifier.fillMaxSize(), pageImage = image, isActive = isActive, onPopup = onPopup
+            viewerState, Modifier.fillMaxSize(), pageImage = image, isActive = isActive, onPopup = onPopup,
+            onError = onError
         )
         type == OrientedImageType.Horizontal || type == OrientedImageType.Inspection ||
                 type == OrientedImageType.Nadir || type == OrientedImageType.Oblique -> RasterImage(
-            viewerState, Modifier.fillMaxSize(), pageImage = image, isActive = isActive, onPopup = onPopup
+            viewerState, Modifier.fillMaxSize(), pageImage = image, isActive = isActive, onPopup = onPopup,
+            onError = onError
         )
-        else -> PlaceholderMessage("This image type is not supported.")
+        else -> MessageScreen(
+            modifier = Modifier.fillMaxSize(), message = stringResource(R.string.image_type_unsupported)
+        )
     }
 }
 
 @Composable
-private fun ImageNavigationControls(viewerState: OrientedImageryViewerState) {
+private fun ImageNavigationControls(viewerState: OrientedImageryViewerState, onError: (String) -> Unit) {
     val state = viewerState.uiState
+    val sequential = state.isSequentialNavigationEnabled
     val scope = rememberCoroutineScope()
-    var failed by remember(viewerState, state.activeImageRevision, state.isSequentialNavigationEnabled) {
+    val reportError by rememberUpdatedState(onError)
+    val failureMessage = stringResource(R.string.image_navigation_failed)
+    var prefetchFailureReported by remember(viewerState, state.activeImageRevision, state.imageSessionRevision, sequential) {
         mutableStateOf(false)
     }
     fun navigate(operation: suspend () -> Result<ImageNavigationStatus>) {
-        scope.launch { failed = operation().isFailure }
+        scope.launch {
+            val result = operation()
+            result.exceptionOrNull()?.let { if (it is CancellationException) throw it }
+            ensureActive()
+            val current = viewerState.uiState
+            if (result.isFailure && current.imageSessionRevision == state.imageSessionRevision &&
+                current.isSequentialNavigationEnabled == sequential
+            ) reportError(failureMessage)
+        }
     }
-    val sequential = state.isSequentialNavigationEnabled
     val canPrevious = if (sequential) state.canNavigatePrevious else state.selectedResultIndex > 0
     val canNext = if (sequential) state.canNavigateNext else state.selectedResultIndex < state.searchResultCount - 1
-    val prefetchErrors = if (sequential) listOfNotNull(state.previousImageError, state.nextImageError).distinct()
-        else emptyList()
+    val hasPrefetchError = sequential && (state.previousImageError != null || state.nextImageError != null)
+    LaunchedEffect(viewerState, state.activeImageRevision, state.imageSessionRevision, sequential, hasPrefetchError) {
+        val current = viewerState.uiState
+        if (current.activeImageRevision != state.activeImageRevision ||
+            current.imageSessionRevision != state.imageSessionRevision ||
+            current.isSequentialNavigationEnabled != sequential
+        ) return@LaunchedEffect
+        if (hasPrefetchError && !prefetchFailureReported) {
+            prefetchFailureReported = true
+            reportError(failureMessage)
+        }
+    }
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
         Row(horizontalArrangement = Arrangement.Center) {
             if (!sequential) {
@@ -223,19 +254,5 @@ private fun ImageNavigationControls(viewerState: OrientedImageryViewerState) {
                 }
             }
         }
-        if (failed || prefetchErrors.isNotEmpty()) {
-            Text(stringResource(R.string.image_navigation_failed), color = MaterialTheme.colorScheme.error)
-            prefetchErrors.forEach { Text(it, color = MaterialTheme.colorScheme.error) }
-        }
     }
-}
-
-@Composable
-private fun PlaceholderMessage(message: String) {
-    Text(
-        text = message,
-        style = MaterialTheme.typography.bodyMedium,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        textAlign = TextAlign.Center
-    )
 }

@@ -18,7 +18,6 @@
 
 package com.arcgismaps.toolkit.orientedimageryviewerapp.screens
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
@@ -69,7 +68,7 @@ fun MainScreen() {
     val sceneGraphicsOverlays = remember(viewModel) { listOf(viewModel.sceneGraphicsOverlay) }
     val orientedImageryViewerState = viewModel.orientedImageryViewerState
     val statusMessage = viewModel.statusMessage
-    val visibleViewerState = orientedImageryViewerState?.takeIf { viewModel.isViewerVisible }
+    val visibleViewerState = orientedImageryViewerState?.takeIf { it.isViewerVisible }
     val shouldShowBottomSheet = visibleViewerState != null
 
     LaunchedEffect(orientedImageryViewerState, shouldShowBottomSheet) {
@@ -135,15 +134,12 @@ fun MainScreen() {
                 GeoViewType.SceneViewType -> {
                     SceneView(
                         arcGISScene = viewModel.arcGISScene,
-                        sceneViewProxy = viewModel.sceneviewProxy,
+                        sceneViewProxy = viewModel.sceneViewProxy,
                         graphicsOverlays = sceneGraphicsOverlays,
                         modifier = Modifier
                             .consumeWindowInsets(paddingValues)
                             .fillMaxSize(),
-                        onSingleTapConfirmed = viewModel::onSingleTapOnGeoView,
-                        onSpatialReferenceChanged = {
-                            Log.i("MainScreen", "SceneView spatial reference changed to: ${it?.wkid}")
-                        }
+                        onSingleTapConfirmed = viewModel::onSingleTapOnGeoView
                     )
                 }
             }

@@ -32,6 +32,7 @@ import androidx.compose.ui.test.performClick
 import androidx.test.platform.app.InstrumentationRegistry
 import com.arcgismaps.mapping.layers.OrientedImageryLayer
 import com.arcgismaps.mapping.view.GraphicsOverlay
+import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
 import com.arcgismaps.toolkit.orientedimageryviewer.GeoViewInteractionStatus
 import com.arcgismaps.toolkit.orientedimageryviewer.OrientedImageryViewer
 import com.arcgismaps.toolkit.orientedimageryviewer.OrientedImageryViewerState
@@ -51,6 +52,7 @@ class ModeSelectionButtonTests {
         compose.setContent {
             state = androidx.compose.runtime.remember {
                 OrientedImageryViewerState(
+                    MapViewProxy(),
                     OrientedImageryLayer("https://example.com/FeatureServer/0"),
                     GraphicsOverlay(),
                     CoroutineScope(Dispatchers.Main.immediate)

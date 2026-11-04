@@ -16,18 +16,23 @@
 
 package com.arcgismaps.toolkit.orientedimageryviewer.internal.components
 
-import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.Color
 import com.arcgismaps.geometry.Envelope
@@ -49,9 +54,11 @@ import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.mapping.view.MapViewInteractionOptions
 import com.arcgismaps.raster.Raster
 import com.arcgismaps.toolkit.orientedimageryviewer.OrientedImageryViewerState
+import com.arcgismaps.toolkit.orientedimageryviewer.R
 import com.arcgismaps.toolkit.geoviewcompose.MapView
 import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
 import com.arcgismaps.toolkit.orientedimageryviewer.internal.ui.ImageInfoButton
+import com.arcgismaps.toolkit.orientedimageryviewer.internal.ui.MessageScreen
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.ensureActive
@@ -78,11 +85,17 @@ internal fun RasterImage(
     graphicsOverlay: GraphicsOverlay = remember { GraphicsOverlay() },
     pageImage: OrientedImage? = null,
     isActive: Boolean = true,
-    onPopup: (() -> Unit)? = null
+    onPopup: (() -> Unit)? = null,
+    onError: (String) -> Unit = {}
 ) {
     val viewerUiState = viewerState.uiState
     val imageRevision = viewerUiState.activeImageRevision
-    fun isCurrent() = isActive && viewerState.uiState.activeImageRevision == imageRevision
+    val active by rememberUpdatedState(isActive)
+    val reportError by rememberUpdatedState(onError)
+    fun isCurrent() = active && viewerState.uiState.activeImageRevision == imageRevision
+    val loadFailedMessage = stringResource(R.string.image_load_failed)
+    val framingFailedMessage = stringResource(R.string.image_framing_failed)
+    val referenceFailedMessage = stringResource(R.string.image_reference_location_failed)
     val coroutineScope = key(viewerState, imageRevision) { rememberCoroutineScope() }
 
     val proxy = remember {
@@ -95,19 +108,26 @@ internal fun RasterImage(
     }
 
     val rasterPath = (if (pageImage != null) pageImage.dataUri else viewerUiState.activeImageInfo?.dataUri) ?: return
-    val rasterLayer = remember(rasterPath) {
-        RasterLayer(Raster.createWithPath(rasterPath))
+    val rasterResult = remember(rasterPath) {
+        runCatching { RasterLayer(Raster.createWithPath(rasterPath)) }
     }
+    val rasterLayer = rasterResult.getOrElse { error ->
+        if (error is CancellationException) throw error
+        MessageScreen(modifier = modifier.fillMaxSize(), message = loadFailedMessage)
+        return
+    }
+    var isLoaded by remember(rasterLayer) { mutableStateOf(false) }
+    var loadFailed by remember(rasterLayer) { mutableStateOf(false) }
 
     val arcGISMap = remember(rasterLayer) {
         ArcGISMap(Basemap(rasterLayer))
     }
 
-    DisposableEffect(viewerState, rasterLayer, imageRevision, isActive) {
+    DisposableEffect(viewerState, rasterLayer, imageRevision, isActive, isLoaded) {
         val toRasterPoint: (DoubleXY) -> Point? = { imagePoint ->
             computeRasterPoint(imagePoint, rasterLayer)
         }
-        if (isCurrent()) viewerState.registerMarkerOverlayInImage(graphicsOverlay, toRasterPoint)
+        if (isCurrent() && isLoaded) viewerState.registerMarkerOverlayInImage(graphicsOverlay, toRasterPoint)
         onDispose {
             viewerState.unregisterMarkerOverlayInImage(toRasterPoint)
         }
@@ -146,9 +166,13 @@ internal fun RasterImage(
                         viewerState.updateFootprints(imageCoordinates)
                     }
                 }
-                Log.i("RasterImage", "Viewpoint changed for bounding geometry: ${viewpoint.targetGeometry.toJson()}")
             }
         )
+        if (loadFailed) {
+            MessageScreen(modifier = Modifier.fillMaxSize(), message = loadFailedMessage)
+        } else if (!isLoaded) {
+            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+        }
         if (isCurrent() && onPopup != null) {
             ImageInfoButton(
                 onClick = { if (isCurrent()) onPopup() },
@@ -163,20 +187,28 @@ internal fun RasterImage(
     LaunchedEffect(rasterLayer) {
         try {
             rasterLayer.load().getOrThrow()
-            rasterLayer.fullExtent?.let { proxy.setViewpointGeometry(it) }
+            ensureActive()
+            isLoaded = true
         } catch (error: CancellationException) {
             throw error
         } catch (error: Exception) {
-            Log.e("RasterImage", "Unable to frame the raster image", error)
+            ensureActive()
+            loadFailed = true
+            return@LaunchedEffect
+        }
+        try {
+            rasterLayer.fullExtent?.let { proxy.setViewpointGeometry(it).getOrThrow() }
+        } catch (error: CancellationException) {
+            throw error
+        } catch (error: Exception) {
+            ensureActive()
+            if (isCurrent()) reportError(framingFailedMessage)
         }
     }
-    LaunchedEffect(viewerState, rasterLayer, imageRevision, isActive, sequentialNavigation, inputLocationData) {
-        if (!isCurrent() || sequentialNavigation) return@LaunchedEffect
+    LaunchedEffect(viewerState, rasterLayer, imageRevision, isActive, isLoaded, sequentialNavigation, inputLocationData) {
+        if (!isCurrent() || !isLoaded || sequentialNavigation) return@LaunchedEffect
         var referenceGraphic: Graphic? = null
         try {
-            rasterLayer.load().getOrThrow()
-            ensureActive()
-            if (!isCurrent()) return@LaunchedEffect
             val location = inputLocationData?.toPoint() ?: return@LaunchedEffect
             val imagePoint = viewerState.locationToImage(location)?.getOrThrow() ?: return@LaunchedEffect
             ensureActive()
@@ -192,7 +224,7 @@ internal fun RasterImage(
             throw error
         } catch (error: Exception) {
             ensureActive()
-            if (isCurrent()) Log.e("RasterImage", "Unable to initialize the raster image", error)
+            if (isCurrent()) reportError(referenceFailedMessage)
         } finally {
             referenceGraphic?.let { referenceOverlay.graphics.remove(it) }
         }

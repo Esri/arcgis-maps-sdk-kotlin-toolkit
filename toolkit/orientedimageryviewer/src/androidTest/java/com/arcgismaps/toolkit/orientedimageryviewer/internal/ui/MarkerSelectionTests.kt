@@ -31,6 +31,7 @@ import com.arcgismaps.Color
 import com.arcgismaps.mapping.layers.OrientedImageryLayer
 import com.arcgismaps.mapping.symbology.SimpleLineSymbolStyle
 import com.arcgismaps.mapping.view.GraphicsOverlay
+import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
 import com.arcgismaps.toolkit.orientedimageryviewer.OrientedImageryViewer
 import com.arcgismaps.toolkit.orientedimageryviewer.OrientedImageryViewerState
 import org.junit.Assert.assertEquals
@@ -51,6 +52,7 @@ class MarkerSelectionTests {
             val scope = rememberCoroutineScope()
             state = remember {
                 OrientedImageryViewerState(
+                    MapViewProxy(),
                     OrientedImageryLayer("https://example.com/FeatureServer/0"), GraphicsOverlay(), scope
                 )
             }

@@ -38,6 +38,7 @@ import com.arcgismaps.mapping.layers.OrientedImageryLayer
 import com.arcgismaps.mapping.layers.orientedimagery.OrientedImage
 import com.arcgismaps.mapping.layers.orientedimagery.OrientedImageType
 import com.arcgismaps.mapping.view.GraphicsOverlay
+import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
 import com.arcgismaps.toolkit.orientedimageryviewer.GeoViewInteractionStatus
 import com.arcgismaps.toolkit.orientedimageryviewer.OrientedImageryViewer
 import com.arcgismaps.toolkit.orientedimageryviewer.OrientedImageryViewerState
@@ -76,7 +77,7 @@ class ExploreButtonTests {
         every { layer.visibleFootprints } returns mutableListOf()
         compose.setContent {
             state = remember {
-                OrientedImageryViewerState(layer, GraphicsOverlay(), scope) { mockk(relaxed = true) }
+                OrientedImageryViewerState(MapViewProxy(), layer, GraphicsOverlay(), scope) { mockk(relaxed = true) }
             }
             MaterialTheme {
                 OrientedImageryViewer(state, showCloseIcon = false)
