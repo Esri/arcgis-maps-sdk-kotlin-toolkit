@@ -250,14 +250,15 @@ internal fun BuildingExplorer(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.padding(8.dp)
                     ) {
-                        Text("Zoom to building")
+                        val zoomToBuildingText = stringResource(R.string.zoom_to_building)
+                        Text(zoomToBuildingText)
                         Spacer(modifier = Modifier.weight(1f))
                         IconButton(
                             onClick = buildingSceneLayerState::onZoom
                         ) {
                             Icon(
                                 painter = painterResource(R.drawable.zoom_in_map),
-                                contentDescription = "Zoom to building"
+                                contentDescription = zoomToBuildingText
                             )
                         }
                     }
