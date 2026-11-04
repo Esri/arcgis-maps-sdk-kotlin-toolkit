@@ -50,8 +50,7 @@ import kotlin.time.Duration.Companion.milliseconds
  * @param onSelected is a callback that is invoked when a bookmark is selected.
  * @param backgroundColor is the background color of the list.
  * @textStyle is the style to be applied to the bookmark text.
- * @since 300.2.0 
- 
+ * @since 300.2.0
  */
 @Composable
 public fun BookmarksListView(
@@ -83,7 +82,6 @@ public fun BookmarksListView(
  * @param onZoom is a callback that is invoked when the bookmark is selected.
  * @param textStyle is the style to be applied to the bookmark text.
  * @since 300.2.0
- * 
  */
 @Composable
 private fun BookmarkItem(
