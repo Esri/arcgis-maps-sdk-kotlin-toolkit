@@ -245,28 +245,29 @@ internal fun BuildingExplorer(
                         )
                     }
                 }
-                if (buildingSceneLayerState.isShowZoom) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(8.dp)
-                    ) {
-                        val zoomToBuildingText = stringResource(R.string.zoom_to_building)
-                        Text(zoomToBuildingText)
-                        Spacer(modifier = Modifier.weight(1f))
-                        IconButton(
-                            onClick = buildingSceneLayerState::onZoom
-                        ) {
-                            Icon(
-                                painter = painterResource(R.drawable.zoom_in_map),
-                                contentDescription = zoomToBuildingText
-                            )
-                        }
-                    }
-                }
 
                 val stateLoaded by buildingSceneLayerState.stateLoaded.collectAsStateWithLifecycle()
 
                 if (stateLoaded) {
+                    if (buildingSceneLayerState.isShowZoom) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.padding(8.dp)
+                        ) {
+                            val zoomToBuildingText = stringResource(R.string.zoom_to_building)
+                            Text(zoomToBuildingText)
+                            Spacer(modifier = Modifier.weight(1f))
+                            IconButton(
+                                onClick = buildingSceneLayerState::onZoom
+                            ) {
+                                Icon(
+                                    painter = painterResource(R.drawable.zoom_in_map),
+                                    contentDescription = zoomToBuildingText
+                                )
+                            }
+                        }
+                    }
+
                     if (buildingSceneLayerState.showFullModel.value) {
                         if (buildingSceneLayerState.isShowLevels) {
                             var levelsExpanded by remember { mutableStateOf(false) }
