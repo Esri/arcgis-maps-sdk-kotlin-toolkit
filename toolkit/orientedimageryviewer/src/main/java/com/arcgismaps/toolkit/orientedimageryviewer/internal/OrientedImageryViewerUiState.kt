@@ -29,6 +29,7 @@ import com.arcgismaps.toolkit.orientedimageryviewer.OrientedImageryViewerState
 @Immutable
 internal data class OrientedImageryViewerUiState(
     val activeImageInfo: OrientedImageInfo? = null,
+    val isLoading: Boolean = false,
     val hasAdditionalImages: Boolean = false,
     val activeImageRevision: Long = 0,
     val imageSessionRevision: Long = 0,

@@ -24,7 +24,9 @@ import com.arcgismaps.mapping.symbology.SimpleMarkerSymbol
 import com.arcgismaps.mapping.symbology.SimpleMarkerSymbolStyle
 import com.arcgismaps.toolkit.orientedimageryviewer.R
 
-/** Identity is independent of symbol appearance and palette ordering. */
+/**
+ * Identity is independent of symbol appearance and palette ordering.
+ */
 internal enum class MarkerOptionId { VioletSquare, YellowTriangle, OrangeDiamond }
 
 internal data class MarkerOption(
@@ -33,7 +35,9 @@ internal data class MarkerOption(
     @StringRes val descriptionResId: Int
 )
 
-/** Palette symbols are shared by selections and markers; do not mutate them after initialization. */
+/**
+ * Palette symbols are shared by selections and markers; do not mutate them after initialization.
+ */
 internal object MarkerSymbols {
     val options: List<MarkerOption> = listOf(
         MarkerOption(

@@ -153,6 +153,67 @@ class GeoViewInteractionTests {
     }
 
     @Test
+    fun progressRemainsVisibleThroughIdentifyFetchAndImageLoad() {
+        val identifying = CompletableDeferred<Result<IdentifyLayerResult>>()
+        val fetching = CompletableDeferred<Result<OrientedImage>>()
+        val loading = CompletableDeferred<Result<Unit>>()
+        lateinit var image: OrientedImage
+        compose.runOnIdle {
+            state.showMessage("Previous failure")
+            state.geoViewInteractionStatus = GeoViewInteractionStatus.DisplayImage
+            image = mockk()
+            every { image.dataUri } returns null
+            every { image.type } returns OrientedImageType.Horizontal
+            every { image.geometry } returns location
+            coEvery { image.load() } coAnswers { loading.await() }
+            coEvery { proxy.identify(layer, any(), any(), any(), any()) } coAnswers { identifying.await() }
+            coEvery { layer.fetchImageForFeature(feature) } coAnswers { fetching.await() }
+            scope.launch { state.onSingleTapOnGeoView(event).getOrThrow() }
+            showViewer = true
+        }
+        assertRequestProgress()
+        compose.runOnIdle { identifying.complete(Result.success(identified)) }
+        assertRequestProgress()
+        compose.runOnIdle { fetching.complete(Result.success(image)) }
+        assertRequestProgress()
+        compose.runOnIdle {
+            loading.complete(Result.success(Unit))
+            assertFalse(state.uiState.isLoading)
+            assertTrue(state.hasActiveImage)
+            assertNull(state.uiState.messageResourceId)
+            assertEquals(GeoViewInteractionStatus.DisplayImage, state.geoViewInteractionStatus)
+        }
+        compose.onNodeWithTag("OrientedImageryProgressIndicator").assertDoesNotExist()
+        compose.onNodeWithText("No Image to display").assertDoesNotExist()
+    }
+
+    @Test
+    fun pendingIdentifyShowsOnlyProgressUntilNoImagesMessage() {
+        val pending = CompletableDeferred<Result<IdentifyLayerResult>>()
+        compose.runOnIdle {
+            state.geoViewInteractionStatus = GeoViewInteractionStatus.DisplayImage
+            every { identified.geoElements } returns emptyList()
+            coEvery { proxy.identify(layer, any(), any(), any(), any()) } coAnswers { pending.await() }
+            scope.launch { state.onSingleTapOnGeoView(event).getOrThrow() }
+            showViewer = true
+        }
+        assertRequestProgress()
+        compose.runOnIdle {
+            pending.complete(Result.success(identified))
+            assertFalse(state.uiState.isLoading)
+        }
+        compose.onNodeWithTag("OrientedImageryProgressIndicator").assertDoesNotExist()
+        compose.onNodeWithText("No images found for the tapped location").assertIsDisplayed()
+    }
+
+    private fun assertRequestProgress() {
+        compose.onNodeWithTag("OrientedImageryProgressIndicator").assertIsDisplayed()
+        compose.onNodeWithTag("MessageScreen").assertDoesNotExist()
+        compose.onNodeWithTag("OrientedImagePager").assertDoesNotExist()
+        compose.runOnIdle { assertTrue(state.uiState.isLoading) }
+    }
+
+    @Test
     fun identifyMissClearsActiveImage() {
         compose.runOnIdle {
             scope.launch { state.fetchImage(feature).getOrThrow() }
@@ -185,15 +246,24 @@ class GeoViewInteractionTests {
 
     @Test
     fun identifyFailureIsReturned() {
+        val pending = CompletableDeferred<Result<IdentifyLayerResult>>()
+        val error = IllegalStateException("Identify failed")
         compose.runOnIdle {
             state.geoViewInteractionStatus = GeoViewInteractionStatus.DisplayImage
-            val error = IllegalStateException("Identify failed")
-            coEvery { proxy.identify(layer, any(), any(), any(), any()) } returns Result.failure(error)
+            coEvery { proxy.identify(layer, any(), any(), any(), any()) } coAnswers { pending.await() }
             scope.launch { assertSame(error, state.onSingleTapOnGeoView(event).exceptionOrNull()) }
+            showViewer = true
+        }
+        assertRequestProgress()
+        compose.runOnIdle {
+            pending.complete(Result.failure(error))
+            assertFalse(state.uiState.isLoading)
             assertEquals(R.string.image_fetch_failed, state.uiState.messageResourceId)
             assertEquals("Identify failed", state.uiState.message)
             coVerify(exactly = 0) { layer.fetchImageForFeature(any()) }
         }
+        compose.onNodeWithTag("OrientedImageryProgressIndicator").assertDoesNotExist()
+        compose.onNodeWithTag("MessageScreen").assertIsDisplayed()
     }
 
     @Test
@@ -242,6 +312,7 @@ class GeoViewInteractionTests {
                 Result.failure(CancellationException("Cancelled"))
             val job = scope.launch { state.onSingleTapOnGeoView(event) }
             assertTrue(job.isCancelled)
+            assertFalse(state.uiState.isLoading)
             assertNull(state.uiState.messageResourceId)
         }
     }
@@ -306,13 +377,95 @@ class GeoViewInteractionTests {
     }
 
     @Test
+    fun progressCoversSceneLocationResolutionAndSearch() {
+        val resolving = CompletableDeferred<Result<Point>>()
+        val searching = CompletableDeferred<Result<List<OrientedImage>>>()
+        compose.runOnIdle {
+            val sceneProxy = mockk<SceneViewProxy>()
+            coEvery { sceneProxy.screenToLocation(event.screenCoordinate) } coAnswers { resolving.await() }
+            coEvery { layer.searchImages(any(), any()) } coAnswers { searching.await() }
+            state = OrientedImageryViewerState(sceneProxy, layer, overlay, scope)
+            scope.launch { state.onSingleTapOnGeoView(event).getOrThrow() }
+            showViewer = true
+        }
+        assertRequestProgress()
+        compose.runOnIdle { resolving.complete(Result.success(location)) }
+        assertRequestProgress()
+        compose.runOnIdle {
+            searching.complete(Result.success(emptyList()))
+            assertFalse(state.uiState.isLoading)
+        }
+        compose.onNodeWithTag("OrientedImageryProgressIndicator").assertDoesNotExist()
+        compose.onNodeWithText("No images found for the tapped location").assertIsDisplayed()
+    }
+
+    @Test
+    fun staleSearchCannotHideNewerIdentifyProgress() {
+        compose.runOnIdle {
+            for (fail in listOf(false, true)) {
+                val searching = CompletableDeferred<Result<List<OrientedImage>>>()
+                val identifying = CompletableDeferred<Result<IdentifyLayerResult>>()
+                coEvery { layer.searchImages(any(), any()) } coAnswers { searching.await() }
+                coEvery { proxy.identify(layer, any(), any(), any(), any()) } coAnswers { identifying.await() }
+                val oldJob = scope.launch { state.searchImages(location) }
+                state.geoViewInteractionStatus = GeoViewInteractionStatus.DisplayImage
+                every { identified.geoElements } returns emptyList()
+                scope.launch { state.onSingleTapOnGeoView(event).getOrThrow() }
+                searching.complete(if (fail) Result.failure(IllegalStateException("Stale search"))
+                    else Result.success(emptyList()))
+                assertTrue(oldJob.isCancelled)
+                assertTrue(state.uiState.isLoading)
+                assertNull(state.uiState.messageResourceId)
+                identifying.complete(Result.success(identified))
+                assertFalse(state.uiState.isLoading)
+                assertEquals(R.string.no_images_found_for_tapped_location, state.uiState.messageResourceId)
+            }
+        }
+    }
+
+    @Test
+    fun staleIdentifyCannotHideNewerSearchProgress() {
+        compose.runOnIdle {
+            val identifying = CompletableDeferred<Result<IdentifyLayerResult>>()
+            val searching = CompletableDeferred<Result<List<OrientedImage>>>()
+            state.geoViewInteractionStatus = GeoViewInteractionStatus.DisplayImage
+            coEvery { proxy.identify(layer, any(), any(), any(), any()) } coAnswers { identifying.await() }
+            coEvery { layer.searchImages(any(), any()) } coAnswers { searching.await() }
+            val oldJob = scope.launch { state.onSingleTapOnGeoView(event) }
+            scope.launch { state.searchImages(location).getOrThrow() }
+            identifying.complete(Result.failure(IllegalStateException("Stale identify")))
+            assertTrue(oldJob.isCancelled)
+            assertTrue(state.uiState.isLoading)
+            assertNull(state.uiState.messageResourceId)
+            searching.complete(Result.success(emptyList()))
+            assertFalse(state.uiState.isLoading)
+        }
+    }
+
+    @Test
+    fun cancellingPendingIdentifyEndsProgressWithoutMessage() {
+        compose.runOnIdle {
+            val pending = CompletableDeferred<Result<IdentifyLayerResult>>()
+            state.geoViewInteractionStatus = GeoViewInteractionStatus.DisplayImage
+            coEvery { proxy.identify(layer, any(), any(), any(), any()) } coAnswers { pending.await() }
+            val job = scope.launch { state.onSingleTapOnGeoView(event) }
+            assertTrue(state.uiState.isLoading)
+            job.cancel()
+            assertFalse(state.uiState.isLoading)
+            assertNull(state.uiState.messageResourceId)
+        }
+    }
+
+    @Test
     fun resetInvalidatesPendingIdentify() {
         compose.runOnIdle {
             state.geoViewInteractionStatus = GeoViewInteractionStatus.DisplayImage
             val pending = CompletableDeferred<Result<IdentifyLayerResult>>()
             coEvery { proxy.identify(layer, any(), any(), any(), any()) } coAnswers { pending.await() }
             val job = scope.launch { state.onSingleTapOnGeoView(event) }
+            assertTrue(state.uiState.isLoading)
             state.resetAll()
+            assertFalse(state.uiState.isLoading)
             pending.complete(Result.success(identified))
             assertTrue(job.isCancelled)
             assertFalse(state.hasActiveImage)
@@ -397,6 +550,7 @@ class GeoViewInteractionTests {
             coEvery { layer.searchImages(any(), any()) } coAnswers { pending.await() }
             val job = scope.launch { state.searchImages(location) }
             state.showMessage("Request replaced")
+            assertFalse(state.uiState.isLoading)
             pending.complete(Result.success(emptyList()))
             assertTrue(job.isCancelled)
             assertEquals("Request replaced", state.uiState.message)

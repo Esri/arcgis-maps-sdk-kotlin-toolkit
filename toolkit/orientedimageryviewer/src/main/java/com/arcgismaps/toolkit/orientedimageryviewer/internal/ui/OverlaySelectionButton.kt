@@ -54,7 +54,18 @@ import com.arcgismaps.toolkit.orientedimageryviewer.R
 import com.arcgismaps.toolkit.orientedimageryviewer.internal.ui.material3.ModalBottomSheet
 import com.arcgismaps.toolkit.orientedimageryviewer.internal.ui.material3.rememberModalBottomSheetState
 
-/** Selects which footprint and camera overlays are visible. */
+/**
+ * A button that opens a bottom sheet for selecting which overlays to display on the map.
+ *
+ * @param hasActiveImage Whether there is an active image to show the footprint for.
+ * @param hasAdditionalImages Whether there are additional images to show footprints or camera locations for.
+ * @param isActiveFootprintVisible Whether the active image footprint is currently visible.
+ * @param isAdditionalFootprintsVisible Whether the additional image footprints are currently visible.
+ * @param isAdditionalCameraLocationsVisible Whether the additional image camera locations are currently visible.
+ * @param onCurrentFootprint Callback when the user toggles the active image footprint visibility.
+ * @param onAdditionalFootprints Callback when the user toggles the additional image footprints visibility.
+ * @param onAdditionalCameraLocations Callback when the user toggles the additional image camera locations visibility.
+ */
 @Composable
 internal fun OverlaySelectionButton(
     hasActiveImage: Boolean,
@@ -72,13 +83,20 @@ internal fun OverlaySelectionButton(
         selected = isActiveFootprintVisible || isAdditionalFootprintsVisible ||
                 isAdditionalCameraLocationsVisible,
         onClick = { showSheet = true },
-        label = { Text(stringResource(R.string.toolbar_overlays)) },
-        modifier = Modifier.padding(horizontal = 4.dp),
+        label = {
+            Text(
+                text = stringResource(R.string.toolbar_overlays),
+                style = MaterialTheme.typography.labelSmall,
+                maxLines = 1,
+                softWrap = false
+            )
+        },
+        modifier = Modifier.padding(horizontal = 2.dp),
         leadingIcon = {
             Icon(
                 painter = painterResource(R.drawable.overlays_24),
                 contentDescription = null,
-                modifier = Modifier.size(24.dp)
+                modifier = Modifier.size(18.dp)
             )
         },
         shape = CircleShape,

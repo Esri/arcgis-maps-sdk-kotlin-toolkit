@@ -57,6 +57,8 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogWindowProvider
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -68,6 +70,18 @@ import com.arcgismaps.toolkit.orientedimageryviewer.internal.ui.material3.ModalB
 import com.arcgismaps.toolkit.orientedimageryviewer.internal.ui.material3.ModalBottomSheetProperties
 import com.arcgismaps.toolkit.orientedimageryviewer.internal.ui.material3.rememberModalBottomSheetState
 
+/**
+ * A button that opens a bottom sheet with marker tools.
+ *
+ * @param isMarkingLocation Whether the user is currently marking a location.
+ * @param onAddMarker Callback when the user selects the "Add Marker" option.
+ * @param onSelectMarker Callback when the user selects the "Select Marker" option.
+ * @param onClearAllMarkers Callback when the user selects the "Clear All Markers" option.
+ * @param isMarkerSelectionVisible Whether the marker selection sheet is currently visible.
+ * @param selectedOptionId The currently selected marker option ID, if any.
+ * @param onSelectOption Callback when the user selects a marker option from the selection sheet.
+ * @param onDismissSelection Callback when the marker selection sheet is dismissed.
+ */
 @Composable
 internal fun MarkerToolsButton(
     isMarkingLocation: Boolean,
@@ -92,13 +106,20 @@ internal fun MarkerToolsButton(
     FilterChip(
         selected = isMarkingLocation,
         onClick = { showSheet = true },
-        label = { Text(stringResource(R.string.toolbar_markers)) },
-        modifier = Modifier.padding(horizontal = 4.dp),
+        label = {
+            Text(
+                text = stringResource(R.string.toolbar_markers),
+                style = MaterialTheme.typography.labelSmall,
+                maxLines = 1,
+                softWrap = false
+            )
+        },
+        modifier = Modifier.padding(horizontal = 2.dp),
         leadingIcon = {
             Icon(
                 painter = painterResource(R.drawable.location_image_24),
                 contentDescription = null,
-                modifier = Modifier.size(24.dp)
+                modifier = Modifier.size(18.dp)
             )
         },
         shape = CircleShape,
@@ -172,8 +193,11 @@ internal fun MarkerToolsButton(
                         enabled = isMarkingLocation,
                         onClick = onSelectMarker,
                         leadingIcon = {
-                            Canvas(Modifier.size(24.dp)) {
-                                drawMarkerSymbol(MarkerSymbols.options.first().symbol, center, 24.dp.toPx())
+                            val option = MarkerSymbols.options.firstOrNull { it.id == selectedOptionId }
+                                ?: MarkerSymbols.options.first()
+                            val description = stringResource(option.descriptionResId)
+                            Canvas(Modifier.size(24.dp).semantics { contentDescription = description }) {
+                                drawMarkerSymbol(option.symbol, center, 24.dp.toPx())
                             }
                         },
                         trailingContent = {

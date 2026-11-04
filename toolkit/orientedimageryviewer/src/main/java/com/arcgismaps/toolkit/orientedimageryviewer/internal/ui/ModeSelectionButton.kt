@@ -48,7 +48,15 @@ import com.arcgismaps.toolkit.orientedimageryviewer.R
 import com.arcgismaps.toolkit.orientedimageryviewer.internal.ui.material3.ModalBottomSheet
 import com.arcgismaps.toolkit.orientedimageryviewer.internal.ui.material3.rememberModalBottomSheetState
 
-/** Selects the operation performed when the user taps the GeoView. */
+/**
+ * A button that allows the user to select between different modes of interaction with the oriented imagery viewer.
+ *
+ * @param interactionStatus The current interaction status of the GeoView.
+ * @param isFindImagesSelected Whether the "Find Images" mode is currently selected.
+ * @param isDisplayImageSelected Whether the "Display Image" mode is currently selected.
+ * @param onFindImagesSelectedChange Callback when the "Find Images" mode selection changes.
+ * @param onDisplayImageSelectedChange Callback when the "Display Image" mode selection changes.
+ */
 @Composable
 internal fun ModeSelectionButton(
     interactionStatus: GeoViewInteractionStatus,
@@ -64,13 +72,20 @@ internal fun ModeSelectionButton(
         selected = interactionStatus == GeoViewInteractionStatus.FindImages ||
                 interactionStatus == GeoViewInteractionStatus.DisplayImage,
         onClick = { showSheet = true },
-        label = { Text(stringResource(R.string.toolbar_mode)) },
-        modifier = Modifier.padding(horizontal = 4.dp),
+        label = {
+            Text(
+                text = stringResource(R.string.toolbar_mode),
+                style = MaterialTheme.typography.labelSmall,
+                maxLines = 1,
+                softWrap = false
+            )
+        },
+        modifier = Modifier.padding(horizontal = 2.dp),
         leadingIcon = {
             Icon(
                 painter = painterResource(lastClickedModeIcon),
                 contentDescription = null,
-                modifier = Modifier.size(24.dp)
+                modifier = Modifier.size(18.dp)
             )
         },
         shape = CircleShape,

@@ -308,7 +308,7 @@ internal fun ViewerLayout(
 }
 
 @Composable
-private fun OrientedImageryToolbar(
+internal fun OrientedImageryToolbar(
     interactionStatus: GeoViewInteractionStatus,
     isFindImagesSelected: Boolean,
     isDisplayImageSelected: Boolean,

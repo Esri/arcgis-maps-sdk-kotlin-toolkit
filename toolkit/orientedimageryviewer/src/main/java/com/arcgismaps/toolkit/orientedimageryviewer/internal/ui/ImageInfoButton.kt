@@ -33,7 +33,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arcgismaps.toolkit.orientedimageryviewer.R
 
-/** Opens information about the active image without intercepting renderer gestures. */
+/**
+ * Opens information about the active image without intercepting renderer gestures.
+ */
 @Composable
 internal fun ImageInfoButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
     val description = stringResource(R.string.toolbar_popup)

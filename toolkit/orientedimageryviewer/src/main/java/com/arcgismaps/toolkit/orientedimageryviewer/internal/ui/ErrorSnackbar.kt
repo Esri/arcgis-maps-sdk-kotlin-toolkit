@@ -31,7 +31,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
-/** Presents errors without allowing repeated actions to queue stale messages. */
+/**
+ * Presents errors without allowing repeated actions to queue stale messages.
+ */
 internal class ErrorSnackbarState(private val scope: CoroutineScope) {
     val hostState = SnackbarHostState()
     private var messageJob: Job? = null

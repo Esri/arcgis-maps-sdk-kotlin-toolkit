@@ -195,21 +195,21 @@ internal class ImageSession(
 
         val session = generation
         fun fetch(step: SequenceStep): Deferred<Result<OrientedImage?>> = scope.async(start = CoroutineStart.LAZY) {
-            val result = inSession(session) {
-                try {
-                    layer.fetchAdjacentImage(image, step).getInSession(session)
-                } catch (error: Exception) {
-                    if (error is CancellationException) throw error
-                    // Runtime's sequential query reports common_no_data (20) at either boundary.
-                    if (error is ArcGISException && error.errorCode == 20) null else throw error
+                val result = inSession(session) {
+                    try {
+                        layer.fetchAdjacentImage(image, step).getInSession(session)
+                    } catch (error: Exception) {
+                        if (error is CancellationException) throw error
+                        // Runtime's sequential query reports common_no_data (20) at either boundary.
+                        if (error is ArcGISException && error.errorCode == 20) null else throw error
+                    }
                 }
+                ensureSession(session)
+                if (revision != prefetchGeneration) throw CancellationException("Adjacent images were superseded.")
+                val error = result.exceptionOrNull()
+                onAdjacentImageChanged(step, result.getOrNull() != null, error?.let { it.message ?: it.toString() })
+                result
             }
-            ensureSession(session)
-            if (revision != prefetchGeneration) throw CancellationException("Adjacent images were superseded.")
-            val error = result.exceptionOrNull()
-            onAdjacentImageChanged(step, result.getOrNull() != null, error?.let { it.message ?: it.toString() })
-            result
-        }
         // Assign both requests before starting either: immediate completion may enable navigation.
         previousImage = fetch(SequenceStep.Previous)
         nextImage = fetch(SequenceStep.Next)

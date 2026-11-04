@@ -27,7 +27,9 @@ import androidx.compose.ui.unit.dp
 import com.arcgismaps.mapping.symbology.SimpleMarkerSymbol
 import com.arcgismaps.mapping.symbology.SimpleMarkerSymbolStyle
 
-/** Screen-space rendering keeps panoramic symbols upright and the same size as raster symbols. */
+/**
+ * Screen-space rendering keeps panoramic symbols upright and the same size as raster symbols.
+ */
 internal fun DrawScope.drawMarkerSymbol(
     symbol: SimpleMarkerSymbol,
     center: Offset,

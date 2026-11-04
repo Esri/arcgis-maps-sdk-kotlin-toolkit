@@ -35,8 +35,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
@@ -92,6 +90,10 @@ internal fun OrientedImagery(
             contentAlignment = Alignment.Center
         ) {
             when {
+                viewerUiState.isLoading -> CircularProgressIndicator(
+                    modifier = Modifier.testTag("OrientedImageryProgressIndicator")
+                )
+
                 viewerUiState.activeImageInfo == null -> {
                     val localizedMessage = viewerUiState.messageResourceId?.let { stringResource(it) }
                     MessageScreen(
@@ -99,6 +101,7 @@ internal fun OrientedImagery(
                         modifier = Modifier.fillMaxSize()
                     )
                 }
+
                 else -> key(viewerState) {
                     val images = viewerState.searchResultImages
                     // Retain the selected page even when a mode change moves it to index zero.
@@ -138,25 +141,17 @@ internal fun OrientedImagery(
                                     modifier = Modifier.fillMaxSize(),
                                     message = stringResource(R.string.image_load_failed)
                                 )
+
                                 else -> ImageContent(viewerState, image, active, onPopup, onError)
-                            }
-                            if (!viewerUiState.isSequentialNavigationEnabled) Surface(
-                                modifier = Modifier.align(Alignment.BottomEnd).padding(12.dp),
-                                shape = MaterialTheme.shapes.small,
-                                color = MaterialTheme.colorScheme.surface
-                            ) {
-                                Text(
-                                    text = (index + 1).toString(),
-                                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
-                                    style = MaterialTheme.typography.titleMedium
-                                )
                             }
                         }
                     }
                 }
             }
         }
-        if (viewerUiState.activeImageInfo != null) ImageNavigationControls(viewerState, onError)
+        if (!viewerUiState.isLoading && viewerUiState.activeImageInfo != null) {
+            ImageNavigationControls(viewerState, onError)
+        }
     }
 }
 
@@ -179,21 +174,24 @@ private fun ImageContent(
     onPopup: (() -> Unit)? = null,
     onError: (String) -> Unit = {}
 ) {
-    val dataUri = if (image != null) image.dataUri else viewerState.uiState.activeImageInfo?.dataUri
-    val type = if (image != null) image.type else viewerState.uiState.activeImageInfo?.type
+    val dataUri = image?.dataUri ?: viewerState.uiState.activeImageInfo?.dataUri
+    val type = image?.type ?: viewerState.uiState.activeImageInfo?.type
     when {
         dataUri == null -> MessageScreen(
             modifier = Modifier.fillMaxSize(), message = stringResource(R.string.image_source_missing)
         )
+
         type == OrientedImageType.Image360 -> PanoramicImage(
             viewerState, Modifier.fillMaxSize(), pageImage = image, isActive = isActive, onPopup = onPopup,
             onError = onError
         )
+
         type == OrientedImageType.Horizontal || type == OrientedImageType.Inspection ||
                 type == OrientedImageType.Nadir || type == OrientedImageType.Oblique -> RasterImage(
             viewerState, Modifier.fillMaxSize(), pageImage = image, isActive = isActive, onPopup = onPopup,
             onError = onError
         )
+
         else -> MessageScreen(
             modifier = Modifier.fillMaxSize(), message = stringResource(R.string.image_type_unsupported)
         )
@@ -210,6 +208,7 @@ private fun ImageNavigationControls(viewerState: OrientedImageryViewerState, onE
     var prefetchFailureReported by remember(viewerState, state.activeImageRevision, state.imageSessionRevision, sequential) {
         mutableStateOf(false)
     }
+
     fun navigate(operation: suspend () -> Result<ImageNavigationStatus>) {
         scope.launch {
             val result = operation()
@@ -221,6 +220,7 @@ private fun ImageNavigationControls(viewerState: OrientedImageryViewerState, onE
             ) reportError(failureMessage)
         }
     }
+
     val canPrevious = if (sequential) state.canNavigatePrevious else state.selectedResultIndex > 0
     val canNext = if (sequential) state.canNavigateNext else state.selectedResultIndex < state.searchResultCount - 1
     val hasPrefetchError = sequential && (state.previousImageError != null || state.nextImageError != null)

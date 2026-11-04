@@ -96,7 +96,8 @@ public sealed interface ImageNavigationStatus {
 /**
  * State for an oriented imagery viewer. Access this state on the main thread.
  * A newly constructed or reset state displays guidance for selecting an image. Image request
- * failures and empty results display a persistent message instead of image content.
+ * progress is displayed until identification, retrieval, and loading finish. Failures and empty
+ * results display a persistent message instead of image content.
  *
  * Search and feature fetch share a latest-request-wins policy. Navigation requests are queued
  * and processed one at a time. A search, fetch, or reset invalidates older pending operations,
@@ -140,6 +141,7 @@ public class OrientedImageryViewerState internal constructor(
     private var preferredAdditionalFootprintsVisible = uiState.isAdditionalFootprintsVisible
     private var preferredAdditionalCameraLocationsVisible = uiState.isAdditionalCameraLocationsVisible
     private var interactionRevision: Long = 0
+    private var imageRequestRevision: Long = 0
     private val session: ImageSession = ImageSession(
         orientedImageryLayer,
         onImageChanged = ::publishActiveImage,
@@ -320,7 +322,15 @@ public class OrientedImageryViewerState internal constructor(
         if (status == GeoViewInteractionStatus.None) return Result.success(Unit)
         if (status != GeoViewInteractionStatus.AddMarkers) {
             _isViewerVisible.value = true
+            return withImageRequest { handleSingleTap(event, status) }
         }
+        return handleSingleTap(event, status)
+    }
+
+    private suspend fun handleSingleTap(
+        event: SingleTapConfirmedEvent,
+        status: GeoViewInteractionStatus
+    ): Result<Unit> {
         return runCatching {
             currentCoroutineContext().ensureActive()
             when (status) {
@@ -381,7 +391,7 @@ public class OrientedImageryViewerState internal constructor(
     /**
      * Clears the image session and displays an error or warning message in the viewer.
      * Invalidates pending image and marker operations, retaining the toolbar's user preferences.
-     * A new search, fetch, or reset restores the initial guidance until an image is available.
+     * A new image request displays progress; a reset restores the initial guidance.
      */
     public fun showMessage(message: String) {
         resetImageState()
@@ -431,15 +441,15 @@ public class OrientedImageryViewerState internal constructor(
      * Cancellation is rethrown. The active image may already have been changed when an operation fails.
      */
     public suspend fun searchImages(lastMapLocation: Point): Result<ImageSearchStatus> {
-        currentCoroutineContext().ensureActive()
-        resetImageState()
-        setInputLocation(lastMapLocation)
-        return session.search(lastMapLocation).also { result ->
-            result.onFailure { showMessage(R.string.image_search_failed, it.message) }
-            if (result.getOrNull() == ImageSearchStatus.NoImagesFound) {
-                showMessage(R.string.no_images_found_for_tapped_location)
+        return withImageRequest {
+            setInputLocation(lastMapLocation)
+            session.search(lastMapLocation).also { result ->
+                result.onFailure { showMessage(R.string.image_search_failed, it.message) }
+                if (result.getOrNull() == ImageSearchStatus.NoImagesFound) {
+                    showMessage(R.string.no_images_found_for_tapped_location)
+                }
+                clearOverlayChecksIfNoImage()
             }
-            clearOverlayChecksIfNoImage()
         }
     }
 
@@ -450,11 +460,25 @@ public class OrientedImageryViewerState internal constructor(
      * Cancellation is rethrown. The active image may already have been changed when an operation fails.
      */
     public suspend fun fetchImage(feature: Feature): Result<Unit> {
+        return withImageRequest {
+            session.fetch(feature).also { result ->
+                result.onFailure { showMessage(R.string.image_fetch_failed, it.message) }
+                clearOverlayChecksIfNoImage()
+            }
+        }
+    }
+
+    private suspend fun <T> withImageRequest(operation: suspend () -> T): T {
         currentCoroutineContext().ensureActive()
-        resetImageState()
-        return session.fetch(feature).also { result ->
-            result.onFailure { showMessage(R.string.image_fetch_failed, it.message) }
-            clearOverlayChecksIfNoImage()
+        resetImageState(isLoading = true)
+        val revision = imageRequestRevision
+        return try {
+            operation()
+        } finally {
+            // A nested fetch/search, replacement request, or reset owns its own loading state.
+            if (revision == imageRequestRevision) {
+                updateUiState { it.copy(isLoading = false) }
+            }
         }
     }
 
@@ -625,14 +649,16 @@ public class OrientedImageryViewerState internal constructor(
         _isViewerVisible.value = false
     }
 
-    private fun resetImageState() {
+    private fun resetImageState(isLoading: Boolean = false) {
         interactionRevision++
+        imageRequestRevision++
         footprints.reset()
         session.reset()
         markers.reset()
         updateUiState { uiState ->
             uiState.copy(
                 activeImageInfo = null,
+                isLoading = isLoading,
                 inputLocationData = null,
                 message = null,
                 messageResourceId = null

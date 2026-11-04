@@ -175,6 +175,28 @@ class MarkerToolsButtonTests {
     }
 
     @Test
+    fun selectMarkerIconReflectsSelectionAndSurvivesReopening() {
+        isMarkingLocation.value = true
+        showButton()
+        compose.onNodeWithText("Markers").performClick()
+        compose.onNodeWithContentDescription("Violet square", useUnmergedTree = true).assertIsDisplayed()
+
+        listOf("Yellow triangle", "Orange diamond", "Violet square").forEach { description ->
+            compose.onNodeWithText("Select Marker").performClick()
+            compose.onNodeWithContentDescription(description).performClick()
+            compose.onNodeWithText("Marker Tools").assertIsDisplayed()
+            compose.onNodeWithContentDescription(description, useUnmergedTree = true).assertIsDisplayed()
+
+            compose.onNodeWithContentDescription("Close").performClick()
+            compose.onNodeWithText("Markers").performClick()
+            compose.onNodeWithContentDescription(description, useUnmergedTree = true).assertIsDisplayed()
+        }
+
+        compose.runOnIdle { selectedOption.value = null }
+        compose.onNodeWithContentDescription("Violet square", useUnmergedTree = true).assertIsDisplayed()
+    }
+
+    @Test
     fun outsideTapClosesSheetAndNextTapReopensIt() {
         showButton()
         compose.onNodeWithText("Markers").tapOnScreen()

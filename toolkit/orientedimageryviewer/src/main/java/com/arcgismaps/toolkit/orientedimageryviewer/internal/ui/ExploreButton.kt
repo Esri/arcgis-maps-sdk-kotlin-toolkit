@@ -53,7 +53,9 @@ import com.arcgismaps.toolkit.orientedimageryviewer.R
 import com.arcgismaps.toolkit.orientedimageryviewer.internal.ui.material3.ModalBottomSheet
 import com.arcgismaps.toolkit.orientedimageryviewer.internal.ui.material3.rememberModalBottomSheetState
 
-/** Opens exploration options for layers that support sequential navigation. */
+/**
+ * Opens exploration options for layers that support sequential navigation.
+ */
 @Composable
 internal fun ExploreButton(
     supportsSequentialNavigation: Boolean,
@@ -69,13 +71,20 @@ internal fun ExploreButton(
         selected = isSequentialNavigationEnabled,
         enabled = hasActiveImage,
         onClick = { showSheet = true },
-        label = { Text(stringResource(R.string.toolbar_explore)) },
-        modifier = Modifier.padding(horizontal = 4.dp),
+        label = {
+            Text(
+                text = stringResource(R.string.toolbar_explore),
+                style = MaterialTheme.typography.labelSmall,
+                maxLines = 1,
+                softWrap = false
+            )
+        },
+        modifier = Modifier.padding(horizontal = 2.dp),
         leadingIcon = {
             Icon(
                 painter = painterResource(R.drawable.overlays_24),
                 contentDescription = null,
-                modifier = Modifier.size(24.dp)
+                modifier = Modifier.size(18.dp)
             )
         },
         shape = CircleShape,

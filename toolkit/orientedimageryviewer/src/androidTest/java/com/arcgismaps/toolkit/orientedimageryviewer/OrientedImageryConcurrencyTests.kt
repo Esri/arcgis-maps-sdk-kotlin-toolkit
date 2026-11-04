@@ -114,6 +114,108 @@ class OrientedImageryConcurrencyTests {
     }
 
     @Test
+    fun directRequestsRemainLoadingThroughRetrievalAndImageLoad() {
+        compose.runOnIdle {
+            state.geoViewInteractionStatus = GeoViewInteractionStatus.None
+            for (fetch in listOf(false, true)) {
+                for (failLoad in listOf(false, true)) {
+                    val retrieving = CompletableDeferred<Unit>()
+                    val loading = CompletableDeferred<Result<Unit>>()
+                    val candidate = image("candidate")
+                    coEvery { candidate.load() } coAnswers { loading.await() }
+                    coEvery { layer.searchImages(any(), any()) } coAnswers {
+                        retrieving.await()
+                        Result.success(listOf(candidate))
+                    }
+                    coEvery { layer.fetchImageForFeature(feature) } coAnswers {
+                        retrieving.await()
+                        Result.success(candidate)
+                    }
+                    state.showMessage("Previous error")
+                    val job = scope.launch {
+                        val result = if (fetch) state.fetchImage(feature) else state.searchImages(location)
+                        assertEquals(failLoad, result.isFailure)
+                    }
+                    assertTrue(state.uiState.isLoading)
+                    assertNull(state.uiState.message)
+                    assertImage(null)
+                    retrieving.complete(Unit)
+                    assertTrue(state.uiState.isLoading)
+                    assertFalse(job.isCompleted)
+                    assertImage(null)
+                    loading.complete(if (failLoad) Result.failure(IllegalStateException("Load failed"))
+                        else Result.success(Unit))
+                    assertTrue(job.isCompleted)
+                    assertFalse(state.uiState.isLoading)
+                    if (failLoad) {
+                        assertImage(null)
+                        assertEquals(if (fetch) R.string.image_fetch_failed else R.string.image_search_failed,
+                            state.uiState.messageResourceId)
+                    } else {
+                        assertImage("candidate")
+                        assertNull(state.uiState.messageResourceId)
+                    }
+                }
+            }
+        }
+    }
+
+    @Test
+    fun cancellingDirectRequestsEndsLoadingAtEitherStage() {
+        compose.runOnIdle {
+            for (fetch in listOf(false, true)) {
+                for (duringLoad in listOf(false, true)) {
+                    val pending = CompletableDeferred<Unit>()
+                    val candidate = image("cancelled")
+                    coEvery { candidate.load() } coAnswers {
+                        if (duringLoad) pending.await()
+                        Result.success(Unit)
+                    }
+                    coEvery { layer.searchImages(any(), any()) } coAnswers {
+                        if (!duringLoad) pending.await()
+                        Result.success(listOf(candidate))
+                    }
+                    coEvery { layer.fetchImageForFeature(feature) } coAnswers {
+                        if (!duringLoad) pending.await()
+                        Result.success(candidate)
+                    }
+                    val job = scope.launch {
+                        if (fetch) state.fetchImage(feature) else state.searchImages(location)
+                    }
+                    assertTrue(state.uiState.isLoading)
+                    job.cancel()
+                    assertFalse(state.uiState.isLoading)
+                    assertImage(null)
+                    assertNull(state.uiState.messageResourceId)
+                }
+            }
+        }
+    }
+
+    @Test
+    fun obsoleteRequestCleanupCannotHidePendingReplacementProgress() {
+        compose.runOnIdle {
+            for (cancelOld in listOf(false, true)) {
+                val searching = CompletableDeferred<Result<List<OrientedImage>>>()
+                val fetching = CompletableDeferred<Result<OrientedImage>>()
+                coEvery { layer.searchImages(any(), any()) } coAnswers { searching.await() }
+                coEvery { layer.fetchImageForFeature(feature) } coAnswers { fetching.await() }
+                val oldJob = scope.launch { state.searchImages(location) }
+                scope.launch { state.fetchImage(feature).getOrThrow() }
+                if (cancelOld) oldJob.cancel() else {
+                    searching.complete(Result.failure(IllegalStateException("Obsolete search")))
+                }
+                assertTrue(oldJob.isCancelled)
+                assertTrue(state.uiState.isLoading)
+                assertNull(state.uiState.messageResourceId)
+                fetching.complete(Result.success(image("replacement")))
+                assertFalse(state.uiState.isLoading)
+                assertImage("replacement")
+            }
+        }
+    }
+
+    @Test
     fun overlayAvailabilityFollowsImageSessionRatherThanCreatedFootprints() {
         compose.runOnIdle {
             assertFalse(state.hasActiveImage)
