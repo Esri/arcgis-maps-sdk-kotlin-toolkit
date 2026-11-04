@@ -49,7 +49,7 @@ import com.arcgismaps.mapping.Bookmark
  */
 @Composable
 public fun BookmarksListView(
-    bookmarks: MutableList<Bookmark>,
+    bookmarks: SnapshotStateList<Bookmark>,
     onSelected: (Bookmark) -> Unit,
     backgroundColor: Color = MaterialTheme.colorScheme.surfaceContainer,
     textStyle : TextStyle = LocalTextStyle.current
