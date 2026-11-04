@@ -58,8 +58,8 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
 
                     buildingExplorerState = BuildingExplorerState(
                         buildingSceneLayers = layers,
-                        localSceneViewProxy = localSceneViewProxy,
-                        coroutineScope = viewModelScope
+                        coroutineScope = viewModelScope,
+                        localSceneViewProxy = localSceneViewProxy
                     )
 
                     _showProgress.value = false

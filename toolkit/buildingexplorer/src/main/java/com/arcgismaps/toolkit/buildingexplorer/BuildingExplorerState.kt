@@ -46,8 +46,8 @@ import kotlin.time.Duration.Companion.seconds
 @Stable
 public class BuildingExplorerState(
     buildingSceneLayers: List<BuildingSceneLayer>,
-    internal val localSceneViewProxy: LocalSceneViewProxy? = null,
-    coroutineScope: CoroutineScope
+    coroutineScope: CoroutineScope,
+    internal val localSceneViewProxy: LocalSceneViewProxy? = null
 ) {
     init {
         require(buildingSceneLayers.isNotEmpty()) {
