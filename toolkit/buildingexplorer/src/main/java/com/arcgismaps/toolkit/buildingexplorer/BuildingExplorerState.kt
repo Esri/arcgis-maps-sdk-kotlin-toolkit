@@ -58,8 +58,8 @@ public class BuildingExplorerState(
     internal val buildingSceneLayerStates = buildingSceneLayers.map {
         BuildingSceneLayerState(
             buildingSceneLayer = it,
-            localSceneViewProxy = localSceneViewProxy,
-            coroutineScope = coroutineScope
+            coroutineScope = coroutineScope,
+            localSceneViewProxy = localSceneViewProxy
         )
     }.sortedBy { it.name }
 
@@ -83,8 +83,8 @@ public class BuildingExplorerState(
 @Stable
 internal class BuildingSceneLayerState(
     private val buildingSceneLayer: BuildingSceneLayer,
-    private val localSceneViewProxy: LocalSceneViewProxy?,
-    private val coroutineScope: CoroutineScope
+    private val coroutineScope: CoroutineScope,
+    private val localSceneViewProxy: LocalSceneViewProxy?
 ) {
     private val _stateLoaded = MutableStateFlow(false)
     internal val stateLoaded = _stateLoaded.asStateFlow()
