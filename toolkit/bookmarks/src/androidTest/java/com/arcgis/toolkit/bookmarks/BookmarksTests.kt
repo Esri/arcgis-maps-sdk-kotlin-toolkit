@@ -45,7 +45,7 @@ class BookmarksTests {
 
         composeTestRule.setContent {
             BookmarksListView(
-                bookmarks = mutableListOf(
+                bookmarks = mutableStateListOf(
                     Bookmark("Bookmark 1", null),
                     Bookmark("Bookmark 2", null),
                     Bookmark("Bookmark 3", null)
