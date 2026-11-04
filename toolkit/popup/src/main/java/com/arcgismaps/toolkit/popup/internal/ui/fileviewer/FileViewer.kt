@@ -226,7 +226,7 @@ private fun ViewerActions(
 }
 
 @Composable
-internal fun VideoViewer(path: String, name: String, caption : String? = null) {
+internal fun VideoViewer(path: String, name: String) {
     val context = LocalContext.current
     val exoPlayer = remember {
         ExoPlayer.Builder(context).build().apply {
@@ -237,12 +237,11 @@ internal fun VideoViewer(path: String, name: String, caption : String? = null) {
             prepare()
         }
     }
-    val contentDesc = if (caption == null) name else name + "\n" + caption
     AndroidView(
         factory = {
             PlayerView(context).apply {
                 player = exoPlayer
-                contentDescription = contentDesc
+                contentDescription = name
             }
         }
     )

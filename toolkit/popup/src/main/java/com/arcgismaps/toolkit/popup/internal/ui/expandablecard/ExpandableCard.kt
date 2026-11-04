@@ -132,6 +132,7 @@ private fun ExpandableHeader(
     onClick: () -> Unit
 ) {
     if (title.isEmpty() && description == null && !expandable) return
+    val stateString = if(isExpanded) stringResource(R.string.expanded) else stringResource(R.string.collapsed)
     Row(
         Modifier
             .testTag("ExpandableHeader")
@@ -142,6 +143,7 @@ private fun ExpandableHeader(
                 }
                     .semantics(mergeDescendants = true){
                         role = Role.Button
+                        stateDescription = stateString
                     }
             }
             .background(colors.headerBackgroundColor),
@@ -166,7 +168,7 @@ private fun ExpandableHeader(
         }
         if (expandable) {
             Crossfade(targetState = isExpanded, label = "expandPopupElement") {
-                val stateString = if(isExpanded) stringResource(R.string.expanded) else stringResource(R.string.collapsed)
+
                 Icon(
                     modifier = Modifier
                         .padding(16.dp)
