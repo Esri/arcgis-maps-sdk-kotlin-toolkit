@@ -26,8 +26,6 @@ import com.arcgismaps.ApiKey
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.toolkit.basemapgalleryapp.screens.MainScreen
 import com.esri.microappslib.theme.MicroAppTheme
-import com.arcgismaps.sharedtestutilities.OpenBaoTestSecretsStore
-
 
 /**
  * The main activity of the application.
@@ -37,13 +35,7 @@ import com.arcgismaps.sharedtestutilities.OpenBaoTestSecretsStore
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        ArcGISEnvironment.apiKey = ApiKey.create(
-            OpenBaoTestSecretsStore.getSecretValue(
-                "tests/api-key",
-                "production",
-                "apikey"
-            )
-        )
+        ArcGISEnvironment.apiKey = ApiKey.create(BuildConfig.API_KEY)
         setContent {
             MicroAppTheme {
                 BasemapGalleryApp()

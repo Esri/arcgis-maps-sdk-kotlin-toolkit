@@ -31,8 +31,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.arcgismaps.ApiKey
 import com.arcgismaps.ArcGISEnvironment
-import com.arcgismaps.sharedtestutilities.OpenBaoTestSecretsStore
-
 import com.arcgismaps.toolkit.compassapp.screens.MainScreen
 import com.esri.microappslib.theme.MicroAppTheme
 
@@ -42,13 +40,7 @@ class MainActivity : ComponentActivity() {
         // authentication with an API key or named user is
         // required to access basemaps and other location services
         ArcGISEnvironment.apiKey =
-            ApiKey.create(
-                OpenBaoTestSecretsStore.getSecretValue(
-                    "tests/api-key",
-                    "production",
-                    "apikey"
-                )
-            )
+            ApiKey.create(BuildConfig.API_KEY)
         setContent {
             MicroAppTheme {
                 CompassApp()
