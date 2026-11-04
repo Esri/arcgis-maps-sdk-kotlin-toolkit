@@ -17,9 +17,9 @@
  */
 
 plugins {
-    id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
     alias(libs.plugins.android.integration.testing)
     alias(libs.plugins.component.convention.plugin)
+    id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
 }
 
 secrets {

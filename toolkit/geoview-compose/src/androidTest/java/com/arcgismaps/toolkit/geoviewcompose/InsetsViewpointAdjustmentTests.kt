@@ -35,7 +35,6 @@ import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.mapping.view.DrawStatus
 import com.arcgismaps.mapping.view.InsetsViewpointAdjustmentType
 import com.arcgismaps.mapping.view.LocationDisplay
-import com.arcgismaps.sharedtestutilities.OpenBaoTestSecretsStore
 import com.arcgismaps.sharedtestutilities.assertIsLoaded
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
@@ -56,14 +55,7 @@ class InsetsViewpointAdjustmentTests {
     @Before
     fun setup() = runTest {
         ArcGISEnvironment.applicationContext = InstrumentationRegistry.getInstrumentation().context
-        ArcGISEnvironment.apiKey = ApiKey.create(
-            OpenBaoTestSecretsStore.getSecretValue(
-                "tests/api-key",
-                "production",
-                "apikey"
-            )
-        )
-
+        ArcGISEnvironment.apiKey = ApiKey.create(BuildConfig.API_KEY)
     }
 
     /**

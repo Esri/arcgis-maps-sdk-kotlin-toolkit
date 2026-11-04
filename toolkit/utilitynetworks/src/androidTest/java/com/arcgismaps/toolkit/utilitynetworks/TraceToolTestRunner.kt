@@ -22,7 +22,6 @@ import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.PortalItem
 import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.portal.Portal
-import com.arcgismaps.sharedtestutilities.OpenBaoTestSecretsStore
 import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -63,8 +62,8 @@ open class TraceToolTestRunner(
         val tokenCred =
             TokenCredential.create(
                 url,
-                username = OpenBaoTestSecretsStore.getCredential("tests/token", "editor01").username,
-                password = OpenBaoTestSecretsStore.getCredential("tests/token", "editor01").password
+                username = BuildConfig.traceToolUser,
+                password = BuildConfig.traceToolPassword
             ).getOrThrow()
 
         ArcGISEnvironment.authenticationManager.arcGISCredentialStore.add(tokenCred)
