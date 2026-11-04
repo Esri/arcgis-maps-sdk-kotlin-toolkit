@@ -29,6 +29,10 @@ import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.contentDescription
@@ -37,6 +41,8 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.mapping.Bookmark
+import kotlinx.coroutines.delay
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * A composable that displays a list of bookmarks.
@@ -69,6 +75,15 @@ public fun BookmarksListView(
     }
 }
 
+
+/**
+ * A composable that displays a single bookmark item.
+ * @param bookmark is the bookmark to be displayed.
+ * @param onZoom is a callback that is invoked when the bookmark is selected.
+ * @param textStyle is the style to be applied to the bookmark text.
+ * @since 300.2.0
+ * 
+ */
 @Composable
 private fun BookmarkItem(
     bookmark: Bookmark,
@@ -94,14 +109,19 @@ private fun BookmarkItem(
 @Preview
 @Composable
 private fun BookmarksListViewPreview() {
+    val bookmarks = remember { mutableStateListOf(
+        Bookmark("Bookmark 1", null)
+    ) }
     BookmarksListView(
-        bookmarks = mutableListOf(
-            Bookmark("Bookmark 1", null),
-            Bookmark("Bookmark 2", null),
-            Bookmark("Bookmark 3", null)
-        ),
+        bookmarks = bookmarks,
         onSelected = {},
     )
+    LaunchedEffect(Unit) {
+        listOf(1, 2, 3).forEach {
+            delay(1500.milliseconds)
+            bookmarks.add(Bookmark("Bookmark $it", null))
+        }
+    }
 }
 
 
@@ -114,6 +134,3 @@ private fun BookmarkItemPreview() {
         textStyle = LocalTextStyle.current
     )
 }
-
-
-
