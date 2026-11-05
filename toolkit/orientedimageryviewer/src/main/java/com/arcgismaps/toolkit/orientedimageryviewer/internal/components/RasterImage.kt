@@ -34,7 +34,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.arcgismaps.Color
 import com.arcgismaps.geometry.Envelope
 import com.arcgismaps.geometry.GeometryEngine
 import com.arcgismaps.geometry.Point
@@ -45,8 +44,6 @@ import com.arcgismaps.mapping.Basemap
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.mapping.layers.RasterLayer
 import com.arcgismaps.mapping.layers.orientedimagery.OrientedImage
-import com.arcgismaps.mapping.symbology.SimpleMarkerSymbol
-import com.arcgismaps.mapping.symbology.SimpleMarkerSymbolStyle
 import com.arcgismaps.mapping.view.BackgroundGrid
 import com.arcgismaps.mapping.view.DoubleXY
 import com.arcgismaps.mapping.view.Graphic
@@ -183,6 +180,7 @@ internal fun RasterImage(
 
     val sequentialNavigation = viewerState.supportsSequentialNavigation && viewerUiState.isSequentialNavigationEnabled
     val inputLocationData = viewerUiState.inputLocationData.takeUnless { sequentialNavigation }
+    val searchPointMarkerSymbol = viewerState.appearance.searchPointMarkerSymbol
     // Frame every page independently, including an incoming/outgoing page during pager animation.
     LaunchedEffect(rasterLayer) {
         try {
@@ -205,7 +203,7 @@ internal fun RasterImage(
             if (isCurrent()) reportError(framingFailedMessage)
         }
     }
-    LaunchedEffect(viewerState, rasterLayer, imageRevision, isActive, isLoaded, sequentialNavigation, inputLocationData) {
+    LaunchedEffect(viewerState, rasterLayer, imageRevision, isActive, isLoaded, sequentialNavigation, inputLocationData, searchPointMarkerSymbol) {
         if (!isCurrent() || !isLoaded || sequentialNavigation) return@LaunchedEffect
         var referenceGraphic: Graphic? = null
         try {
@@ -216,7 +214,7 @@ internal fun RasterImage(
             val rasterPoint = computeRasterPoint(imagePoint, rasterLayer) ?: return@LaunchedEffect
             referenceGraphic = Graphic(
                 geometry = rasterPoint,
-                symbol = SimpleMarkerSymbol(SimpleMarkerSymbolStyle.X, Color.red, 20f)
+                symbol = searchPointMarkerSymbol
             ).also { referenceOverlay.graphics.add(it) }
             // Keep ownership until this image/effect is replaced or disposed.
             awaitCancellation()

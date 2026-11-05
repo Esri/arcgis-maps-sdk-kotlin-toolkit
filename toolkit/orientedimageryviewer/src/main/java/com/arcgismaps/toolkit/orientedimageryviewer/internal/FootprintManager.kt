@@ -16,7 +16,6 @@
 
 package com.arcgismaps.toolkit.orientedimageryviewer.internal
 
-import com.arcgismaps.Color
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.layers.OrientedImageryLayer
 import com.arcgismaps.mapping.layers.orientedimagery.OrientedImage
@@ -59,14 +58,43 @@ internal class FootprintManager(
     private var additionalCameras: List<Graphic> = emptyList()
     private var updateJob: Job? = null
     private var pendingUpdate: (suspend (OrientedImageFootprint) -> Result<*>)? = null
+    private var appearance = ViewerAppearance()
+    private var noImageGraphic: Graphic? = null
+
+    fun updateAppearance(value: ViewerAppearance) {
+        appearance = value
+        active?.apply {
+            fillColor = value.selectedFootprintFillColor
+            outlineColor = value.selectedFootprintOutlineColor
+        }
+        additionalFootprints.forEach {
+            it.fillColor = value.unselectedFootprintFillColor
+            it.outlineColor = value.unselectedFootprintOutlineColor
+        }
+        activeCamera?.symbol = value.selectedCameraMarkerSymbol
+        additionalCameras.forEach { it.symbol = value.allCamerasMarkerSymbol }
+        inputGraphic?.symbol = value.searchPointMarkerSymbol
+        noImageGraphic?.symbol = value.noImageMarkerSymbol
+    }
+
+    fun showNoImageLocation(point: Point) {
+        clearNoImageLocation()
+        noImageGraphic = Graphic(point, appearance.noImageMarkerSymbol).also(overlay.graphics::add)
+    }
+
+    fun clearNoImageLocation() {
+        noImageGraphic?.let { overlay.graphics.remove(it) }
+        noImageGraphic = null
+    }
 
     fun setActiveVisible(visible: Boolean) {
         if (visible) {
             val image = activeImage() ?: return
             val footprint = active ?: createFootprint(image).also {
-                it.outlineColor = Color.transparent
+                it.fillColor = appearance.selectedFootprintFillColor
+                it.outlineColor = appearance.selectedFootprintOutlineColor
                 active = it
-                activeCamera = Graphic(image.geometry, ImageDefaults.activeCameraLocationSymbol()).also(overlay.graphics::add)
+                activeCamera = Graphic(image.geometry, appearance.selectedCameraMarkerSymbol).also(overlay.graphics::add)
             }
             if (footprint !in layer.visibleFootprints) layer.visibleFootprints.add(footprint)
         } else {
@@ -82,7 +110,7 @@ internal class FootprintManager(
         inputGraphic = null
         if (visible && !uiState().isSequentialNavigationEnabled && activeImage() != null) {
             inputLocation()?.let { point ->
-                inputGraphic = Graphic(point, ImageDefaults.inputLocationSymbol()).also(overlay.graphics::add)
+                inputGraphic = Graphic(point, appearance.searchPointMarkerSymbol).also(overlay.graphics::add)
             }
         }
     }
@@ -95,8 +123,8 @@ internal class FootprintManager(
         if (additionalFootprints.isEmpty()) {
             additionalFootprints = additionalImages().map { image ->
                 createFootprint(image).apply {
-                    fillColor = ImageDefaults.additionalFootprintColor
-                    outlineColor = Color.transparent
+                    fillColor = appearance.unselectedFootprintFillColor
+                    outlineColor = appearance.unselectedFootprintOutlineColor
                 }
             }
         }
@@ -110,7 +138,7 @@ internal class FootprintManager(
         }
         if (additionalCameras.isEmpty()) {
             additionalCameras = additionalImages().map { image ->
-                Graphic(image.geometry, ImageDefaults.additionalCameraLocationSymbol())
+                Graphic(image.geometry, appearance.allCamerasMarkerSymbol)
             }
         }
         overlay.graphics.addAll(additionalCameras.filterNot { it in overlay.graphics })
@@ -156,6 +184,7 @@ internal class FootprintManager(
         layer.visibleFootprints.removeAll(additionalFootprints)
         activeCamera?.let { overlay.graphics.remove(it) }
         inputGraphic?.let { overlay.graphics.remove(it) }
+        clearNoImageLocation()
         overlay.graphics.removeAll(additionalCameras)
         active = null
         activeCamera = null

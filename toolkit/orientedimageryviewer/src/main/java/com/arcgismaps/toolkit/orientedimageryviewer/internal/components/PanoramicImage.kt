@@ -39,6 +39,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.geometry.GeometryEngine
 import com.arcgismaps.geometry.Point
@@ -85,11 +89,15 @@ internal fun PanoramicImage(
     val materialLoader = rememberMaterialLoader(engine)
     val resources = remember(materialLoader, viewerState) { PanoramicImageMaterials(materialLoader) }
     DisposableEffect(resources) { onDispose { resources.close() } }
-    // The loader owns this shared material and releases it with the renderer.
-    val markerMaterial = remember(materialLoader) {
-        materialLoader.createUnlitColorInstance(androidx.compose.ui.graphics.Color.Red)
-    }
     val context = LocalContext.current
+    val searchPointMarkerSymbol = viewerState.appearance.searchPointMarkerSymbol
+    val density = LocalDensity.current.density
+    var searchMarkerBitmap by remember(searchPointMarkerSymbol, density) { mutableStateOf<ImageBitmap?>(null) }
+    LaunchedEffect(searchPointMarkerSymbol, density) {
+        searchMarkerBitmap = searchPointMarkerSymbol.createSwatch(density)
+            .onFailure { if (it is CancellationException) throw it }
+            .getOrNull()?.bitmap?.asImageBitmap()
+    }
     val loadFailedMessage = stringResource(R.string.panoramic_image_load_failed)
     val referenceFailedMessage = stringResource(R.string.image_reference_location_failed)
 
@@ -236,6 +244,9 @@ internal fun PanoramicImage(
             var projectedMarkers by remember(viewerState, state, imageRevision) {
                 mutableStateOf<List<Pair<Offset, SimpleMarkerSymbol>>>(emptyList())
             }
+            var projectedSearchMarker by remember(viewerState, state, imageRevision) {
+                mutableStateOf<Offset?>(null)
+            }
 
             FilamentSceneView(
                 modifier = Modifier.fillMaxSize(),
@@ -267,6 +278,22 @@ internal fun PanoramicImage(
                 },
                 onFrame = {
                     val currentUiState = viewerState.uiState
+                    projectedSearchMarker = if (isCurrent() && !currentUiState.isSequentialNavigationEnabled &&
+                        state.imageRevision == currentUiState.activeImageRevision &&
+                        view.viewport.width > 0 && view.viewport.height > 0
+                    ) {
+                        state.initialMarkerDirection?.let { direction ->
+                            val forward = cameraNode.forwardDirection
+                            if (direction.x * forward.x + direction.y * forward.y + direction.z * forward.z <= 0f) {
+                                null
+                            } else {
+                                val distance = radiusMeters * 0.98f
+                                view.worldToScreen(Float3(
+                                    direction.x * distance, direction.y * distance, direction.z * distance
+                                ))?.takeIf { it.x.isFinite() && it.y.isFinite() }?.let { Offset(it.x, it.y) }
+                            }
+                        }
+                    } else null
                     projectedMarkers = if (isCurrent() && state.imageRevision == currentUiState.activeImageRevision &&
                         view.viewport.width > 0 && view.viewport.height > 0
                     ) {
@@ -330,20 +357,16 @@ internal fun PanoramicImage(
                         }
                     )
                 }
-                if (!sequentialNavigation && isCurrent() && state.imageRevision == viewerState.uiState.activeImageRevision) {
-                    state.initialMarkerDirection?.let { direction ->
-                        val distance = radiusMeters * 0.98f
-                        SphereNode(
-                            radius = radiusMeters * 0.012f,
-                            position = Float3(direction.x * distance, direction.y * distance, direction.z * distance),
-                            stacks = 8,
-                            slices = 16,
-                            materialInstance = markerMaterial
-                        )
-                    }
-                }
             }
             Canvas(modifier = Modifier.fillMaxSize().clipToBounds()) {
+                projectedSearchMarker?.let { position ->
+                    searchMarkerBitmap?.let { bitmap ->
+                        drawImage(bitmap, dstOffset = IntOffset(
+                            (position.x - bitmap.width / 2f).toInt(),
+                            (position.y - bitmap.height / 2f).toInt()
+                        ))
+                    }
+                }
                 projectedMarkers.forEach { (position, symbol) -> drawMarkerSymbol(symbol, position) }
             }
         }

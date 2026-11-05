@@ -34,6 +34,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -46,9 +47,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.arcgismaps.Color
 import com.arcgismaps.mapping.layers.OrientedImageryLayer
+import com.arcgismaps.mapping.symbology.Symbol
 import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
+import com.arcgismaps.toolkit.orientedimageryviewer.internal.ImageDefaults
+import com.arcgismaps.toolkit.orientedimageryviewer.internal.ViewerAppearance
 import com.arcgismaps.toolkit.orientedimageryviewer.internal.ui.ErrorSnackbarContainer
 import com.arcgismaps.toolkit.orientedimageryviewer.internal.ui.ExploreButton
 import com.arcgismaps.toolkit.orientedimageryviewer.internal.ui.MarkerToolsButton
@@ -68,6 +73,17 @@ import com.arcgismaps.mapping.popup.Popup as ImagePopup
  * @param modifier The modifier to be applied to the viewer layout.
  * @param onDismiss A callback that is invoked when the viewer is dismissed.
  * @param showCloseIcon Whether to show the close icon in the toolbar.
+ * @param selectedFootprintFillColor The selected image footprint fill color. Defaults to red with alpha 128.
+ * @param selectedFootprintOutlineColor The selected image footprint outline color. Defaults to red.
+ * @param unselectedFootprintFillColor The unselected image footprint fill color. Defaults to blue with alpha 64.
+ * @param unselectedFootprintOutlineColor The unselected image footprint outline color. Defaults to blue.
+ * @param searchPointMarkerSymbol The search point symbol. Defaults to a red X, size 15, with a white outline of width 1.
+ * @param noImageMarkerSymbol The symbol for a tapped location where no images were found, shown only in
+ * [GeoViewInteractionStatus.DisplayImage] mode. Defaults to a light-gray circle, size 12, with a black outline of width 1.
+ * @param selectedCameraMarkerSymbol The selected image camera location symbol. Defaults to a red circle,
+ * size 15, with a white outline of width 1.
+ * @param allCamerasMarkerSymbol The result image camera location symbol. Defaults to a blue circle with
+ * alpha 200, size 15, and a white outline of width 1.
  */
 @Composable
 public fun OrientedImageryViewer(
@@ -75,9 +91,23 @@ public fun OrientedImageryViewer(
     modifier: Modifier = Modifier,
     onDismiss: () -> Unit = {},
     showCloseIcon: Boolean = true,
+    selectedFootprintFillColor: Color = ImageDefaults.selectedFootprintFillColor,
+    selectedFootprintOutlineColor: Color = ImageDefaults.selectedFootprintOutlineColor,
+    unselectedFootprintFillColor: Color = ImageDefaults.additionalFootprintColor,
+    unselectedFootprintOutlineColor: Color = ImageDefaults.unselectedFootprintOutlineColor,
+    searchPointMarkerSymbol: Symbol = remember { ImageDefaults.inputLocationSymbol() },
+    noImageMarkerSymbol: Symbol = remember { ImageDefaults.noImageMarkerSymbol() },
+    selectedCameraMarkerSymbol: Symbol = remember { ImageDefaults.activeCameraLocationSymbol() },
+    allCamerasMarkerSymbol: Symbol = remember { ImageDefaults.additionalCameraLocationSymbol() },
 ) {
     val coroutineScope = rememberCoroutineScope()
     val viewerUiState = orientedImageryViewerState.uiState
+    val appearance = ViewerAppearance(
+        selectedFootprintFillColor, selectedFootprintOutlineColor,
+        unselectedFootprintFillColor, unselectedFootprintOutlineColor,
+        searchPointMarkerSymbol, noImageMarkerSymbol, selectedCameraMarkerSymbol, allCamerasMarkerSymbol
+    )
+    SideEffect { orientedImageryViewerState.updateAppearance(appearance) }
 
     ViewerLayout(
         viewerState = orientedImageryViewerState,

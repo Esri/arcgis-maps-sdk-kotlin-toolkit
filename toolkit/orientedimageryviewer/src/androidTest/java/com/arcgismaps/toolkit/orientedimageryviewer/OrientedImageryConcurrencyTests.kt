@@ -17,6 +17,7 @@
 package com.arcgismaps.toolkit.orientedimageryviewer
 
 import androidx.compose.ui.test.junit4.v2.createComposeRule
+import com.arcgismaps.Color
 import com.arcgismaps.data.Feature
 import com.arcgismaps.exceptions.ArcGISException
 import com.arcgismaps.geometry.Point
@@ -26,13 +27,18 @@ import com.arcgismaps.mapping.layers.orientedimagery.OrientedImage
 import com.arcgismaps.mapping.layers.orientedimagery.OrientedImageFootprint
 import com.arcgismaps.mapping.layers.orientedimagery.OrientedImageType
 import com.arcgismaps.mapping.layers.orientedimagery.SequenceStep
+import com.arcgismaps.mapping.symbology.SimpleLineSymbolStyle
+import com.arcgismaps.mapping.symbology.SimpleMarkerSymbol
+import com.arcgismaps.mapping.symbology.SimpleMarkerSymbolStyle
 import com.arcgismaps.mapping.view.Graphic
 import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
+import com.arcgismaps.toolkit.orientedimageryviewer.internal.ViewerAppearance
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
@@ -46,6 +52,7 @@ import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
@@ -111,6 +118,75 @@ class OrientedImageryConcurrencyTests {
         assertEquals(active, state.uiState.isActiveFootprintVisible)
         assertEquals(additional, state.uiState.isAdditionalFootprintsVisible)
         assertEquals(cameras, state.uiState.isAdditionalCameraLocationsVisible)
+    }
+
+    @Test
+    fun appearanceDefaultsMatchSpecifiedColorsAndSymbols() {
+        compose.runOnIdle {
+            val defaults = ViewerAppearance()
+            assertEquals(Color.fromRgba(255, 0, 0, 128), defaults.selectedFootprintFillColor)
+            assertEquals(Color.red, defaults.selectedFootprintOutlineColor)
+            assertEquals(Color.fromRgba(0, 0, 255, 64), defaults.unselectedFootprintFillColor)
+            assertEquals(Color.blue, defaults.unselectedFootprintOutlineColor)
+            listOf(
+                Triple(defaults.searchPointMarkerSymbol, SimpleMarkerSymbolStyle.X, Color.red),
+                Triple(defaults.selectedCameraMarkerSymbol, SimpleMarkerSymbolStyle.Circle, Color.red),
+                Triple(defaults.allCamerasMarkerSymbol, SimpleMarkerSymbolStyle.Circle, Color.fromRgba(0, 0, 255, 200))
+            ).forEach { (symbol, style, color) ->
+                val marker = symbol as SimpleMarkerSymbol
+                assertEquals(style, marker.style)
+                assertEquals(color, marker.color)
+                assertEquals(15f, marker.size)
+                assertEquals(Color.white, marker.outline?.color)
+                assertEquals(1f, marker.outline?.width)
+                assertEquals(SimpleLineSymbolStyle.Solid, marker.outline?.style)
+            }
+            val noImage = defaults.noImageMarkerSymbol as SimpleMarkerSymbol
+            assertEquals(SimpleMarkerSymbolStyle.Circle, noImage.style)
+            assertEquals(Color.fromRgba(211, 211, 211, 255), noImage.color)
+            assertEquals(12f, noImage.size)
+            assertEquals(Color.black, noImage.outline?.color)
+            assertEquals(1f, noImage.outline?.width)
+            assertEquals(SimpleLineSymbolStyle.Solid, noImage.outline?.style)
+        }
+    }
+
+    @Test
+    fun appearanceChangesUpdateExistingOverlaysWithoutResettingSessionOrMarkers() {
+        compose.runOnIdle {
+            search(image("active"), image("additional"))
+            state.toggleAdditionalFootprints()
+            state.addImageLocationMarker(otherLocation)
+            val graphics = overlay.graphics.toList()
+            val userMarker = graphics.last()
+            val userSymbol = userMarker.symbol
+            val currentMarker = state.currentMarkerSymbol
+            val revision = state.uiState.activeImageRevision
+            val newAppearance = ViewerAppearance(
+                selectedFootprintFillColor = Color.black,
+                selectedFootprintOutlineColor = Color.white,
+                unselectedFootprintFillColor = Color.white,
+                unselectedFootprintOutlineColor = Color.black
+            )
+            state.updateAppearance(newAppearance)
+            assertImage("active")
+            assertEquals(revision, state.uiState.activeImageRevision)
+            assertEquals(graphics, overlay.graphics.toList())
+            assertEquals(userSymbol, userMarker.symbol)
+            assertSame(currentMarker, state.currentMarkerSymbol)
+            assertTrue(overlay.graphics.any { it.symbol == newAppearance.selectedCameraMarkerSymbol })
+            assertTrue(overlay.graphics.any { it.symbol == newAppearance.allCamerasMarkerSymbol })
+            assertTrue(overlay.graphics.any { it.symbol == newAppearance.searchPointMarkerSymbol })
+            verify { footprints.first().fillColor = Color.black }
+            verify { footprints.first().outlineColor = Color.white }
+            verify { footprints.last().fillColor = Color.white }
+            verify { footprints.last().outlineColor = Color.black }
+            state.resetAll()
+            assertEquals(newAppearance, state.appearance)
+            search(image("replacement"))
+            verify { footprints.single().fillColor = Color.black }
+            verify { footprints.single().outlineColor = Color.white }
+        }
     }
 
     @Test

@@ -153,6 +153,46 @@ class GeoViewInteractionTests {
     }
 
     @Test
+    fun noImageMarkerIsUpdatedReplacedAndClearedWithoutRemovingForeignGraphics() {
+        compose.runOnIdle {
+            val foreign = Graphic(location)
+            overlay.graphics.add(foreign)
+            every { identified.geoElements } returns emptyList()
+            state.geoViewInteractionStatus = GeoViewInteractionStatus.DisplayImage
+            scope.launch { state.onSingleTapOnGeoView(event).getOrThrow() }
+            val marker = overlay.graphics.single { it !== foreign }
+            assertEquals(location, marker.geometry)
+            assertEquals(state.appearance.noImageMarkerSymbol, marker.symbol)
+            val updated = state.appearance.copy(noImageMarkerSymbol = state.appearance.searchPointMarkerSymbol)
+            state.updateAppearance(updated)
+            assertEquals(updated.noImageMarkerSymbol, marker.symbol)
+            scope.launch { state.onSingleTapOnGeoView(event).getOrThrow() }
+            assertEquals(2, overlay.graphics.size)
+            assertFalse(marker in overlay.graphics)
+            state.geoViewInteractionStatus = GeoViewInteractionStatus.FindImages
+            assertEquals(listOf(foreign), overlay.graphics.toList())
+            scope.launch { state.onSingleTapOnGeoView(event).getOrThrow() }
+            assertEquals(listOf(foreign), overlay.graphics.toList())
+            state.geoViewInteractionStatus = GeoViewInteractionStatus.DisplayImage
+            scope.launch { state.onSingleTapOnGeoView(event).getOrThrow() }
+            state.resetAll()
+            assertEquals(listOf(foreign), overlay.graphics.toList())
+        }
+    }
+
+    @Test
+    fun emptyDisplayIdentifyWithoutLocationDoesNotCreateMarker() {
+        compose.runOnIdle {
+            state.geoViewInteractionStatus = GeoViewInteractionStatus.DisplayImage
+            every { identified.geoElements } returns emptyList()
+            every { event.mapPoint } returns null
+            scope.launch { state.onSingleTapOnGeoView(event).getOrThrow() }
+            assertTrue(overlay.graphics.isEmpty())
+            assertEquals(R.string.no_images_found_for_tapped_location, state.uiState.messageResourceId)
+        }
+    }
+
+    @Test
     fun progressRemainsVisibleThroughIdentifyFetchAndImageLoad() {
         val identifying = CompletableDeferred<Result<IdentifyLayerResult>>()
         val fetching = CompletableDeferred<Result<OrientedImage>>()

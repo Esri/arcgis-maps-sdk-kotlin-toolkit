@@ -18,7 +18,9 @@ package com.arcgismaps.toolkit.orientedimageryviewer
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.data.Feature
 import com.arcgismaps.geometry.Point
@@ -42,6 +44,7 @@ import com.arcgismaps.toolkit.orientedimageryviewer.internal.OrientedImageInfo
 import com.arcgismaps.toolkit.orientedimageryviewer.internal.OrientedImageryViewerUiState
 import com.arcgismaps.toolkit.orientedimageryviewer.internal.PanoramicMarker
 import com.arcgismaps.toolkit.orientedimageryviewer.internal.PointData
+import com.arcgismaps.toolkit.orientedimageryviewer.internal.ViewerAppearance
 import com.arcgismaps.toolkit.orientedimageryviewer.internal.toPointData
 import com.arcgismaps.toolkit.orientedimageryviewer.internal.ui.MarkerOptionId
 import kotlinx.coroutines.CancellationException
@@ -131,6 +134,14 @@ public class OrientedImageryViewerState internal constructor(
 
     private val _uiState = mutableStateOf(OrientedImageryViewerUiState())
     private val _isViewerVisible = mutableStateOf(true)
+    internal var appearance: ViewerAppearance by mutableStateOf(ViewerAppearance())
+        private set
+
+    internal fun updateAppearance(value: ViewerAppearance) {
+        if (appearance == value) return
+        appearance = value
+        footprints.updateAppearance(value)
+    }
 
     /** Whether the host should display the viewer. Image-mode taps reopen a dismissed viewer. */
     public val isViewerVisible: Boolean
@@ -171,7 +182,7 @@ public class OrientedImageryViewerState internal constructor(
         inputLocation = { uiState.inputLocationData?.toPoint() },
         uiState = { uiState },
         createFootprint = createFootprint
-    )
+    ).also { it.updateAppearance(appearance) }
 
     internal val currentMarkerSymbol: SimpleMarkerSymbol
         get() = markers.currentSymbol
@@ -273,6 +284,9 @@ public class OrientedImageryViewerState internal constructor(
             markers.invalidateOperations()
         }
         _uiState.value = next
+        if (next.imageInteractionStatus != GeoViewInteractionStatus.DisplayImage || next.isMarkingLocation) {
+            footprints.clearNoImageLocation()
+        }
     }
 
     public val hasActiveImage: Boolean
@@ -349,7 +363,16 @@ public class OrientedImageryViewerState internal constructor(
                     identified.error?.let { throw it }
                     val feature = identified.geoElements.firstOrNull() as? Feature
                     if (feature == null) {
+                        val location = when (geoViewProxy) {
+                            is SceneViewProxy -> geoViewProxy.screenToLocation(event.screenCoordinate).getOrThrow()
+
+                            is LocalSceneViewProxy -> geoViewProxy.screenToLocation(event.screenCoordinate).getOrThrow()
+
+                            else -> event.mapPoint
+                        }
+                        ensureCurrentInteraction(revision)
                         showMessage(R.string.no_images_found_for_tapped_location)
+                        location?.let { footprints.showNoImageLocation(it) }
                     } else {
                         fetchImage(feature).getOrThrow()
                     }
