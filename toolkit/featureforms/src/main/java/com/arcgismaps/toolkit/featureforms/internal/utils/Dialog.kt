@@ -523,8 +523,10 @@ internal fun FeatureFormDialog(states: FormStateCollection) {
         is DialogType.SaveErrorDialog -> {
             ErrorDialog(
                 onDismissRequest = { dialogRequester.dismissDialog() },
+                onAction = null,
                 title = stringResource(R.string.save_failed),
-                body = (dialogType as DialogType.SaveErrorDialog).message
+                body = (dialogType as DialogType.SaveErrorDialog).message,
+                actionText = ""
             )
         }
 

@@ -66,6 +66,7 @@ internal fun BoxScope.ModalSheet(
     ) {
         Surface(
             modifier = Modifier.fillMaxSize(),
+            shape = MaterialTheme.shapes.large
         ) {
             content()
         }
