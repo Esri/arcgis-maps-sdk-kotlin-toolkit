@@ -71,6 +71,7 @@ import com.arcgismaps.mapping.layers.buildingscene.BuildingSublayer
  * Create a `BuildingExplorerState` with a list of `BuildingSceneLayers`
  *
  * ```
+ *     val localSceneViewProxy = LocalSceneViewProxy()
  *     lateinit var buildingExplorerState: BuildingExplorerState
  *
  *     init {
@@ -84,7 +85,8 @@ import com.arcgismaps.mapping.layers.buildingscene.BuildingSublayer
  *
  *                     buildingExplorerState = BuildingExplorerState(
  *                         buildingSceneLayers = layers,
- *                         coroutineScope = viewModelScope
+ *                         coroutineScope = viewModelScope,
+ *                         localSceneViewProxy = localSceneViewProxy
  *                     )
  *                 }
  *         }
@@ -97,6 +99,7 @@ import com.arcgismaps.mapping.layers.buildingscene.BuildingSublayer
  * Column {
  *     LocalSceneView(
  *         scene = viewModel.scene,
+ *         proxy = localSceneViewProxy
  *         modifier = Modifier.weight(0.5f))
  *     BuildingExplorer(
  *         state = viewModel.buildingExplorerState,
