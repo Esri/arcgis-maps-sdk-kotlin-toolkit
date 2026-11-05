@@ -52,6 +52,7 @@ dependencies {
     implementation(libs.androidx.browser)
     testImplementation(libs.bundles.unitTest)
     androidTestImplementation(libs.bundles.composeTest)
+    androidTestImplementation(project(":microapps-lib"))
     debugImplementation(libs.bundles.debug)
 
     // uiautomator

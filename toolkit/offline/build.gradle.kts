@@ -55,5 +55,6 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
     testImplementation(libs.bundles.unitTest)
     androidTestImplementation(libs.bundles.composeTest)
+    androidTestImplementation(project(":microapps-lib"))
     debugImplementation(libs.bundles.debug)
 }

@@ -123,6 +123,13 @@ Capitalization isn't necessary, but it won't capitalize anything but the first l
 A new microapp can be added by running the bash script `./new-microapp-starter.sh`. 
 This script will prompt for you to input a name for the new microapp.
 
+Both scripts require names to start with an ASCII letter and contain only ASCII letters
+and digits. Empty names, whitespace, and punctuation are rejected before copying the
+corresponding template. Microapp names should use CamelCase and end with `App`
+(for example, `BookmarksApp`); the name `App` alone is not valid.
+If optional microapp creation fails, the component script stops; the component
+template may already have been copied at that point.
+
 This script requires bash 4.0 or higher.
 
 ### About this Repo

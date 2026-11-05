@@ -70,5 +70,6 @@ dependencies {
     androidTestImplementation(libs.truth)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.bundles.composeTest)
+    androidTestImplementation(project(":microapps-lib"))
     debugImplementation(libs.bundles.debug)
 }
