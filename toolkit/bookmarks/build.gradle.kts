@@ -109,6 +109,7 @@ dependencies {
     testImplementation(libs.bundles.unitTest)
     androidTestImplementation(libs.bundles.composeTest)
     debugImplementation(libs.bundles.debug)
+    api(project(":geoview-compose"))
 
     /**
      * Include this if any internal-only test dependencies are required

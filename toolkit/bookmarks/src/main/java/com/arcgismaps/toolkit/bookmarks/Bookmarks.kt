@@ -32,6 +32,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -40,26 +41,35 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
 import com.arcgismaps.mapping.Bookmark
+import com.arcgismaps.toolkit.geoviewcompose.GeoViewProxy
+import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * A composable that displays a list of bookmarks.
+ * @param geoViewProxy is the proxy for the GeoView that will be used to set the viewpoint when a bookmark is selected.
  * @param bookmarks is used to allow for dynamic updates to the list of bookmarks.
- * @param onSelected is a callback that is invoked when a bookmark is selected.
+ * @param modifier is the modifier to be applied to the list.
+ * @param onBookmarkSelected is a callback that is invoked when a bookmark is selected.
  * @param backgroundColor is the background color of the list.
- * @textStyle is the style to be applied to the bookmark text.
+ * @param textStyle is the style to be applied to the bookmark text.
  * @since 300.2.0
  */
 @Composable
 public fun BookmarksListView(
+    geoViewProxy : GeoViewProxy,
     bookmarks: SnapshotStateList<Bookmark>,
-    onSelected: (Bookmark) -> Unit,
     modifier: Modifier = Modifier,
+    onBookmarkSelected : () -> Unit = {},
     backgroundColor: Color = MaterialTheme.colorScheme.surfaceContainer,
     textStyle : TextStyle = LocalTextStyle.current
 ) {
+    val scope = rememberCoroutineScope()
     LazyColumn(
         modifier =
             modifier.fillMaxWidth().background(color = backgroundColor)
@@ -68,7 +78,17 @@ public fun BookmarksListView(
             val bookmark = bookmarks.elementAt(index)
             BookmarkItem(
                 bookmark = bookmark,
-                onZoom = { onSelected(bookmark) },
+                onZoom = {
+                    scope.launch {
+                        bookmark.viewpoint?.let {
+                            geoViewProxy.setViewpointAnimated(
+                                viewpoint = it,
+                                duration = 1.seconds,
+                            )
+                        }
+                    }
+                    onBookmarkSelected()
+                },
                 textStyle = textStyle
             )
         }
@@ -100,7 +120,10 @@ private fun BookmarkItem(
                 contentDescription = bookmark.name
             }
     ) {
-        Text(text = bookmark.name, style = textStyle)
+        Text(
+            text = bookmark.name,
+            style = textStyle.copy(lineHeight = 1.2.em)
+        )
     }
     HorizontalDivider()
 }
@@ -111,9 +134,10 @@ private fun BookmarksListViewPreview() {
     val bookmarks = remember { mutableStateListOf(
         Bookmark("Bookmark 1", null)
     ) }
+    val geoViewProxy = MapViewProxy()
     BookmarksListView(
-        bookmarks = bookmarks,
-        onSelected = {},
+        geoViewProxy = geoViewProxy,
+        bookmarks = bookmarks
     )
     LaunchedEffect(Unit) {
         listOf(1, 2, 3).forEach {
