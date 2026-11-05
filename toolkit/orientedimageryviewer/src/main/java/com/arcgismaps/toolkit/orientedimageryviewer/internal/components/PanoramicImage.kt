@@ -319,8 +319,7 @@ internal fun PanoramicImage(
                         !isCurrent() ||
                         state.imageRevision != currentUiState.activeImageRevision ||
                         currentUiState.activeImageInfo?.dataUri != imageSource ||
-                        !currentUiState.isActiveFootprintVisible ||
-                        currentUiState.isSequentialNavigationEnabled
+                        !currentUiState.isActiveFootprintVisible
                     ) {
                         footprintUpdateTracker.lastUpdate = null
                         return@FilamentSceneView

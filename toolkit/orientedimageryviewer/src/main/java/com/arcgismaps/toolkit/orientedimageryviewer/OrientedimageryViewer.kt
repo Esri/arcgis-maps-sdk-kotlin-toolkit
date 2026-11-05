@@ -69,6 +69,13 @@ import com.arcgismaps.mapping.popup.Popup as ImagePopup
 /**
  * A composable that displays an oriented imagery viewer with a toolbar and content area.
  *
+ * When supplying custom marker symbols, remember each symbol instance to avoid recreating it during
+ * recomposition. If its styling depends on changing values, use those values as [remember] keys so a
+ * new symbol is created when they change.
+ *
+ * To update a marker's appearance, pass a replacement symbol instance. Mutating an existing symbol
+ * does not reliably trigger recomposition or refresh symbol-derived imagery.
+ *
  * @param orientedImageryViewerState The state of the oriented imagery viewer.
  * @param modifier The modifier to be applied to the viewer layout.
  * @param onDismiss A callback that is invoked when the viewer is dismissed.

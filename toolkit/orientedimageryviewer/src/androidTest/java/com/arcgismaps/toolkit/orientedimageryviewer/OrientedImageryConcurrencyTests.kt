@@ -121,6 +121,157 @@ class OrientedImageryConcurrencyTests {
     }
 
     @Test
+    fun activePanoramaIsVisibleOnlyAfterFirstSuccessfulViewportUpdate() {
+        val completion = CompletableDeferred<Unit>()
+        val footprint = mockk<OrientedImageFootprint>(relaxed = true)
+        compose.runOnIdle {
+            val panorama = image("panorama")
+            every { panorama.type } returns OrientedImageType.Image360
+            coEvery { footprint.updateFootprint(any(), any(), any(), any()) } coAnswers {
+                completion.await()
+                Result.success(Unit)
+            }
+            state = OrientedImageryViewerState(MapViewProxy(), layer, overlay, scope) { footprint }
+            search(panorama)
+            assertTrue(state.uiState.isActiveFootprintVisible)
+            assertTrue(footprints.isEmpty())
+
+            state.updateFootprints(45.0, 90.0, 60.0, 45.0)
+            assertTrue(footprints.isEmpty())
+            completion.complete(Unit)
+        }
+        compose.runOnIdle {
+            assertEquals(listOf(footprint), footprints)
+            state.toggleActiveFootprint()
+            assertTrue(footprints.isEmpty())
+            state.toggleActiveFootprint()
+            assertEquals(listOf(footprint), footprints)
+        }
+    }
+
+    @Test
+    fun failedPanoramaUpdateDoesNotExposeDefaultFootprint() {
+        compose.runOnIdle {
+            val panorama = image("panorama")
+            every { panorama.type } returns OrientedImageType.Image360
+            val footprint = mockk<OrientedImageFootprint>(relaxed = true)
+            coEvery { footprint.updateFootprint(any(), any(), any(), any()) } returns
+                Result.failure(IllegalStateException("Update failed"))
+            state = OrientedImageryViewerState(MapViewProxy(), layer, overlay, scope) { footprint }
+            search(panorama)
+            state.updateFootprints(45.0, 90.0, 60.0, 45.0)
+            assertTrue(footprints.isEmpty())
+            state.toggleActiveFootprint()
+            state.toggleActiveFootprint()
+            assertTrue(footprints.isEmpty())
+
+            coEvery { footprint.updateFootprint(any(), any(), any(), any()) } returns Result.success(Unit)
+            state.updateFootprints(46.0, 90.0, 60.0, 45.0)
+            assertEquals(listOf(footprint), footprints)
+        }
+    }
+
+    @Test
+    fun panoramaUpdateCompletingAfterHideDoesNotPublishFootprint() {
+        val completion = CompletableDeferred<Unit>()
+        val footprint = mockk<OrientedImageFootprint>(relaxed = true)
+        compose.runOnIdle {
+            val panorama = image("panorama")
+            every { panorama.type } returns OrientedImageType.Image360
+            coEvery { footprint.updateFootprint(any(), any(), any(), any()) } coAnswers {
+                withContext(NonCancellable) { completion.await() }
+                Result.success(Unit)
+            }
+            state = OrientedImageryViewerState(MapViewProxy(), layer, overlay, scope) { footprint }
+            search(panorama)
+            state.updateFootprints(45.0, 90.0, 60.0, 45.0)
+            state.toggleActiveFootprint()
+            completion.complete(Unit)
+        }
+        compose.runOnIdle {
+            assertTrue(footprints.isEmpty())
+            state.toggleActiveFootprint()
+            assertTrue(footprints.isEmpty())
+            state.updateFootprints(45.0, 90.0, 60.0, 45.0)
+        }
+        compose.runOnIdle { assertEquals(listOf(footprint), footprints) }
+    }
+
+    @Test
+    fun stalePanoramaUpdateDoesNotInitializeReplacementFootprint() {
+        val completion = CompletableDeferred<Unit>()
+        val oldFootprint = mockk<OrientedImageFootprint>(relaxed = true)
+        val newFootprint = mockk<OrientedImageFootprint>(relaxed = true)
+        compose.runOnIdle {
+            val panorama = image("panorama")
+            val replacement = image("replacement panorama")
+            every { panorama.type } returns OrientedImageType.Image360
+            every { replacement.type } returns OrientedImageType.Image360
+            coEvery { oldFootprint.updateFootprint(any(), any(), any(), any()) } coAnswers {
+                withContext(NonCancellable) { completion.await() }
+                Result.success(Unit)
+            }
+            coEvery { newFootprint.updateFootprint(any(), any(), any(), any()) } returns Result.success(Unit)
+            state = OrientedImageryViewerState(MapViewProxy(), layer, overlay, scope) {
+                if (it === panorama) oldFootprint else newFootprint
+            }
+            search(panorama)
+            state.updateFootprints(45.0, 90.0, 60.0, 45.0)
+            search(replacement)
+            assertTrue(footprints.isEmpty())
+            completion.complete(Unit)
+        }
+        compose.runOnIdle {
+            assertTrue(footprints.isEmpty())
+            state.toggleActiveFootprint()
+            state.toggleActiveFootprint()
+            assertTrue(footprints.isEmpty())
+            state.updateFootprints(45.0, 90.0, 60.0, 45.0)
+            assertEquals(listOf(newFootprint), footprints)
+        }
+    }
+
+    @Test
+    fun additionalPanoramaVisibilityOnlyChangesCollectionAndUpdatesOnlyTargetActiveImage() {
+        compose.runOnIdle {
+            val active = image("active panorama")
+            val panorama = image("additional panorama")
+            every { active.type } returns OrientedImageType.Image360
+            every { panorama.type } returns OrientedImageType.Image360
+            val raster = image("additional raster")
+            val replacement = image("replacement")
+            val created = listOf(active, panorama, raster, replacement).associateWith { mockk<OrientedImageFootprint>(relaxed = true) }
+            val panoramaFootprint = created.getValue(panorama)
+            val activeFootprint = created.getValue(active)
+            coEvery { activeFootprint.updateFootprint(45.0, 90.0, 60.0, 45.0) } returns Result.success(Unit)
+            state = OrientedImageryViewerState(MapViewProxy(), layer, overlay, scope) { created.getValue(it) }
+
+            search(active, panorama, raster)
+            state.toggleActiveFootprint()
+            state.toggleAdditionalFootprints()
+            assertEquals(setOf(panoramaFootprint, created.getValue(raster)), footprints.toSet())
+
+            state.toggleAdditionalFootprints()
+            assertTrue(footprints.isEmpty())
+            state.toggleAdditionalFootprints()
+            assertEquals(setOf(panoramaFootprint, created.getValue(raster)), footprints.toSet())
+            coVerify(exactly = 0) { activeFootprint.updateFootprint(any(), any(), any(), any()) }
+
+            state.toggleActiveFootprint()
+            state.updateFootprints(45.0, 90.0, 60.0, 45.0)
+            coVerify(exactly = 1) { activeFootprint.updateFootprint(45.0, 90.0, 60.0, 45.0) }
+            listOf(panoramaFootprint, created.getValue(raster)).forEach { footprint ->
+                coVerify(exactly = 0) { footprint.updateFootprint(any(), any(), any(), any()) }
+                coVerify(exactly = 0) { footprint.updateFootprint(any()) }
+            }
+            coVerify(exactly = 0) { panorama.load() }
+            search(replacement)
+            assertFalse(panoramaFootprint in footprints)
+            assertImage("replacement")
+        }
+    }
+
+    @Test
     fun appearanceDefaultsMatchSpecifiedColorsAndSymbols() {
         compose.runOnIdle {
             val defaults = ViewerAppearance()

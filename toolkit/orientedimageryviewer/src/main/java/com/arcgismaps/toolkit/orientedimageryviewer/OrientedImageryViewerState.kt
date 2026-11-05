@@ -171,7 +171,7 @@ public class OrientedImageryViewerState internal constructor(
         }
     )
     private val markers: MarkerCoordinator = MarkerCoordinator(
-        orientedImageryLayer, graphicsOverlay,
+        graphicsOverlay,
         activeImage = { session.activeImage },
         uiState = { uiState }
     )
@@ -302,7 +302,6 @@ public class OrientedImageryViewerState internal constructor(
             ?: return Result.failure(IllegalStateException("An active oriented image is required to create a popup."))
 
         return runCatching {
-            // TODO: replace with the Popup constructor with OrientedImage when a core bug is fixed
             Popup(Graphic(image.geometry, image.attributes))
         }.onFailure { error ->
             if (error is CancellationException) throw error
@@ -326,12 +325,14 @@ public class OrientedImageryViewerState internal constructor(
      * image and displays a message in the viewer. Image-mode taps make the viewer visible.
      * Marker failures retain the active image and visibility without displaying a message.
      * Scene locations are resolved against the scene content through [geoViewProxy].
+     * Taps from [LocalSceneViewProxy] are ignored without changing viewer state.
      *
      * Returns a failed [Result] if location resolution, identify, search, fetch, or marker placement fails.
      * Cancellation is rethrown. A map marker may already have been added when an operation fails.
      */
     public suspend fun onSingleTapOnGeoView(event: SingleTapConfirmedEvent): Result<Unit> {
         currentCoroutineContext().ensureActive()
+        if (geoViewProxy is LocalSceneViewProxy) return Result.success(Unit)
         val status = geoViewInteractionStatus
         if (status == GeoViewInteractionStatus.None) return Result.success(Unit)
         if (status != GeoViewInteractionStatus.AddMarkers) {
@@ -366,8 +367,6 @@ public class OrientedImageryViewerState internal constructor(
                         val location = when (geoViewProxy) {
                             is SceneViewProxy -> geoViewProxy.screenToLocation(event.screenCoordinate).getOrThrow()
 
-                            is LocalSceneViewProxy -> geoViewProxy.screenToLocation(event.screenCoordinate).getOrThrow()
-
                             else -> event.mapPoint
                         }
                         ensureCurrentInteraction(revision)
@@ -383,7 +382,6 @@ public class OrientedImageryViewerState internal constructor(
                     val location = runCatching {
                         when (geoViewProxy) {
                             is SceneViewProxy -> geoViewProxy.screenToLocation(event.screenCoordinate).getOrThrow()
-                            is LocalSceneViewProxy -> geoViewProxy.screenToLocation(event.screenCoordinate).getOrThrow()
                             else -> event.mapPoint
                         }
                     }

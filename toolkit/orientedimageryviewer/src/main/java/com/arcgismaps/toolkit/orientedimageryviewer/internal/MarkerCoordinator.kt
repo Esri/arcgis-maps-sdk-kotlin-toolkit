@@ -20,9 +20,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.arcgismaps.geometry.Point
-import com.arcgismaps.mapping.layers.OrientedImageryLayer
 import com.arcgismaps.mapping.layers.orientedimagery.OrientedImage
-import com.arcgismaps.mapping.layers.orientedimagery.OrientedImageSearchParameters
 import com.arcgismaps.mapping.symbology.SimpleMarkerSymbol
 import com.arcgismaps.mapping.view.DoubleXY
 import com.arcgismaps.mapping.view.Graphic
@@ -44,13 +42,11 @@ internal data class PanoramicMarker(
  * a raster or a panorama, and the marker may be added from either the map or the image. The marker
  * is only added to the image if it is still active and visible at the time of addition.
  *
- * @param layer The oriented imagery layer to which the markers belong.
  * @param mapOverlay The graphics overlay for the map view.
  * @param activeImage A function that returns the currently active oriented image, or null if none.
  * @param uiState A function that returns the current UI state of the oriented imagery viewer.
  */
 internal class MarkerCoordinator(
-    private val layer: OrientedImageryLayer,
     private val mapOverlay: GraphicsOverlay,
     private val activeImage: () -> OrientedImage?,
     private val uiState: () -> OrientedImageryViewerUiState
@@ -156,7 +152,7 @@ internal class MarkerCoordinator(
 
     suspend fun addFromMap(point: Point) {
         currentCoroutineContext().ensureActive()
-        // Capture the symbol reference once, before either projection or coverage can suspend.
+        // Capture the symbol reference once, before projection can suspend.
         val operation = snapshot()
         addMapMarker(point, operation?.symbol ?: currentSymbol)
         if (operation == null) return
@@ -164,7 +160,7 @@ internal class MarkerCoordinator(
         currentCoroutineContext().ensureActive()
         if (!isCurrent(operation)) return
         val commit = operation.target.prepare(pixel, operation.symbol, true) ?: return
-        if (!canImageSeeLocation(operation.image, point) || !isCurrent(operation)) return
+        if (!isCurrent(operation)) return
         commit()
     }
 
@@ -214,26 +210,6 @@ internal class MarkerCoordinator(
         imageGraphics += graphic
     }
 
-    private suspend fun canImageSeeLocation(image: OrientedImage, point: Point): Boolean {
-        val result = layer.searchImages(point, OrientedImageSearchParameters().apply {
-            applyHeightFilter = false
-            maxResults = -1
-        })
-        currentCoroutineContext().ensureActive()
-        val candidates = result.getOrThrow()
-        val idField = layer.featureTable?.objectIdField
-        val id = idField?.let { image.attributes[it] }
-        if (id != null) return candidates.any { it.attributes[idField] == id }
-        val uri = image.dataUri ?: return false
-        for (candidate in candidates) {
-            if (candidate === image) return true
-            val loaded = candidate.load()
-            currentCoroutineContext().ensureActive()
-            loaded.getOrThrow()
-            if (candidate.dataUri == uri) return true
-        }
-        return false
-    }
 
     private fun clearRasterMarkers() {
         rasterOverlay?.graphics?.removeAll(imageGraphics)

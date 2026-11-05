@@ -77,7 +77,7 @@ public final class com/arcgismaps/toolkit/orientedimageryviewer/OrientedImageryV
 }
 
 public final class com/arcgismaps/toolkit/orientedimageryviewer/OrientedimageryViewerKt {
-	public static final fun OrientedImageryViewer (Lcom/arcgismaps/toolkit/orientedimageryviewer/OrientedImageryViewerState;Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function0;ZLandroidx/compose/runtime/Composer;II)V
+	public static final fun OrientedImageryViewer-whEyIGc (Lcom/arcgismaps/toolkit/orientedimageryviewer/OrientedImageryViewerState;Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function0;ZIIIILcom/arcgismaps/mapping/symbology/Symbol;Lcom/arcgismaps/mapping/symbology/Symbol;Lcom/arcgismaps/mapping/symbology/Symbol;Lcom/arcgismaps/mapping/symbology/Symbol;Landroidx/compose/runtime/Composer;III)V
 }
 
 public final class com/arcgismaps/toolkit/orientedimageryviewer/internal/ui/ComposableSingletons$ImageInfoButtonKt {

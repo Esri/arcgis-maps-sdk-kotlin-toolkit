@@ -20,6 +20,7 @@ import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.layers.OrientedImageryLayer
 import com.arcgismaps.mapping.layers.orientedimagery.OrientedImage
 import com.arcgismaps.mapping.layers.orientedimagery.OrientedImageFootprint
+import com.arcgismaps.mapping.layers.orientedimagery.OrientedImageType
 import com.arcgismaps.mapping.view.Graphic
 import com.arcgismaps.mapping.view.GraphicsOverlay
 import kotlinx.coroutines.CancellationException
@@ -52,6 +53,7 @@ internal class FootprintManager(
     private val createFootprint: (OrientedImage) -> OrientedImageFootprint = ::OrientedImageFootprint
 ) {
     private var active: OrientedImageFootprint? = null
+    private var activeFootprintInitialized = false
     private var activeCamera: Graphic? = null
     private var inputGraphic: Graphic? = null
     private var additionalFootprints: List<OrientedImageFootprint> = emptyList()
@@ -94,9 +96,13 @@ internal class FootprintManager(
                 it.fillColor = appearance.selectedFootprintFillColor
                 it.outlineColor = appearance.selectedFootprintOutlineColor
                 active = it
+                // A panorama's default footprint covers the full circle, not the current viewport.
+                activeFootprintInitialized = image.type != OrientedImageType.Image360
                 activeCamera = Graphic(image.geometry, appearance.selectedCameraMarkerSymbol).also(overlay.graphics::add)
             }
-            if (footprint !in layer.visibleFootprints) layer.visibleFootprints.add(footprint)
+            if (activeFootprintInitialized && footprint !in layer.visibleFootprints) {
+                layer.visibleFootprints.add(footprint)
+            }
         } else {
             active?.let { layer.visibleFootprints.remove(it) }
             cancelUpdates()
@@ -155,6 +161,12 @@ internal class FootprintManager(
                 pendingUpdate = null
                 try {
                     next(footprint).getOrThrow()
+                    currentCoroutineContext().ensureActive()
+                    if (active !== footprint) break
+                    activeFootprintInitialized = true
+                    if (uiState().isActiveFootprintVisible && footprint !in layer.visibleFootprints) {
+                        layer.visibleFootprints.add(footprint)
+                    }
                 } catch (error: Exception) {
                     if (error is CancellationException) throw error
                     currentCoroutineContext().ensureActive()
@@ -187,11 +199,13 @@ internal class FootprintManager(
         clearNoImageLocation()
         overlay.graphics.removeAll(additionalCameras)
         active = null
+        activeFootprintInitialized = false
         activeCamera = null
         inputGraphic = null
         additionalFootprints = emptyList()
         additionalCameras = emptyList()
     }
+
 
     private fun cancelUpdates() {
         updateJob?.cancel()

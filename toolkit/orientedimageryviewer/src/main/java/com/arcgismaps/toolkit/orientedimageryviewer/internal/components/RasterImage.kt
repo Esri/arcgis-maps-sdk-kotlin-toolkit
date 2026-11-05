@@ -49,7 +49,6 @@ import com.arcgismaps.mapping.view.DoubleXY
 import com.arcgismaps.mapping.view.Graphic
 import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.mapping.view.MapViewInteractionOptions
-import com.arcgismaps.raster.Raster
 import com.arcgismaps.toolkit.orientedimageryviewer.OrientedImageryViewerState
 import com.arcgismaps.toolkit.orientedimageryviewer.R
 import com.arcgismaps.toolkit.geoviewcompose.MapView
@@ -62,7 +61,7 @@ import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.awaitCancellation
 
 /**
- * RasterImage is a small, secondary [MapView] which displays georeferenced raster image.
+ * RasterImage is a small, secondary [MapView] which displays an oriented image in image space.
  *
  * [MapView] is used intentionally because image formats such as TIFF and other less common formats
  * are not supported natively by commonly-used Compose image components such as AsyncImage. Rendering
@@ -104,13 +103,30 @@ internal fun RasterImage(
         listOf(graphicsOverlay, referenceOverlay)
     }
 
-    val rasterPath = (if (pageImage != null) pageImage.dataUri else viewerUiState.activeImageInfo?.dataUri) ?: return
-    val rasterResult = remember(rasterPath) {
-        runCatching { RasterLayer(Raster.createWithPath(rasterPath)) }
+    val orientedImage = pageImage
+        ?: viewerState.searchResultImages.getOrNull(viewerUiState.selectedResultIndex)
+        ?: return
+    var rasterResult by remember(orientedImage) { mutableStateOf<Result<RasterLayer>?>(null) }
+    LaunchedEffect(orientedImage) {
+        try {
+            val raster = orientedImage.createImageSpaceRaster().getOrThrow()
+            ensureActive()
+            rasterResult = Result.success(RasterLayer(raster))
+        } catch (error: CancellationException) {
+            throw error
+        } catch (error: Exception) {
+            ensureActive()
+            rasterResult = Result.failure(error)
+        }
     }
-    val rasterLayer = rasterResult.getOrElse { error ->
+    val rasterLayer = rasterResult?.getOrElse { error ->
         if (error is CancellationException) throw error
         MessageScreen(modifier = modifier.fillMaxSize(), message = loadFailedMessage)
+        return
+    } ?: run {
+        Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator()
+        }
         return
     }
     var isLoaded by remember(rasterLayer) { mutableStateOf(false) }
@@ -155,8 +171,7 @@ internal fun RasterImage(
             onViewpointChangedForBoundingGeometry = { viewpoint ->
                 val currentUiState = viewerState.uiState
                 if (isCurrent() &&
-                    currentUiState.activeImageInfo != null && currentUiState.isActiveFootprintVisible &&
-                    !currentUiState.isSequentialNavigationEnabled
+                    currentUiState.activeImageInfo != null && currentUiState.isActiveFootprintVisible
                 ) {
                     val imageCoordinates = computePixelCorners(viewpoint, rasterLayer)
                     if (imageCoordinates != null) {
