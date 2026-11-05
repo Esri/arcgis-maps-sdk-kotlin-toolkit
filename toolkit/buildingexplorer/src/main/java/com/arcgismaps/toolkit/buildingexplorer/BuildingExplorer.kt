@@ -46,6 +46,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
@@ -115,97 +116,119 @@ public fun BuildingExplorer(
     state: BuildingExplorerState,
     modifier: Modifier = Modifier
 ) {
-    Box(modifier = modifier) {
-        val listState = rememberLazyListState()
+    val stateLoaded by state.stateLoaded.collectAsStateWithLifecycle()
 
-        LazyColumn(
-            state = listState,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            item {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(8.dp)
-                ) {
-                    if (state.buildingSceneLayerStates.size > 1) {
-                        var buildingSceneLayerExpanded by remember { mutableStateOf(false) }
+    LaunchedEffect(state) {
+        state.initialize()
+    }
 
-                        Box(modifier = Modifier.padding(8.dp)) {
-                            TextField(
-                                value = state.buildingSceneLayerState.value.name,
-                                onValueChange = {},
-                                readOnly = true,
-                                trailingIcon = {
-                                    Icon(
-                                        imageVector = if (buildingSceneLayerExpanded) {
-                                            Icons.Default.ArrowDropUp
-                                        } else {
-                                            Icons.Default.ArrowDropDown
-                                        },
-                                        contentDescription = null
-                                    )
-                                }
-                            )
+    if (stateLoaded) {
+        Box(modifier = modifier) {
+            val listState = rememberLazyListState()
 
-                            Box(
-                                modifier = Modifier
-                                    .matchParentSize()
-                                    .clickable { buildingSceneLayerExpanded = true }
-                            )
+            LazyColumn(
+                state = listState,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                item {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(8.dp)
+                    ) {
+                        if (state.buildingSceneLayerStates.size > 1) {
+                            var buildingSceneLayerExpanded by remember { mutableStateOf(false) }
 
-                            DropdownMenu(
-                                expanded = buildingSceneLayerExpanded,
-                                onDismissRequest = { buildingSceneLayerExpanded = false }
-                            ) {
-                                state.buildingSceneLayerStates.forEachIndexed { index, buildingSceneLayerState ->
-                                    DropdownMenuItem(
-                                        text = { Text(buildingSceneLayerState.name) },
-                                        onClick = {
-                                            state.onBuildingSceneLayerSelected(index)
-                                            buildingSceneLayerExpanded = false
-                                        }
-                                    )
+                            Box(modifier = Modifier.padding(8.dp)) {
+                                TextField(
+                                    value = state.buildingSceneLayerState.value!!.name,
+                                    onValueChange = {},
+                                    readOnly = true,
+                                    trailingIcon = {
+                                        Icon(
+                                            imageVector = if (buildingSceneLayerExpanded) {
+                                                Icons.Default.ArrowDropUp
+                                            } else {
+                                                Icons.Default.ArrowDropDown
+                                            },
+                                            contentDescription = null
+                                        )
+                                    }
+                                )
+
+                                Box(
+                                    modifier = Modifier
+                                        .matchParentSize()
+                                        .clickable { buildingSceneLayerExpanded = true }
+                                )
+
+                                DropdownMenu(
+                                    expanded = buildingSceneLayerExpanded,
+                                    onDismissRequest = { buildingSceneLayerExpanded = false }
+                                ) {
+                                    state.buildingSceneLayerStates.forEachIndexed { index, buildingSceneLayerState ->
+                                        DropdownMenuItem(
+                                            text = { Text(buildingSceneLayerState.name) },
+                                            onClick = {
+                                                state.onBuildingSceneLayerSelected(index)
+                                                buildingSceneLayerExpanded = false
+                                            }
+                                        )
+                                    }
                                 }
                             }
+                        } else {
+                            Text(text = state.buildingSceneLayerState.value!!.name)
                         }
-                    } else {
-                        Text(text = state.buildingSceneLayerState.value.name)
                     }
                 }
+                item {
+                    HorizontalDivider()
+                }
+                item {
+                    BuildingExplorer(buildingSceneLayerState = state.buildingSceneLayerState.value!!)
+                }
             }
-            item {
-                HorizontalDivider()
+            // show a fade to indicate that there is scrollable content
+            if (listState.canScrollBackward) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.TopCenter)
+                        .fillMaxWidth()
+                        .height(50.dp)
+                        .background(
+                            Brush.verticalGradient(
+                                colors = listOf(
+                                    MaterialTheme.colorScheme.surface,
+                                    Color.Transparent
+                                )
+                            )
+                        )
+                )
             }
-            item {
-                BuildingExplorer(buildingSceneLayerState = state.buildingSceneLayerState.value)
+            if (listState.canScrollForward) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .fillMaxWidth()
+                        .height(50.dp)
+                        .background(
+                            Brush.verticalGradient(
+                                colors = listOf(
+                                    Color.Transparent,
+                                    MaterialTheme.colorScheme.surface
+                                )
+                            )
+                        )
+                )
             }
         }
-        // show a fade to indicate that there is scrollable content
-        if (listState.canScrollBackward) {
-            Box(
-                modifier = Modifier
-                    .align(Alignment.TopCenter)
-                    .fillMaxWidth()
-                    .height(50.dp)
-                    .background(
-                        Brush.verticalGradient(
-                            colors = listOf(MaterialTheme.colorScheme.surface, Color.Transparent)
-                        )
-                    )
-            )
-        }
-        if (listState.canScrollForward) {
-            Box(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .fillMaxWidth()
-                    .height(50.dp)
-                    .background(
-                        Brush.verticalGradient(
-                            colors = listOf(Color.Transparent, MaterialTheme.colorScheme.surface)
-                        )
-                    )
-            )
+    } else {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        )
+        {
+            CircularProgressIndicator()
         }
     }
 }
