@@ -43,7 +43,7 @@ playServicesLocation = "21.4.0"
 gmazzo = "2.5.1"
 gradleSecrets = "2.0.1"
 workVersion = "2.11.2"
-arcgismapsTestdataSync = "1.0"
+arcgismapsTestdataSync = "1.1"
 
 [libraries]
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose"}
