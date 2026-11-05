@@ -31,4 +31,3 @@ abstract class VaultTokenProvider : ValueSource<String, ValueSourceParameters.No
         }
     }
 }
-

@@ -18,7 +18,6 @@
 
 import com.android.build.api.dsl.LibraryExtension
 import com.arcgismaps.kotlin.toolkit.build_logic.convention.VaultTokenProvider
-import com.arcgismaps.kotlin.toolkit.build_logic.convention.androidTestImplementation
 import com.arcgismaps.kotlin.toolkit.build_logic.convention.api
 import com.arcgismaps.kotlin.toolkit.build_logic.convention.arcgis
 import com.arcgismaps.kotlin.toolkit.build_logic.convention.libs
@@ -198,7 +197,6 @@ class ComponentConventions : Plugin<Project> {
 
             dependencies {
                 api(arcgis.findLibrary("mapsSdk").get())
-                androidTestImplementation(arcgis.findLibrary("mapsSdkTestFixtures").get())
             }
         }
 

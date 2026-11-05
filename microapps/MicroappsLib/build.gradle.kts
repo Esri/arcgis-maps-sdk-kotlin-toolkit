@@ -24,6 +24,8 @@ plugins {
     alias(libs.plugins.kotlin.convention.plugin)
 }
 
+val vaultTokenProvider = providers.of(VaultTokenProvider::class) {}
+
 android {
     namespace = "com.esri.microappslib"
     compileSdk = libs.versions.compileSdk.get().toInt()
@@ -31,7 +33,6 @@ android {
     defaultConfig {
         minSdk = libs.versions.minSdk.get().toInt()
 
-        val vaultTokenProvider = providers.of(VaultTokenProvider::class) {}
         val vaultToken = vaultTokenProvider.get().trim()
         if (vaultToken.isEmpty()) {
             // do not change the structure of the build config object
@@ -68,7 +69,6 @@ dependencies {
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.startup.runtime)
     implementation(arcgis.mapsSdk)
-    implementation(arcgis.mapsSdkTestFixtures)
     implementation(libs.bundles.composeCore)
     implementation(libs.bundles.core)
     implementation(libs.androidx.lifecycle.runtime.compose)
