@@ -121,6 +121,7 @@ apiValidation {
 
 dependencies {
     api(arcgis.mapsSdk)
+    api(project(":geoview-compose"))
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.composeCore)
     implementation(libs.bundles.core)

@@ -30,20 +30,28 @@ import com.arcgismaps.mapping.layers.buildingscene.BuildingGroupSublayer
 import com.arcgismaps.mapping.layers.buildingscene.BuildingSolidFilterMode
 import com.arcgismaps.mapping.layers.buildingscene.BuildingSublayer
 import com.arcgismaps.mapping.layers.buildingscene.BuildingXrayFilterMode
+import com.arcgismaps.mapping.view.Camera
+import com.arcgismaps.toolkit.geoviewcompose.LocalSceneViewProxy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * The state of a [BuildingExplorer].
  *
+ * @param buildingSceneLayers The list of [BuildingSceneLayer]s that will appear in the component.
+ * @param coroutineScope The coroutine scope to use for asynchronous operations.
+ * @param localSceneViewProxy The proxy to provide access to the set viewpoint operation for the
+ * "Zoom to building" button. If the proxy is null then that button will not display.
  * @since 300.2.0
  */
 @Stable
 public class BuildingExplorerState(
     buildingSceneLayers: List<BuildingSceneLayer>,
-    coroutineScope: CoroutineScope
+    coroutineScope: CoroutineScope,
+    internal val localSceneViewProxy: LocalSceneViewProxy? = null
 ) {
     init {
         require(buildingSceneLayers.isNotEmpty()) {
@@ -52,7 +60,11 @@ public class BuildingExplorerState(
     }
 
     internal val buildingSceneLayerStates = buildingSceneLayers.map {
-        BuildingSceneLayerState(it, coroutineScope)
+        BuildingSceneLayerState(
+            buildingSceneLayer = it,
+            coroutineScope = coroutineScope,
+            localSceneViewProxy = localSceneViewProxy
+        )
     }.sortedBy { it.name }
 
     private val _buildingSceneLayerState = mutableStateOf(
@@ -75,7 +87,8 @@ public class BuildingExplorerState(
 @Stable
 internal class BuildingSceneLayerState(
     private val buildingSceneLayer: BuildingSceneLayer,
-    coroutineScope: CoroutineScope
+    private val coroutineScope: CoroutineScope,
+    private val localSceneViewProxy: LocalSceneViewProxy?
 ) {
     private val _stateLoaded = MutableStateFlow(false)
     internal val stateLoaded = _stateLoaded.asStateFlow()
@@ -124,6 +137,8 @@ internal class BuildingSceneLayerState(
     // are available
     private var _isShowFullModelSwitch = mutableStateOf(false)
     internal val isShowFullModelSwitch: State<Boolean> = _isShowFullModelSwitch
+
+    internal val isShowZoom = localSceneViewProxy != null
 
     init {
         coroutineScope.launch {
@@ -232,6 +247,25 @@ internal class BuildingSceneLayerState(
                 )
             )
             buildingSceneLayer.activeFilter = buildingFilter
+        }
+    }
+
+    internal fun onZoom() {
+        coroutineScope.launch {
+            buildingSceneLayer.fullExtent?.let { fullExtent ->
+                val center = fullExtent.center
+                val camera = Camera(
+                    lookAtPoint = center,
+                    distance = 250.0,
+                    heading = 40.0,
+                    pitch = 60.0,
+                    roll = 0.0,
+                )
+                localSceneViewProxy?.setViewpointCameraAnimated(
+                    camera = camera,
+                    duration = 1.5.seconds
+                )
+            }
         }
     }
 }

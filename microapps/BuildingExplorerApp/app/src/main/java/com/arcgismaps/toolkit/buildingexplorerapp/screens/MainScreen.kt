@@ -27,6 +27,7 @@ import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberBottomSheetScaffoldState
@@ -75,6 +76,7 @@ fun MainScreen() {
         var criticalError: Throwable? by remember { mutableStateOf(null) }
 
         BottomSheetScaffold(
+            sheetContainerColor = MaterialTheme.colorScheme.surface,
             sheetContent = {
                 BuildingExplorer(
                     state = viewModel.buildingExplorerState,
@@ -85,6 +87,7 @@ fun MainScreen() {
         ) { paddingValues ->
             LocalSceneView(
                 scene = viewModel.scene,
+                localSceneViewProxy = viewModel.localSceneViewProxy,
                 modifier = Modifier.padding(paddingValues),
                 onCriticalErrorChanged = { throwable ->
                     throwable?.let {

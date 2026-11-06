@@ -55,6 +55,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -70,6 +71,7 @@ import com.arcgismaps.mapping.layers.buildingscene.BuildingSublayer
  * Create a `BuildingExplorerState` with a list of `BuildingSceneLayers`
  *
  * ```
+ *     val localSceneViewProxy = LocalSceneViewProxy()
  *     lateinit var buildingExplorerState: BuildingExplorerState
  *
  *     init {
@@ -83,7 +85,8 @@ import com.arcgismaps.mapping.layers.buildingscene.BuildingSublayer
  *
  *                     buildingExplorerState = BuildingExplorerState(
  *                         buildingSceneLayers = layers,
- *                         coroutineScope = viewModelScope
+ *                         coroutineScope = viewModelScope,
+ *                         localSceneViewProxy = localSceneViewProxy
  *                     )
  *                 }
  *         }
@@ -96,6 +99,7 @@ import com.arcgismaps.mapping.layers.buildingscene.BuildingSublayer
  * Column {
  *     LocalSceneView(
  *         scene = viewModel.scene,
+ *         proxy = localSceneViewProxy,
  *         modifier = Modifier.weight(0.5f))
  *     BuildingExplorer(
  *         state = viewModel.buildingExplorerState,
@@ -248,6 +252,25 @@ internal fun BuildingExplorer(
                 val stateLoaded by buildingSceneLayerState.stateLoaded.collectAsStateWithLifecycle()
 
                 if (stateLoaded) {
+                    if (buildingSceneLayerState.isShowZoom) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.padding(8.dp)
+                        ) {
+                            val zoomToBuildingText = stringResource(R.string.zoom_to_building)
+                            Text(zoomToBuildingText)
+                            Spacer(modifier = Modifier.weight(1f))
+                            IconButton(
+                                onClick = buildingSceneLayerState::onZoom
+                            ) {
+                                Icon(
+                                    painter = painterResource(R.drawable.zoom_in_map),
+                                    contentDescription = zoomToBuildingText
+                                )
+                            }
+                        }
+                    }
+
                     if (buildingSceneLayerState.showFullModel.value) {
                         if (buildingSceneLayerState.isShowLevels) {
                             var levelsExpanded by remember { mutableStateOf(false) }

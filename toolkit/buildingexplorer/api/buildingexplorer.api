@@ -4,7 +4,8 @@ public final class com/arcgismaps/toolkit/buildingexplorer/BuildingExplorerKt {
 
 public final class com/arcgismaps/toolkit/buildingexplorer/BuildingExplorerState {
 	public static final field $stable I
-	public fun <init> (Ljava/util/List;Lkotlinx/coroutines/CoroutineScope;)V
+	public fun <init> (Ljava/util/List;Lkotlinx/coroutines/CoroutineScope;Lcom/arcgismaps/toolkit/geoviewcompose/LocalSceneViewProxy;)V
+	public synthetic fun <init> (Ljava/util/List;Lkotlinx/coroutines/CoroutineScope;Lcom/arcgismaps/toolkit/geoviewcompose/LocalSceneViewProxy;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 }
 
 public final class com/arcgismaps/toolkit/buildingexplorer/ComposableSingletons$BuildingExplorerKt {
