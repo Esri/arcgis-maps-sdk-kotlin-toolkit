@@ -18,7 +18,6 @@
 
 package com.arcgismaps.toolkit.buildingexplorer
 
-import android.R.string.no
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -47,7 +46,6 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
@@ -94,8 +92,18 @@ import com.arcgismaps.mapping.layers.buildingscene.BuildingSublayer
  *         }
  *     }
  * ```
+ * or create a `BuildingExplorerState` from an `ArcGisScene` which will extract all `BuildingSceneLayers`
+ * in the scene
  *
- * Create a `BuildingExplorer` taking the `BuildingExploereState` and add it to the UI
+ * val localSceneViewProxy = LocalSceneViewProxy()
+ *
+ *     val buildingExplorerState = BuildingExplorerState(
+ *         arcGISScene = scene,
+ *         coroutineScope = viewModelScope,
+ *         localSceneViewProxy = localSceneViewProxy
+ *     )
+ *
+ * Create a `BuildingExplorer` taking the `BuildingExplorerState` and add it to the UI
  *
  * ```
  * Column {
