@@ -53,11 +53,10 @@ import kotlin.time.Duration.Companion.seconds
 @Stable
 public class BuildingExplorerState internal constructor(
     buildingSceneLayers: List<BuildingSceneLayer>,
-    internal val arcGISScene: ArcGISScene?,
-    internal val coroutineScope: CoroutineScope,
-    internal val localSceneViewProxy: LocalSceneViewProxy? = null
+    arcGISScene: ArcGISScene?,
+    coroutineScope: CoroutineScope,
+    localSceneViewProxy: LocalSceneViewProxy? = null
 ) {
-    private val layers = mutableListOf<BuildingSceneLayer>()
     private val _stateLoaded = MutableStateFlow(false)
     internal val stateLoaded = _stateLoaded.asStateFlow()
 
@@ -73,7 +72,7 @@ public class BuildingExplorerState internal constructor(
     )
 
     public constructor(
-        arcGISScene: ArcGISScene?,
+        arcGISScene: ArcGISScene,
         coroutineScope: CoroutineScope,
         localSceneViewProxy: LocalSceneViewProxy? = null
     ) : this(
@@ -93,50 +92,31 @@ public class BuildingExplorerState internal constructor(
         }
     }
 
-    public suspend fun initialize() {
-        arcGISScene?.let {
-            arcGISScene.load().onFailure { throw it }
-            val extractedLayers = extractBuildingSceneLayers(arcGISScene.operationalLayers)
-            layers.addAll(extractedLayers)
-        }
-
-        buildingSceneLayerStates = layers.map {
-            BuildingSceneLayerState(
-                buildingSceneLayer = it,
-                coroutineScope = coroutineScope,
-                localSceneViewProxy = localSceneViewProxy
-            )
-        }.sortedBy { it.name }
-
-        _buildingSceneLayerState.value = buildingSceneLayerStates.first()
-
-        _stateLoaded.value = true
-    }
-
     init {
-        layers.addAll(buildingSceneLayers)
+        coroutineScope.launch {
+            // extract building scene layers from the scene otherwise use the list
+            val layers = arcGISScene?.let { scene ->
+                scene.load().onFailure { throw it }
+                extractBuildingSceneLayers(scene.operationalLayers)
+            } ?: buildingSceneLayers
+
+            buildingSceneLayerStates = layers.map {
+                BuildingSceneLayerState(
+                    buildingSceneLayer = it,
+                    coroutineScope = coroutineScope,
+                    localSceneViewProxy = localSceneViewProxy
+                )
+            }.sortedBy { it.name }
+
+            _buildingSceneLayerState.value = buildingSceneLayerStates.firstOrNull()
+
+            _stateLoaded.value = true
+        }
     }
-
-//    init {
-////        require(buildingSceneLayers.isNotEmpty()) {
-////            "BuildingExplorerState requires at least one BuildingSceneLayer."
-////        }
-//    }
-
-//    internal val buildingSceneLayerStates = buildingSceneLayers.map {
-//        BuildingSceneLayerState(
-//            buildingSceneLayer = it,
-//            coroutineScope = coroutineScope,
-//            localSceneViewProxy = localSceneViewProxy
-//        )
-//    }.sortedBy { it.name }
 
     internal lateinit var buildingSceneLayerStates: List<BuildingSceneLayerState>
 
-    private val _buildingSceneLayerState = mutableStateOf<BuildingSceneLayerState?>(
-        //buildingSceneLayerStates.first()
-        null
-    )
+    private val _buildingSceneLayerState = mutableStateOf<BuildingSceneLayerState?>(null)
 
     internal val buildingSceneLayerState: State<BuildingSceneLayerState?> =
         _buildingSceneLayerState

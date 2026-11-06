@@ -23,4 +23,5 @@
     <string name="level">Level</string>
     <string name="construction_phase">Construction phase</string>
     <string name="zoom_to_building">Zoom to building</string>
+    <string name="no_building_scene_layers">No BuildingSceneLayers</string>
 </resources>
