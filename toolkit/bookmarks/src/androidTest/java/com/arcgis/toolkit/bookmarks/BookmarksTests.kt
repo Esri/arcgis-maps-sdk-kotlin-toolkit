@@ -26,14 +26,21 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.performClick
+import com.arcgismaps.geometry.SpatialReference
+import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.Bookmark
 import com.arcgismaps.toolkit.bookmarks.BookmarksListView
+import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.Assert.assertEquals
 import org.junit.Rule
+import kotlin.time.Duration.Companion.seconds
 
 class BookmarksTests {
 
@@ -42,36 +49,36 @@ class BookmarksTests {
 
     @OptIn(ExperimentalTestApi::class)
     @Test
-    fun testBookmarkListItems() {
-        var selectedBookmark by mutableStateOf<String?>(null)
+    fun testBookmarkListItems() = runTest {
+
+        val mapViewModel = MapViewModel("16f1b8ba37b44dc3884afc8d5f454dd2")
+        val bookmarks = mapViewModel.load()
 
         composeTestRule.setContent {
-            BookmarksListView(
-                bookmarks = remember { mutableStateListOf(
-                    Bookmark("Bookmark 1", null),
-                    Bookmark("Bookmark 2", null),
-                    Bookmark("Bookmark 3", null)
-                )  } ,
-                onSelected = { selectedBookmark = it.name }
+            BookmarksScenario(
+                mapViewModel = mapViewModel,
+                bookmarks = bookmarks
             )
         }
 
 
-        val bookmark1 = composeTestRule.onNodeWithContentDescription("Bookmark 1")
-        val bookmark2 = composeTestRule.onNodeWithContentDescription("Bookmark 2")
-        val bookmark3 = composeTestRule.onNodeWithContentDescription("Bookmark 3")
+        val bookmark1 = composeTestRule.onNodeWithContentDescription("Giant Sequoias of Willamette Blvd")
+        val bookmark2 = composeTestRule.onNodeWithContentDescription("Large Douglas-fir")
+        val bookmark3 = composeTestRule.onNodeWithContentDescription("Historic Ladd's Addition")
+        val bookmark4 = composeTestRule.onNodeWithContentDescription("Irvington neighborhood")
 
         bookmark1.assertIsDisplayed()
         bookmark2.assertIsDisplayed()
         bookmark3.assertIsDisplayed()
+        bookmark4.assertIsDisplayed()
+
+        assertEquals(null,mapViewModel.bookmarkSelected.value)
 
         bookmark3.performClick()
-        assertEquals("Bookmark 3", selectedBookmark)
 
-        bookmark1.performClick()
-        assertEquals("Bookmark 1", selectedBookmark)
 
-        bookmark2.performClick()
-        assertEquals("Bookmark 2", selectedBookmark)
+        delay(1.seconds)
+        assertEquals("Historic Ladd's Addition",mapViewModel.bookmarkSelected.value?.name)
+        bookmark1.assertIsNotDisplayed()
     }
 }

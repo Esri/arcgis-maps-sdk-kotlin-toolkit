@@ -65,7 +65,7 @@ public fun BookmarksListView(
     geoViewProxy : GeoViewProxy,
     bookmarks: SnapshotStateList<Bookmark>,
     modifier: Modifier = Modifier,
-    onBookmarkSelected : () -> Unit = {},
+    onBookmarkSelected : (Bookmark) -> Unit = {},
     backgroundColor: Color = MaterialTheme.colorScheme.surfaceContainer,
     textStyle : TextStyle = LocalTextStyle.current
 ) {
@@ -87,7 +87,7 @@ public fun BookmarksListView(
                             )
                         }
                     }
-                    onBookmarkSelected()
+                    onBookmarkSelected(bookmark)
                 },
                 textStyle = textStyle
             )
