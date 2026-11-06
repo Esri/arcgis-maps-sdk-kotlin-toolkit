@@ -1,0 +1,662 @@
+/*
+ * Copyright 2026 Esri
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.arcgismaps.toolkit.orientedimageryviewer
+
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.junit4.v2.createComposeRule
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.unit.dp
+import com.arcgismaps.data.Feature
+import com.arcgismaps.geometry.Point
+import com.arcgismaps.mapping.layers.OrientedImageryLayer
+import com.arcgismaps.mapping.layers.orientedimagery.OrientedImage
+import com.arcgismaps.mapping.layers.orientedimagery.OrientedImageType
+import com.arcgismaps.mapping.view.Graphic
+import com.arcgismaps.mapping.view.GraphicsOverlay
+import com.arcgismaps.mapping.view.IdentifyLayerResult
+import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
+import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
+import com.arcgismaps.toolkit.geoviewcompose.SceneViewProxy
+import io.mockk.coEvery
+import io.mockk.coVerify
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.verify
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
+import org.junit.After
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
+import org.junit.Assert.assertSame
+import org.junit.Assert.assertTrue
+import org.junit.Before
+import org.junit.Rule
+import org.junit.Test
+
+class GeoViewInteractionTests {
+    @get:Rule
+    val compose = createComposeRule()
+
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+    private val location = Point(1.0, 2.0)
+    private lateinit var state: OrientedImageryViewerState
+    private lateinit var layer: OrientedImageryLayer
+    private lateinit var overlay: GraphicsOverlay
+    private lateinit var proxy: MapViewProxy
+    private lateinit var event: SingleTapConfirmedEvent
+    private lateinit var identified: IdentifyLayerResult
+    private lateinit var feature: Feature
+    private var showViewer by mutableStateOf(false)
+
+    @Before
+    fun setUp() {
+        compose.setContent {
+            if (showViewer) ViewerLayout(viewerState = state)
+        }
+        compose.runOnIdle {
+            layer = mockk()
+            every { layer.name } returns "Interaction"
+            every { layer.supportsSequentialNavigation } returns false
+            every { layer.visibleFootprints } returns mutableListOf()
+            overlay = GraphicsOverlay()
+            proxy = mockk()
+            state = OrientedImageryViewerState(proxy, layer, overlay, scope)
+            state.toggleActiveFootprint()
+            state.toggleAdditionalCameraLocations()
+            event = mockk()
+            every { event.mapPoint } returns location
+            every { event.screenCoordinate } returns mockk()
+            feature = mockk()
+            every { feature.geometry } returns location
+            identified = mockk()
+            every { identified.error } returns null
+            every { identified.geoElements } returns listOf(feature)
+            coEvery { proxy.identify(layer, event.screenCoordinate, 20.dp, false, 1) } returns
+                Result.success(identified)
+            coEvery { layer.searchImages(any(), any()) } returns Result.success(emptyList())
+            val image = mockk<OrientedImage>()
+            every { image.dataUri } returns "/local/image.png"
+            every { image.type } returns OrientedImageType.Horizontal
+            every { image.geometry } returns location
+            coEvery { image.load() } returns Result.success(Unit)
+            coEvery { layer.fetchImageForFeature(feature) } returns Result.success(image)
+        }
+    }
+
+    @After
+    fun tearDown() {
+        compose.runOnIdle { scope.cancel() }
+    }
+
+    @Test
+    fun defaultsToFindImagesAndSearchesAtTapLocation() {
+        compose.runOnIdle {
+            assertEquals(GeoViewInteractionStatus.FindImages, state.geoViewInteractionStatus)
+            scope.launch { state.onSingleTapOnGeoView(event).getOrThrow() }
+            coVerify(exactly = 1) { layer.searchImages(location, any()) }
+            coVerify(exactly = 0) { proxy.identify(layer, any(), any(), any(), any()) }
+            assertEquals(GeoViewInteractionStatus.FindImages, state.geoViewInteractionStatus)
+        }
+    }
+
+    @Test
+    fun noneDoesNotReadCoordinatesOrPerformOperations() {
+        compose.runOnIdle {
+            state.geoViewInteractionStatus = GeoViewInteractionStatus.None
+            val ignoredEvent = mockk<SingleTapConfirmedEvent>()
+            scope.launch { state.onSingleTapOnGeoView(ignoredEvent).getOrThrow() }
+            verify(exactly = 0) { ignoredEvent.mapPoint; ignoredEvent.screenCoordinate }
+            coVerify(exactly = 0) { layer.searchImages(any(), any()) }
+            coVerify(exactly = 0) { proxy.identify(layer, any(), any(), any(), any()) }
+            assertTrue(overlay.graphics.isEmpty())
+        }
+    }
+
+    @Test
+    fun displayIdentifiesFirstFeatureWithoutRequiringMapPointAndPreservesMode() {
+        compose.runOnIdle {
+            state.geoViewInteractionStatus = GeoViewInteractionStatus.DisplayImage
+            every { event.mapPoint } returns null
+            every { identified.geoElements } returns listOf(feature, mockk<Feature>())
+            scope.launch { state.onSingleTapOnGeoView(event).getOrThrow() }
+            coVerify(exactly = 1) { proxy.identify(layer, event.screenCoordinate, 20.dp, false, 1) }
+            coVerify(exactly = 1) { layer.fetchImageForFeature(feature) }
+            coVerify(exactly = 0) { layer.searchImages(any(), any()) }
+            assertTrue(state.hasActiveImage)
+            assertNull(state.uiState.messageResourceId)
+            assertEquals(GeoViewInteractionStatus.DisplayImage, state.geoViewInteractionStatus)
+        }
+    }
+
+    @Test
+    fun noImageMarkerIsUpdatedReplacedAndClearedWithoutRemovingForeignGraphics() {
+        compose.runOnIdle {
+            val foreign = Graphic(location)
+            overlay.graphics.add(foreign)
+            every { identified.geoElements } returns emptyList()
+            state.geoViewInteractionStatus = GeoViewInteractionStatus.DisplayImage
+            scope.launch { state.onSingleTapOnGeoView(event).getOrThrow() }
+            val marker = overlay.graphics.single { it !== foreign }
+            assertEquals(location, marker.geometry)
+            assertEquals(state.appearance.noImageMarkerSymbol, marker.symbol)
+            val updated = state.appearance.copy(noImageMarkerSymbol = state.appearance.searchPointMarkerSymbol)
+            state.updateAppearance(updated)
+            assertEquals(updated.noImageMarkerSymbol, marker.symbol)
+            scope.launch { state.onSingleTapOnGeoView(event).getOrThrow() }
+            assertEquals(2, overlay.graphics.size)
+            assertFalse(marker in overlay.graphics)
+            state.geoViewInteractionStatus = GeoViewInteractionStatus.FindImages
+            assertEquals(listOf(foreign), overlay.graphics.toList())
+            scope.launch { state.onSingleTapOnGeoView(event).getOrThrow() }
+            assertEquals(listOf(foreign), overlay.graphics.toList())
+            state.geoViewInteractionStatus = GeoViewInteractionStatus.DisplayImage
+            scope.launch { state.onSingleTapOnGeoView(event).getOrThrow() }
+            state.resetAll()
+            assertEquals(listOf(foreign), overlay.graphics.toList())
+        }
+    }
+
+    @Test
+    fun emptyDisplayIdentifyWithoutLocationDoesNotCreateMarker() {
+        compose.runOnIdle {
+            state.geoViewInteractionStatus = GeoViewInteractionStatus.DisplayImage
+            every { identified.geoElements } returns emptyList()
+            every { event.mapPoint } returns null
+            scope.launch { state.onSingleTapOnGeoView(event).getOrThrow() }
+            assertTrue(overlay.graphics.isEmpty())
+            assertEquals(R.string.no_images_found_for_tapped_location, state.uiState.messageResourceId)
+        }
+    }
+
+    @Test
+    fun progressRemainsVisibleThroughIdentifyFetchAndImageLoad() {
+        val identifying = CompletableDeferred<Result<IdentifyLayerResult>>()
+        val fetching = CompletableDeferred<Result<OrientedImage>>()
+        val loading = CompletableDeferred<Result<Unit>>()
+        lateinit var image: OrientedImage
+        compose.runOnIdle {
+            state.showMessage("Previous failure")
+            state.geoViewInteractionStatus = GeoViewInteractionStatus.DisplayImage
+            image = mockk()
+            every { image.dataUri } returns null
+            every { image.type } returns OrientedImageType.Horizontal
+            every { image.geometry } returns location
+            coEvery { image.load() } coAnswers { loading.await() }
+            coEvery { proxy.identify(layer, any(), any(), any(), any()) } coAnswers { identifying.await() }
+            coEvery { layer.fetchImageForFeature(feature) } coAnswers { fetching.await() }
+            scope.launch { state.onSingleTapOnGeoView(event).getOrThrow() }
+            showViewer = true
+        }
+        assertRequestProgress()
+        compose.runOnIdle { identifying.complete(Result.success(identified)) }
+        assertRequestProgress()
+        compose.runOnIdle { fetching.complete(Result.success(image)) }
+        assertRequestProgress()
+        compose.runOnIdle {
+            loading.complete(Result.success(Unit))
+            assertFalse(state.uiState.isLoading)
+            assertTrue(state.hasActiveImage)
+            assertNull(state.uiState.messageResourceId)
+            assertEquals(GeoViewInteractionStatus.DisplayImage, state.geoViewInteractionStatus)
+        }
+        compose.onNodeWithTag("OrientedImageryProgressIndicator").assertDoesNotExist()
+        compose.onNodeWithText("No Image to display").assertDoesNotExist()
+    }
+
+    @Test
+    fun pendingIdentifyShowsOnlyProgressUntilNoImagesMessage() {
+        val pending = CompletableDeferred<Result<IdentifyLayerResult>>()
+        compose.runOnIdle {
+            state.geoViewInteractionStatus = GeoViewInteractionStatus.DisplayImage
+            every { identified.geoElements } returns emptyList()
+            coEvery { proxy.identify(layer, any(), any(), any(), any()) } coAnswers { pending.await() }
+            scope.launch { state.onSingleTapOnGeoView(event).getOrThrow() }
+            showViewer = true
+        }
+        assertRequestProgress()
+        compose.runOnIdle {
+            pending.complete(Result.success(identified))
+            assertFalse(state.uiState.isLoading)
+        }
+        compose.onNodeWithTag("OrientedImageryProgressIndicator").assertDoesNotExist()
+        compose.onNodeWithText("No images found for the tapped location").assertIsDisplayed()
+    }
+
+    private fun assertRequestProgress() {
+        compose.onNodeWithTag("OrientedImageryProgressIndicator").assertIsDisplayed()
+        compose.onNodeWithTag("MessageScreen").assertDoesNotExist()
+        compose.onNodeWithTag("OrientedImagePager").assertDoesNotExist()
+        compose.runOnIdle { assertTrue(state.uiState.isLoading) }
+    }
+
+    @Test
+    fun identifyMissClearsActiveImage() {
+        compose.runOnIdle {
+            scope.launch { state.fetchImage(feature).getOrThrow() }
+            val revision = state.uiState.activeImageRevision
+            state.geoViewInteractionStatus = GeoViewInteractionStatus.DisplayImage
+            every { identified.geoElements } returns emptyList()
+            scope.launch { state.onSingleTapOnGeoView(event).getOrThrow() }
+            assertTrue(state.uiState.activeImageRevision > revision)
+            assertFalse(state.hasActiveImage)
+            assertTrue(state.searchResultImages.isEmpty())
+            assertEquals(R.string.no_images_found_for_tapped_location, state.uiState.messageResourceId)
+            coVerify(exactly = 1) { layer.fetchImageForFeature(feature) }
+        }
+    }
+
+    @Test
+    fun identifyMissShowsPersistentMessageScreen() {
+        compose.runOnIdle {
+            state.geoViewInteractionStatus = GeoViewInteractionStatus.DisplayImage
+            every { identified.geoElements } returns emptyList()
+            scope.launch { state.onSingleTapOnGeoView(event).getOrThrow() }
+            showViewer = true
+        }
+        compose.onNodeWithTag("MessageScreen").assertIsDisplayed()
+        compose.onNodeWithText("No images found for the tapped location").assertIsDisplayed()
+        compose.runOnIdle {
+            assertEquals(R.string.no_images_found_for_tapped_location, state.uiState.messageResourceId)
+        }
+    }
+
+    @Test
+    fun identifyFailureIsReturned() {
+        val pending = CompletableDeferred<Result<IdentifyLayerResult>>()
+        val error = IllegalStateException("Identify failed")
+        compose.runOnIdle {
+            state.geoViewInteractionStatus = GeoViewInteractionStatus.DisplayImage
+            coEvery { proxy.identify(layer, any(), any(), any(), any()) } coAnswers { pending.await() }
+            scope.launch { assertSame(error, state.onSingleTapOnGeoView(event).exceptionOrNull()) }
+            showViewer = true
+        }
+        assertRequestProgress()
+        compose.runOnIdle {
+            pending.complete(Result.failure(error))
+            assertFalse(state.uiState.isLoading)
+            assertEquals(R.string.image_fetch_failed, state.uiState.messageResourceId)
+            assertEquals("Identify failed", state.uiState.message)
+            coVerify(exactly = 0) { layer.fetchImageForFeature(any()) }
+        }
+        compose.onNodeWithTag("OrientedImageryProgressIndicator").assertDoesNotExist()
+        compose.onNodeWithTag("MessageScreen").assertIsDisplayed()
+    }
+
+    @Test
+    fun embeddedIdentifyErrorNotifiesWithoutFetching() {
+        compose.runOnIdle {
+            state.geoViewInteractionStatus = GeoViewInteractionStatus.DisplayImage
+            val error = IllegalStateException("Layer identify failed")
+            every { identified.error } returns error
+            scope.launch { assertSame(error, state.onSingleTapOnGeoView(event).exceptionOrNull()) }
+            assertEquals(R.string.image_fetch_failed, state.uiState.messageResourceId)
+            assertEquals("Layer identify failed", state.uiState.message)
+            coVerify(exactly = 0) { layer.fetchImageForFeature(any()) }
+        }
+    }
+
+    @Test
+    fun nonFeatureFirstResultNotifiesWithoutFetchingLaterFeature() {
+        compose.runOnIdle {
+            state.geoViewInteractionStatus = GeoViewInteractionStatus.DisplayImage
+            every { identified.geoElements } returns listOf(Graphic(), feature)
+            scope.launch { state.onSingleTapOnGeoView(event).getOrThrow() }
+            assertEquals(R.string.no_images_found_for_tapped_location, state.uiState.messageResourceId)
+            coVerify(exactly = 0) { layer.fetchImageForFeature(any()) }
+        }
+    }
+
+    @Test
+    fun repeatedMissesRemainVisibleUntilReset() {
+        compose.runOnIdle {
+            state.geoViewInteractionStatus = GeoViewInteractionStatus.DisplayImage
+            every { identified.geoElements } returns emptyList()
+            scope.launch { state.onSingleTapOnGeoView(event).getOrThrow() }
+            scope.launch { state.onSingleTapOnGeoView(event).getOrThrow() }
+            assertEquals(R.string.no_images_found_for_tapped_location, state.uiState.messageResourceId)
+            state.resetAll()
+            assertNull(state.uiState.messageResourceId)
+            assertNull(state.uiState.message)
+        }
+    }
+
+    @Test
+    fun cancelledIdentifyDoesNotNotify() {
+        compose.runOnIdle {
+            state.geoViewInteractionStatus = GeoViewInteractionStatus.DisplayImage
+            coEvery { proxy.identify(layer, any(), any(), any(), any()) } returns
+                Result.failure(CancellationException("Cancelled"))
+            val job = scope.launch { state.onSingleTapOnGeoView(event) }
+            assertTrue(job.isCancelled)
+            assertFalse(state.uiState.isLoading)
+            assertNull(state.uiState.messageResourceId)
+        }
+    }
+
+    @Test
+    fun addMarkersAddsMapMarkerWithoutIdentifyingOrSearching() {
+        compose.runOnIdle {
+            state.geoViewInteractionStatus = GeoViewInteractionStatus.AddMarkers
+            scope.launch { state.onSingleTapOnGeoView(event).getOrThrow() }
+            assertTrue(state.isMarkingLocation)
+            assertFalse(state.uiState.isFindImagesSelected)
+            assertFalse(state.uiState.isDisplayImageSelected)
+            assertEquals(location, overlay.graphics.single().geometry)
+            coVerify(exactly = 0) { layer.searchImages(any(), any()) }
+            coVerify(exactly = 0) { proxy.identify(layer, any(), any(), any(), any()) }
+        }
+    }
+
+    @Test
+    fun markerToggleClearsImageModesAndReturnsToNone() {
+        compose.runOnIdle {
+            for (mode in listOf(GeoViewInteractionStatus.FindImages, GeoViewInteractionStatus.DisplayImage)) {
+                state.geoViewInteractionStatus = mode
+                state.addMarker()
+                assertTrue(state.isMarkingLocation)
+                assertEquals(GeoViewInteractionStatus.AddMarkers, state.geoViewInteractionStatus)
+                assertFalse(state.uiState.isFindImagesSelected)
+                assertFalse(state.uiState.isDisplayImageSelected)
+                state.addMarker()
+                assertFalse(state.isMarkingLocation)
+                assertEquals(GeoViewInteractionStatus.None, state.geoViewInteractionStatus)
+                assertFalse(state.uiState.isFindImagesSelected)
+                assertFalse(state.uiState.isDisplayImageSelected)
+                scope.launch { state.onSingleTapOnGeoView(event).getOrThrow() }
+            }
+            coVerify(exactly = 0) { layer.searchImages(any(), any()) }
+            coVerify(exactly = 0) { proxy.identify(layer, any(), any(), any(), any()) }
+        }
+    }
+
+    @Test
+    fun nullMapLocationReturnsFailureForFindImages() {
+        compose.runOnIdle {
+            every { event.mapPoint } returns null
+            scope.launch { assertTrue(state.onSingleTapOnGeoView(event).isFailure) }
+            coVerify(exactly = 0) { layer.searchImages(any(), any()) }
+        }
+    }
+
+    @Test
+    fun sceneTapResolvesLocationThroughProxy() {
+        compose.runOnIdle {
+            val sceneProxy = mockk<SceneViewProxy>()
+            val sceneLocation = Point(3.0, 4.0, 5.0)
+            coEvery { sceneProxy.screenToLocation(event.screenCoordinate) } returns Result.success(sceneLocation)
+            state = OrientedImageryViewerState(sceneProxy, layer, overlay, scope)
+            state.toggleActiveFootprint()
+            state.toggleAdditionalCameraLocations()
+            scope.launch { state.onSingleTapOnGeoView(event).getOrThrow() }
+            coVerify(exactly = 1) { layer.searchImages(sceneLocation, any()) }
+        }
+    }
+
+    @Test
+    fun progressCoversSceneLocationResolutionAndSearch() {
+        val resolving = CompletableDeferred<Result<Point>>()
+        val searching = CompletableDeferred<Result<List<OrientedImage>>>()
+        compose.runOnIdle {
+            val sceneProxy = mockk<SceneViewProxy>()
+            coEvery { sceneProxy.screenToLocation(event.screenCoordinate) } coAnswers { resolving.await() }
+            coEvery { layer.searchImages(any(), any()) } coAnswers { searching.await() }
+            state = OrientedImageryViewerState(sceneProxy, layer, overlay, scope)
+            scope.launch { state.onSingleTapOnGeoView(event).getOrThrow() }
+            showViewer = true
+        }
+        assertRequestProgress()
+        compose.runOnIdle { resolving.complete(Result.success(location)) }
+        assertRequestProgress()
+        compose.runOnIdle {
+            searching.complete(Result.success(emptyList()))
+            assertFalse(state.uiState.isLoading)
+        }
+        compose.onNodeWithTag("OrientedImageryProgressIndicator").assertDoesNotExist()
+        compose.onNodeWithText("No images found for the tapped location").assertIsDisplayed()
+    }
+
+    @Test
+    fun staleSearchCannotHideNewerIdentifyProgress() {
+        compose.runOnIdle {
+            for (fail in listOf(false, true)) {
+                val searching = CompletableDeferred<Result<List<OrientedImage>>>()
+                val identifying = CompletableDeferred<Result<IdentifyLayerResult>>()
+                coEvery { layer.searchImages(any(), any()) } coAnswers { searching.await() }
+                coEvery { proxy.identify(layer, any(), any(), any(), any()) } coAnswers { identifying.await() }
+                val oldJob = scope.launch { state.searchImages(location) }
+                state.geoViewInteractionStatus = GeoViewInteractionStatus.DisplayImage
+                every { identified.geoElements } returns emptyList()
+                scope.launch { state.onSingleTapOnGeoView(event).getOrThrow() }
+                searching.complete(if (fail) Result.failure(IllegalStateException("Stale search"))
+                    else Result.success(emptyList()))
+                assertTrue(oldJob.isCancelled)
+                assertTrue(state.uiState.isLoading)
+                assertNull(state.uiState.messageResourceId)
+                identifying.complete(Result.success(identified))
+                assertFalse(state.uiState.isLoading)
+                assertEquals(R.string.no_images_found_for_tapped_location, state.uiState.messageResourceId)
+            }
+        }
+    }
+
+    @Test
+    fun staleIdentifyCannotHideNewerSearchProgress() {
+        compose.runOnIdle {
+            val identifying = CompletableDeferred<Result<IdentifyLayerResult>>()
+            val searching = CompletableDeferred<Result<List<OrientedImage>>>()
+            state.geoViewInteractionStatus = GeoViewInteractionStatus.DisplayImage
+            coEvery { proxy.identify(layer, any(), any(), any(), any()) } coAnswers { identifying.await() }
+            coEvery { layer.searchImages(any(), any()) } coAnswers { searching.await() }
+            val oldJob = scope.launch { state.onSingleTapOnGeoView(event) }
+            scope.launch { state.searchImages(location).getOrThrow() }
+            identifying.complete(Result.failure(IllegalStateException("Stale identify")))
+            assertTrue(oldJob.isCancelled)
+            assertTrue(state.uiState.isLoading)
+            assertNull(state.uiState.messageResourceId)
+            searching.complete(Result.success(emptyList()))
+            assertFalse(state.uiState.isLoading)
+        }
+    }
+
+    @Test
+    fun cancellingPendingIdentifyEndsProgressWithoutMessage() {
+        compose.runOnIdle {
+            val pending = CompletableDeferred<Result<IdentifyLayerResult>>()
+            state.geoViewInteractionStatus = GeoViewInteractionStatus.DisplayImage
+            coEvery { proxy.identify(layer, any(), any(), any(), any()) } coAnswers { pending.await() }
+            val job = scope.launch { state.onSingleTapOnGeoView(event) }
+            assertTrue(state.uiState.isLoading)
+            job.cancel()
+            assertFalse(state.uiState.isLoading)
+            assertNull(state.uiState.messageResourceId)
+        }
+    }
+
+    @Test
+    fun resetInvalidatesPendingIdentify() {
+        compose.runOnIdle {
+            state.geoViewInteractionStatus = GeoViewInteractionStatus.DisplayImage
+            val pending = CompletableDeferred<Result<IdentifyLayerResult>>()
+            coEvery { proxy.identify(layer, any(), any(), any(), any()) } coAnswers { pending.await() }
+            val job = scope.launch { state.onSingleTapOnGeoView(event) }
+            assertTrue(state.uiState.isLoading)
+            state.resetAll()
+            assertFalse(state.uiState.isLoading)
+            pending.complete(Result.success(identified))
+            assertTrue(job.isCancelled)
+            assertFalse(state.hasActiveImage)
+            assertNull(state.uiState.messageResourceId)
+            assertEquals(GeoViewInteractionStatus.FindImages, state.geoViewInteractionStatus)
+            coVerify(exactly = 0) { layer.fetchImageForFeature(any()) }
+        }
+    }
+
+    @Test
+    fun changingModeInvalidatesPendingIdentify() {
+        compose.runOnIdle {
+            state.geoViewInteractionStatus = GeoViewInteractionStatus.DisplayImage
+            val pending = CompletableDeferred<Result<IdentifyLayerResult>>()
+            coEvery { proxy.identify(layer, any(), any(), any(), any()) } coAnswers { pending.await() }
+            val job = scope.launch { state.onSingleTapOnGeoView(event) }
+            state.geoViewInteractionStatus = GeoViewInteractionStatus.None
+            pending.complete(Result.success(identified))
+            assertTrue(job.isCancelled)
+            assertNull(state.uiState.messageResourceId)
+            coVerify(exactly = 0) { layer.fetchImageForFeature(any()) }
+        }
+    }
+
+    @Test
+    fun constructedStateDisplaysInitialGuidanceAndToolbar() {
+        compose.runOnIdle { showViewer = true }
+        compose.onNodeWithTag("MessageScreen").assertIsDisplayed()
+        compose.onNodeWithText("No Image to display").assertIsDisplayed()
+        compose.onNodeWithText("Tap on the map to search", substring = true).assertIsDisplayed()
+        compose.onNodeWithText("Mode").assertIsDisplayed()
+        compose.onNodeWithTag("OrientedImagePager").assertDoesNotExist()
+    }
+
+    @Test
+    fun customMessageClearsImageAndOwnedGraphicsAndResetRestoresGuidance() {
+        compose.runOnIdle {
+            scope.launch { state.fetchImage(feature).getOrThrow() }
+            val foreignGraphic = Graphic(location)
+            overlay.graphics.add(foreignGraphic)
+            state.addImageLocationMarker(location)
+            state.showMessage("Unable to display this image.")
+            assertFalse(state.hasActiveImage)
+            assertTrue(state.searchResultImages.isEmpty())
+            assertEquals(listOf(foreignGraphic), overlay.graphics.toList())
+            assertEquals("Unable to display this image.", state.uiState.message)
+            showViewer = true
+        }
+        compose.onNodeWithText("Unable to display this image.").assertIsDisplayed()
+        compose.runOnIdle { state.resetAll() }
+        compose.onNodeWithText("No Image to display").assertIsDisplayed()
+    }
+
+    @Test
+    fun searchAndFetchFailuresDisplayMessagesAndSuccessClearsThem() {
+        compose.runOnIdle {
+            coEvery { layer.searchImages(any(), any()) } returns Result.failure(IllegalStateException("Search failed"))
+            scope.launch { assertTrue(state.searchImages(location).isFailure) }
+            assertEquals(R.string.image_search_failed, state.uiState.messageResourceId)
+            assertEquals("Search failed", state.uiState.message)
+            coEvery { layer.fetchImageForFeature(feature) } returns Result.failure(IllegalStateException("Fetch failed"))
+            scope.launch { assertTrue(state.fetchImage(feature).isFailure) }
+            assertEquals(R.string.image_fetch_failed, state.uiState.messageResourceId)
+            assertEquals("Fetch failed", state.uiState.message)
+            val image = mockk<OrientedImage>()
+            every { image.dataUri } returns null
+            every { image.type } returns OrientedImageType.Horizontal
+            every { image.geometry } returns location
+            coEvery { image.load() } returns Result.success(Unit)
+            coEvery { layer.fetchImageForFeature(feature) } returns Result.success(image)
+            scope.launch { state.fetchImage(feature).getOrThrow() }
+            assertTrue(state.hasActiveImage)
+            assertNull(state.uiState.message)
+            assertNull(state.uiState.messageResourceId)
+        }
+    }
+
+    @Test
+    fun showingMessageInvalidatesPendingImageRequest() {
+        compose.runOnIdle {
+            val pending = CompletableDeferred<Result<List<OrientedImage>>>()
+            coEvery { layer.searchImages(any(), any()) } coAnswers { pending.await() }
+            val job = scope.launch { state.searchImages(location) }
+            state.showMessage("Request replaced")
+            assertFalse(state.uiState.isLoading)
+            pending.complete(Result.success(emptyList()))
+            assertTrue(job.isCancelled)
+            assertEquals("Request replaced", state.uiState.message)
+            assertNull(state.uiState.messageResourceId)
+        }
+    }
+
+    @Test
+    fun markerLocationFailureRetainsActiveImageAndDoesNotPublishMessage() {
+        compose.runOnIdle {
+            scope.launch { state.fetchImage(feature).getOrThrow() }
+            val revision = state.uiState.activeImageRevision
+            state.geoViewInteractionStatus = GeoViewInteractionStatus.AddMarkers
+            every { event.mapPoint } returns null
+            scope.launch { assertTrue(state.onSingleTapOnGeoView(event).isFailure) }
+            assertTrue(state.hasActiveImage)
+            assertEquals(revision, state.uiState.activeImageRevision)
+            assertNull(state.uiState.message)
+            assertNull(state.uiState.messageResourceId)
+            assertTrue(state.isViewerVisible)
+            every { event.mapPoint } returns location
+            scope.launch { state.onSingleTapOnGeoView(event).getOrThrow() }
+            assertTrue(state.hasActiveImage)
+            assertNull(state.uiState.message)
+            assertNull(state.uiState.messageResourceId)
+        }
+    }
+
+    @Test
+    fun dismissalResetsStateAndImageModesReopenViewer() {
+        compose.runOnIdle {
+            assertTrue(state.isViewerVisible)
+            for (mode in listOf(GeoViewInteractionStatus.FindImages, GeoViewInteractionStatus.DisplayImage)) {
+                scope.launch { state.fetchImage(feature).getOrThrow() }
+                state.dismissViewer()
+                assertFalse(state.isViewerVisible)
+                assertFalse(state.hasActiveImage)
+                assertEquals(GeoViewInteractionStatus.FindImages, state.geoViewInteractionStatus)
+                // Dismissal restores overlay defaults; mocked images cannot create SDK footprints.
+                state.toggleActiveFootprint()
+                state.toggleAdditionalCameraLocations()
+                state.geoViewInteractionStatus = mode
+                scope.launch { state.onSingleTapOnGeoView(event).getOrThrow() }
+                assertTrue(state.isViewerVisible)
+            }
+        }
+    }
+
+    @Test
+    fun ignoredAndMarkerTapsDoNotReopenDismissedViewer() {
+        compose.runOnIdle {
+            state.dismissViewer()
+            state.geoViewInteractionStatus = GeoViewInteractionStatus.None
+            scope.launch { state.onSingleTapOnGeoView(mockk()).getOrThrow() }
+            assertFalse(state.isViewerVisible)
+            state.geoViewInteractionStatus = GeoViewInteractionStatus.AddMarkers
+            every { event.mapPoint } returns null
+            scope.launch { assertTrue(state.onSingleTapOnGeoView(event).isFailure) }
+            assertFalse(state.isViewerVisible)
+            assertNull(state.uiState.message)
+            assertNull(state.uiState.messageResourceId)
+            state.geoViewInteractionStatus = GeoViewInteractionStatus.None
+            scope.launch { state.onSingleTapOnGeoView(mockk()).getOrThrow() }
+            assertFalse(state.isViewerVisible)
+            state.dismissViewer()
+            assertFalse(state.isViewerVisible)
+        }
+    }
+}

@@ -1,28 +1,27 @@
 /*
+ * Copyright 2026 Esri
  *
- *  Copyright 2026 Esri
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
- *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package com.arcgismaps.toolkit.orientedimageryviewer
 
-
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.horizontalScroll
@@ -31,34 +30,91 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.arcgismaps.Color
 import com.arcgismaps.mapping.layers.OrientedImageryLayer
+import com.arcgismaps.mapping.symbology.Symbol
 import com.arcgismaps.mapping.view.GraphicsOverlay
-import com.arcgismaps.toolkit.orientedimageryviewer.internal.OrientedImagery
+import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
+import com.arcgismaps.toolkit.orientedimageryviewer.internal.ImageDefaults
+import com.arcgismaps.toolkit.orientedimageryviewer.internal.ViewerAppearance
+import com.arcgismaps.toolkit.orientedimageryviewer.internal.ui.ErrorSnackbarContainer
+import com.arcgismaps.toolkit.orientedimageryviewer.internal.ui.ExploreButton
+import com.arcgismaps.toolkit.orientedimageryviewer.internal.ui.MarkerToolsButton
+import com.arcgismaps.toolkit.orientedimageryviewer.internal.ui.MarkerOptionId
+import com.arcgismaps.toolkit.orientedimageryviewer.internal.ui.ModeSelectionButton
+import com.arcgismaps.toolkit.orientedimageryviewer.internal.ui.OrientedImagery
+import com.arcgismaps.toolkit.orientedimageryviewer.internal.ui.OverlaySelectionButton
+import com.arcgismaps.toolkit.popup.Popup
+import com.arcgismaps.toolkit.popup.PopupState
 import kotlinx.coroutines.launch
+import com.arcgismaps.mapping.popup.Popup as ImagePopup
 
+/**
+ * A composable that displays an oriented imagery viewer with a toolbar and content area.
+ *
+ * When supplying custom marker symbols, remember each symbol instance to avoid recreating it during
+ * recomposition. If its styling depends on changing values, use those values as [remember] keys so a
+ * new symbol is created when they change.
+ *
+ * To update a marker's appearance, pass a replacement symbol instance. Mutating an existing symbol
+ * does not reliably trigger recomposition or refresh symbol-derived imagery.
+ *
+ * @param orientedImageryViewerState The state of the oriented imagery viewer.
+ * @param modifier The modifier to be applied to the viewer layout.
+ * @param onDismiss A callback that is invoked when the viewer is dismissed.
+ * @param showCloseIcon Whether to show the close icon in the toolbar.
+ * @param selectedFootprintFillColor The selected image footprint fill color. Defaults to red with alpha 128.
+ * @param selectedFootprintOutlineColor The selected image footprint outline color. Defaults to red.
+ * @param unselectedFootprintFillColor The unselected image footprint fill color. Defaults to blue with alpha 64.
+ * @param unselectedFootprintOutlineColor The unselected image footprint outline color. Defaults to blue.
+ * @param searchPointMarkerSymbol The search point symbol. Defaults to a red X, size 15, with a white outline of width 1.
+ * @param noImageMarkerSymbol The symbol for a tapped location where no images were found, shown only in
+ * [GeoViewInteractionStatus.DisplayImage] mode. Defaults to a light-gray circle, size 12, with a black outline of width 1.
+ * @param selectedCameraMarkerSymbol The selected image camera location symbol. Defaults to a red circle,
+ * size 15, with a white outline of width 1.
+ * @param allCamerasMarkerSymbol The result image camera location symbol. Defaults to a blue circle with
+ * alpha 200, size 15, and a white outline of width 1.
+ */
 @Composable
 public fun OrientedImageryViewer(
     orientedImageryViewerState: OrientedImageryViewerState,
     modifier: Modifier = Modifier,
     onDismiss: () -> Unit = {},
     showCloseIcon: Boolean = true,
+    selectedFootprintFillColor: Color = ImageDefaults.selectedFootprintFillColor,
+    selectedFootprintOutlineColor: Color = ImageDefaults.selectedFootprintOutlineColor,
+    unselectedFootprintFillColor: Color = ImageDefaults.additionalFootprintColor,
+    unselectedFootprintOutlineColor: Color = ImageDefaults.unselectedFootprintOutlineColor,
+    searchPointMarkerSymbol: Symbol = remember { ImageDefaults.inputLocationSymbol() },
+    noImageMarkerSymbol: Symbol = remember { ImageDefaults.noImageMarkerSymbol() },
+    selectedCameraMarkerSymbol: Symbol = remember { ImageDefaults.activeCameraLocationSymbol() },
+    allCamerasMarkerSymbol: Symbol = remember { ImageDefaults.additionalCameraLocationSymbol() },
 ) {
     val coroutineScope = rememberCoroutineScope()
     val viewerUiState = orientedImageryViewerState.uiState
+    val appearance = ViewerAppearance(
+        selectedFootprintFillColor, selectedFootprintOutlineColor,
+        unselectedFootprintFillColor, unselectedFootprintOutlineColor,
+        searchPointMarkerSymbol, noImageMarkerSymbol, selectedCameraMarkerSymbol, allCamerasMarkerSymbol
+    )
+    SideEffect { orientedImageryViewerState.updateAppearance(appearance) }
 
     ViewerLayout(
         viewerState = orientedImageryViewerState,
@@ -77,6 +133,9 @@ public fun OrientedImageryViewer(
         onCurrentFootprint = { orientedImageryViewerState.toggleActiveFootprint() },
         onAdditionalFootprints = { orientedImageryViewerState.toggleAdditionalFootprints() },
         onAdditionalCameraLocations = { orientedImageryViewerState.toggleAdditionalCameraLocations() },
+        onAddMarker = { orientedImageryViewerState.addMarker() },
+        onSelectMarker = { orientedImageryViewerState.selectMarker() },
+        onClearAllMarkers = { orientedImageryViewerState.clearAllMarkers() },
         onSequentialNavigation = { orientedImageryViewerState.toggleSequentialNavigation() },
         onReset = { orientedImageryViewerState.resetAll()},
         onDismiss = onDismiss,
@@ -95,159 +154,262 @@ internal fun ViewerLayout(
     onCurrentFootprint: () -> Unit = {},
     onAdditionalFootprints: () -> Unit = {},
     onAdditionalCameraLocations: () -> Unit = {},
+    onAddMarker: () -> Unit = {},
+    onSelectMarker: () -> Unit = {},
+    onClearAllMarkers: () -> Unit = {},
     onSequentialNavigation: () -> Unit = {},
     onReset: () -> Unit = {},
     onDismiss: () -> Unit = {},
     showCloseIcon: Boolean = true,
     isSequentialNavigationEnabled: Boolean = false,
+    onCreateImagePopup: suspend () -> Result<ImagePopup> = { viewerState.createImagePopup() },
 ) {
-    ViewerLayout(
-        modifier = modifier,
-        topBar = {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.surface)
-                    .padding(horizontal = 8.dp, vertical = 8.dp)
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
+    val coroutineScope = rememberCoroutineScope()
+    val imageRevision = viewerState.uiState.activeImageRevision
+    var isCreatingPopup by remember(viewerState, imageRevision) { mutableStateOf(false) }
+    // Key on transitions, not image metadata: a new search may return the same image.
+    var imagePopup by remember(viewerState, viewerState.uiState.activeImageRevision) {
+        mutableStateOf<ImagePopup?>(null)
+    }
+    val noActiveImageMessage = stringResource(R.string.popup_no_active_image)
+    val creationFailedMessage = stringResource(R.string.popup_creation_failed)
+
+    ErrorSnackbarContainer(modifier = modifier) { errors ->
+        val onPopup: () -> Unit = {
+            if (!isCreatingPopup) {
+                isCreatingPopup = true
+                coroutineScope.launch {
+                    try {
+                        val result = onCreateImagePopup()
+                        if (viewerState.uiState.activeImageRevision == imageRevision) {
+                            result.onSuccess { popup ->
+                                viewerState.dismissMarkerSelection()
+                                imagePopup = popup
+                            }.onFailure {
+                                errors.showError(
+                                    if (viewerState.hasActiveImage) creationFailedMessage
+                                    else noActiveImageMessage
+                                )
+                            }
+                        }
+                    } finally {
+                        isCreatingPopup = false
+                    }
+                }
+            }
+        }
+        ViewerLayout(
+            showTopBar = imagePopup == null,
+            topBar = {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(MaterialTheme.colorScheme.surface)
+                        .padding(horizontal = 8.dp, vertical = 8.dp)
                 ) {
-                    Text(
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(end = 8.dp),
+                            text = title,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            style = MaterialTheme.typography.titleLarge,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        if (showCloseIcon) {
+                            IconButton(onClick = onDismiss) {
+                                Icon(
+                                    imageVector = Icons.Default.Close,
+                                    contentDescription = stringResource(R.string.toolbar_close)
+                                )
+                            }
+                        }
+                    }
+                    Row(
                         modifier = Modifier
-                            .weight(1f)
-                            .padding(end = 8.dp),
-                        text = title,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        style = MaterialTheme.typography.titleLarge,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState()),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        OrientedImageryToolbar(
+                            interactionStatus = viewerState.geoViewInteractionStatus,
+                            isFindImagesSelected = viewerState.uiState.isFindImagesSelected,
+                            isDisplayImageSelected = viewerState.uiState.isDisplayImageSelected,
+                            onFindImagesSelectedChange = {
+                                viewerState.setImageModeSelected(GeoViewInteractionStatus.FindImages, it)
+                            },
+                            onDisplayImageSelectedChange = {
+                                viewerState.setImageModeSelected(GeoViewInteractionStatus.DisplayImage, it)
+                            },
+                            isMarkingLocation = viewerState.uiState.isMarkingLocation,
+                            isMarkerSelectionVisible = viewerState.isMarkerSelectionVisible,
+                            selectedMarkerOptionId = viewerState.selectedMarkerOptionId,
+                            onSelectMarkerOption = viewerState::selectMarkerOption,
+                            onDismissMarkerSelection = viewerState::dismissMarkerSelection,
+                            hasActiveImage = viewerState.hasActiveImage,
+                            hasAdditionalImages = viewerState.uiState.hasAdditionalImages,
+                            isActiveFootprintVisible = viewerState.uiState.isActiveFootprintVisible,
+                            isAdditionalFootprintsVisible = viewerState.uiState.isAdditionalFootprintsVisible,
+                            isAdditionalCameraLocationsVisible = viewerState.uiState.isAdditionalCameraLocationsVisible,
+                            onPreviousImage = onPreviousImage,
+                            onNextImage = onNextImage,
+                            onCurrentFootprint = onCurrentFootprint,
+                            onAdditionalFootprints = onAdditionalFootprints,
+                            onAdditionalCameraLocations = onAdditionalCameraLocations,
+                            onAddMarker = onAddMarker,
+                            onSelectMarker = onSelectMarker,
+                            onClearAllMarkers = onClearAllMarkers,
+                            supportsSequentialNavigation = viewerState.supportsSequentialNavigation,
+                            isSequentialNavigationEnabled = isSequentialNavigationEnabled,
+                            onSequentialNavigation = onSequentialNavigation,
+                            onReset = onReset
+                        )
+                    }
+                }
+            },
+            content = {
+                Box(modifier = Modifier.fillMaxSize()) {
+                    OrientedImagery(
+                        viewerState = viewerState,
+                        modifier = Modifier.fillMaxSize(),
+                        onPopup = onPopup.takeIf { imagePopup == null },
+                        onError = errors::showError
                     )
-                    if (showCloseIcon) {
-                        IconButton(onClick = onDismiss) {
-                            Icon(
-                                imageVector = Icons.Default.Close,
-                                contentDescription = stringResource(R.string.toolbar_close)
-                            )
+                    imagePopup?.let { popup ->
+                        // Scope evaluation to the popup's composition, including dismissal and image changes.
+                        val popupScope = rememberCoroutineScope()
+                        val popupState = remember(popup) { PopupState(popup, popupScope) }
+                        // Cover the renderer with an opaque surface, including the popup header.
+                        Surface(
+                            modifier = Modifier.fillMaxSize(),
+                            color = MaterialTheme.colorScheme.surface,
+                            contentColor = MaterialTheme.colorScheme.onSurface
+                        ) {
+                            Column(modifier = Modifier.fillMaxSize()) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth()
+                                        .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                                        .padding(start = 16.dp, end = 8.dp, top = 8.dp, bottom = 8.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        text = stringResource(R.string.image_details_title),
+                                        modifier = Modifier.weight(1f).padding(end = 8.dp),
+                                        style = MaterialTheme.typography.titleLarge,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                    IconButton(onClick = { imagePopup = null }) {
+                                        Icon(
+                                            imageVector = Icons.Default.Close,
+                                            contentDescription = stringResource(R.string.image_details_close),
+                                            tint = MaterialTheme.colorScheme.onSurface
+                                        )
+                                    }
+                                }
+                                HorizontalDivider()
+                                Popup(
+                                    popupState = popupState,
+                                    modifier = Modifier.weight(1f).fillMaxWidth(),
+                                    onDismiss = { imagePopup = null },
+                                    showCloseIcon = false
+                                )
+                            }
                         }
                     }
                 }
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .horizontalScroll(rememberScrollState()),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    OrientedImageryToolbar(
-                        onPreviousImage = onPreviousImage,
-                        onNextImage = onNextImage,
-                        onCurrentFootprint = onCurrentFootprint,
-                        onAdditionalFootprints = onAdditionalFootprints,
-                        onAdditionalCameraLocations = onAdditionalCameraLocations,
-                        supportsSequentialNavigation = viewerState.supportsSequentialNavigation,
-                        isSequentialNavigationEnabled = isSequentialNavigationEnabled,
-                        onSequentialNavigation = onSequentialNavigation,
-                        onReset = onReset
-                    )
-                }
             }
-        },
-        content = {
-            OrientedImagery(
-                viewerState = viewerState,
-            )
-        }
-    )
+        )
+    }
 }
 
 @Composable
 internal fun ViewerLayout(
     topBar: @Composable ColumnScope.() -> Unit,
     content: @Composable ColumnScope.() -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    showTopBar: Boolean = true
 ) {
     Column(modifier = modifier) {
-        topBar()
-        HorizontalDivider(modifier = Modifier.fillMaxWidth(), thickness = 2.dp)
+        if (showTopBar) {
+            topBar()
+            HorizontalDivider(modifier = Modifier.fillMaxWidth(), thickness = 2.dp)
+        }
         content()
     }
 }
 
 @Composable
-private fun OrientedImageryToolbar(
+internal fun OrientedImageryToolbar(
+    interactionStatus: GeoViewInteractionStatus,
+    isFindImagesSelected: Boolean,
+    isDisplayImageSelected: Boolean,
+    onFindImagesSelectedChange: (Boolean) -> Unit,
+    onDisplayImageSelectedChange: (Boolean) -> Unit,
+    isMarkingLocation: Boolean,
+    isMarkerSelectionVisible: Boolean,
+    selectedMarkerOptionId: MarkerOptionId?,
+    onSelectMarkerOption: (MarkerOptionId) -> Unit,
+    onDismissMarkerSelection: () -> Unit,
+    hasActiveImage: Boolean,
+    hasAdditionalImages: Boolean,
+    isActiveFootprintVisible: Boolean,
+    isAdditionalFootprintsVisible: Boolean,
+    isAdditionalCameraLocationsVisible: Boolean,
     onPreviousImage: (() -> Unit)?,
     onNextImage: (() -> Unit)?,
     onCurrentFootprint: () -> Unit,
     onAdditionalFootprints: () -> Unit,
     onAdditionalCameraLocations: () -> Unit,
+    onAddMarker: () -> Unit = {},
+    onSelectMarker: () -> Unit = {},
+    onClearAllMarkers: () -> Unit = {},
     supportsSequentialNavigation: Boolean,
     isSequentialNavigationEnabled: Boolean,
     onSequentialNavigation: () -> Unit,
     onReset: () -> Unit,
 ) {
     Row(verticalAlignment = Alignment.CenterVertically) {
-        IconButton(
-            enabled = onPreviousImage != null,
-            onClick = { onPreviousImage?.invoke() }
-        ) {
-            Icon(
-                painter = painterResource(R.drawable.arrow_bold_left_24),
-                contentDescription = stringResource(R.string.toolbar_previous_image),
-                tint = Color.Unspecified
-            )
-        }
-        IconButton(
-            enabled = onNextImage != null,
-            onClick = { onNextImage?.invoke() }
-        ) {
-            Icon(
-                painter = painterResource(R.drawable.arrow_bold_right_24),
-                contentDescription = stringResource(R.string.toolbar_next_image),
-                tint = Color.Unspecified
-            )
-        }
-        IconButton(onClick = onCurrentFootprint) {
-            Icon(
-                painter = painterResource(R.drawable.footprint_24),
-                contentDescription = stringResource(R.string.toolbar_current_footprint),
-                tint = Color.Red
-            )
-        }
-        IconButton(onClick = onAdditionalFootprints) {
-            Icon(
-                painter = painterResource(R.drawable.footprint_24),
-                contentDescription = stringResource(R.string.toolbar_additional_footprints),
-                tint = Color.Blue
-            )
-        }
-        IconButton(onClick = onAdditionalCameraLocations) {
-            Icon(
-                painter = painterResource(R.drawable.additional_cameras_24),
-                contentDescription = stringResource(R.string.toolbar_additional_camera_locations),
-                tint = Color.Unspecified
-            )
-        }
-        IconToggleButton(
-            checked = isSequentialNavigationEnabled,
-            enabled = supportsSequentialNavigation,
-            onCheckedChange = { onSequentialNavigation() }
-        ) {
-            Icon(
-                painter = painterResource(R.drawable.sequential_navigation_24),
-                contentDescription = stringResource(R.string.toolbar_sequential_navigation)
-            )
-        }
-        IconButton(onClick = onReset) {
-            Icon(
-                painter = painterResource(R.drawable.reset_24),
-                contentDescription = stringResource(R.string.toolbar_reset),
-                tint = Color.Unspecified
-            )
-        }
+        ModeSelectionButton(
+            interactionStatus = interactionStatus,
+            isFindImagesSelected = isFindImagesSelected,
+            isDisplayImageSelected = isDisplayImageSelected,
+            onFindImagesSelectedChange = onFindImagesSelectedChange,
+            onDisplayImageSelectedChange = onDisplayImageSelectedChange
+        )
+        OverlaySelectionButton(
+            hasActiveImage = hasActiveImage,
+            hasAdditionalImages = hasAdditionalImages,
+            isActiveFootprintVisible = isActiveFootprintVisible,
+            isAdditionalFootprintsVisible = isAdditionalFootprintsVisible,
+            isAdditionalCameraLocationsVisible = isAdditionalCameraLocationsVisible,
+            onCurrentFootprint = onCurrentFootprint,
+            onAdditionalFootprints = onAdditionalFootprints,
+            onAdditionalCameraLocations = onAdditionalCameraLocations
+        )
+        MarkerToolsButton(
+            isMarkingLocation = isMarkingLocation,
+            onAddMarker = onAddMarker,
+            onSelectMarker = onSelectMarker,
+            onClearAllMarkers = onClearAllMarkers,
+            isMarkerSelectionVisible = isMarkerSelectionVisible,
+            selectedOptionId = selectedMarkerOptionId,
+            onSelectOption = onSelectMarkerOption,
+            onDismissSelection = onDismissMarkerSelection
+        )
+        ExploreButton(
+            supportsSequentialNavigation = supportsSequentialNavigation,
+            hasActiveImage = hasActiveImage,
+            isSequentialNavigationEnabled = isSequentialNavigationEnabled,
+            onSequentialNavigation = onSequentialNavigation
+        )
     }
 }
-
 
 @Preview
 @Composable
@@ -256,6 +418,7 @@ internal fun ViewerLayoutPreview() {
 
     ViewerLayout(
         viewerState = OrientedImageryViewerState(
+            geoViewProxy = MapViewProxy(),
             orientedImageryLayer = OrientedImageryLayer("https://example.com/oriented-imagery-layer"),
             GraphicsOverlay(),
             coroutineScope = coroutineScope

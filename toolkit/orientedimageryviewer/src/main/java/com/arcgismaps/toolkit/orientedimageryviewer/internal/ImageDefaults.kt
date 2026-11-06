@@ -19,31 +19,53 @@
 package com.arcgismaps.toolkit.orientedimageryviewer.internal
 
 import com.arcgismaps.Color
+import com.arcgismaps.mapping.symbology.SimpleLineSymbol
+import com.arcgismaps.mapping.symbology.SimpleLineSymbolStyle
 import com.arcgismaps.mapping.symbology.SimpleMarkerSymbol
 import com.arcgismaps.mapping.symbology.SimpleMarkerSymbolStyle
+import com.arcgismaps.mapping.symbology.Symbol
 
 internal object ImageDefaults {
     private const val CAMERA_LOCATION_SYMBOL_SIZE = 15.0f
-    private val activeCameraSymbolColor = Color.fromRgba(255, 102, 102, 100)
-    private val additionalCameraSymbolColor = Color.fromRgba(0, 128, 192, 100)
+    val selectedFootprintFillColor = Color.fromRgba(255, 0, 0, 128)
+    val selectedFootprintOutlineColor = Color.red
+    val additionalFootprintColor = Color.fromRgba(0, 0, 255, 64)
+    val unselectedFootprintOutlineColor = Color.blue
 
-    val additionalFootprintColor = Color.fromRgba(0, 128, 192, 60)
+    private fun symbolOutline() = SimpleLineSymbol(SimpleLineSymbolStyle.Solid, Color.white, 1f)
 
     fun activeCameraLocationSymbol(): SimpleMarkerSymbol = SimpleMarkerSymbol(
         SimpleMarkerSymbolStyle.Circle,
-        activeCameraSymbolColor,
+        Color.red,
         CAMERA_LOCATION_SYMBOL_SIZE
-    )
+    ).apply { outline = symbolOutline() }
 
     fun additionalCameraLocationSymbol(): SimpleMarkerSymbol = SimpleMarkerSymbol(
         SimpleMarkerSymbolStyle.Circle,
-        additionalCameraSymbolColor,
+        Color.fromRgba(0, 0, 255, 200),
         CAMERA_LOCATION_SYMBOL_SIZE
-    )
+    ).apply { outline = symbolOutline() }
 
     fun inputLocationSymbol(): SimpleMarkerSymbol = SimpleMarkerSymbol(
         SimpleMarkerSymbolStyle.X,
         Color.red,
         CAMERA_LOCATION_SYMBOL_SIZE
-    )
+    ).apply { outline = symbolOutline() }
+
+    fun noImageMarkerSymbol(): SimpleMarkerSymbol = SimpleMarkerSymbol(
+        SimpleMarkerSymbolStyle.Circle,
+        Color.fromRgba(211, 211, 211, 255),
+        12f
+    ).apply { outline = SimpleLineSymbol(SimpleLineSymbolStyle.Solid, Color.black, 1f) }
 }
+
+internal data class ViewerAppearance(
+    val selectedFootprintFillColor: Color = ImageDefaults.selectedFootprintFillColor,
+    val selectedFootprintOutlineColor: Color = ImageDefaults.selectedFootprintOutlineColor,
+    val unselectedFootprintFillColor: Color = ImageDefaults.additionalFootprintColor,
+    val unselectedFootprintOutlineColor: Color = ImageDefaults.unselectedFootprintOutlineColor,
+    val searchPointMarkerSymbol: Symbol = ImageDefaults.inputLocationSymbol(),
+    val noImageMarkerSymbol: Symbol = ImageDefaults.noImageMarkerSymbol(),
+    val selectedCameraMarkerSymbol: Symbol = ImageDefaults.activeCameraLocationSymbol(),
+    val allCamerasMarkerSymbol: Symbol = ImageDefaults.additionalCameraLocationSymbol()
+)
