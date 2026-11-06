@@ -168,7 +168,8 @@ apiValidation {
         "com.arcgismaps.toolkit.featureforms.internal.screens.ComposableSingletons\$FeaturesFilterScreenKt",
         "com.arcgismaps.toolkit.featureforms.internal.utils.ComposableSingletons\$SearchBarKt",
         "com.arcgismaps.toolkit.featureforms.internal.utils.ComposableSingletons\$DialogKt",
-        "com.arcgismaps.toolkit.featureforms.internal.components.attachment.ComposableSingletons\$AddAttachmentKt"
+        "com.arcgismaps.toolkit.featureforms.internal.components.attachment.ComposableSingletons\$AddAttachmentKt",
+        "com.arcgismaps.toolkit.featureforms.internal.components.attachment.ComposableSingletons\$AudioRecorderKt"
     )
     ignoredClasses.addAll(composableSingletons)
 }

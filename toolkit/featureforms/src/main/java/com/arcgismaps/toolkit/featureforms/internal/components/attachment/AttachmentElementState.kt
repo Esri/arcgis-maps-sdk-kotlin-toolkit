@@ -16,7 +16,6 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.components.attachment
 
-import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
@@ -249,7 +248,7 @@ internal class AttachmentElementState(
     /**
      * Adds an attachment with the given [name], [contentType], and [filePath]. If the [source] is
      * [AttachmentSource.FileSystem], the attachment will be added with the given [name]. If the
-     * [source] is [AttachmentSource.Camera], the attachment is added with the API generated name.
+     * [source] is [AttachmentSource.Capture], the attachment is added with the API generated name.
      *
      * @param name The name of the attachment.
      * @param contentType The content type of the attachment.
@@ -264,7 +263,7 @@ internal class AttachmentElementState(
     ): Result<Unit> {
         return when (source) {
             // If the attachment is from the camera, use the API generated name.
-            AttachmentSource.Camera -> formElement.addAttachment(
+            AttachmentSource.Capture -> formElement.addAttachment(
                 contentType = contentType,
                 filePath = filePath
             )
@@ -336,11 +335,11 @@ internal class AttachmentElementState(
     }
 
     /**
-     * Checks if the camera permissions are granted.
+     * Checks if the provided permission is granted.
      */
-    fun hasCameraPermissions(context: Context): Boolean = ContextCompat.checkSelfPermission(
+    fun hasPermission(context: Context, permission: String): Boolean = ContextCompat.checkSelfPermission(
         context,
-        Manifest.permission.CAMERA
+        permission
     ) == PackageManager.PERMISSION_GRANTED
 }
 
@@ -745,6 +744,6 @@ internal class EmptyAttachmentException : Exception("Attachment size is 0")
  * Enum representing the source of an attachment.
  */
 internal enum class AttachmentSource {
-    Camera,
+    Capture,
     FileSystem
 }

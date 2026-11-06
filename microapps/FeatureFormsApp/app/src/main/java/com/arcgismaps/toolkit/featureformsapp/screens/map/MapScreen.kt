@@ -434,7 +434,7 @@ fun FeatureFormSheet(
         WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND
     ).not()
     val bottomSheetState = rememberStandardBottomSheetState(
-        initialValue = SheetValue.PartiallyExpanded,
+        initialValue = if (isCompact) SheetValue.PartiallyExpanded else SheetValue.Expanded,
         confirmValueChange = { it != SheetValue.Hidden },
         skipHiddenState = false
     )
