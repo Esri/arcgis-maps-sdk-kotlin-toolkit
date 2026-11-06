@@ -23,7 +23,10 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.State
+import com.arcgismaps.mapping.ArcGISScene
 import com.arcgismaps.mapping.layers.BuildingSceneLayer
+import com.arcgismaps.mapping.layers.GroupLayer
+import com.arcgismaps.mapping.layers.Layer
 import com.arcgismaps.mapping.layers.buildingscene.BuildingFilter
 import com.arcgismaps.mapping.layers.buildingscene.BuildingFilterBlock
 import com.arcgismaps.mapping.layers.buildingscene.BuildingGroupSublayer
@@ -48,31 +51,77 @@ import kotlin.time.Duration.Companion.seconds
  * @since 300.2.0
  */
 @Stable
-public class BuildingExplorerState(
+public class BuildingExplorerState internal constructor(
     buildingSceneLayers: List<BuildingSceneLayer>,
+    arcGISScene: ArcGISScene?,
     coroutineScope: CoroutineScope,
-    internal val localSceneViewProxy: LocalSceneViewProxy? = null
+    localSceneViewProxy: LocalSceneViewProxy? = null
 ) {
-    init {
-        require(buildingSceneLayers.isNotEmpty()) {
-            "BuildingExplorerState requires at least one BuildingSceneLayer."
+    private val _stateLoaded = MutableStateFlow(false)
+    internal val stateLoaded = _stateLoaded.asStateFlow()
+
+    internal lateinit var buildingSceneLayerStates: List<BuildingSceneLayerState>
+
+    private val _buildingSceneLayerState = mutableStateOf<BuildingSceneLayerState?>(null)
+
+    internal val buildingSceneLayerState: State<BuildingSceneLayerState?> =
+        _buildingSceneLayerState
+
+    public constructor(
+        buildingSceneLayers: List<BuildingSceneLayer>,
+        coroutineScope: CoroutineScope,
+        localSceneViewProxy: LocalSceneViewProxy? = null
+    ) : this(
+        buildingSceneLayers = buildingSceneLayers,
+        arcGISScene = null,
+        coroutineScope = coroutineScope,
+        localSceneViewProxy = localSceneViewProxy
+    )
+
+    public constructor(
+        arcGISScene: ArcGISScene,
+        coroutineScope: CoroutineScope,
+        localSceneViewProxy: LocalSceneViewProxy? = null
+    ) : this(
+        buildingSceneLayers = emptyList(),
+        arcGISScene = arcGISScene,
+        coroutineScope = coroutineScope,
+        localSceneViewProxy = localSceneViewProxy
+    )
+
+    private fun extractBuildingSceneLayers(
+        layers: List<Layer>
+    ): List<BuildingSceneLayer> = layers.flatMap { layer ->
+        when (layer) {
+            is BuildingSceneLayer -> listOf(layer)
+            is GroupLayer -> extractBuildingSceneLayers(layer.layers)
+            else -> emptyList()
         }
     }
 
-    internal val buildingSceneLayerStates = buildingSceneLayers.map {
-        BuildingSceneLayerState(
-            buildingSceneLayer = it,
-            coroutineScope = coroutineScope,
-            localSceneViewProxy = localSceneViewProxy
-        )
-    }.sortedBy { it.name }
+    init {
+        coroutineScope.launch {
+            // extract building scene layers from the scene otherwise use the list
+            val layers = arcGISScene?.let { scene ->
+                scene.load().fold(
+                    onSuccess = { extractBuildingSceneLayers(scene.operationalLayers) },
+                    onFailure = { emptyList() }
+                )
+            } ?: buildingSceneLayers
 
-    private val _buildingSceneLayerState = mutableStateOf(
-        buildingSceneLayerStates.first()
-    )
+            buildingSceneLayerStates = layers.map {
+                BuildingSceneLayerState(
+                    buildingSceneLayer = it,
+                    coroutineScope = coroutineScope,
+                    localSceneViewProxy = localSceneViewProxy
+                )
+            }.sortedBy { it.name }
 
-    internal val buildingSceneLayerState: State<BuildingSceneLayerState> =
-        _buildingSceneLayerState
+            _buildingSceneLayerState.value = buildingSceneLayerStates.firstOrNull()
+
+            _stateLoaded.value = true
+        }
+    }
 
     internal fun onBuildingSceneLayerSelected(index: Int) {
         _buildingSceneLayerState.value = buildingSceneLayerStates.getOrNull(index) ?: return
