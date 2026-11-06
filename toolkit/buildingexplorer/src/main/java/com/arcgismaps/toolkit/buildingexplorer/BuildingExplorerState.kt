@@ -96,8 +96,10 @@ public class BuildingExplorerState internal constructor(
         coroutineScope.launch {
             // extract building scene layers from the scene otherwise use the list
             val layers = arcGISScene?.let { scene ->
-                scene.load().onFailure { throw it }
-                extractBuildingSceneLayers(scene.operationalLayers)
+                scene.load().fold(
+                    onSuccess = { extractBuildingSceneLayers(scene.operationalLayers) },
+                    onFailure = { emptyList() }
+                )
             } ?: buildingSceneLayers
 
             buildingSceneLayerStates = layers.map {
