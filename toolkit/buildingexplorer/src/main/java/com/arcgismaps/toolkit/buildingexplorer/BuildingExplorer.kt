@@ -120,10 +120,10 @@ public fun BuildingExplorer(
     val stateLoaded by state.stateLoaded.collectAsStateWithLifecycle()
     val layerState = state.buildingSceneLayerState.value
 
-    if (stateLoaded) {
-        Box(modifier = modifier) {
-            val listState = rememberLazyListState()
+    Box(modifier = modifier) {
+        if (stateLoaded) {
             if (layerState != null) {
+                val listState = rememberLazyListState()
                 LazyColumn(
                     state = listState,
                     horizontalAlignment = Alignment.CenterHorizontally
@@ -227,14 +227,14 @@ public fun BuildingExplorer(
                     Text(stringResource(R.string.no_building_scene_layers))
                 }
             }
-        }
-    } else {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        )
-        {
-            CircularProgressIndicator()
+        } else {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            )
+            {
+                CircularProgressIndicator()
+            }
         }
     }
 }
