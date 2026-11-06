@@ -99,7 +99,7 @@ import com.arcgismaps.mapping.layers.buildingscene.BuildingSublayer
  * Column {
  *     LocalSceneView(
  *         scene = viewModel.scene,
- *         proxy = localSceneViewProxy
+ *         proxy = localSceneViewProxy,
  *         modifier = Modifier.weight(0.5f))
  *     BuildingExplorer(
  *         state = viewModel.buildingExplorerState,
