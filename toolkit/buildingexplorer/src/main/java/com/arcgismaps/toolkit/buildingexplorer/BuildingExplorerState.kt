@@ -60,6 +60,13 @@ public class BuildingExplorerState internal constructor(
     private val _stateLoaded = MutableStateFlow(false)
     internal val stateLoaded = _stateLoaded.asStateFlow()
 
+    internal lateinit var buildingSceneLayerStates: List<BuildingSceneLayerState>
+
+    private val _buildingSceneLayerState = mutableStateOf<BuildingSceneLayerState?>(null)
+
+    internal val buildingSceneLayerState: State<BuildingSceneLayerState?> =
+        _buildingSceneLayerState
+
     public constructor(
         buildingSceneLayers: List<BuildingSceneLayer>,
         coroutineScope: CoroutineScope,
@@ -115,13 +122,6 @@ public class BuildingExplorerState internal constructor(
             _stateLoaded.value = true
         }
     }
-
-    internal lateinit var buildingSceneLayerStates: List<BuildingSceneLayerState>
-
-    private val _buildingSceneLayerState = mutableStateOf<BuildingSceneLayerState?>(null)
-
-    internal val buildingSceneLayerState: State<BuildingSceneLayerState?> =
-        _buildingSceneLayerState
 
     internal fun onBuildingSceneLayerSelected(index: Int) {
         _buildingSceneLayerState.value = buildingSceneLayerStates.getOrNull(index) ?: return
