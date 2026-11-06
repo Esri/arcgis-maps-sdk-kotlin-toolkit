@@ -33,6 +33,7 @@ import com.arcgismaps.mapping.symbology.SimpleMarkerSymbolStyle
 import com.arcgismaps.mapping.view.Graphic
 import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
+import com.arcgismaps.toolkit.geoviewcompose.SceneViewProxy
 import com.arcgismaps.toolkit.orientedimageryviewer.internal.ViewerAppearance
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -121,7 +122,28 @@ class OrientedImageryConcurrencyTests {
     }
 
     @Test
-    fun activePanoramaIsVisibleOnlyAfterFirstSuccessfulViewportUpdate() {
+    fun scenePanoramaWithoutCameraZShowsDefaultFootprintWithoutViewportUpdate() {
+        compose.runOnIdle {
+            val panorama = image("panorama without Z")
+            every { panorama.type } returns OrientedImageType.Image360
+            val footprint = mockk<OrientedImageFootprint>(relaxed = true)
+            state = OrientedImageryViewerState(SceneViewProxy(), layer, overlay, scope) { footprint }
+            search(panorama)
+
+            assertFalse(state.uiState.activeImageInfo?.cameraLocationData?.z?.isFinite() == true)
+            assertTrue(state.uiState.isActiveFootprintVisible)
+            assertEquals(listOf(footprint), footprints)
+            state.toggleActiveFootprint()
+            assertTrue(footprints.isEmpty())
+            state.toggleActiveFootprint()
+            assertEquals(listOf(footprint), footprints)
+            coVerify(exactly = 0) { footprint.updateFootprint(any(), any(), any(), any()) }
+            coVerify(exactly = 0) { footprint.updateFootprint(any()) }
+        }
+    }
+
+    @Test
+    fun activePanoramaShowsDefaultFootprintWhileFirstViewportUpdateIsPending() {
         val completion = CompletableDeferred<Unit>()
         val footprint = mockk<OrientedImageFootprint>(relaxed = true)
         compose.runOnIdle {
@@ -134,10 +156,10 @@ class OrientedImageryConcurrencyTests {
             state = OrientedImageryViewerState(MapViewProxy(), layer, overlay, scope) { footprint }
             search(panorama)
             assertTrue(state.uiState.isActiveFootprintVisible)
-            assertTrue(footprints.isEmpty())
+            assertEquals(listOf(footprint), footprints)
 
             state.updateFootprints(45.0, 90.0, 60.0, 45.0)
-            assertTrue(footprints.isEmpty())
+            assertEquals(listOf(footprint), footprints)
             completion.complete(Unit)
         }
         compose.runOnIdle {
@@ -150,7 +172,7 @@ class OrientedImageryConcurrencyTests {
     }
 
     @Test
-    fun failedPanoramaUpdateDoesNotExposeDefaultFootprint() {
+    fun failedPanoramaUpdateRetainsDefaultFootprintUntilSuccessfulUpdate() {
         compose.runOnIdle {
             val panorama = image("panorama")
             every { panorama.type } returns OrientedImageType.Image360
@@ -159,15 +181,18 @@ class OrientedImageryConcurrencyTests {
                 Result.failure(IllegalStateException("Update failed"))
             state = OrientedImageryViewerState(MapViewProxy(), layer, overlay, scope) { footprint }
             search(panorama)
+            assertEquals(listOf(footprint), footprints)
             state.updateFootprints(45.0, 90.0, 60.0, 45.0)
+            assertEquals(listOf(footprint), footprints)
+            state.toggleActiveFootprint()
             assertTrue(footprints.isEmpty())
             state.toggleActiveFootprint()
-            state.toggleActiveFootprint()
-            assertTrue(footprints.isEmpty())
+            assertEquals(listOf(footprint), footprints)
 
             coEvery { footprint.updateFootprint(any(), any(), any(), any()) } returns Result.success(Unit)
             state.updateFootprints(46.0, 90.0, 60.0, 45.0)
             assertEquals(listOf(footprint), footprints)
+            coVerify(exactly = 1) { footprint.updateFootprint(46.0, 90.0, 60.0, 45.0) }
         }
     }
 
@@ -191,14 +216,14 @@ class OrientedImageryConcurrencyTests {
         compose.runOnIdle {
             assertTrue(footprints.isEmpty())
             state.toggleActiveFootprint()
-            assertTrue(footprints.isEmpty())
+            assertEquals(listOf(footprint), footprints)
             state.updateFootprints(45.0, 90.0, 60.0, 45.0)
         }
         compose.runOnIdle { assertEquals(listOf(footprint), footprints) }
     }
 
     @Test
-    fun stalePanoramaUpdateDoesNotInitializeReplacementFootprint() {
+    fun stalePanoramaUpdateDoesNotReplaceVisibleReplacementFootprint() {
         val completion = CompletableDeferred<Unit>()
         val oldFootprint = mockk<OrientedImageFootprint>(relaxed = true)
         val newFootprint = mockk<OrientedImageFootprint>(relaxed = true)
@@ -218,14 +243,15 @@ class OrientedImageryConcurrencyTests {
             search(panorama)
             state.updateFootprints(45.0, 90.0, 60.0, 45.0)
             search(replacement)
-            assertTrue(footprints.isEmpty())
+            assertEquals(listOf(newFootprint), footprints)
             completion.complete(Unit)
         }
         compose.runOnIdle {
+            assertEquals(listOf(newFootprint), footprints)
+            state.toggleActiveFootprint()
             assertTrue(footprints.isEmpty())
             state.toggleActiveFootprint()
-            state.toggleActiveFootprint()
-            assertTrue(footprints.isEmpty())
+            assertEquals(listOf(newFootprint), footprints)
             state.updateFootprints(45.0, 90.0, 60.0, 45.0)
             assertEquals(listOf(newFootprint), footprints)
         }

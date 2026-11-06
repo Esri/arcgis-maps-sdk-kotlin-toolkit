@@ -148,7 +148,7 @@ internal fun MarkerToolsButton(
                 LocalNavigationEventDispatcherOwner provides (dialogOwner as NavigationEventDispatcherOwner)
             ) {
                 BackHandler {
-                    if (isMarkerSelectionVisible) onDismissSelection()
+                    if (isMarkerSelectionVisible) onDismissSelection() else dismiss()
                 }
             }
             if (isMarkerSelectionVisible) {

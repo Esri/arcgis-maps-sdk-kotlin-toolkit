@@ -90,12 +90,12 @@ internal class InternalMutatorMutex {
 
         tryMutateOrCancel(mutator)
 
-        mutex.withLock {
-            try {
+        try {
+            mutex.withLock {
                 block()
-            } finally {
-                currentMutator.compareAndSet(mutator, null)
             }
+        } finally {
+            currentMutator.compareAndSet(mutator, null)
         }
     }
 

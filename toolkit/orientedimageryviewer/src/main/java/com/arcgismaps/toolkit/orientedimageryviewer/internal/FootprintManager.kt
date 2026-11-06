@@ -20,7 +20,6 @@ import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.layers.OrientedImageryLayer
 import com.arcgismaps.mapping.layers.orientedimagery.OrientedImage
 import com.arcgismaps.mapping.layers.orientedimagery.OrientedImageFootprint
-import com.arcgismaps.mapping.layers.orientedimagery.OrientedImageType
 import com.arcgismaps.mapping.view.Graphic
 import com.arcgismaps.mapping.view.GraphicsOverlay
 import kotlinx.coroutines.CancellationException
@@ -53,7 +52,6 @@ internal class FootprintManager(
     private val createFootprint: (OrientedImage) -> OrientedImageFootprint = ::OrientedImageFootprint
 ) {
     private var active: OrientedImageFootprint? = null
-    private var activeFootprintInitialized = false
     private var activeCamera: Graphic? = null
     private var inputGraphic: Graphic? = null
     private var additionalFootprints: List<OrientedImageFootprint> = emptyList()
@@ -96,11 +94,11 @@ internal class FootprintManager(
                 it.fillColor = appearance.selectedFootprintFillColor
                 it.outlineColor = appearance.selectedFootprintOutlineColor
                 active = it
-                // A panorama's default footprint covers the full circle, not the current viewport.
-                activeFootprintInitialized = image.type != OrientedImageType.Image360
                 activeCamera = Graphic(image.geometry, appearance.selectedCameraMarkerSymbol).also(overlay.graphics::add)
             }
-            if (activeFootprintInitialized && footprint !in layer.visibleFootprints) {
+            // Show a panorama's full-circle footprint until viewport refinement succeeds.
+            // Missing camera Z or failed orientation initialization must not hide this fallback.
+            if (footprint !in layer.visibleFootprints) {
                 layer.visibleFootprints.add(footprint)
             }
         } else {
@@ -163,7 +161,6 @@ internal class FootprintManager(
                     next(footprint).getOrThrow()
                     currentCoroutineContext().ensureActive()
                     if (active !== footprint) break
-                    activeFootprintInitialized = true
                     if (uiState().isActiveFootprintVisible && footprint !in layer.visibleFootprints) {
                         layer.visibleFootprints.add(footprint)
                     }
@@ -199,7 +196,6 @@ internal class FootprintManager(
         clearNoImageLocation()
         overlay.graphics.removeAll(additionalCameras)
         active = null
-        activeFootprintInitialized = false
         activeCamera = null
         inputGraphic = null
         additionalFootprints = emptyList()

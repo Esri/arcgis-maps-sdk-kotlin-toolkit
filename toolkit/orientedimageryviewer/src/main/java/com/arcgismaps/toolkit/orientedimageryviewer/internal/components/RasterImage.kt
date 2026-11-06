@@ -308,7 +308,17 @@ private fun rasterTransform(rasterLayer: RasterLayer): RasterTransform? {
 
 
 private fun computeVisiblePolygon(viewpoint: Viewpoint, spatialReference: SpatialReference?): Polygon? {
-    val extent = viewpoint.targetGeometry.extent
+    val viewportExtent = viewpoint.targetGeometry.extent
+    val sourceReference = viewportExtent.spatialReference
+    val extent = if (spatialReference == null && sourceReference != null) {
+        if (sourceReference.isGeographic || sourceReference.isProjected) return null
+        // MapView gives unreferenced images a local, unit-only viewport reference.
+        // Preserve these image-space coordinates, but remove the reference so both
+        // polygons have compatible references when intersecting below.
+        Envelope(viewportExtent.xMin, viewportExtent.yMin, viewportExtent.xMax, viewportExtent.yMax)
+    } else {
+        viewportExtent
+    }
     val rotation = viewpoint.rotation.takeIf { it.isFinite() } ?: 0.0
     val center = Point(extent.center.x, extent.center.y, extent.spatialReference)
     val polygon = GeometryEngine.rotate(extent.toPolygon(), rotation, center) as? Polygon ?: return null
