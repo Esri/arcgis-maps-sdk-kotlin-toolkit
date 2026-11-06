@@ -22,7 +22,6 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.arcgismaps.mapping.ArcGISScene
-import com.arcgismaps.mapping.layers.BuildingSceneLayer
 import com.arcgismaps.toolkit.buildingexplorer.BuildingExplorerState
 import com.arcgismaps.toolkit.geoviewcompose.LocalSceneViewProxy
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -46,22 +45,17 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
 
     val localSceneViewProxy = LocalSceneViewProxy()
 
-    lateinit var buildingExplorerState: BuildingExplorerState
+    val buildingExplorerState = BuildingExplorerState(
+        arcGISScene = scene,
+        coroutineScope = viewModelScope,
+        localSceneViewProxy = localSceneViewProxy
+    )
 
     init {
         viewModelScope.launch {
             scene.load()
                 .onFailure { throw it }
                 .onSuccess {
-                    val layers =
-                        scene.operationalLayers.filterIsInstance<BuildingSceneLayer>()
-
-                    buildingExplorerState = BuildingExplorerState(
-                        buildingSceneLayers = layers,
-                        coroutineScope = viewModelScope,
-                        localSceneViewProxy = localSceneViewProxy
-                    )
-
                     _showProgress.value = false
                 }
         }
