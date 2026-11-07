@@ -30,6 +30,10 @@ kotlin {
 
 android {
     namespace = "com.arcgismaps.toolkit.popup"
+    lint {
+        // remove these disables when strings.xml lint is fixed via localization
+        disable += "MissingTranslation"
+    }
 }
 
 apiValidation {
