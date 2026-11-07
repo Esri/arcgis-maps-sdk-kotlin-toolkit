@@ -85,7 +85,7 @@ internal val DarkColorScheme = darkColorScheme(
 @Suppress("DEPRECATION")
 fun MicroAppTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    content: @Composable() () -> Unit
+    content: @Composable () -> Unit
 ) {
     val colorScheme = when {
         darkTheme -> DarkColorScheme

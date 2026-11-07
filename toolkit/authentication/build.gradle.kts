@@ -17,14 +17,9 @@
  */
 
 plugins {
-    id("com.android.library")
-    id("org.jetbrains.kotlin.plugin.compose")
-    id("artifact-deploy")
-    alias(libs.plugins.kotlin.convention.plugin)
-    alias(libs.plugins.binary.compatibility.validator) apply true
+    alias(libs.plugins.component.convention.plugin)
 }
 kotlin {
-    jvmToolchain(17)
     compilerOptions {
         freeCompilerArgs.add("-Xconsistent-data-class-copy-visibility")
     }
@@ -32,62 +27,9 @@ kotlin {
 
 android {
     namespace = "com.arcgismaps.toolkit.authentication"
-    compileSdk = libs.versions.compileSdk.get().toInt()
-
-    defaultConfig {
-        minSdk = libs.versions.minSdk.get().toInt()
-
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        consumerProguardFiles("consumer-rules.pro")
-    }
-
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-        }
-    }
-    buildFeatures {
-        compose = true
-    }
-    packaging {
-        resources {
-            excludes += setOf(
-                "META-INF/LICENSE-notice.md",
-                "META-INF/LICENSE.md"
-            )
-        }
-    }
-
-    // If this were not an android project, we would just write `explicitApi()` in the Kotlin scope.
-    // but as an android project could write `freeCompilerArgs = listOf("-Xexplicit-api=strict")`
-    // in the kotlinOptions above, but that would enforce api rules on the test code, which we don't want.
-    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-        if ("Test" !in name) {
-            compilerOptions {
-                freeCompilerArgs.add("-Xexplicit-api=strict")
-            }
-        }
-    }
-
-    /**
-     * Configures the test report for connected (instrumented) tests to be copied to a central
-     * folder in the project's root directory.
-     */
-    testOptions {
-        targetSdk = libs.versions.compileSdk.get().toInt()
-        val connectedTestReportsPath: String = rootProject.extra["connectedTestReportsPath"] as String
-        reportDir = "$connectedTestReportsPath/${project.name}"
-    }
-
-    publishing {
-        singleVariant("release") {
-            // This is the default variant.
-        }
-    }
 }
 
 apiValidation {
-    ignoredClasses.add("com.arcgismaps.toolkit.featureforms.BuildConfig")
     // todo: remove when this is resolved https://github.com/Kotlin/binary-compatibility-validator/issues/74
     // compose compiler generates public singletons for internal compose functions. this may be resolved in the compose
     // compiler.

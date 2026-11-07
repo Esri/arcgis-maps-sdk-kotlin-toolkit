@@ -1,3 +1,5 @@
+import com.arcgismaps.kotlin.toolkit.build_logic.convention.VaultTokenProvider
+
 /*
  *
  *  Copyright 2024 Esri
@@ -22,9 +24,7 @@ plugins {
     alias(libs.plugins.kotlin.convention.plugin)
 }
 
-kotlin {
-    jvmToolchain(17)
-}
+val vaultTokenProvider = providers.of(VaultTokenProvider::class) {}
 
 android {
     namespace = "com.esri.microappslib"
@@ -32,6 +32,15 @@ android {
 
     defaultConfig {
         minSdk = libs.versions.minSdk.get().toInt()
+
+        val vaultToken = vaultTokenProvider.get().trim()
+        if (vaultToken.isEmpty()) {
+            // do not change the structure of the build config object
+            // even if the vault token is unusable
+            logger.warn("vault token not provided")
+        }
+
+        buildConfigField("String", "vaultToken", "\"${vaultToken}\"")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
@@ -47,6 +56,7 @@ android {
         }
     }
     buildFeatures {
+        buildConfig = true
         compose = true
     }
 
@@ -57,6 +67,8 @@ android {
 
 dependencies {
     implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.startup.runtime)
+    implementation(arcgis.mapsSdk)
     implementation(libs.bundles.composeCore)
     implementation(libs.bundles.core)
     implementation(libs.androidx.lifecycle.runtime.compose)
