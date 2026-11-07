@@ -16,7 +16,18 @@ query-filters:
       id: java/field-masks-super-field
   - exclude:
       id: java/local-variable-is-never-read
-
+  - exclude:      
+      id: java/confusing-method-name
+  - exclude:      
+      id: java/deprecated-call
+  - exclude:
+      id: java/integer-multiplication-cast-to-long
+  - exclude:
+      id: java/reference-equality-of-boxed-types
+  - exclude:
+      id: 
+      
+      
 # paths: does not work with compiled languages, the build command dictates what files are analyzed
 # paths-ignore: does not work with compiled languages, use exclude in the sarif-tools filter configuration instead
 

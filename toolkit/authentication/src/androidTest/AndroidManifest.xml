@@ -5,7 +5,9 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
 
-    <application android:requestLegacyExternalStorage="true">
+    <application
+        android:requestLegacyExternalStorage="true"
+        android:allowBackup="false">
         <activity
             android:name="com.arcgismaps.toolkit.authentication.AuthenticationActivity"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize"

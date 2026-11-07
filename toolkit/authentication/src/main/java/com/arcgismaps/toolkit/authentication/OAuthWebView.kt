@@ -68,6 +68,8 @@ internal fun OAuthWebView(
             settings.apply {
                 displayZoomControls = false
                 javaScriptEnabled = true
+                allowContentAccess = false
+                allowFileAccess = false
             }
             layoutParams = ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
