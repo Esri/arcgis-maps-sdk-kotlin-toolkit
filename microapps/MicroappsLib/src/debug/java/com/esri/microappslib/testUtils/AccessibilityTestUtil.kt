@@ -14,11 +14,12 @@
  *  limitations under the License.
  */
 
-package com.arcgismaps.toolkit.popup
+package com.esri.microappslib.testUtils
 
+import android.os.Build
 import android.util.Log
 import androidx.compose.ui.test.isRoot
-import androidx.compose.ui.test.junit4.ComposeContentTestRule
+import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.junit4.accessibility.disableAccessibilityChecks
 import androidx.compose.ui.test.junit4.accessibility.enableAccessibilityChecks
 import androidx.compose.ui.test.tryPerformAccessibilityChecks
@@ -33,10 +34,16 @@ import com.google.android.apps.common.testing.accessibility.framework.uielement.
  * Runs the default Accessibility Test Framework checks against the rendered Compose UI.
  * Set [failOnViolation] to `false` to log violations without failing the test.
  * See `A11Y` tags in test result logs.
+ * On API levels below 34 or unsupported rules, logs that the scan was not run and continues the test.
  */
-internal fun ComposeContentTestRule.checkAccessibility(
+fun ComposeTestRule.checkAccessibility(
     failOnViolation: Boolean = true
 ) {
+    if (Build.VERSION.SDK_INT < 34) {
+        Log.w("A11Y", "Accessibility scan not run: Compose requires API 34+, device API is ${Build.VERSION.SDK_INT}. Continuing test.")
+        return
+    }
+
     val resultDescriptor = AccessibilityCheckResultDescriptor()
     val validator = AccessibilityValidator()
         .setCheckPreset(AccessibilityCheckPreset.PRERELEASE)
@@ -49,7 +56,7 @@ internal fun ComposeContentTestRule.checkAccessibility(
             Log.w("A11Y", "${violations.size} accessibility violation(s)")
             violations.forEach { result ->
                 Log.w("A11Y", "[${result.type}] ${resultDescriptor.describeResult(result)}")
-                val context = result.element?.let { element -> elementContext(result, element) }
+                val context = result.element?.let { element: ViewHierarchyElement -> elementContext(result, element) }
                     ?: "[${result.sourceCheckClass.simpleName}] no view hierarchy context was provided"
                 Log.w("A11Y", context)
             }

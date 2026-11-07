@@ -33,6 +33,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performScrollToIndex
 import androidx.test.platform.app.InstrumentationRegistry
+import com.esri.microappslib.testUtils.checkAccessibility
 import com.esri.microappslib.theme.MicroAppThemeSurface
 import com.arcgismaps.toolkit.popup.internal.element.attachment.AttachmentsElementState
 import com.arcgismaps.toolkit.popup.internal.element.fieldselement.FieldsElementState

@@ -62,5 +62,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.activity.compose)
     testImplementation(libs.bundles.unitTest)
+    debugApi(libs.androidx.compose.ui.test)
+    debugImplementation(libs.androidx.compose.ui.test.accessibility)
     debugImplementation(libs.bundles.debug)
 }
