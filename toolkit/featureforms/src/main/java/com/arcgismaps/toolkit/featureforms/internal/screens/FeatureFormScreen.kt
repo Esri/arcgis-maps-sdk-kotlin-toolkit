@@ -41,6 +41,7 @@ import com.arcgismaps.mapping.featureforms.GroupFormElement
 import com.arcgismaps.mapping.featureforms.TextFormElement
 import com.arcgismaps.mapping.featureforms.UtilityAssociationsFormElement
 import com.arcgismaps.toolkit.featureforms.FormStateData
+import com.arcgismaps.toolkit.featureforms.internal.components.attachment.AttachmentElementState
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.AttachmentFormElement
 import com.arcgismaps.toolkit.featureforms.internal.components.base.BaseFieldState
 import com.arcgismaps.toolkit.featureforms.internal.components.base.getState
@@ -61,6 +62,7 @@ import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.Ut
 @Composable
 internal fun FeatureFormScreen(
     formStateData: FormStateData,
+    onAudioCaptureRequest: (Long?, Int) -> Unit,
     onBarcodeButtonClick: ((FieldFormElement) -> Unit)?,
     onUtilityFilterSelected: (UtilityAssociationsElementState) -> Unit,
     modifier: Modifier = Modifier
@@ -117,9 +119,13 @@ internal fun FeatureFormScreen(
                     }
 
                     is AttachmentsFormElement -> {
+                        val state = entry.getState<AttachmentElementState>()
                         AttachmentFormElement(
-                            state = entry.getState(),
-                            Modifier
+                            state = state,
+                            onAudioCaptureRequest = { maxDuration ->
+                                onAudioCaptureRequest(maxDuration, state.id)
+                            },
+                            modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 15.dp, vertical = 10.dp)
                         )
