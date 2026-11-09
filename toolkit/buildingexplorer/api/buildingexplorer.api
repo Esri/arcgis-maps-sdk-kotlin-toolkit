@@ -13,6 +13,6 @@ public final class com/arcgismaps/toolkit/buildingexplorer/BuildingExplorerState
 public final class com/arcgismaps/toolkit/buildingexplorer/ComposableSingletons$BuildingExplorerKt {
 	public static final field INSTANCE Lcom/arcgismaps/toolkit/buildingexplorer/ComposableSingletons$BuildingExplorerKt;
 	public fun <init> ()V
-	public final fun getLambda$1515152779$buildingexplorer ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda$-1912042037$buildingexplorer ()Lkotlin/jvm/functions/Function3;
 }
 
