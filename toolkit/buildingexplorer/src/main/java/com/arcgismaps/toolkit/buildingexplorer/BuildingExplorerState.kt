@@ -34,6 +34,7 @@ import com.arcgismaps.mapping.layers.buildingscene.BuildingSolidFilterMode
 import com.arcgismaps.mapping.layers.buildingscene.BuildingSublayer
 import com.arcgismaps.mapping.layers.buildingscene.BuildingXrayFilterMode
 import com.arcgismaps.mapping.view.Camera
+import com.arcgismaps.mapping.view.SceneViewingMode
 import com.arcgismaps.toolkit.geoviewcompose.LocalSceneViewProxy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -104,7 +105,13 @@ public class BuildingExplorerState internal constructor(
             // extract building scene layers from the scene otherwise use the list
             val layers = arcGISScene?.let { scene ->
                 scene.load().fold(
-                    onSuccess = { extractBuildingSceneLayers(scene.operationalLayers) },
+                    onSuccess = {
+                        if (scene.viewingMode == SceneViewingMode.Local) {
+                            extractBuildingSceneLayers(scene.operationalLayers)
+                        } else {
+                            emptyList()
+                        }
+                    },
                     onFailure = { emptyList() }
                 )
             } ?: buildingSceneLayers
