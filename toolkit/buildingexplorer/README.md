@@ -41,7 +41,7 @@ Create a `BuildingExplorerState` with a list of `BuildingSceneLayers`
     }
 ```
 
-or create a `BuildingExplorerState` from an `ArcGisScene` which will allow exploring all of the 
+or create a `BuildingExplorerState` from an `ArcGISScene` which will allow exploring all of the 
 `BuildingSceneLayers` in the scene
 
 ```kotlin
@@ -54,12 +54,13 @@ or create a `BuildingExplorerState` from an `ArcGisScene` which will allow explo
      )
 ```
 
-Create a `BuildingExplorer` taking the `BuildingExploereState` and add it to the UI
+Create a `BuildingExplorer` taking the `BuildingExplorerState` and add it to the UI
 
 ```kotlin
 Column {
     LocalSceneView(
-        scene = viewModel.scene, 
+        scene = viewModel.scene,
+        localSceneViewProxy = viewModel.localSceneViewProxy,
         modifier = Modifier.weight(0.5f))
     BuildingExplorer(
         state = viewModel.buildingExplorerState,
