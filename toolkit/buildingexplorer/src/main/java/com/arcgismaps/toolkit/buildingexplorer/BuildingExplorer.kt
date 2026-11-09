@@ -81,7 +81,6 @@ import com.arcgismaps.mapping.layers.buildingscene.BuildingSublayer
  *                 .onSuccess {
  *                     val layers =
  *                         scene.operationalLayers.filterIsInstance<BuildingSceneLayer>()
- *                             .toPersistentList()
  *
  *                     buildingExplorerState = BuildingExplorerState(
  *                         buildingSceneLayers = layers,
@@ -228,11 +227,19 @@ public fun BuildingExplorer(
                     )
                 }
             } else {
+                // if there is no BuildingSceneLayerState then display the appropriate error message
                 Box(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(stringResource(R.string.no_building_scene_layers))
+                    when (state.error) {
+                        BuildingExplorerState.Error.NoBuildingLayers -> Text(stringResource(R.string.no_building_scene_layers))
+                        BuildingExplorerState.Error.RequiresLocalScene -> Text(stringResource(R.string.requires_local_scene))
+                        BuildingExplorerState.Error.LoadFailed -> Text(stringResource(R.string.load_failed))
+                        BuildingExplorerState.Error.NoError -> {
+                            // nothing to display
+                        }
+                    }
                 }
             }
         } else {

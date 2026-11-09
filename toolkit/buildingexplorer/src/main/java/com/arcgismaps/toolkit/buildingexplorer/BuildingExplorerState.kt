@@ -19,8 +19,6 @@
 package com.arcgismaps.toolkit.buildingexplorer
 
 import androidx.compose.runtime.Stable
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.State
 import com.arcgismaps.mapping.ArcGISScene
@@ -60,6 +58,15 @@ public class BuildingExplorerState internal constructor(
 ) {
     private val _stateLoaded = MutableStateFlow(false)
     internal val stateLoaded = _stateLoaded.asStateFlow()
+
+    internal enum class Error {
+        NoError,
+        NoBuildingLayers,
+        RequiresLocalScene,
+        LoadFailed
+    }
+
+    internal var error: Error = Error.NoError
 
     internal lateinit var buildingSceneLayerStates: List<BuildingSceneLayerState>
 
@@ -102,30 +109,36 @@ public class BuildingExplorerState internal constructor(
 
     init {
         coroutineScope.launch {
-            // extract building scene layers from the scene otherwise use the list
             val layers = arcGISScene?.let { scene ->
                 scene.load().fold(
                     onSuccess = {
                         if (scene.viewingMode == SceneViewingMode.Local) {
                             extractBuildingSceneLayers(scene.operationalLayers)
                         } else {
+                            error = Error.RequiresLocalScene
                             emptyList()
                         }
                     },
-                    onFailure = { emptyList() }
+                    onFailure = {
+                        error = Error.LoadFailed
+                        emptyList()
+                    }
                 )
             } ?: buildingSceneLayers
 
-            buildingSceneLayerStates = layers.map {
+            if (layers.isEmpty() && error == Error.NoError) {
+                error = Error.NoBuildingLayers
+            }
+
+            buildingSceneLayerStates = layers.map { layer ->
                 BuildingSceneLayerState(
-                    buildingSceneLayer = it,
+                    buildingSceneLayer = layer,
                     coroutineScope = coroutineScope,
                     localSceneViewProxy = localSceneViewProxy
                 )
             }.sortedBy { it.name }
 
             _buildingSceneLayerState.value = buildingSceneLayerStates.firstOrNull()
-
             _stateLoaded.value = true
         }
     }
@@ -169,7 +182,8 @@ internal class BuildingSceneLayerState(
     internal val levels: List<String> get() = _levels.toList()
 
     // Levels elements should only show if there are more than 1 level (so 2 when counting "All")
-    internal val isShowLevels by derivedStateOf { levels.size > 2 }
+    internal val isShowLevels: Boolean
+        get() = levels.size > 2
 
     // the index of the selected construction phase
     private var _selectedConstructionPhase = mutableStateOf("")
@@ -180,7 +194,8 @@ internal class BuildingSceneLayerState(
     internal val constructionPhases: List<String> get() = _constructionPhases.toList()
 
     // construction phase elements should only show if there is more than 1 phase
-    internal val isShowConstructionPhases by derivedStateOf { constructionPhases.size > 1 }
+    internal val isShowConstructionPhases: Boolean
+        get() = constructionPhases.size > 1
 
     // The list of building sublayer categories
     private val _categories = mutableListOf<BuildingSublayer>()
@@ -201,6 +216,7 @@ internal class BuildingSceneLayerState(
             buildingSceneLayer.let { buildingSceneLayer ->
                 // load the layer and extract the overview and full model sublayers if they are available
                 buildingSceneLayer.load().onFailure { throw it }
+                _visible.value = buildingSceneLayer.isVisible
 
                 val sublayers = buildingSceneLayer.sublayers
                 overviewSublayer = sublayers.firstOrNull { it.modelName == "Overview" }
@@ -214,7 +230,8 @@ internal class BuildingSceneLayerState(
                 // Get the levels and construction phases from the statistics
                 buildingSceneLayer.fetchStatistics().onSuccess { statistics ->
                     statistics["BldgLevel"]?.mostFrequentValues?.let {
-                        _levels.addAll(0, it.sortedBy { level -> level.toInt() })
+                        _levels.addAll(0, it.filter { level -> level.toIntOrNull() != null }
+                            .sortedBy { level -> level.toInt() })
                     }
                     statistics["CreatedPhase"]?.mostFrequentValues?.let {
                         // only allow integer phases because that is what the filter is expecting
@@ -224,11 +241,10 @@ internal class BuildingSceneLayerState(
                             _selectedConstructionPhase.value = _constructionPhases.last()
                         }
                     }
-
-                    // The top-level sublayer groups will be the categories
-                    (fullModelSublayer as? BuildingGroupSublayer)?.let { buildingSublayer ->
-                        _categories.addAll(buildingSublayer.sublayers.sortedBy { it.name })
-                    }
+                }
+                // The top-level sublayer groups will be the categories
+                (fullModelSublayer as? BuildingGroupSublayer)?.let { buildingSublayer ->
+                    _categories.addAll(buildingSublayer.sublayers.sortedBy { it.name })
                 }
 
                 // clear any preset filter on the layer
