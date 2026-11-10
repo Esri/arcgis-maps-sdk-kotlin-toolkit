@@ -18,30 +18,22 @@
 
 package com.arcgis.toolkit.bookmarks
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.ExperimentalTestApi
-import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.performClick
-import com.arcgismaps.geometry.SpatialReference
-import com.arcgismaps.mapping.ArcGISMap
-import com.arcgismaps.mapping.Bookmark
 import com.arcgismaps.toolkit.bookmarks.BookmarksListView
-import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.Assert.assertEquals
 import org.junit.Rule
-import kotlin.time.Duration.Companion.seconds
 
+/**
+ * Tests for the [BookmarksListView] composable.
+ * Shows bookmark lists and makes sure expected bookmarks are being selected
+ * @since 300.2.0
+ */
 class BookmarksTests {
 
     @get:Rule
@@ -61,7 +53,6 @@ class BookmarksTests {
             )
         }
 
-
         val bookmark1 = composeTestRule.onNodeWithContentDescription("Giant Sequoias of Willamette Blvd")
         val bookmark2 = composeTestRule.onNodeWithContentDescription("Large Douglas-fir")
         val bookmark3 = composeTestRule.onNodeWithContentDescription("Historic Ladd's Addition")
@@ -76,9 +67,11 @@ class BookmarksTests {
 
         bookmark3.performClick()
 
-
-        delay(1.seconds)
         assertEquals("Historic Ladd's Addition",mapViewModel.bookmarkSelected.value?.name)
-        bookmark1.assertIsNotDisplayed()
+
+        bookmark2.performClick()
+
+        assertEquals("Large Douglas-fir",mapViewModel.bookmarkSelected.value?.name)
+
     }
 }

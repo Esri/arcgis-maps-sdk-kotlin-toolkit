@@ -18,24 +18,29 @@
 
 package com.arcgismaps.toolkit.bookmarks
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.runtime.toMutableStateList
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
@@ -45,9 +50,7 @@ import androidx.compose.ui.unit.em
 import com.arcgismaps.mapping.Bookmark
 import com.arcgismaps.toolkit.geoviewcompose.GeoViewProxy
 import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
 /**
@@ -70,27 +73,48 @@ public fun BookmarksListView(
     textStyle : TextStyle = LocalTextStyle.current
 ) {
     val scope = rememberCoroutineScope()
-    LazyColumn(
-        modifier =
-            modifier.fillMaxWidth().background(color = backgroundColor)
+    Surface(
+        modifier = modifier,
+        color = backgroundColor
     ) {
-        items(bookmarks.size) { index ->
-            val bookmark = bookmarks.elementAt(index)
-            BookmarkItem(
-                bookmark = bookmark,
-                onZoom = {
-                    scope.launch {
-                        bookmark.viewpoint?.let {
-                            geoViewProxy.setViewpointAnimated(
-                                viewpoint = it,
-                                duration = 1.seconds,
-                            )
-                        }
-                    }
-                    onBookmarkSelected(bookmark)
-                },
-                textStyle = textStyle
-            )
+        //If there is no bookmarks show an empty state
+        if(bookmarks.isEmpty()){
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.BookmarkBorder,
+                    contentDescription = stringResource(R.string.no_bookmarks)
+                )
+                Text(
+                    text = stringResource(R.string.no_bookmarks)
+                )
+            }
+        }else{
+            LazyColumn(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                //Display bookmarks.
+                //If a bookmark is selected, move GeoView to viewpoint and return selected bookmark for callback
+                items(bookmarks.size) { index ->
+                    val bookmark = bookmarks.elementAt(index)
+                    BookmarkItem(
+                        bookmark = bookmark,
+                        onZoom = {
+                            scope.launch {
+                                bookmark.viewpoint?.let {
+                                    geoViewProxy.setViewpointAnimated(
+                                        viewpoint = it
+                                    )
+                                }
+                            }
+                            onBookmarkSelected(bookmark)
+                        },
+                        textStyle = textStyle
+                    )
+                }
+            }
         }
     }
 }
@@ -116,6 +140,7 @@ private fun BookmarkItem(
             )
             .fillMaxWidth()
             .padding(16.dp)
+            .heightIn(min = 48.dp)
             .semantics{
                 contentDescription = bookmark.name
             }
@@ -128,32 +153,13 @@ private fun BookmarkItem(
     HorizontalDivider()
 }
 
+
 @Preview
 @Composable
-private fun BookmarksListViewPreview() {
-    val bookmarks = remember { mutableStateListOf(
-        Bookmark("Bookmark 1", null)
-    ) }
+public fun BookmarkPreview(){
     val geoViewProxy = MapViewProxy()
     BookmarksListView(
         geoViewProxy = geoViewProxy,
-        bookmarks = bookmarks
-    )
-    LaunchedEffect(Unit) {
-        listOf(1, 2, 3).forEach {
-            delay(1500.milliseconds)
-            bookmarks.add(Bookmark("Bookmark $it", null))
-        }
-    }
-}
-
-
-@Preview
-@Composable
-private fun BookmarkItemPreview() {
-    BookmarkItem(
-        bookmark = Bookmark("Bookmark 1", null),
-        onZoom = {},
-        textStyle = LocalTextStyle.current
+        bookmarks = emptyList<Bookmark>().toMutableStateList()
     )
 }
