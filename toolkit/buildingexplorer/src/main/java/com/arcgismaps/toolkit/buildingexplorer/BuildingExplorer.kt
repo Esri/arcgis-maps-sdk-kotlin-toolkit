@@ -94,7 +94,7 @@ import com.arcgismaps.mapping.layers.buildingscene.BuildingSublayer
  * or create a `BuildingExplorerState` from an `ArcGISScene` which will allow exploring all of the
  * `BuildingSceneLayers` in the scene
  *
- * val localSceneViewProxy = LocalSceneViewProxy()
+ *     val localSceneViewProxy = LocalSceneViewProxy()
  *
  *     val buildingExplorerState = BuildingExplorerState(
  *         arcGISScene = scene,
