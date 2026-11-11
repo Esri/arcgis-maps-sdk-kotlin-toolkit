@@ -45,13 +45,13 @@ or create a `BuildingExplorerState` from an `ArcGISScene` which will allow explo
 `BuildingSceneLayers` in the scene
 
 ```kotlin
- val localSceneViewProxy = LocalSceneViewProxy()
+    val localSceneViewProxy = LocalSceneViewProxy()
 
-     val buildingExplorerState = BuildingExplorerState(
-         arcGISScene = scene,
-         coroutineScope = viewModelScope,
-         localSceneViewProxy = localSceneViewProxy
-     )
+    val buildingExplorerState = BuildingExplorerState(
+        arcGISScene = scene,
+        coroutineScope = viewModelScope,
+        localSceneViewProxy = localSceneViewProxy
+    )
 ```
 
 Create a `BuildingExplorer` taking the `BuildingExplorerState` and add it to the UI
