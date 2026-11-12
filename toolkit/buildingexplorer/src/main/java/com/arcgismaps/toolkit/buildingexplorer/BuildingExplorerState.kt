@@ -162,6 +162,13 @@ internal class BuildingSceneLayerState(
     private val _stateLoaded = MutableStateFlow(false)
     internal val stateLoaded = _stateLoaded.asStateFlow()
 
+    internal enum class Error {
+        NoError,
+        LoadFailed
+    }
+
+    internal var error: Error = Error.NoError
+
     // the name of the building layer
     internal val name = buildingSceneLayer.name
 
@@ -215,40 +222,46 @@ internal class BuildingSceneLayerState(
         coroutineScope.launch {
             buildingSceneLayer.let { buildingSceneLayer ->
                 // load the layer and extract the overview and full model sublayers if they are available
-                buildingSceneLayer.load().onFailure { throw it }
-                _visible.value = buildingSceneLayer.isVisible
-
-                val sublayers = buildingSceneLayer.sublayers
-                overviewSublayer = sublayers.firstOrNull { it.modelName == "Overview" }
-                fullModelSublayer = sublayers.firstOrNull { it.modelName == "FullModel" }
-                fullModelSublayer?.let {
-                    _showFullModel.value = it.isVisible
+                buildingSceneLayer.load().onFailure {
+                    error = Error.LoadFailed
                 }
 
-                _isShowFullModelSwitch.value = fullModelSublayer != null && overviewSublayer != null
+                if (error == Error.NoError) {
+                    _visible.value = buildingSceneLayer.isVisible
 
-                // Get the levels and construction phases from the statistics
-                buildingSceneLayer.fetchStatistics().onSuccess { statistics ->
-                    statistics["BldgLevel"]?.mostFrequentValues?.let {
-                        _levels.addAll(0, it.filter { level -> level.toIntOrNull() != null }
-                            .sortedBy { level -> level.toInt() })
+                    val sublayers = buildingSceneLayer.sublayers
+                    overviewSublayer = sublayers.firstOrNull { it.modelName == "Overview" }
+                    fullModelSublayer = sublayers.firstOrNull { it.modelName == "FullModel" }
+                    fullModelSublayer?.let {
+                        _showFullModel.value = it.isVisible
                     }
-                    statistics["CreatedPhase"]?.mostFrequentValues?.let {
-                        // only allow integer phases because that is what the filter is expecting
-                        _constructionPhases.addAll(it.filter { phase -> phase.toIntOrNull() != null }
-                            .sortedBy { phase -> phase.toInt() })
-                        if (_constructionPhases.isNotEmpty()) {
-                            _selectedConstructionPhase.value = _constructionPhases.last()
+
+                    _isShowFullModelSwitch.value =
+                        fullModelSublayer != null && overviewSublayer != null
+
+                    // Get the levels and construction phases from the statistics
+                    buildingSceneLayer.fetchStatistics().onSuccess { statistics ->
+                        statistics["BldgLevel"]?.mostFrequentValues?.let {
+                            _levels.addAll(0, it.filter { level -> level.toIntOrNull() != null }
+                                .sortedBy { level -> level.toInt() })
+                        }
+                        statistics["CreatedPhase"]?.mostFrequentValues?.let {
+                            // only allow integer phases because that is what the filter is expecting
+                            _constructionPhases.addAll(it.filter { phase -> phase.toIntOrNull() != null }
+                                .sortedBy { phase -> phase.toInt() })
+                            if (_constructionPhases.isNotEmpty()) {
+                                _selectedConstructionPhase.value = _constructionPhases.last()
+                            }
                         }
                     }
-                }
-                // The top-level sublayer groups will be the categories
-                (fullModelSublayer as? BuildingGroupSublayer)?.let { buildingSublayer ->
-                    _categories.addAll(buildingSublayer.sublayers.sortedBy { it.name })
-                }
+                    // The top-level sublayer groups will be the categories
+                    (fullModelSublayer as? BuildingGroupSublayer)?.let { buildingSublayer ->
+                        _categories.addAll(buildingSublayer.sublayers.sortedBy { it.name })
+                    }
 
-                // clear any preset filter on the layer
-                filter()
+                    // clear any preset filter on the layer
+                    filter()
+                }
 
                 _stateLoaded.emit(true)
             }

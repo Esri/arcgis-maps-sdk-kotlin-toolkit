@@ -25,5 +25,6 @@
     <string name="zoom_to_building">Zoom to building</string>
     <string name="no_building_scene_layers">No BuildingSceneLayers</string>
     <string name="requires_local_scene">Global scenes are not supported</string>
-    <string name="load_failed">Scene failed to load</string>
+    <string name="scene_load_failed">Scene failed to load</string>
+    <string name="building_scene_layer_load_failed">BuildingSceneLayer failed to load</string>
 </resources>
