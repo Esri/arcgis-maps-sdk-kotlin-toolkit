@@ -65,9 +65,6 @@ MapView(
 )
 ```
 
-**Note:** 
-- For API level 28 and below, you must include WRITE_EXTERNAL_STORAGE permission in your `AndroidManifest.xml` to enable saving media to device storage.
-
 #### Rendering the composable Popup function
 
 A `Popup` can be rendered within a composition by simply calling the `Popup` composable with a `PopupState` created from a [Popup object](https://developers.arcgis.com/kotlin/api-reference/arcgis-maps-kotlin/com.arcgismaps.mapping.popup/-popup/index.html). The Popup should be displayed in a container. Its visibility and the container are external and should be controlled by the calling Composable. The `PopupState` must be hoisted out of the composition to avoid losing state on recomposition.

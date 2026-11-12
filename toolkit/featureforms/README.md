@@ -108,9 +108,11 @@ Beginning with version 200.8.0, a close icon is now displayed in the bottom righ
 
 ### Action Bar
 
-Beginning with version 200.8.0, when edits are present in the `FeatureForm`, an action bar is displayed at the top of the form with “Save” and “Discard” buttons. This can be hidden by setting `showFormActions: Boolean` to `false`.
+Beginning with version 200.8.0, when edits are present in the `FeatureForm`, an action bar is displayed at the top of the form with “Save” and “Discard” buttons. This can be hidden by setting `showFormActions: Boolean` to `false`.  When providing custom save/discard controls, use `FeatureFormState.discardEdits()` to keep form data and attachments in sync.
 
 A new `onEditingEvent` callback of type `FeatureFormEditingEvent` is introduced which is invoked when the user performs the "Save" or "Discard" action. This event can be used to perform any additional tasks such as rolling back changes on "Discard" or applying edits to the service on "Save". The [microapp](../../microapps/FeatureFormsApp) uses this mechanism.
+
+The form displays an error if saving (internally `finishEditing()`) fails.
 
 ### Utility Associations
 
@@ -134,7 +136,8 @@ To monitor navigation events when users interact with utility associations, the 
 
 The `FeatureForm` component requires the following permissions to function correctly. These permissions are added to the AndroidManifest.xml file of the library. But the calling app should request these permissions at runtime. If the permissions are not granted, the respective functionality will be limited.
 
-- `Manifest.permission.CAMERA` : Required to use the camera for the `BarcodeScannerFormInput` input type and the `AttachmentsFormElement` to add attachments.
+- `Manifest.permission.CAMERA` : Required for the `BarcodeScannerFormInput` scanner and photo or video attachment capture.
+- `Manifest.permission.RECORD_AUDIO` : Required to record audio attachments with `AudioFormInput`.
 
 ## Behavior
 
@@ -144,8 +147,8 @@ The `FeatureForm` component requires the following permissions to function corre
 ### [AttachmentsFormElement](https://developers.arcgis.com/kotlin/api-reference/arcgis-maps-kotlin/com.arcgismaps.mapping.featureforms/-attachments-form-element/index.html?query=class%20AttachmentsFormElement%20:%20FormElement)
 
 - The `AttachmentsFormElement` is used to display and manage attachments for a feature. It allows users to add, view, and delete attachments.
-- It provides photo capture, video capture, gallery selection and a file picker based on the configured options for the element.
-- If camera permissions are not granted, the appropriate camera capture options will be disabled.
+- It provides photo, video and audio capture, gallery selection and a file picker based on the configured options for the element.
+- If camera or microphone permission is not granted, the corresponding capture options are disabled.
 
 <img src="screenshots/attachments_form_element.png" width="250"/>
   

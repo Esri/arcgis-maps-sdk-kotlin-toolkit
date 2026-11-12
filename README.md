@@ -34,7 +34,7 @@ Please see the [developer setup](doc/general/developer_setup.md) for a complete 
 other options for installing the SDK.
 * JDK 17
 
-The *ArcGIS Maps SDK for Kotlin Toolkit* has a *Minimum SDK* version of *28*, meaning that it can run on devices with *Android Pie (9.0)* or newer.
+The *ArcGIS Maps SDK for Kotlin Toolkit* has a *Minimum SDK* version of *29*, meaning that it can run on devices with *Android 10* or newer.
 
 ## Installation
 
@@ -53,7 +53,7 @@ repositories {
 The *ArcGIS Maps SDK for Kotlin Toolkit* is released with a "bill of materials" (`BOM`). The releasable BOM is versioned and represents a set of versions of the toolkit components which are compatible with one another. You may specify dependencies as follows
 
 ```
-implementation(platform("com.esri:arcgis-maps-kotlin-toolkit-bom:300.1.0"))
+implementation(platform("com.esri:arcgis-maps-kotlin-toolkit-bom:300.2.0"))
 implementation("com.esri:arcgis-maps-kotlin-toolkit-authentication")
 implementation("com.esri:arcgis-maps-kotlin-toolkit-basemapgallery")
 implementation("com.esri:arcgis-maps-kotlin-toolkit-compass")
