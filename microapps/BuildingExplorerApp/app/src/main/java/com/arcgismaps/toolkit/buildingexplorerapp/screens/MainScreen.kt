@@ -55,60 +55,48 @@ import com.arcgismaps.toolkit.geoviewcompose.LocalSceneView
 fun MainScreen() {
     val viewModel: ViewModel = viewModel()
 
-    val showProgress by viewModel.showProgress.collectAsStateWithLifecycle()
-
-    if (showProgress) {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
+    val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(
+        bottomSheetState = rememberStandardBottomSheetState(
+            initialValue = SheetValue.Expanded
         )
-        {
-            CircularProgressIndicator()
-        }
-    } else {
-        val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(
-            bottomSheetState = rememberStandardBottomSheetState(
-                initialValue = SheetValue.Expanded
+    )
+
+    var showErrorDialog by remember { mutableStateOf(false) }
+    var criticalError: Throwable? by remember { mutableStateOf(null) }
+
+    BottomSheetScaffold(
+        sheetContainerColor = MaterialTheme.colorScheme.surface,
+        sheetContent = {
+            BuildingExplorer(
+                state = viewModel.buildingExplorerState,
+                modifier = Modifier.fillMaxHeight(fraction = 0.5f)
             )
+        },
+        scaffoldState = bottomSheetScaffoldState
+    ) { paddingValues ->
+        LocalSceneView(
+            scene = viewModel.scene,
+            localSceneViewProxy = viewModel.localSceneViewProxy,
+            modifier = Modifier.padding(paddingValues),
+            onCriticalErrorChanged = { throwable ->
+                throwable?.let {
+                    showErrorDialog = true
+                    criticalError = throwable
+                }
+            }
         )
 
-        var showErrorDialog by remember { mutableStateOf(false) }
-        var criticalError: Throwable? by remember { mutableStateOf(null) }
-
-        BottomSheetScaffold(
-            sheetContainerColor = MaterialTheme.colorScheme.surface,
-            sheetContent = {
-                BuildingExplorer(
-                    state = viewModel.buildingExplorerState,
-                    modifier = Modifier.fillMaxHeight(fraction = 0.5f)
-                )
-            },
-            scaffoldState = bottomSheetScaffoldState
-        ) { paddingValues ->
-            LocalSceneView(
-                scene = viewModel.scene,
-                localSceneViewProxy = viewModel.localSceneViewProxy,
-                modifier = Modifier.padding(paddingValues),
-                onCriticalErrorChanged = { throwable ->
-                    throwable?.let {
-                        showErrorDialog = true
-                        criticalError = throwable
+        if (showErrorDialog) {
+            AlertDialog(
+                onDismissRequest = { showErrorDialog = false },
+                title = { Text(text = "Critical Error") },
+                text = { Text(text = criticalError?.message.toString()) },
+                confirmButton = {
+                    Button(onClick = { showErrorDialog = false }) {
+                        Text("OK")
                     }
                 }
             )
-
-            if (showErrorDialog) {
-                AlertDialog(
-                    onDismissRequest = { showErrorDialog = false },
-                    title = { Text(text = "Critical Error") },
-                    text = { Text(text = criticalError?.message.toString()) },
-                    confirmButton = {
-                        Button(onClick = { showErrorDialog = false }) {
-                            Text("OK")
-                        }
-                    }
-                )
-            }
         }
     }
 }

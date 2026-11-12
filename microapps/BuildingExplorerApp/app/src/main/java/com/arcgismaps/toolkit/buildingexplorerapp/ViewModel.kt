@@ -22,12 +22,8 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.arcgismaps.mapping.ArcGISScene
-import com.arcgismaps.mapping.layers.BuildingSceneLayer
 import com.arcgismaps.toolkit.buildingexplorer.BuildingExplorerState
 import com.arcgismaps.toolkit.geoviewcompose.LocalSceneViewProxy
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
 
 /**
  * The view model.
@@ -41,29 +37,11 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
     val scene =
         ArcGISScene("https://www.arcgis.com/home/item.html?id=b7c387d599a84a50aafaece5ca139d44")
 
-    private val _showProgress = MutableStateFlow(true)
-    val showProgress = _showProgress.asStateFlow()
-
     val localSceneViewProxy = LocalSceneViewProxy()
 
-    lateinit var buildingExplorerState: BuildingExplorerState
-
-    init {
-        viewModelScope.launch {
-            scene.load()
-                .onFailure { throw it }
-                .onSuccess {
-                    val layers =
-                        scene.operationalLayers.filterIsInstance<BuildingSceneLayer>()
-
-                    buildingExplorerState = BuildingExplorerState(
-                        buildingSceneLayers = layers,
-                        coroutineScope = viewModelScope,
-                        localSceneViewProxy = localSceneViewProxy
-                    )
-
-                    _showProgress.value = false
-                }
-        }
-    }
+    val buildingExplorerState = BuildingExplorerState(
+        arcGISScene = scene,
+        coroutineScope = viewModelScope,
+        localSceneViewProxy = localSceneViewProxy
+    )
 }

@@ -19,11 +19,12 @@
 package com.arcgismaps.toolkit.buildingexplorer
 
 import androidx.compose.runtime.Stable
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.State
+import com.arcgismaps.mapping.ArcGISScene
 import com.arcgismaps.mapping.layers.BuildingSceneLayer
+import com.arcgismaps.mapping.layers.GroupLayer
+import com.arcgismaps.mapping.layers.Layer
 import com.arcgismaps.mapping.layers.buildingscene.BuildingFilter
 import com.arcgismaps.mapping.layers.buildingscene.BuildingFilterBlock
 import com.arcgismaps.mapping.layers.buildingscene.BuildingGroupSublayer
@@ -31,6 +32,7 @@ import com.arcgismaps.mapping.layers.buildingscene.BuildingSolidFilterMode
 import com.arcgismaps.mapping.layers.buildingscene.BuildingSublayer
 import com.arcgismaps.mapping.layers.buildingscene.BuildingXrayFilterMode
 import com.arcgismaps.mapping.view.Camera
+import com.arcgismaps.mapping.view.SceneViewingMode
 import com.arcgismaps.toolkit.geoviewcompose.LocalSceneViewProxy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -48,31 +50,98 @@ import kotlin.time.Duration.Companion.seconds
  * @since 300.2.0
  */
 @Stable
-public class BuildingExplorerState(
+public class BuildingExplorerState internal constructor(
     buildingSceneLayers: List<BuildingSceneLayer>,
+    arcGISScene: ArcGISScene?,
     coroutineScope: CoroutineScope,
-    internal val localSceneViewProxy: LocalSceneViewProxy? = null
+    localSceneViewProxy: LocalSceneViewProxy? = null
 ) {
-    init {
-        require(buildingSceneLayers.isNotEmpty()) {
-            "BuildingExplorerState requires at least one BuildingSceneLayer."
+    private val _stateLoaded = MutableStateFlow(false)
+    internal val stateLoaded = _stateLoaded.asStateFlow()
+
+    internal enum class Error {
+        NoError,
+        NoBuildingLayers,
+        RequiresLocalScene,
+        LoadFailed
+    }
+
+    internal var error: Error = Error.NoError
+
+    internal lateinit var buildingSceneLayerStates: List<BuildingSceneLayerState>
+
+    private val _buildingSceneLayerState = mutableStateOf<BuildingSceneLayerState?>(null)
+
+    internal val buildingSceneLayerState: State<BuildingSceneLayerState?> =
+        _buildingSceneLayerState
+
+    public constructor(
+        buildingSceneLayers: List<BuildingSceneLayer>,
+        coroutineScope: CoroutineScope,
+        localSceneViewProxy: LocalSceneViewProxy? = null
+    ) : this(
+        buildingSceneLayers = buildingSceneLayers,
+        arcGISScene = null,
+        coroutineScope = coroutineScope,
+        localSceneViewProxy = localSceneViewProxy
+    )
+
+    public constructor(
+        arcGISScene: ArcGISScene,
+        coroutineScope: CoroutineScope,
+        localSceneViewProxy: LocalSceneViewProxy? = null
+    ) : this(
+        buildingSceneLayers = emptyList(),
+        arcGISScene = arcGISScene,
+        coroutineScope = coroutineScope,
+        localSceneViewProxy = localSceneViewProxy
+    )
+
+    private fun extractBuildingSceneLayers(
+        layers: List<Layer>
+    ): List<BuildingSceneLayer> = layers.flatMap { layer ->
+        when (layer) {
+            is BuildingSceneLayer -> listOf(layer)
+            is GroupLayer -> extractBuildingSceneLayers(layer.layers)
+            else -> emptyList()
         }
     }
 
-    internal val buildingSceneLayerStates = buildingSceneLayers.map {
-        BuildingSceneLayerState(
-            buildingSceneLayer = it,
-            coroutineScope = coroutineScope,
-            localSceneViewProxy = localSceneViewProxy
-        )
-    }.sortedBy { it.name }
+    init {
+        coroutineScope.launch {
+            val layers = arcGISScene?.let { scene ->
+                scene.load().fold(
+                    onSuccess = {
+                        if (scene.viewingMode == SceneViewingMode.Local) {
+                            extractBuildingSceneLayers(scene.operationalLayers)
+                        } else {
+                            error = Error.RequiresLocalScene
+                            emptyList()
+                        }
+                    },
+                    onFailure = {
+                        error = Error.LoadFailed
+                        emptyList()
+                    }
+                )
+            } ?: buildingSceneLayers
 
-    private val _buildingSceneLayerState = mutableStateOf(
-        buildingSceneLayerStates.first()
-    )
+            if (layers.isEmpty() && error == Error.NoError) {
+                error = Error.NoBuildingLayers
+            }
 
-    internal val buildingSceneLayerState: State<BuildingSceneLayerState> =
-        _buildingSceneLayerState
+            buildingSceneLayerStates = layers.map { layer ->
+                BuildingSceneLayerState(
+                    buildingSceneLayer = layer,
+                    coroutineScope = coroutineScope,
+                    localSceneViewProxy = localSceneViewProxy
+                )
+            }.sortedBy { it.name }
+
+            _buildingSceneLayerState.value = buildingSceneLayerStates.firstOrNull()
+            _stateLoaded.value = true
+        }
+    }
 
     internal fun onBuildingSceneLayerSelected(index: Int) {
         _buildingSceneLayerState.value = buildingSceneLayerStates.getOrNull(index) ?: return
@@ -92,6 +161,13 @@ internal class BuildingSceneLayerState(
 ) {
     private val _stateLoaded = MutableStateFlow(false)
     internal val stateLoaded = _stateLoaded.asStateFlow()
+
+    internal enum class Error {
+        NoError,
+        LoadFailed
+    }
+
+    internal var error: Error = Error.NoError
 
     // the name of the building layer
     internal val name = buildingSceneLayer.name
@@ -113,7 +189,8 @@ internal class BuildingSceneLayerState(
     internal val levels: List<String> get() = _levels.toList()
 
     // Levels elements should only show if there are more than 1 level (so 2 when counting "All")
-    internal val isShowLevels by derivedStateOf { levels.size > 2 }
+    internal val isShowLevels: Boolean
+        get() = levels.size > 2
 
     // the index of the selected construction phase
     private var _selectedConstructionPhase = mutableStateOf("")
@@ -124,7 +201,8 @@ internal class BuildingSceneLayerState(
     internal val constructionPhases: List<String> get() = _constructionPhases.toList()
 
     // construction phase elements should only show if there is more than 1 phase
-    internal val isShowConstructionPhases by derivedStateOf { constructionPhases.size > 1 }
+    internal val isShowConstructionPhases: Boolean
+        get() = constructionPhases.size > 1
 
     // The list of building sublayer categories
     private val _categories = mutableListOf<BuildingSublayer>()
@@ -144,39 +222,46 @@ internal class BuildingSceneLayerState(
         coroutineScope.launch {
             buildingSceneLayer.let { buildingSceneLayer ->
                 // load the layer and extract the overview and full model sublayers if they are available
-                buildingSceneLayer.load().onFailure { throw it }
-
-                val sublayers = buildingSceneLayer.sublayers
-                overviewSublayer = sublayers.firstOrNull { it.modelName == "Overview" }
-                fullModelSublayer = sublayers.firstOrNull { it.modelName == "FullModel" }
-                fullModelSublayer?.let {
-                    _showFullModel.value = it.isVisible
+                buildingSceneLayer.load().onFailure {
+                    error = Error.LoadFailed
                 }
 
-                _isShowFullModelSwitch.value = fullModelSublayer != null && overviewSublayer != null
+                if (error == Error.NoError) {
+                    _visible.value = buildingSceneLayer.isVisible
 
-                // Get the levels and construction phases from the statistics
-                buildingSceneLayer.fetchStatistics().onSuccess { statistics ->
-                    statistics["BldgLevel"]?.mostFrequentValues?.let {
-                        _levels.addAll(0, it.sortedBy { level -> level.toInt() })
+                    val sublayers = buildingSceneLayer.sublayers
+                    overviewSublayer = sublayers.firstOrNull { it.modelName == "Overview" }
+                    fullModelSublayer = sublayers.firstOrNull { it.modelName == "FullModel" }
+                    fullModelSublayer?.let {
+                        _showFullModel.value = it.isVisible
                     }
-                    statistics["CreatedPhase"]?.mostFrequentValues?.let {
-                        // only allow integer phases because that is what the filter is expecting
-                        _constructionPhases.addAll(it.filter { phase -> phase.toIntOrNull() != null }
-                            .sortedBy { phase -> phase.toInt() })
-                        if (_constructionPhases.isNotEmpty()) {
-                            _selectedConstructionPhase.value = _constructionPhases.last()
+
+                    _isShowFullModelSwitch.value =
+                        fullModelSublayer != null && overviewSublayer != null
+
+                    // Get the levels and construction phases from the statistics
+                    buildingSceneLayer.fetchStatistics().onSuccess { statistics ->
+                        statistics["BldgLevel"]?.mostFrequentValues?.let {
+                            _levels.addAll(0, it.filter { level -> level.toIntOrNull() != null }
+                                .sortedBy { level -> level.toInt() })
+                        }
+                        statistics["CreatedPhase"]?.mostFrequentValues?.let {
+                            // only allow integer phases because that is what the filter is expecting
+                            _constructionPhases.addAll(it.filter { phase -> phase.toIntOrNull() != null }
+                                .sortedBy { phase -> phase.toInt() })
+                            if (_constructionPhases.isNotEmpty()) {
+                                _selectedConstructionPhase.value = _constructionPhases.last()
+                            }
                         }
                     }
-
                     // The top-level sublayer groups will be the categories
                     (fullModelSublayer as? BuildingGroupSublayer)?.let { buildingSublayer ->
                         _categories.addAll(buildingSublayer.sublayers.sortedBy { it.name })
                     }
-                }
 
-                // clear any preset filter on the layer
-                filter()
+                    // clear any preset filter on the layer
+                    filter()
+                }
 
                 _stateLoaded.emit(true)
             }
