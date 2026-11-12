@@ -143,11 +143,12 @@ private fun BookmarkItem(
             .heightIn(min = 48.dp)
             .semantics{
                 contentDescription = bookmark.name
-            }
+            },
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
             text = bookmark.name,
-            style = textStyle.copy(lineHeight = 1.2.em)
+            style = textStyle
         )
     }
     HorizontalDivider()
