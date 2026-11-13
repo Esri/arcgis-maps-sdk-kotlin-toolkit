@@ -3,7 +3,7 @@
 Requirements: 
 
 * [Android Studio](https://developer.android.com/studio)
-* [Android SDK build tools version 33](https://developer.android.com/about/versions/13/setup-sdk#:~:text=Click%20Tools%20%3E%20SDK%20Manager.,OK%20to%20install%20the%20SDK.)
+* [Android SDK Platform 37](https://developer.android.com/studio/intro/update#sdk-manager)
 * [JDK 17](https://adoptium.net/temurin/releases/)
 
 and an internet connection to download dependencies expressed in gradle.
@@ -30,37 +30,57 @@ The actual toolkit components are releasable libraries whose modules can be foun
 
 <pre>
 toolkit
+├── ar
 ├── authentication
+├── basemapgallery
 ├── compass
 ├── featureforms
 ├── geoview-compose
 ├── indoors
+├── legend
+├── offline
+├── popup
+├── scalebar
+├── utilitynetworks
 └── template
 </pre>
 
 These libraries have package names like `com.arcgismaps.toolkit.authentication`. Note that the `template` module is used internally and is not released.
 
-For each toolkit component, there are one or more example apps in the `microapps` folder.
+The `microapps` folder contains example apps for the toolkit components and composable GeoViews:
 
 <pre>
 microapps
+├── ArFlyoverApp
+├── ArTabletopApp
+├── ArWorldScaleApp
 ├── AuthenticationApp
+├── BasemapGalleryApp
+├── CalloutApp
 ├── CompassApp
 ├── FeatureFormsApp
 ├── FloorFilterApp
+├── LegendApp
+├── LocalSceneViewApp
 ├── MapViewGeometryEditorApp
 ├── MapViewIdentifyApp
 ├── MapViewInsetsApp
 ├── MapViewLocationDisplayApp
 ├── MapViewSetViewpointApp
+├── OfflineMapAreasApp
+├── OverviewMapApp
+├── PopupApp
+├── ScalebarApp
 ├── SceneViewAnalysisOverlayApp
 ├── SceneViewCameraControllerApp
 ├── SceneViewLightingOptionsApp
 ├── SceneViewSetViewpointApp
-└── TemplateApp
+└── UtilityNetworkTraceApp
 </pre>
 
-These apps have package names like `com.arcgismaps.toolkit.featureformsapp`
+The apps have package names such as `com.arcgismaps.toolkit.featureformsapp`. The folder also
+contains `MicroappsLib`, a shared library, and `TemplateApp`, which is used to bootstrap new
+microapps.
 
 ### Creating new toolkit components
 

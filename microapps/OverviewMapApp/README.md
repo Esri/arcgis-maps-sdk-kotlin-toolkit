@@ -8,7 +8,7 @@ View or Scene View, which shows a representation of the main view's current view
 
 ## Usage
 
-Tha application shows two tabs, one that demonstrates the Overview Map being used with a Map View
+The application shows two tabs, one that demonstrates the Overview Map being used with a Map View
 and one that demonstrates the Overview Map being used with a Scene View.
 
 For more information on the `OverviewMap` component and how it works, see

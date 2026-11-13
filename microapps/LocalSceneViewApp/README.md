@@ -6,6 +6,8 @@ user interface that displays 3D basemaps and layer content described in a Scene 
 
 ![Screenshot](screenshot.png)
 
-# Usage
+## Usage
 
 This micro-app displays a local scene clipped to an extent. Pan and zoom to explore the scene.
+
+For more information, see the [GeoView-Compose README](../../toolkit/geoview-compose/README.md).
