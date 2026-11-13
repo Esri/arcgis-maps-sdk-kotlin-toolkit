@@ -1,0 +1,4 @@
+public final class com/arcgismaps/toolkit/bookmarks/BookmarksKt {
+	public static final fun BookmarksListView-FHprtrg (Lcom/arcgismaps/toolkit/geoviewcompose/GeoViewProxy;Landroidx/compose/runtime/snapshots/SnapshotStateList;Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function1;JLandroidx/compose/ui/text/TextStyle;Landroidx/compose/runtime/Composer;II)V
+}
+
