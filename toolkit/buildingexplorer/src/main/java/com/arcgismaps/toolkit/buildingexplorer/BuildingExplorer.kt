@@ -243,13 +243,7 @@ public fun BuildingExplorer(
                 }
             }
         } else {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            )
-            {
-                CircularProgressIndicator()
-            }
+            LoadingIndicator()
         }
     }
 }
@@ -469,12 +463,7 @@ internal fun BuildingExplorer(
             }
         }
     } else {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            CircularProgressIndicator()
-        }
+        LoadingIndicator()
     }
 }
 
@@ -561,6 +550,16 @@ private fun SubCategorySelector(
                     onSelected(buildingSublayer, isChecked)
                 })
         }
+    }
+}
+
+@Composable
+private fun LoadingIndicator(modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        CircularProgressIndicator()
     }
 }
 
