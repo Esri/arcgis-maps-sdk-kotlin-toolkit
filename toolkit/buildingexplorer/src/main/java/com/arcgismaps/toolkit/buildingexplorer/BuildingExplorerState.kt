@@ -52,8 +52,8 @@ public class BuildingExplorerState internal constructor(
     coroutineScope: CoroutineScope,
     localSceneViewProxy: LocalSceneViewProxy? = null
 ) {
-    private val _stateLoaded = MutableStateFlow(false)
-    internal val stateLoaded = _stateLoaded.asStateFlow()
+    private val _isStateLoaded = MutableStateFlow(false)
+    internal val isStateLoaded = _isStateLoaded.asStateFlow()
 
     internal enum class Error {
         NoError,
@@ -155,7 +155,7 @@ public class BuildingExplorerState internal constructor(
             }.sortedBy { it.name }
 
             _buildingSceneLayerState.value = buildingSceneLayerStates.firstOrNull()
-            _stateLoaded.value = true
+            _isStateLoaded.value = true
         }
     }
 
@@ -175,8 +175,8 @@ internal class BuildingSceneLayerState(
     private val coroutineScope: CoroutineScope,
     private val localSceneViewProxy: LocalSceneViewProxy?
 ) {
-    private val _stateLoaded = MutableStateFlow(false)
-    internal val stateLoaded = _stateLoaded.asStateFlow()
+    private val _isStateLoaded = MutableStateFlow(false)
+    internal val isStateLoaded = _isStateLoaded.asStateFlow()
 
     internal enum class Error {
         NoError,
@@ -279,7 +279,7 @@ internal class BuildingSceneLayerState(
                     filter()
                 }
 
-                _stateLoaded.emit(true)
+                _isStateLoaded.emit(true)
             }
         }
     }

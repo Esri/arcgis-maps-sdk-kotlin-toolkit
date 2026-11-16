@@ -124,11 +124,11 @@ public fun BuildingExplorer(
     state: BuildingExplorerState,
     modifier: Modifier = Modifier
 ) {
-    val stateLoaded by state.stateLoaded.collectAsStateWithLifecycle()
+    val isStateLoaded by state.isStateLoaded.collectAsStateWithLifecycle()
     val layerState = state.buildingSceneLayerState.value
 
     Box(modifier = modifier) {
-        if (stateLoaded) {
+        if (isStateLoaded) {
             if (layerState != null) {
                 val listState = rememberLazyListState()
                 LazyColumn(
@@ -264,9 +264,9 @@ internal fun BuildingExplorer(
     buildingSceneLayerState: BuildingSceneLayerState,
     modifier: Modifier = Modifier
 ) {
-    val stateLoaded by buildingSceneLayerState.stateLoaded.collectAsStateWithLifecycle()
+    val isStateLoaded by buildingSceneLayerState.isStateLoaded.collectAsStateWithLifecycle()
 
-    if (stateLoaded) {
+    if (isStateLoaded) {
         if (buildingSceneLayerState.error == BuildingSceneLayerState.Error.NoError) {
             Surface(modifier = modifier) {
                 Column {
