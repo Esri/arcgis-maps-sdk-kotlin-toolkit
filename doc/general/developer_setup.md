@@ -33,6 +33,7 @@ toolkit
 ├── ar
 ├── authentication
 ├── basemapgallery
+├── bookmarks
 ├── compass
 ├── featureforms
 ├── geoview-compose
