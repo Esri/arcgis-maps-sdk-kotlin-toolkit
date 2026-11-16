@@ -43,10 +43,6 @@ import kotlin.time.Duration.Companion.seconds
 /**
  * The state of a [BuildingExplorer].
  *
- * @param buildingSceneLayers The list of [BuildingSceneLayer]s that will appear in the component.
- * @param coroutineScope The coroutine scope to use for asynchronous operations.
- * @param localSceneViewProxy The proxy to provide access to the set viewpoint operation for the
- * "Zoom to building" button. If the proxy is null then that button will not display.
  * @since 300.2.0
  */
 @Stable
@@ -75,6 +71,16 @@ public class BuildingExplorerState internal constructor(
     internal val buildingSceneLayerState: State<BuildingSceneLayerState?> =
         _buildingSceneLayerState
 
+    /**
+     * Creates a [BuildingExplorerState] with the given building scene layers.
+     *
+     * @param buildingSceneLayers The list of [BuildingSceneLayer]s that will appear in the component.
+     * @param coroutineScope The coroutine scope to use for asynchronous operations.
+     * @param localSceneViewProxy The proxy to provide access to the set viewpoint operation for the
+     * "Zoom to building" button. If the proxy is null then that button will not display.
+     *
+     * @since 300.2.0
+     */
     public constructor(
         buildingSceneLayers: List<BuildingSceneLayer>,
         coroutineScope: CoroutineScope,
@@ -86,6 +92,16 @@ public class BuildingExplorerState internal constructor(
         localSceneViewProxy = localSceneViewProxy
     )
 
+    /**
+     * Creates a [BuildingExplorerState] with using the [BuildingSceneLayer]s from the given ArcGISScene.
+     *
+     * @param arcGISScene The scene that provides [BuildingSceneLayer]s.
+     * @param coroutineScope The coroutine scope to use for asynchronous operations.
+     * @param localSceneViewProxy The proxy to provide access to the set viewpoint operation for the
+     * "Zoom to building" button. If the proxy is null then that button will not display.
+     *
+     * @since 300.2.0
+     */
     public constructor(
         arcGISScene: ArcGISScene,
         coroutineScope: CoroutineScope,
