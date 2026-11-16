@@ -194,7 +194,7 @@ internal class BuildingSceneLayerState(
 
     // whether the full model is being shown
     private var _showFullModel = mutableStateOf(false)
-    internal val showFullModel: State<Boolean> = _showFullModel
+    internal val shouldShowFullModel: State<Boolean> = _showFullModel
 
     // The selected level
     private var _selectedLevel = mutableStateOf("All")
@@ -205,7 +205,7 @@ internal class BuildingSceneLayerState(
     internal val levels: List<String> get() = _levels.toList()
 
     // Levels elements should only show if there are more than 1 level (so 2 when counting "All")
-    internal val isShowLevels: Boolean
+    internal val shouldShowLevels: Boolean
         get() = levels.size > 2
 
     // the index of the selected construction phase
@@ -217,7 +217,7 @@ internal class BuildingSceneLayerState(
     internal val constructionPhases: List<String> get() = _constructionPhases.toList()
 
     // construction phase elements should only show if there is more than 1 phase
-    internal val isShowConstructionPhases: Boolean
+    internal val shouldShowConstructionPhases: Boolean
         get() = constructionPhases.size > 1
 
     // The list of building sublayer categories
@@ -229,8 +229,8 @@ internal class BuildingSceneLayerState(
 
     // the show full model switch should only appear if both the full model and overview sublayers
     // are available
-    private var _isShowFullModelSwitch = mutableStateOf(false)
-    internal val isShowFullModelSwitch: State<Boolean> = _isShowFullModelSwitch
+    private var _shouldShowFullModelSwitch = mutableStateOf(false)
+    internal val shouldShowFullModelSwitch: State<Boolean> = _shouldShowFullModelSwitch
 
     internal val isShowZoom = localSceneViewProxy != null
 
@@ -252,7 +252,7 @@ internal class BuildingSceneLayerState(
                         _showFullModel.value = it.isVisible
                     }
 
-                    _isShowFullModelSwitch.value =
+                    _shouldShowFullModelSwitch.value =
                         fullModelSublayer != null && overviewSublayer != null
 
                     // Get the levels and construction phases from the statistics
@@ -309,7 +309,7 @@ internal class BuildingSceneLayerState(
         var solidWhere = ""
         var xRayWhere = ""
 
-        if (isShowConstructionPhases) {
+        if (shouldShowConstructionPhases) {
             val phase = _selectedConstructionPhase.value
             solidWhere = "CreatedPhase <= $phase"
             xRayWhere = "CreatedPhase <= $phase"

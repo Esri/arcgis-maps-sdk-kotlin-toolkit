@@ -283,7 +283,7 @@ internal fun BuildingExplorer(
                     }
 
                     if (buildingSceneLayerState.visible.value) {
-                        if (buildingSceneLayerState.isShowFullModelSwitch.value) {
+                        if (buildingSceneLayerState.shouldShowFullModelSwitch.value) {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
                                 modifier = Modifier.padding(8.dp)
@@ -291,7 +291,7 @@ internal fun BuildingExplorer(
                                 Text(stringResource(R.string.show_full_model))
                                 Spacer(modifier = Modifier.weight(1f))
                                 Switch(
-                                    checked = buildingSceneLayerState.showFullModel.value,
+                                    checked = buildingSceneLayerState.shouldShowFullModel.value,
                                     onCheckedChange = buildingSceneLayerState::toggleFullModel
                                 )
                             }
@@ -317,8 +317,8 @@ internal fun BuildingExplorer(
                             }
                         }
 
-                        if (buildingSceneLayerState.showFullModel.value) {
-                            if (buildingSceneLayerState.isShowLevels) {
+                        if (buildingSceneLayerState.shouldShowFullModel.value) {
+                            if (buildingSceneLayerState.shouldShowLevels) {
                                 var levelsExpanded by remember { mutableStateOf(false) }
                                 Row {
                                     Text(
@@ -381,7 +381,7 @@ internal fun BuildingExplorer(
                                 }
                             }
 
-                            if (buildingSceneLayerState.isShowConstructionPhases) {
+                            if (buildingSceneLayerState.shouldShowConstructionPhases) {
                                 var constructionPhasesExpanded by remember {
                                     mutableStateOf(
                                         false
