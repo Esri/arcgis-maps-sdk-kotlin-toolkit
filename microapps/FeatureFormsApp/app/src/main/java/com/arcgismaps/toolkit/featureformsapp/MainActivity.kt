@@ -19,6 +19,7 @@
 package com.arcgismaps.toolkit.featureformsapp
 
 import android.Manifest.permission.CAMERA
+import android.Manifest.permission.RECORD_AUDIO
 import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -101,12 +102,14 @@ class MainActivity : ComponentActivity() {
 
     private val hasPermissions = mutableStateOf<Boolean?>(null)
 
+    private val requiredPermissions = arrayOf(CAMERA, RECORD_AUDIO)
+
     // Register the permissions callback, which handles the user's response to the
     // system permissions dialog.
     private val requestPermissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { isGranted: Boolean ->
-        hasPermissions.value = isGranted
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        hasPermissions.value = requiredPermissions.all { permissions[it] == true }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -142,12 +145,13 @@ class MainActivity : ComponentActivity() {
             loadCredentials(factory.getPortalSettings(), this@MainActivity.datastore)
         }
         // check for permissions
-        when (ContextCompat.checkSelfPermission(this, CAMERA)) {
-            PackageManager.PERMISSION_GRANTED -> {
-                hasPermissions.value = true
-            }
-
-            else -> requestPermissionLauncher.launch(CAMERA)
+        val allPermissionsGranted = requiredPermissions.all { permission ->
+            ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED
+        }
+        if (allPermissionsGranted) {
+            hasPermissions.value = true
+        } else {
+            requestPermissionLauncher.launch(requiredPermissions)
         }
     }
 

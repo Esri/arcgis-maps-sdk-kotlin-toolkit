@@ -33,6 +33,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
+import androidx.window.core.layout.WindowSizeClass
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.BottomSheetMaxWidth
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.SheetExpansionHeight
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.SheetLayout
@@ -51,8 +52,12 @@ fun OfflineMapAreasSheet(
     modifier: Modifier = Modifier,
 ) {
     val windowSize = getWindowSize(LocalContext.current)
+    // determine if the device is in compact width
+    val isCompact = windowSize.isWidthAtLeastBreakpoint(
+        WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND
+    ).not()
     val bottomSheetState = rememberStandardBottomSheetState(
-        initialValue = SheetValue.PartiallyExpanded,
+        initialValue = if (isCompact) SheetValue.PartiallyExpanded else SheetValue.Expanded,
         confirmValueChange = { it != SheetValue.Hidden },
         skipHiddenState = false
     )

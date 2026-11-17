@@ -119,6 +119,8 @@
     <string name="file_size_exceeds_limit">File Size Exceeds Limit</string>
     <string name="unsupported_file_type">Unsupported File Type</string>
     <string name="save">Save</string>
+    <string name="save_failed">Unable to save edits</string>
+    <string name="unknown_save_error">An unexpected error occurred while saving the form.</string>
     <string name="discard">Discard</string>
     <string name="none_selected">None Selected</string>
     <string name="the_form_has_validation_errors">The form has validation errors</string>
@@ -180,6 +182,10 @@
     <string name="filters_not_applied">Filters have not been applied</string>
     <string name="discard_changes_confirmation">Are you sure you want to discard the changes?</string>
     <string name="record_audio">Record Audio</string>
+    <string name="ready_to_record_audio">Ready to record audio.</string>
+    <string name="recording_audio">Recording audio…</string>
+    <string name="start_recording">Start Recording</string>
+    <string name="stop_recording">Stop Recording</string>
     <string name="take_video">Take Video</string>
     <string name="max_attachments_limit_reached">The maximum number of attachments allowed is %1$d</string>
     <string name="media_too_long">This media is too long. Maximum allowed duration is %1$d seconds.</string>

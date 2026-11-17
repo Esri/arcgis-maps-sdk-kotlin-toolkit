@@ -28,6 +28,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import com.esri.microappslib.theme.MicroAppThemeSurface
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.geometry.SpatialReference
 import kotlinx.coroutines.runBlocking
@@ -59,13 +60,15 @@ class TraceToolTests : TraceToolTestRunner(
     fun setContent() = runTest {
         val traceToolUsageScenarios = TraceToolUsageScenarios()
         composeTestRule.setContent {
-            traceToolUsageScenarios.MapViewWithTraceInBottomSheet(
-                map,
-                mapviewProxy,
-                graphicsOverlay,
-                { drawStatusLatch.countDown() }
-            ) {
-                Trace(traceState = traceState)
+            MicroAppThemeSurface {
+                traceToolUsageScenarios.MapViewWithTraceInBottomSheet(
+                    map,
+                    mapviewProxy,
+                    graphicsOverlay,
+                    { drawStatusLatch.countDown() }
+                ) {
+                    Trace(traceState = traceState)
+                }
             }
         }
     }

@@ -40,11 +40,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.arcgismaps.toolkit.popup.R
 import com.arcgismaps.toolkit.popup.internal.ui.expandablecard.theme.DefaultThemeTokens.shapes
 import com.arcgismaps.toolkit.popup.internal.ui.expandablecard.theme.DefaultThemeTokens.typography
 import com.arcgismaps.toolkit.popup.internal.ui.expandablecard.theme.ExpandableCardColorScheme
@@ -126,6 +132,7 @@ private fun ExpandableHeader(
     onClick: () -> Unit
 ) {
     if (title.isEmpty() && description == null && !expandable) return
+    val stateString = if(isExpanded) stringResource(R.string.expanded) else stringResource(R.string.collapsed)
     Row(
         Modifier
             .testTag("ExpandableHeader")
@@ -134,6 +141,10 @@ private fun ExpandableHeader(
                 clickable {
                     onClick()
                 }
+                    .semantics(mergeDescendants = true){
+                        role = Role.Button
+                        stateDescription = stateString
+                    }
             }
             .background(colors.headerBackgroundColor),
         verticalAlignment = Alignment.CenterVertically
@@ -155,14 +166,17 @@ private fun ExpandableHeader(
                 description()
             }
         }
-
         if (expandable) {
             Crossfade(targetState = isExpanded, label = "expandPopupElement") {
+
                 Icon(
                     modifier = Modifier
-                        .padding(16.dp),
+                        .padding(16.dp)
+                        .semantics{
+                            stateDescription = stateString
+                        },
                     imageVector = if (it) Icons.Rounded.ExpandLess else Icons.Rounded.ExpandMore,
-                    contentDescription = "Expand"
+                    contentDescription = null
                 )
             }
         }

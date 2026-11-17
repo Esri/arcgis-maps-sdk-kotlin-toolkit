@@ -18,56 +18,17 @@
 
 
 plugins {
-    alias(libs.plugins.binary.compatibility.validator)
-    id("com.android.library")
-    id("artifact-deploy")
-    alias(libs.plugins.kotlin.convention.plugin)
-    id("org.jetbrains.kotlin.plugin.compose")
+    alias(libs.plugins.component.convention.plugin)
 }
-kotlin {
-    jvmToolchain(17)
-}
+
 
 android {
     namespace = "com.arcgismaps.toolkit.basemapgallery"
-    compileSdk = libs.versions.compileSdk.get().toInt()
-
-    defaultConfig {
-        minSdk = libs.versions.minSdk.get().toInt()
-
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        consumerProguardFiles("consumer-rules.pro")
-    }
-
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-        }
-    }
-    buildFeatures {
-        compose = true
-    }
-    // If this were not an android project, we would just write `explicitApi()` in the Kotlin scope.
-    // but as an android project could write `freeCompilerArgs = listOf("-Xexplicit-api=strict")`
-    // in the kotlinOptions above, but that would enforce api rules on the test code, which we don't want.
-    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-        if ("Test" !in name) {
-            compilerOptions {
-                freeCompilerArgs.add("-Xexplicit-api=strict")
-            }
-        }
-    }
 
     // Avoids an empty test report showing up in the CI integration test report.
     // Remove this if tests will be added.
     tasks.withType<Test> {
         enabled = false
-    }
-
-    publishing {
-        singleVariant("release") {
-            // This is the default variant.
-        }
     }
 }
 

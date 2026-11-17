@@ -337,4 +337,4 @@ internal fun rememberSheetState(
 }
 
 private val DragHandleVerticalPadding = 22.dp
-internal val BottomSheetMaxWidth = 640.dp
+internal val BottomSheetMaxWidth = 540.dp

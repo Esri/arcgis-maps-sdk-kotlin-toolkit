@@ -81,7 +81,6 @@ fun UtilityNetworkTraceApp(traceViewModel: TraceViewModel) {
                     username = BuildConfig.traceToolUser,
                     password = BuildConfig.traceToolPassword
                 ).getOrThrow()
-
             ArcGISEnvironment.authenticationManager.arcGISCredentialStore.add(tokenCred)
             initialized = true
         } catch (e: Exception) {

@@ -20,6 +20,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.test.platform.app.InstrumentationRegistry
+import com.esri.microappslib.theme.MicroAppThemeSurface
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.PortalItem
 import com.arcgismaps.portal.Portal
@@ -51,13 +52,15 @@ class LegendTests {
         val legendUsageScenarios = LegendUsageScenarios()
         val basemap = map.basemap.value
         composeTestRule.setContent {
-            legendUsageScenarios.MapViewWithLegendInBottomSheet(
-                map
-            ) {
-                Legend(
-                    map.operationalLayers,
-                    basemap,
-                    296326.0565949112)
+            MicroAppThemeSurface {
+                legendUsageScenarios.MapViewWithLegendInBottomSheet(
+                    map
+                ) {
+                    Legend(
+                        map.operationalLayers,
+                        basemap,
+                        296326.0565949112)
+                }
             }
         }
     }
