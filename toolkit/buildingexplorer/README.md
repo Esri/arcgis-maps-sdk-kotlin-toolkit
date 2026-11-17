@@ -9,6 +9,7 @@ The Building Explorer provides a tool for browsing the levels and sublayers of b
 - Select building scene layers from a dropdown list.
 - Switching the visibility of the building scene layer.
 - Switching between the Overview model (if available) and the Full Model.
+- Zoom the view to the selected building.
 - Selecting a level of the building to highlight in the view.
     - The selected level and all the features of the level are rendered normally.
     - Levels above are hidden.
@@ -40,12 +41,26 @@ Create a `BuildingExplorerState` with a list of `BuildingSceneLayers`
     }
 ```
 
-Create a `BuildingExplorer` taking the `BuildingExploereState` and add it to the UI
+or create a `BuildingExplorerState` from an `ArcGISScene` which will allow exploring all of the 
+`BuildingSceneLayers` in the scene
+
+```kotlin
+    val localSceneViewProxy = LocalSceneViewProxy()
+
+    val buildingExplorerState = BuildingExplorerState(
+        arcGISScene = scene,
+        coroutineScope = viewModelScope,
+        localSceneViewProxy = localSceneViewProxy
+    )
+```
+
+Create a `BuildingExplorer` taking the `BuildingExplorerState` and add it to the UI
 
 ```kotlin
 Column {
     LocalSceneView(
-        scene = viewModel.scene, 
+        scene = viewModel.scene,
+        localSceneViewProxy = viewModel.localSceneViewProxy,
         modifier = Modifier.weight(0.5f))
     BuildingExplorer(
         state = viewModel.buildingExplorerState,
