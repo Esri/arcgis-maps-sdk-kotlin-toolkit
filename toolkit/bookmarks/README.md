@@ -19,7 +19,7 @@ The `BookmarksListView` composable displays the bookmarks from a map or scene. S
 
 *View the Toolkit API Reference for the `bookmarks` module [here](https://developers.arcgis.com/kotlin/toolkit-api-reference/arcgis-maps-kotlin-toolkit/com.arcgismaps.toolkit.bookmarks/index.html).*
 
-`BookmarksListView` needs a `GeoViewProxy` for the map or scene and a `SnapshotStateList` of `Bookmark` objects. For example, after loading a map, its bookmarks can be copied into a state list and displayed alongside a `MapView`:
+Use the `BookmarksListView` in conjunction with a `GeoViewProxy` from a map or scene to maintain a list of points of interest. For example, to navigate to the GeoViewProxy's bookmark viewpoints, after loading a map, pass in the bookmarks and display the component alongside a `MapView`:
 
 ```kotlin
 @Composable
@@ -43,11 +43,15 @@ fun MapWithBookmarks(arcGISMap: ArcGISMap) {
     BottomSheetScaffold(
         sheetContent = {
             BookmarksListView(
-                geoViewProxy = mapViewProxy,
                 bookmarks = bookmarks,
                 modifier = Modifier.weight(1f),
                 onBookmarkSelected = { bookmark ->
-                    // Optional responses to the selected bookmark.
+                    val viewpoint = bookmark.viewpoint
+                    if (viewpoint != null) {
+                        scope.launch {
+                            mapViewProxy.setViewpointAnimated(viewpoint, 1.0.seconds)
+                        }
+                    {
                 }
             )
         },
@@ -64,7 +68,7 @@ fun MapWithBookmarks(arcGISMap: ArcGISMap) {
 }
 ```
 
-The map must be loaded before reading its bookmarks. To add or remove bookmarks later, update the `SnapshotStateList`; the list recomposes when its contents change. The callback is optional, and the component handles navigating the `GeoView` to the selected bookmark.
+The map must be loaded before reading its bookmarks. To add or remove bookmarks later, update the `SnapshotStateList`; the list recomposes when its contents change. The callback is optional.
 
 Use `backgroundColor` and `textStyle` to customize the list's appearance:
 
