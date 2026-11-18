@@ -2,7 +2,7 @@
 
 ## Description
 
-The `BookmarksListView` composable displays the bookmarks from a map or scene. Selecting a bookmark animates the associated `GeoView` to the bookmark's viewpoint.
+The `BookmarksListView` composable displays the bookmarks from a map or scene. You can provide custom behavior when selecting a bookmark, such as animating in the associated `GeoView` to the bookmark's viewpoint.
 
 ![Screenshot](screenshot.png)
 
