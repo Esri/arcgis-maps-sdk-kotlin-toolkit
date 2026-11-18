@@ -18,7 +18,6 @@
 
 package com.arcgis.toolkit.bookmarks
 
-import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -39,7 +38,7 @@ class BookmarksTests {
     @get:Rule
     val composeTestRule = createComposeRule()
 
-    @OptIn(ExperimentalTestApi::class)
+
     @Test
     fun testBookmarkListItems() = runTest {
 

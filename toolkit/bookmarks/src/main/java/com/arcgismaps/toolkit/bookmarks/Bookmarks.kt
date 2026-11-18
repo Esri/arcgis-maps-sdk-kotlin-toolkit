@@ -35,7 +35,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -46,9 +45,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.em
 import com.arcgismaps.mapping.Bookmark
-import com.arcgismaps.toolkit.geoviewcompose.GeoViewProxy
 import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.seconds
@@ -65,8 +62,7 @@ import kotlin.time.Duration.Companion.seconds
  */
 @Composable
 public fun BookmarksListView(
-    geoViewProxy : GeoViewProxy,
-    bookmarks: SnapshotStateList<Bookmark>,
+    bookmarks: List<Bookmark>,
     modifier: Modifier = Modifier,
     onBookmarkSelected : (Bookmark) -> Unit = {},
     backgroundColor: Color = MaterialTheme.colorScheme.surfaceContainer,
@@ -102,13 +98,6 @@ public fun BookmarksListView(
                     BookmarkItem(
                         bookmark = bookmark,
                         onZoom = {
-                            scope.launch {
-                                bookmark.viewpoint?.let {
-                                    geoViewProxy.setViewpointAnimated(
-                                        viewpoint = it
-                                    )
-                                }
-                            }
                             onBookmarkSelected(bookmark)
                         },
                         textStyle = textStyle
@@ -159,8 +148,14 @@ private fun BookmarkItem(
 @Composable
 public fun BookmarkPreview(){
     val geoViewProxy = MapViewProxy()
+    val scope = rememberCoroutineScope()
     BookmarksListView(
-        geoViewProxy = geoViewProxy,
-        bookmarks = emptyList<Bookmark>().toMutableStateList()
+        bookmarks = emptyList<Bookmark>().toMutableStateList(),
+        onBookmarkSelected = { bookmark -> scope.launch {
+            val viewpoint = bookmark.viewpoint
+            if (viewpoint != null) {
+                geoViewProxy.setViewpointAnimated(viewpoint, 1.0.seconds)
+            }
+        }}
     )
 }
