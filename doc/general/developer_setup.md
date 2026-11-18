@@ -34,6 +34,7 @@ toolkit
 ├── authentication
 ├── basemapgallery
 ├── bookmarks
+├── buildingexplorer
 ├── compass
 ├── featureforms
 ├── geoview-compose
@@ -57,6 +58,7 @@ microapps
 ├── ArWorldScaleApp
 ├── AuthenticationApp
 ├── BasemapGalleryApp
+├── BuildingExplorerApp
 ├── CalloutApp
 ├── CompassApp
 ├── FeatureFormsApp
