@@ -71,7 +71,6 @@ fun BookmarksScenario(mapViewModel: MapViewModel, bookmarks : List<Bookmark>) {
 
     Surface {
         BookmarksListView(
-            geoViewProxy = mapViewModel.mapViewProxy,
             bookmarks = remember { mutableStateListOf(*bookmarks.toTypedArray()) },
             onBookmarkSelected = { bookmark ->
                 scope.launch {
