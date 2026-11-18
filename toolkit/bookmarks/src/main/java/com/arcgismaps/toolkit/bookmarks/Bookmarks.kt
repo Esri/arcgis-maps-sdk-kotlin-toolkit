@@ -52,8 +52,7 @@ import kotlin.time.Duration.Companion.seconds
 
 /**
  * A composable that displays a list of bookmarks.
- * @param geoViewProxy is the proxy for the GeoView that will be used to set the viewpoint when a bookmark is selected.
- * @param bookmarks is used to allow for dynamic updates to the list of bookmarks.
+ * @param bookmarks the list of bookmarks. Use a SnapshotStateList to recompose when the list changes.
  * @param modifier is the modifier to be applied to the list.
  * @param onBookmarkSelected is a callback that is invoked when a bookmark is selected.
  * @param backgroundColor is the background color of the list.
