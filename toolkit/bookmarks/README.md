@@ -9,9 +9,7 @@ The `BookmarksListView` composable displays the bookmarks from a map or scene. Y
 ## Features
 
 - Displays a scrollable list of bookmarks.
-- Animates the `GeoView` to a bookmark's viewpoint when it is selected.
 - Provides an `onBookmarkSelected` callback for responding to selections.
-- Supports dynamically updating the list through a `SnapshotStateList`.
 - Shows an empty state when there are no bookmarks.
 - Allows customization of the background color, text style, and layout modifier.
 
