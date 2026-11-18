@@ -33,11 +33,16 @@ fun MapWithBookmarks(arcGISMap: ArcGISMap) {
     val mapViewProxy = remember { MapViewProxy() }
     
     // Bookmarks from webmap
-    val bookmarks = remember(arcGISMap) {
-        arcGISMap.bookmarks.toMutableStateList()
+    val bookmarks = remember(arcGISMap) { mutableStateListOf<Bookmark>() }
+    LaunchedEffect(arcGISMap) {
+        arcGISMap.load().onSuccess {
+            bookmarks.clear()
+            bookmarks.addAll(arcGISMap.bookmarks)
+        }
     }
 
     // Create a container to show BookmarksListView with the composable MapView
+    val scope = rememberCoroutineScope()
     BottomSheetScaffold(
         sheetContent = {
             BookmarksListView(
@@ -49,7 +54,7 @@ fun MapWithBookmarks(arcGISMap: ArcGISMap) {
                         scope.launch {
                             mapViewProxy.setViewpointAnimated(viewpoint, 1.0.seconds)
                         }
-                    {
+                    }
                 }
             )
         },
