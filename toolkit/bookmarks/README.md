@@ -72,7 +72,6 @@ Use `backgroundColor` and `textStyle` to customize the list's appearance:
 
 ```kotlin
 BookmarksListView(
-    geoViewProxy = mapViewProxy,
     bookmarks = bookmarks,
     backgroundColor = MaterialTheme.colorScheme.surface,
     textStyle = MaterialTheme.typography.titleMedium
