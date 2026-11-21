@@ -24,6 +24,7 @@ import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.performClick
 import androidx.lifecycle.ViewModel
+import com.esri.microappslib.testUtils.checkAccessibility
 import com.esri.microappslib.theme.MicroAppThemeSurface
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.PortalItem
