@@ -12,6 +12,7 @@ Authentication is optional but limited to specific public web maps.
 
 To login to your ArcGIS Online account, click the `Sign in with ArcGIS Online` button in the app. This will open the OAuth page in a new browser window where you can enter the account credentials. 
 Once you have signed in, you can access the web maps that are shared with your account.
+You can browse your portal folders, open web maps, search for a web map, and use the offline map areas workflow where the map supports it.
 
 If you'd rather use an ArcGIS Enterprise account, click the `Sign in with ArcGIS Enterprise` button in the app. This will open a dialog prompting for an Enterprise URL followed by another dialog to enter your credentials.
 

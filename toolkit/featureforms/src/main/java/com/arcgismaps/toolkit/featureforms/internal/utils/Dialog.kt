@@ -530,6 +530,14 @@ internal fun FeatureFormDialog(states: FormStateCollection) {
             )
         }
 
+        is DialogType.SaveErrorDialog -> {
+            ErrorDialog(
+                onDismissRequest = { dialogRequester.dismissDialog() },
+                title = stringResource(R.string.save_failed),
+                body = (dialogType as DialogType.SaveErrorDialog).message
+            )
+        }
+
         else -> {
             // clear focus from the originating tapped field
             if (dialogType == null) {

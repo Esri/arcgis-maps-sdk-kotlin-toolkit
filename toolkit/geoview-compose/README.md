@@ -48,7 +48,7 @@ val mapViewProxy = remember { MapViewProxy() }
 
 Button(
     onClick = {
-        mapViewProxy.setViewpoint(point, scale)
+        mapViewProxy.setViewpoint(Viewpoint(point, scale))
     }
 ) {
     Text("Set Viewpoint")
@@ -81,18 +81,24 @@ A `LocationDisplay` can be used to display the device's location as a blue dot o
 
 ```kotlin
 val arcGISMap = remember { ArcGISMap(BasemapStyle.ArcGISImagery) }
-val scope = rememberCoroutineScope()
-val locationDisplay = rememberLocationDisplay {
-	start(scope)
+val locationDisplay = rememberLocationDisplay()
+LaunchedEffect(locationDisplay) {
+    locationDisplay.dataSource.start().onFailure { error ->
+        Log.e("MapView", "Could not start location display", error)
+    }
 }
 MapView(
 	modifier = Modifier.fillMaxSize(),
-	arcGISMap = remember { ArcGISMap(BasemapStyle.ArcGISImagery) },
+	arcGISMap = arcGISMap,
 	locationDisplay = locationDisplay
 )
 ```
 
 An example of how to display the device location is available in the [MapView Location Display App](../../microapps/MapViewLocationDisplayApp/README.md).
+
+### Text scaling
+
+`MapView`, `SceneView`, and `LocalSceneView` accept `useSystemTextScale`, which defaults to `true` and applies the system font scale to supported text rendered by the view. Setting it to `false` to disable this behavior.
 
 ### Identify a Feature
 
@@ -244,5 +250,3 @@ Other microapps that demonstrate various workflows with the composable `MapView`
 - [SceneView Lighting Options App](../../microapps/SceneViewLightingOptionsApp/README.md) demonstrates the use of various lighting options with the `SceneView`
 - [CalloutApp](../../microapps/CalloutApp/README.md) demonstrates the use of Callout with the composable `MapView` or `SceneView`
 - [LocalSceneView App](../../microapps/LocalSceneViewApp/README.md) demonstrates the use of the composable `LocalSceneView`
-
-

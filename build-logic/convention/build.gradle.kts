@@ -46,7 +46,12 @@ gradlePlugin {
 
         register("kotlinConvention") {
             id = "kotlin-convention-plugin"
-            implementationClass = "KotlinConventionPlugin"
+            implementationClass = "KotlinConventions"
+        }
+
+        register("componentConventions") {
+            id = "component-convention-plugin"
+            implementationClass = "ComponentConventions"
         }
 
         register("microappConvention") {

@@ -35,6 +35,8 @@ kotlinxCoroutinesTest = "1.11.0"
 kotlinxSerializationJson = "1.11.0"
 mockkAndroid = "1.14.11"
 room = "2.8.4"
+startupRuntime = "1.2.0"
+#noinspection UnusedVersionCatalogEntry
 targetSdk = "37"
 truth = "1.4.5"
 uiautomator = "2.4.0"
@@ -74,6 +76,7 @@ androidx-material-icons-extended = { group = "androidx.compose.material", name =
 androidx-media3-exoplayer = { module = "androidx.media3:media3-exoplayer", version.ref = "media3Exoplayer" }
 androidx-media3-ui = { module = "androidx.media3:media3-ui", version.ref = "media3Exoplayer" }
 androidx-media3-exoplayer-dash = { module = "androidx.media3:media3-exoplayer-dash", version.ref = "media3Exoplayer" }
+androidx-startup-runtime = { group = "androidx.startup", name = "startup-runtime", version.ref = "startupRuntime" }
 androidx-test-ext = { group = "androidx.test.ext", name = "junit-ktx", version.ref = "androidxTestExt" }
 androidx-test-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "androidxEspresso" }
 androidx-test-runner = { group = "androidx.test", name = "runner", version.ref = "androidXTestRunner" }
@@ -125,8 +128,10 @@ arcgismaps-testdata-sync = { id = "com.esri.gradle-plugins.testdata.sync", versi
 
 # Plugins defined by the project build-logic
 android-integration-testing = { id = "android-integration-testing" }
-#noinspection UnusedVersionCatalogEntry
+component-convention-plugin = { id = "component-convention-plugin" }
 kotlin-convention-plugin = { id = "kotlin-convention-plugin" }
+#noinspection UnusedVersionCatalogEntry
+artifact-deploy-plugin = { id = "artifact-deploy" }
 microapp-convention-plugin = { id = "microapp-convention-plugin" }
 
 [bundles]

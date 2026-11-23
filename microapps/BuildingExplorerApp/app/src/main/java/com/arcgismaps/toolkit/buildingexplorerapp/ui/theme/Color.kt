@@ -1,6 +1,6 @@
 /*
  *
- *  Copyright CURRENT_YEAR Esri
+ *  Copyright 2026 Esri
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
  *
  */
 
-package com.arcgismaps.toolkit.templateapp.ui.theme
+package com.arcgismaps.toolkit.buildingexplorerapp.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
