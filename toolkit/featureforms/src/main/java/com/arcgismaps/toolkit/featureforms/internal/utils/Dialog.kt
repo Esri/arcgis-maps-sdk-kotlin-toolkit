@@ -196,16 +196,6 @@ internal sealed class DialogType {
     ) : DialogType()
 
     data class BarcodeScanner(val stateId: Int) : DialogType()
-
-    data class ValidationErrorsDialog(
-        val onDismiss: () -> Unit,
-        val onAction: (() -> Unit)?,
-        val title: String,
-        val body: String,
-        val actionText: String
-    ) : DialogType()
-
-    data class SaveErrorDialog(val message: String) : DialogType()
 }
 
 /**
@@ -496,45 +486,6 @@ internal fun FeatureFormDialog(states: FormStateCollection) {
                 onDismiss = {
                     dialogRequester.dismissDialog()
                 }
-            )
-        }
-
-        is DialogType.ValidationErrorsDialog -> {
-            val onDismiss = (dialogType as DialogType.ValidationErrorsDialog).onDismiss
-            val onAction = (dialogType as DialogType.ValidationErrorsDialog).onAction
-            val title = (dialogType as DialogType.ValidationErrorsDialog).title
-            val body = (dialogType as DialogType.ValidationErrorsDialog).body
-            val actionText = (dialogType as DialogType.ValidationErrorsDialog).actionText
-            ErrorDialog(
-                onDismissRequest = {
-                    dialogRequester.dismissDialog()
-                    onDismiss()
-                },
-                onAction = {
-                    dialogRequester.dismissDialog()
-                    onAction?.invoke()
-                },
-                title = title,
-                body = body,
-                actionText = actionText
-            )
-        }
-
-        is DialogType.SaveErrorDialog -> {
-            ErrorDialog(
-                onDismissRequest = { dialogRequester.dismissDialog() },
-                onAction = null,
-                title = stringResource(R.string.save_failed),
-                body = (dialogType as DialogType.SaveErrorDialog).message,
-                actionText = ""
-            )
-        }
-
-        is DialogType.SaveErrorDialog -> {
-            ErrorDialog(
-                onDismissRequest = { dialogRequester.dismissDialog() },
-                title = stringResource(R.string.save_failed),
-                body = (dialogType as DialogType.SaveErrorDialog).message
             )
         }
 

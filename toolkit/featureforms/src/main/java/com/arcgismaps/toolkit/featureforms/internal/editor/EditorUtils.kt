@@ -25,6 +25,10 @@ import com.arcgismaps.mapping.featureforms.FormElement
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
+/**
+ * Returns a unique identifier for the feature based on its global ID and object ID. If both
+ * the global ID and object ID are null, this returns null.
+ */
 internal fun ArcGISFeature.id(): String? {
     val table = featureTable as ArcGISFeatureTable
     val globalId = attributes[table.globalIdField]

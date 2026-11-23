@@ -47,8 +47,17 @@ internal data class FormStateData(
     val featureForm: FeatureForm,
     val stateCollection: FormStateCollection
 ) {
+
+    /**
+     * The index of the first visible item in the form. This is used to restore the scroll position
+     * when the associated form is recomposed.
+     */
     var firstVisibleItemIndex by mutableIntStateOf(0)
 
+    /**
+     * The scroll offset of the first visible item in the form. This is used to restore the scroll
+     * position when the associated form is recomposed.
+     */
     var firstVisibleItemScrollOffset by mutableIntStateOf(0)
 
     /**
@@ -154,6 +163,8 @@ internal data class FormStateData(
          *
          * @param form the [FeatureForm] to create the state for.
          * @param scope the [CoroutineScope] to use for evaluating expressions.
+         * @param initialEvaluation whether to perform an initial evaluation of the expressions.
+         * Defaults to false.
          * @return a [FormStateData] for the given [FeatureForm].
          */
         fun create(

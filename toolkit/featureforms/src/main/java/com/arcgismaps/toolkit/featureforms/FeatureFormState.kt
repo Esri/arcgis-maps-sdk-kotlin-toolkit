@@ -72,7 +72,6 @@ import com.arcgismaps.toolkit.featureforms.internal.editor.id
 import com.arcgismaps.toolkit.featureforms.internal.navigation.FormNavigationDirection
 import com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationRoute
 import com.arcgismaps.toolkit.featureforms.internal.navigation.lifecycleIsResumed
-import com.arcgismaps.toolkit.featureforms.internal.utils.ApplyEditsException
 import com.arcgismaps.toolkit.featureforms.internal.utils.FinishEditingException
 import com.arcgismaps.toolkit.featureforms.internal.utils.FormExpressionEvaluationException
 import com.arcgismaps.toolkit.featureforms.internal.utils.InvalidFormGroupStateException
@@ -315,7 +314,7 @@ public class FeatureFormState private constructor(
      * @param willApplyEdits whether the edits made to the feature form should be applied to the
      * service. Defaults to false.
      *
-     * @since 300.2.0
+     * @since 300.3.0
      */
     public constructor(
         featureForm: FeatureForm,
@@ -342,7 +341,7 @@ public class FeatureFormState private constructor(
      * service. Defaults to false.
      * @throws IllegalArgumentException if [featureForms] is empty.
      *
-     * @since 300.2.0
+     * @since 300.3.0
      */
     public constructor(
         featureForms: List<FeatureForm>,
@@ -371,6 +370,11 @@ public class FeatureFormState private constructor(
         return _featureFormGroup.evaluateExpressions()
     }
 
+    /**
+     * Internal variant of [discardEdits] that also emits the correct events. This should be used
+     * for any internal calls to discard edits, such as when the user taps the discard button or when
+     * the form is being closed.
+     */
     internal fun discard() {
         coroutineScope.launch {
             discardEdits().onSuccess {
@@ -407,6 +411,10 @@ public class FeatureFormState private constructor(
         }
     }
 
+    /**
+     * Internal variant of [finishEditing] that also emits the correct events. This should be used
+     * for any internal calls to finish editing, such as when the user taps the save button.
+     */
     internal fun save() {
         // If already saving, return early to avoid duplicate saves.
         if (_savedEditsState.value == SavedEditsState.Saving) return

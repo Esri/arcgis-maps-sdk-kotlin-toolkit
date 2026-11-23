@@ -62,7 +62,7 @@ import com.arcgismaps.mapping.featureforms.TextFormElement
 import com.arcgismaps.mapping.featureforms.UtilityAssociationFeatureCandidate
 import com.arcgismaps.mapping.featureforms.UtilityAssociationFeatureSource
 import com.arcgismaps.mapping.featureforms.UtilityAssociationsFormElement
-import com.arcgismaps.toolkit.featureforms.internal.components.dialogs.SavingsEditsDialog
+import com.arcgismaps.toolkit.featureforms.internal.components.dialogs.SavingEditsDialog
 import com.arcgismaps.toolkit.featureforms.internal.editor.FeatureFormTopBar
 import com.arcgismaps.toolkit.featureforms.internal.editor.ManagerOverview
 import com.arcgismaps.toolkit.featureforms.internal.editor.ModalSheet
@@ -492,7 +492,7 @@ public fun FeatureForm(
     // Dialogs
     FeatureFormDialog(states = formData.stateCollection)
 
-    SavingsEditsDialog(
+    SavingEditsDialog(
         onDismissRequest = state::resetSavedEditsState,
         state = state.saveEditsState
     )

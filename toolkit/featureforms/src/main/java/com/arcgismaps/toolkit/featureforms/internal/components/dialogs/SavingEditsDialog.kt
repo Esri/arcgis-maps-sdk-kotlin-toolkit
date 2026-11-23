@@ -16,18 +16,10 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.components.dialogs
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.window.DialogProperties
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.SavedEditsState
 import com.arcgismaps.toolkit.featureforms.internal.utils.ApplyEditsException
@@ -37,12 +29,15 @@ import com.arcgismaps.toolkit.featureforms.internal.utils.InvalidFormGroupStateE
 import com.arcgismaps.toolkit.featureforms.internal.utils.InvalidFormStateException
 
 @Composable
-internal fun SavingsEditsDialog(
+internal fun SavingEditsDialog(
     onDismissRequest: () -> Unit,
     state: SavedEditsState
 ) {
     when (state) {
-        SavedEditsState.Saved -> {
+        is SavedEditsState.Saving -> {
+            // Todo: Add a progress indicator
+        }
+        is SavedEditsState.Saved -> {
             LaunchedEffect(Unit) {
                 onDismissRequest()
             }
@@ -60,29 +55,6 @@ internal fun SavingsEditsDialog(
 
         else -> {}
     }
-}
-
-@Composable
-private fun SavingEditsProgressDialog() {
-    AlertDialog(
-        onDismissRequest = {},
-        title = {
-            Text(stringResource(R.string.saving_edits))
-        },
-        text = {
-            Box(
-                modifier = Modifier.fillMaxWidth(),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
-            }
-        },
-        confirmButton = {},
-        properties = DialogProperties(
-            dismissOnClickOutside = false,
-            dismissOnBackPress = false
-        )
-    )
 }
 
 @Composable
