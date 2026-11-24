@@ -16,6 +16,8 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.navigation
 
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -26,7 +28,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import com.arcgismaps.data.ArcGISFeature
-import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.toolkit.featureforms.FeatureFormNavigationRoute
 import com.arcgismaps.toolkit.featureforms.FeatureFormState
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationsElementState
@@ -34,16 +35,18 @@ import com.arcgismaps.toolkit.featureforms.internal.screens.UNAssociationGroupRe
 
 internal fun NavGraphBuilder.associationGroupResultDestination(
     state: FeatureFormState,
-    onSave: suspend (Boolean) -> Result<Unit>,
-    onDiscard: suspend (Boolean) -> Unit,
     onNavigateToAssociation : (NavBackStackEntry, Int) -> Unit,
     onNavigateToFeature: (NavBackStackEntry, ArcGISFeature) -> Unit,
     onNavigationEvent: (FeatureFormNavigationRoute) -> Unit,
     onAssociatedFeatureLocateRequest: (ArcGISFeature) -> Unit,
     onBack: (NavBackStackEntry) -> Unit,
-    isNavigationEnabled: Boolean,
+    isNavigationEnabled: Boolean
 ) {
-    composable<NavigationRoute.UNAssociationGroupResult> { backStackEntry ->
+    composable<NavigationRoute.UNAssociationGroupResult>(
+        exitTransition = {
+            fadeOut(animationSpec = tween(100))
+        }
+    ) { backStackEntry ->
         val route = backStackEntry.toRoute<NavigationRoute.UNAssociationGroupResult>()
         val formData = remember(backStackEntry) { state.getActiveFormStateData() }
         val states = formData.stateCollection
@@ -57,8 +60,6 @@ internal fun NavGraphBuilder.associationGroupResultDestination(
                 state = utilityAssociationsElementState,
                 featureForm = formData.featureForm,
                 isNavigationEnabled = isNavigationEnabled,
-                onSave = onSave,
-                onDiscard = onDiscard,
                 onNavigateToAssociation = {
                     onNavigateToAssociation(backStackEntry, utilityAssociationsElementState.id)
                 },

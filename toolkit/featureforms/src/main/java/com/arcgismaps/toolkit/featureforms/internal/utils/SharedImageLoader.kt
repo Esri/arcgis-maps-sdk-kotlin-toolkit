@@ -119,6 +119,6 @@ private class SymbolFetcher(
         override fun key(
             data: Symbol,
             options: Options
-        ): String? = data.toJson()
+        ): String = data.toJson()
     }
 }

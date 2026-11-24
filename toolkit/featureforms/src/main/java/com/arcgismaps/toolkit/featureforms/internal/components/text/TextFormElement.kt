@@ -16,6 +16,7 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.components.text
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -42,13 +43,18 @@ import kotlinx.coroutines.flow.MutableStateFlow
 internal fun TextFormElement(state: TextFormElementState, modifier: Modifier = Modifier) {
     val text by state.text.collectAsState()
     val visible by state.isVisible.collectAsState()
+    val color = if (isSystemInDarkTheme()) {
+        MaterialTheme.colorScheme.surfaceContainerHigh
+    } else {
+        MaterialTheme.colorScheme.surfaceContainerLow
+    }
     if (visible) {
         // do not merge semantics for this composable so that each markdown/plain-text element
         // is treated as a separate node in the semantic tree
         Surface(
             modifier = modifier.semantics(mergeDescendants = false) {},
             shape = RoundedCornerShape(12.dp),
-            color = MaterialTheme.colorScheme.surfaceContainerLow
+            color = color
         ) {
             if (state.format == FormTextFormat.Markdown) {
                 Markdown(text = text, modifier = Modifier.padding(8.dp))

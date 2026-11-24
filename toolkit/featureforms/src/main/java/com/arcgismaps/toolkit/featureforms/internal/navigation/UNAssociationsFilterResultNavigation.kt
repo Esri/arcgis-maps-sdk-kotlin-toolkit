@@ -58,6 +58,11 @@ internal fun NavGraphBuilder.associationsFilterResultDestination(
                 },
                 modifier = Modifier.fillMaxSize()
             )
+            LaunchedEffect(formData) {
+                // Update the active feature form when we navigate back to this screen from another
+                // form.
+                state.updateActiveFeatureForm()
+            }
             LaunchedEffect(filterResult) {
                 val eventData = FeatureFormNavigationRoute.AssociationsFilterResult(
                     element = utilityAssociationsElementState.element,

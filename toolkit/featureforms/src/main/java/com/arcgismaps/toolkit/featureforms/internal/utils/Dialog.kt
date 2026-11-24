@@ -28,6 +28,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -49,6 +50,7 @@ import com.arcgismaps.mapping.featureforms.AudioFormInput
 import com.arcgismaps.mapping.featureforms.DocumentFormInput
 import com.arcgismaps.mapping.featureforms.FormAttachment
 import com.arcgismaps.mapping.featureforms.VideoFormInput
+import com.arcgismaps.toolkit.featureforms.FeatureFormState
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.AttachmentElementState
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.AttachmentErrorDialog
@@ -194,14 +196,6 @@ internal sealed class DialogType {
     ) : DialogType()
 
     data class BarcodeScanner(val stateId: Int) : DialogType()
-
-    data class ValidationErrorsDialog(
-        val onDismiss: () -> Unit,
-        val title: String,
-        val body: String
-    ) : DialogType()
-
-    data class SaveErrorDialog(val message: String) : DialogType()
 }
 
 /**
@@ -492,28 +486,6 @@ internal fun FeatureFormDialog(states: FormStateCollection) {
                 onDismiss = {
                     dialogRequester.dismissDialog()
                 }
-            )
-        }
-
-        is DialogType.ValidationErrorsDialog -> {
-            val onDismiss = (dialogType as DialogType.ValidationErrorsDialog).onDismiss
-            val title = (dialogType as DialogType.ValidationErrorsDialog).title
-            val body = (dialogType as DialogType.ValidationErrorsDialog).body
-            ErrorDialog(
-                onDismissRequest = {
-                    dialogRequester.dismissDialog()
-                    onDismiss()
-                },
-                title = title,
-                body = body
-            )
-        }
-
-        is DialogType.SaveErrorDialog -> {
-            ErrorDialog(
-                onDismissRequest = { dialogRequester.dismissDialog() },
-                title = stringResource(R.string.save_failed),
-                body = (dialogType as DialogType.SaveErrorDialog).message
             )
         }
 

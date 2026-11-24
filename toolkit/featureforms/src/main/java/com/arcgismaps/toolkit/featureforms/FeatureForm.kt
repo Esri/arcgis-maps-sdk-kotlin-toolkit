@@ -20,6 +20,8 @@ package com.arcgismaps.toolkit.featureforms
 
 import android.Manifest
 import android.content.Context
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxSize
@@ -29,6 +31,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -40,8 +43,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.platform.LocalResources
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.FloatingWindow
 import androidx.navigation.NavHostController
@@ -61,12 +62,14 @@ import com.arcgismaps.mapping.featureforms.TextFormElement
 import com.arcgismaps.mapping.featureforms.UtilityAssociationFeatureCandidate
 import com.arcgismaps.mapping.featureforms.UtilityAssociationFeatureSource
 import com.arcgismaps.mapping.featureforms.UtilityAssociationsFormElement
-import com.arcgismaps.toolkit.featureforms.internal.components.text.TextFormElement
+import com.arcgismaps.toolkit.featureforms.internal.components.dialogs.SavingEditsDialog
+import com.arcgismaps.toolkit.featureforms.internal.editor.FeatureFormTopBar
+import com.arcgismaps.toolkit.featureforms.internal.editor.ManagerOverview
+import com.arcgismaps.toolkit.featureforms.internal.editor.ModalSheet
 import com.arcgismaps.toolkit.featureforms.internal.navigation.FeatureFormNavHost
-import com.arcgismaps.toolkit.featureforms.internal.screens.ContentAwareTopBar
-import com.arcgismaps.toolkit.featureforms.internal.utils.DialogType
+import com.arcgismaps.toolkit.featureforms.internal.navigation.FormNavigationDirection
+import com.arcgismaps.toolkit.featureforms.internal.screens.shouldEnableTopBar
 import com.arcgismaps.toolkit.featureforms.internal.utils.FeatureFormDialog
-import com.arcgismaps.toolkit.featureforms.internal.utils.LocalDialogRequester
 import com.arcgismaps.toolkit.featureforms.theme.FeatureFormColorScheme
 import com.arcgismaps.toolkit.featureforms.theme.FeatureFormDefaults
 import com.arcgismaps.toolkit.featureforms.theme.FeatureFormTheme
@@ -104,25 +107,61 @@ public sealed class ValidationErrorVisibility {
  *
  * @since 200.8.0
  */
-public sealed class FeatureFormEditingEvent {
+public abstract class FeatureFormEditingEvent private constructor() {
 
     /**
      * Indicates that the edits have been discarded on the [featureForm].
      *
      * @param featureForm The [FeatureForm] that was edited.
      * @param willNavigate Indicates if the form will navigate to another screen after discarding the edits.
+     * @since 200.8.0
      */
-    public data class DiscardedEdits(val featureForm: FeatureForm, val willNavigate: Boolean) :
-        FeatureFormEditingEvent()
+    public data class DiscardedEdits(
+        @Deprecated(
+            message = "This parameter is not applicable. Use [FeatureFormState.featureForms]" +
+                "to get the feature form(s) that were discarded. This parameter will be removed in " +
+                "a future release.",
+            level = DeprecationLevel.WARNING
+        )
+        val featureForm: FeatureForm,
+        @Deprecated(
+            message = "This parameter is no longer applicable. It will be removed in a future release",
+            level = DeprecationLevel.WARNING
+        )
+        val willNavigate: Boolean
+    ) : FeatureFormEditingEvent()
 
     /**
      * Indicates that the edits have been saved successfully on the [featureForm].
      *
      * @param featureForm The [FeatureForm] that was edited.
      * @param willNavigate Indicates if the form will navigate to another screen after saving the edits.
+     * @since 200.8.0
      */
-    public data class SavedEdits(val featureForm: FeatureForm, val willNavigate: Boolean) :
-        FeatureFormEditingEvent()
+    public data class SavedEdits(
+        @Deprecated(
+            message = "This parameter is not applicable. Use [FeatureFormState.featureForms]" +
+                "to get the feature form(s) that were saved. This parameter will be removed in a" +
+                "future release.",
+            level = DeprecationLevel.WARNING
+        )
+        val featureForm: FeatureForm,
+        @Deprecated(
+            message = "This parameter is no longer applicable. It will be removed in a future release",
+            level = DeprecationLevel.WARNING
+        )
+        val willNavigate: Boolean
+    ) : FeatureFormEditingEvent()
+
+    /**
+     * Indicates that there was an error while edits were being saved.
+     *
+     * @param error The associated error
+     * @since 300.3.0
+     */
+    public data class FailedEdits(
+        val error: Throwable
+    ) : FeatureFormEditingEvent()
 }
 
 /**
@@ -192,7 +231,7 @@ public sealed class FeatureFormNavigationRoute {
      */
     public data class SelectAssociationFeatureSource(
         val element: UtilityAssociationsFormElement,
-        val filter : UtilityAssociationsFilter
+        val filter: UtilityAssociationsFilter
     ) : FeatureFormNavigationRoute()
 
     /**
@@ -207,7 +246,7 @@ public sealed class FeatureFormNavigationRoute {
      */
     public data class SelectUtilityAssetType(
         val element: UtilityAssociationsFormElement,
-        val filter : UtilityAssociationsFilter,
+        val filter: UtilityAssociationsFilter,
         val featureSource: UtilityAssociationFeatureSource
     ) : FeatureFormNavigationRoute()
 
@@ -224,7 +263,7 @@ public sealed class FeatureFormNavigationRoute {
      */
     public data class SelectAssociationFeatureCandidate(
         val element: UtilityAssociationsFormElement,
-        val filter : UtilityAssociationsFilter,
+        val filter: UtilityAssociationsFilter,
         val featureSource: UtilityAssociationFeatureSource,
         val assetType: UtilityAssetType
     ) : FeatureFormNavigationRoute()
@@ -242,7 +281,7 @@ public sealed class FeatureFormNavigationRoute {
      */
     public data class CreateAssociation(
         val element: UtilityAssociationsFormElement,
-        val filter : UtilityAssociationsFilter,
+        val filter: UtilityAssociationsFilter,
         val featureSource: UtilityAssociationFeatureSource,
         val candidate: UtilityAssociationFeatureCandidate
     ) : FeatureFormNavigationRoute()
@@ -352,10 +391,10 @@ public fun FeatureForm(
     modifier: Modifier = Modifier,
     showCloseIcon: Boolean = true,
     showFormActions: Boolean = true,
-    isNavigationEnabled : Boolean = true,
+    isNavigationEnabled: Boolean = true,
     validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.Automatic,
     onBarcodeButtonClick: ((FieldFormElement) -> Unit)? = null,
-    onShowOnMapRequest : (ArcGISFeature) -> Unit = {},
+    onShowOnMapRequest: (ArcGISFeature) -> Unit = {},
     onDismiss: () -> Unit = {},
     onEditingEvent: (FeatureFormEditingEvent) -> Unit = {},
     onNavigationEvent: (FeatureFormNavigationRoute) -> Unit = {},
@@ -363,67 +402,10 @@ public fun FeatureForm(
     typography: FeatureFormTypography = FeatureFormDefaults.typography(),
 ) {
     val state by rememberUpdatedState(featureFormState)
+    val currentOnEditingEvent by rememberUpdatedState(onEditingEvent)
+    val currentOnNavigationEvent by rememberUpdatedState(onNavigationEvent)
     val navController = rememberNavController(state)
-    state.setNavigationCallback { route ->
-        navController.navigate(route)
-    }
-    state.setNavigateBack {
-        navController.navigateUp()
-    }
-
-    val res = LocalResources.current
-    val dialogRequester = LocalDialogRequester.current
     val focusManager = LocalFocusManager.current
-    val validationErrorMessage = stringResource(R.string.the_form_has_validation_errors)
-
-    // A function that provides the action to save edits on the form
-    suspend fun saveForm(state: FeatureFormState, willNavigate: Boolean): Result<Unit> {
-        val form = state.getActiveFormStateData().featureForm
-        focusManager.clearFocus()
-        // Check for validation errors
-        val errorCount = form.elementValidationErrors.value.entries.count()
-        return if (errorCount == 0) {
-            // Finish editing the form if there are no validation errors
-            state.saveEdits().onSuccess {
-                // Send a saved edits event if the save was successful
-                val event = FeatureFormEditingEvent.SavedEdits(form, willNavigate)
-                onEditingEvent(event)
-            }.onFailure { error ->
-                dialogRequester.requestDialog(
-                    DialogType.SaveErrorDialog(
-                        message = error.localizedMessage
-                            ?: res.getString(R.string.unknown_save_error)
-                    )
-                )
-            }
-        } else {
-            // Show a dialog with the validation errors if they exist
-            val errorDialog = DialogType.ValidationErrorsDialog(
-                onDismiss = {
-                    state.validateAllFields()
-                },
-                title = validationErrorMessage,
-                body = res.getQuantityString(
-                    R.plurals.you_have_errors_that_must_be_fixed_before_saving,
-                    errorCount,
-                    errorCount
-                )
-            )
-            dialogRequester.requestDialog(errorDialog)
-            Result.failure(Exception("Validation errors found"))
-        }
-    }
-
-    // A function that provides the action to discard edits on the form
-    suspend fun discardForm(willNavigate: Boolean) {
-        state.discardEdits()
-        // Send a discarded edits event
-        val event = FeatureFormEditingEvent.DiscardedEdits(
-            state.getActiveFormStateData().featureForm,
-            willNavigate
-        )
-        onEditingEvent(event)
-    }
     // Get the current back stack entry as state
     val backStackEntry by navController.currentBackStackEntryAsState()
     // Track if the content has a back stack entry.
@@ -432,87 +414,148 @@ public fun FeatureForm(
     }
     // Get the form data for the active entry (destination) in the back stack
     val formData = remember(backStackEntry) { state.getActiveFormStateData() }
-    FeatureFormLayout(
-        topBar = {
-            val isDialogDestination = backStackEntry?.destination is FloatingWindow
-            // Get the appropriate back stack entry based on whether the current destination is a
-            // dialog or not. Dialog destinations should not be considered for the top bar content,
-            // so we use the previous back stack entry instead.
-            val contentEntry = if (isDialogDestination) {
-                navController.previousBackStackEntry
-            } else {
-                backStackEntry
-            }
-            // Track if there is a back stack entry
-            val hasBackStack = if (isDialogDestination) {
-                contentHasBackStack
-            } else {
-                navController.previousBackStackEntry != null
-            }
 
-            SideEffect {
-                // update the retained value only for regular content destinations.
-                // A dialog's own previous entry must not alter it.
-                if (!isDialogDestination) {
-                    contentHasBackStack = hasBackStack
+    Box(modifier = modifier) {
+        FeatureFormLayout(
+            topBar = {
+                val isDialogDestination = backStackEntry?.destination is FloatingWindow
+                // Track if there is a back stack entry
+                val hasBackStack = if (isDialogDestination) {
+                    contentHasBackStack
+                } else {
+                    navController.previousBackStackEntry != null
+                }
+                SideEffect {
+                    // update the retained value only for regular content destinations.
+                    // A dialog's own previous entry must not alter it.
+                    if (!isDialogDestination) {
+                        contentHasBackStack = hasBackStack
+                    }
+                }
+                FeatureFormTopBar(
+                    isVisible = backStackEntry?.shouldEnableTopBar() == true,
+                    state = state,
+                    hasBackStack = contentHasBackStack,
+                    showCloseIcon = showCloseIcon,
+                    showFormActions = showFormActions,
+                    onBack = {
+                        backStackEntry?.let(state::popBackStack)
+                    },
+                    onSave = {
+                        focusManager.clearFocus()
+                        state.save()
+                    },
+                    onDismiss = {
+                        state.discard()
+                        onDismiss()
+                    },
+                    onShowOverview = {
+                        state.showOverview(true)
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp)
+                )
+            },
+            content = {
+                FeatureFormNavHost(
+                    navController = navController,
+                    state = state,
+                    isNavigationEnabled = isNavigationEnabled,
+                    validationErrorVisibility = validationErrorVisibility,
+                    onBarcodeButtonClick = onBarcodeButtonClick,
+                    onShowOnMapRequest = onShowOnMapRequest,
+                    onNavigationEvent = currentOnNavigationEvent,
+                    modifier = Modifier.fillMaxSize()
+                )
+            },
+            modifier = Modifier.fillMaxSize(),
+            colorScheme = colorScheme,
+            typography = typography
+        )
+        ModalSheet(
+            visibilityProvider = { state.showOverview },
+            onDismiss = {
+                state.showOverview(false)
+            }
+        ) {
+            ManagerOverview(
+                state = state,
+                editable = false,
+                modifier = Modifier.fillMaxSize(),
+                onShowOnMapRequest = onShowOnMapRequest,
+                onDismiss = {
+                    state.showOverview(false)
+                },
+                onClose = {
+                    state.discard()
+                    onDismiss()
+                },
+                onSave = {
+                    state.save()
+                },
+                onNavigateToForm = { stateData ->
+                    backStackEntry?.let { entry ->
+                        state.navigateToForm(
+                            backStackEntry = entry,
+                            formStateData = stateData,
+                            direction = FormNavigationDirection.Default
+                        )
+                    }
+                    state.showOverview(false)
+                },
+                onRemoveForm = { TODO() }
+            )
+        }
+    }
+
+    // Dialogs
+    FeatureFormDialog(states = formData.stateCollection)
+
+    SavingEditsDialog(
+        onDismissRequest = state::resetSavedEditsState,
+        state = state.saveEditsState
+    )
+
+    // Clear the navigation callbacks when the composition is disposed to avoid memory leaks
+    DisposableEffect(state, navController) {
+        state.setNavigationCallback { route ->
+            navController.navigate(route)
+        }
+        state.setNavigationPopupToCallback { route ->
+            navController.navigate(route) {
+                popUpTo(navController.graph.id) {
+                    inclusive = true
                 }
             }
-
-            contentEntry?.let { entry ->
-                ContentAwareTopBar(
-                    backStackEntry = entry,
-                    state = state,
-                    onSaveForm = { willNavigate ->
-                        saveForm(state, willNavigate)
-                    },
-                    onDiscardForm = ::discardForm,
-                    onDismissRequest = onDismiss,
-                    hasBackStack = hasBackStack,
-                    showFormActions = showFormActions,
-                    showCloseIcon = showCloseIcon,
-                    isNavigationEnabled = isNavigationEnabled,
-                    modifier = Modifier
-                        .padding(
-                            vertical = 8.dp,
-                            horizontal = if (hasBackStack) 8.dp else 16.dp
-                        )
-                        .fillMaxWidth(),
-                )
-            }
-        },
-        content = {
-            FeatureFormNavHost(
-                navController = navController,
-                state = state,
-                isNavigationEnabled = isNavigationEnabled,
-                validationErrorVisibility = validationErrorVisibility,
-                onSaveForm = { willNavigate ->
-                    saveForm(state, willNavigate)
-                },
-                onDiscardForm = ::discardForm,
-                onBarcodeButtonClick = onBarcodeButtonClick,
-                onShowOnMapRequest = onShowOnMapRequest,
-                onNavigationEvent = onNavigationEvent,
-                modifier = Modifier.fillMaxSize()
-            )
-        },
-        modifier = modifier,
-        colorScheme = colorScheme,
-        typography = typography
-    )
-    FeatureFormDialog(states = formData.stateCollection)
-    DisposableEffect(state) {
+        }
+        state.setNavigateBack {
+            navController.navigateUp()
+        }
         onDispose {
             // Clear the navigation actions when the composition is disposed
             state.setNavigationCallback(null)
+            state.setNavigationPopupToCallback(null)
             state.setNavigateBack(null)
         }
+    }
+
+    // Observe and emit editing events from the FeatureFormState to the onEditingEvent callback
+    LaunchedEffect(state.editingEvent) {
+        state.editingEvent.collect { event ->
+            currentOnEditingEvent(event)
+        }
+    }
+
+    // Handle the Android system back action to navigate back in the form's navigation stack
+    BackHandler(contentHasBackStack) {
+        backStackEntry?.let(state::popBackStack)
     }
 }
 
 @Composable
 internal fun FeatureFormLayout(
-    topBar: @Composable ColumnScope.() -> Unit,
+    topBar: (@Composable ColumnScope.() -> Unit)?,
     content: @Composable ColumnScope.() -> Unit,
     modifier: Modifier = Modifier,
     colorScheme: FeatureFormColorScheme,
@@ -523,7 +566,7 @@ internal fun FeatureFormLayout(
         typography = typography
     ) {
         Column(modifier = modifier) {
-            topBar()
+            topBar?.invoke(this)
             content()
         }
     }

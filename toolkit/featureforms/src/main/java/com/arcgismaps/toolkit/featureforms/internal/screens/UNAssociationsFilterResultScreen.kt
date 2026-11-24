@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -74,6 +75,22 @@ internal fun UNAssociationsFilterResultScreen(
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        // Display the top bar
+        FeatureFormTitle(
+            title = filterResult.filter.title,
+            subTitle = filterResult.filter.description,
+            hasEdits = false,
+            showCloseIcon = false,
+            showBackIcon = false,
+            isNavigationEnabled = true,
+            onBackPressed = {},
+            onClose = {},
+            onSave = {},
+            onDiscard = {},
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .fillMaxWidth()
+        )
         UtilityAssociationsFilterResult(
             groupResults = filterResult.groupResults,
             onGroupClick = { groupResult ->
@@ -98,7 +115,10 @@ internal fun UNAssociationsFilterResultScreen(
                 enabled = isEditable
             ) {
                 Icon(imageVector = Icons.Default.Add, contentDescription = "Add Associations")
-                Text(text = stringResource(R.string.add_associations), modifier = Modifier.padding(horizontal = 12.dp))
+                Text(
+                    text = stringResource(R.string.add_associations),
+                    modifier = Modifier.padding(horizontal = 12.dp)
+                )
             }
         }
         Spacer(modifier = Modifier.height(25.dp))

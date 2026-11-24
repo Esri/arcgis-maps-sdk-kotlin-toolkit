@@ -21,8 +21,8 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavDestination.Companion.hasRoute
 import com.arcgismaps.data.ArcGISFeature
@@ -32,6 +32,7 @@ import com.arcgismaps.mapping.featureforms.BarcodeScannerFormInput
 import com.arcgismaps.mapping.featureforms.ComboBoxFormInput
 import com.arcgismaps.mapping.featureforms.DateTimePickerFormInput
 import com.arcgismaps.mapping.featureforms.FeatureForm
+import com.arcgismaps.mapping.featureforms.FeatureFormGroup
 import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.mapping.featureforms.FormElement
 import com.arcgismaps.mapping.featureforms.FormExpressionEvaluationError
@@ -50,9 +51,9 @@ import com.arcgismaps.toolkit.featureforms.internal.components.barcode.BarcodeTe
 import com.arcgismaps.toolkit.featureforms.internal.components.base.BaseFieldState
 import com.arcgismaps.toolkit.featureforms.internal.components.base.BaseGroupState
 import com.arcgismaps.toolkit.featureforms.internal.components.base.FormStateCollection
+import com.arcgismaps.toolkit.featureforms.internal.components.base.FormStateData
 import com.arcgismaps.toolkit.featureforms.internal.components.base.MutableFormStateCollection
 import com.arcgismaps.toolkit.featureforms.internal.components.base.formattedValueAsStateFlow
-import com.arcgismaps.toolkit.featureforms.internal.components.base.getState
 import com.arcgismaps.toolkit.featureforms.internal.components.base.mapValidationErrors
 import com.arcgismaps.toolkit.featureforms.internal.components.base.mapValueAsStateFlow
 import com.arcgismaps.toolkit.featureforms.internal.components.codedvalue.CodedValueFieldProperties
@@ -67,12 +68,27 @@ import com.arcgismaps.toolkit.featureforms.internal.components.text.FormTextFiel
 import com.arcgismaps.toolkit.featureforms.internal.components.text.TextFieldProperties
 import com.arcgismaps.toolkit.featureforms.internal.components.text.TextFormElementState
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationsElementState
+import com.arcgismaps.toolkit.featureforms.internal.editor.id
+import com.arcgismaps.toolkit.featureforms.internal.navigation.FormNavigationDirection
 import com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationRoute
 import com.arcgismaps.toolkit.featureforms.internal.navigation.lifecycleIsResumed
+import com.arcgismaps.toolkit.featureforms.internal.utils.FinishEditingException
+import com.arcgismaps.toolkit.featureforms.internal.utils.FormExpressionEvaluationException
+import com.arcgismaps.toolkit.featureforms.internal.utils.InvalidFormGroupStateException
+import com.arcgismaps.toolkit.featureforms.internal.utils.InvalidFormStateException
 import com.arcgismaps.toolkit.featureforms.internal.utils.fieldIsNullable
 import com.arcgismaps.toolkit.featureforms.internal.utils.toMap
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 /**
@@ -95,11 +111,33 @@ import kotlinx.coroutines.launch
  */
 @Stable
 public class FeatureFormState private constructor(
-    private val featureForm: FeatureForm
+    private val featureForm: FeatureForm,
+    private val coroutineScope: CoroutineScope,
+    public val willApplyEdits: Boolean,
+    initialForms: List<FeatureForm>
 ) {
     private val store: ArrayDeque<FormStateData> = ArrayDeque()
 
-    private lateinit var coroutineScope: CoroutineScope
+    /**
+     * The backing [FeatureFormGroup] instance.
+     */
+    private val _featureFormGroup: FeatureFormGroup = FeatureFormGroup(emptyList())
+
+    /**
+     * The list of [FormStateData] for all the feature forms managed by this state. This list is
+     * backed by a [SnapshotStateList] and will be updated whenever a new feature form is added or
+     * removed.
+     *
+     * It should always be kept in sync with the [_featureFormGroup.forms] list.
+     */
+    private val _featureFormStates = SnapshotStateList<FormStateData>()
+
+    /**
+     * The list of [FormStateData] for all the feature forms managed by this state. This list is
+     * backed by a [SnapshotStateList] and will be updated whenever a new feature form is added or
+     * removed.
+     */
+    internal val featureFormStates: List<FormStateData> = _featureFormStates
 
     private val _activeFeatureForm: MutableState<FeatureForm> = mutableStateOf(featureForm)
 
@@ -108,6 +146,12 @@ public class FeatureFormState private constructor(
      * be set by the composition that uses the NavController to the correct [NavigationRoute].
      */
     private var navigateToRoute: ((NavigationRoute) -> Unit)? = null
+
+    /**
+     * A navigation callback that is designed to pop all destinations before navigating
+     * to the new [FeatureForm]. This should be set by the composition.
+     */
+    private var navigatePopUpToRoute: ((NavigationRoute) -> Unit)? = null
 
     /**
      * A navigation callback that is called when navigating back to a previous [FeatureForm]. This
@@ -128,40 +172,188 @@ public class FeatureFormState private constructor(
      */
     public val activeFeatureForm: FeatureForm by _activeFeatureForm
 
-    public constructor(
-        featureForm: FeatureForm,
-        coroutineScope: CoroutineScope
-    ) : this(featureForm) {
-        this.coroutineScope = coroutineScope
-        val formElements: List<FormElement> =
-            featureForm.elements + listOfNotNull(featureForm.defaultAttachmentsElement)
-        // create state objects for all the supported element types that are part of the provided FeatureForm
-        val states = createStates(
-            form = this.featureForm,
-            elements = formElements,
-            scope = coroutineScope
-        )
-        val formStateData = FormStateData(featureForm, states)
-        // Add the provided state collection to the store.
-        store.addLast(formStateData)
+    private val featureFormsFlow = snapshotFlow {
+        _featureFormStates.toList()
+    }
+
+    private val _editingEvent = MutableSharedFlow<FeatureFormEditingEvent>()
+    internal val editingEvent: SharedFlow<FeatureFormEditingEvent> = _editingEvent.asSharedFlow()
+
+    /**
+     * Backing state for [showOverview].
+     */
+    private var _showOverview = mutableStateOf(false)
+
+    /**
+     * A boolean indicating whether the overview of all feature forms should be visible. The value
+     * can be set using the [showOverview] function.
+     */
+    internal val showOverview
+        get() = _showOverview.value
+
+    /**
+     *
+     */
+    private val _isEvaluatingExpressions = mutableStateOf(false)
+
+    /**
+     * A boolean indicating whether the expressions for entire state (one or more forms) are being
+     * evaluated.
+     */
+    internal val isEvaluatingExpressions: Boolean
+        get() = _isEvaluatingExpressions.value
+
+    /**
+     * The backing state for [saveEditsState].
+     */
+    private val _savedEditsState = mutableStateOf<SavedEditsState>(SavedEditsState.Idle)
+
+    /**
+     * Indicates the current state of saving edits.
+     */
+    internal val saveEditsState
+        get() = _savedEditsState.value
+
+    init {
+        initialForms.forEachIndexed { index, form ->
+            _featureFormGroup.addForm(form)
+            // Create state objects
+            val formStateData = FormStateData.create(form, coroutineScope).apply {
+                // Set the evaluating state to true.
+                setEvaluating()
+            }
+            _featureFormStates.add(formStateData)
+            // Add the first form to the store.
+            if (index == 0) {
+                store.addLast(formStateData)
+            }
+        }
         coroutineScope.launch(start = CoroutineStart.UNDISPATCHED) {
-            formStateData.evaluateExpressions()
+            _isEvaluatingExpressions.value = true
+            // Evaluate expressions on the group.
+            _featureFormGroup.evaluateExpressions().onSuccess {
+                _featureFormStates.forEach {
+                    // Set evaluated to true after the group has evaluated expressions.
+                    it.setEvaluated()
+                }
+            }
+            _isEvaluatingExpressions.value = false
+        }
+        // If there are multiple forms, show the overview by default.
+        if (initialForms.size > 1) {
+            _showOverview.value = true
         }
     }
 
-    internal constructor(
-        featureForm: FeatureForm,
-        stateCollection: FormStateCollection,
-        coroutineScope: CoroutineScope
-    ) : this(featureForm) {
-        this.coroutineScope = coroutineScope
-        // Add the provided state collection to the store.
-        val formStateData = FormStateData(this.featureForm, stateCollection)
-        store.addLast(formStateData)
-        coroutineScope.launch(start = CoroutineStart.UNDISPATCHED) {
-            formStateData.evaluateExpressions()
+    @OptIn(ExperimentalCoroutinesApi::class)
+    internal val hasEdits: StateFlow<Boolean> = featureFormsFlow.flatMapLatest { forms ->
+        combine(
+            forms.map {
+                it.featureForm.hasEdits
+            }
+        ) { array ->
+            // check if any form has edits
+            array.any { it }
         }
-    }
+    }.stateIn(
+        initialValue = false,
+        scope = coroutineScope,
+        started = SharingStarted.Eagerly
+    )
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    internal val formsWithErrors: StateFlow<Int> = featureFormsFlow.flatMapLatest { forms ->
+        combine(
+            flows = forms.map { form ->
+                form.featureForm.elementValidationErrors
+            }
+        ) { validationErrors ->
+            // count the number of forms with errors
+            validationErrors.count { it.isNotEmpty() }
+        }
+    }.stateIn(
+        initialValue = 0,
+        scope = coroutineScope,
+        started = SharingStarted.Eagerly
+    )
+
+    /**
+     * Creates a [FeatureFormState] using the supplied [featureForm] and [coroutineScope].
+     *
+     * @param featureForm the [FeatureForm] to create the state for.
+     * @param coroutineScope the [CoroutineScope] to use for evaluating expressions and other
+     * asynchronous operations.
+     *
+     * @since 200.8.0
+     */
+    @Deprecated(
+        level = DeprecationLevel.HIDDEN,
+        message = "Deprecated for binary compatibility. Use the constructor with willApplyEdits " +
+            "parameter instead.",
+        replaceWith = ReplaceWith(
+            expression = "FeatureFormState(featureForm, coroutineScope, willApplyEdits = false)",
+            imports = ["com.arcgismaps.toolkit.featureforms.FeatureFormState"]
+        )
+    )
+    public constructor(
+        featureForm: FeatureForm,
+        coroutineScope: CoroutineScope,
+    ) : this(
+        featureForm = featureForm,
+        coroutineScope = coroutineScope,
+        initialForms = listOf(featureForm),
+        willApplyEdits = false
+    )
+
+    /**
+     * Creates a [FeatureFormState] using the supplied [featureForm] and [coroutineScope].
+     *
+     * @param featureForm the [FeatureForm] to create the state for.
+     * @param coroutineScope the [CoroutineScope] to use for evaluating expressions and other
+     * asynchronous operations.
+     * @param willApplyEdits whether the edits made to the feature form should be applied to the
+     * service. Defaults to false.
+     *
+     * @since 300.3.0
+     */
+    public constructor(
+        featureForm: FeatureForm,
+        coroutineScope: CoroutineScope,
+        willApplyEdits: Boolean = false
+    ) : this(
+        featureForm = featureForm,
+        coroutineScope = coroutineScope,
+        initialForms = listOf(featureForm),
+        willApplyEdits = willApplyEdits
+    )
+
+    /**
+     * Creates a [FeatureFormState] using the supplied list of [featureForms] and [coroutineScope].
+     * The first [FeatureForm] in the list will be used as the initial active form with the rest
+     * of the forms being available for editing. If the list is empty, an [IllegalArgumentException]
+     * will be thrown.
+     *
+     * @param featureForms A list of [FeatureForm]s to manage. The first form will be the initial
+     * active form.
+     * @param coroutineScope The [CoroutineScope] to use for evaluating expressions and other
+     * asynchronous operations.
+     * @param willApplyEdits Whether the edits made to the feature forms should be applied to the
+     * service. Defaults to false.
+     * @throws IllegalArgumentException if [featureForms] is empty.
+     *
+     * @since 300.3.0
+     */
+    public constructor(
+        featureForms: List<FeatureForm>,
+        coroutineScope: CoroutineScope,
+        willApplyEdits: Boolean = false
+    ) : this(
+        featureForm = featureForms.firstOrNull()
+            ?: throw IllegalArgumentException("featureForms must not be empty"),
+        coroutineScope = coroutineScope,
+        initialForms = featureForms,
+        willApplyEdits = willApplyEdits
+    )
 
     /**
      * Discards all the edits made to the [activeFeatureForm], refreshes the attachments and
@@ -170,38 +362,127 @@ public class FeatureFormState private constructor(
      * @since 200.8.0
      */
     public suspend fun discardEdits(): Result<List<FormExpressionEvaluationError>> {
-        val formData = getActiveFormStateData()
-        formData.featureForm.discardEdits()
-        formData.stateCollection.forEach {
-            when (it.state) {
-                is AttachmentElementState -> {
-                    (it.state as AttachmentElementState).refreshAttachments()
-                }
-
-                is UtilityAssociationsElementState -> {
-                    (it.state as UtilityAssociationsElementState).refreshResults()
-                }
-            }
+        _featureFormGroup.discardEdits()
+        _featureFormStates.forEach {
+            it.refreshAttachments()
+            it.refreshUtilityAssociations()
         }
-        return formData.evaluateExpressions()
+        return _featureFormGroup.evaluateExpressions()
     }
 
     /**
-     * Saves all the edits made to the [activeFeatureForm] and refreshes the associations.
-     *
-     * @return the result of the save operation.
+     * Internal variant of [discardEdits] that also emits the correct events. This should be used
+     * for any internal calls to discard edits, such as when the user taps the discard button or when
+     * the form is being closed.
      */
-    internal suspend fun saveEdits(): Result<Unit> {
-        val formData = getActiveFormStateData()
-        val result = formData.featureForm.finishEditing().onSuccess {
-            // After a successful save, refresh the associations
-            formData.stateCollection.forEach { entry ->
-                if (entry.state is UtilityAssociationsElementState) {
-                    (entry.state as UtilityAssociationsElementState).refreshResults()
+    internal fun discard() {
+        coroutineScope.launch {
+            discardEdits().onSuccess {
+                _editingEvent.emit(
+                    FeatureFormEditingEvent.DiscardedEdits(
+                        activeFeatureForm,
+                        false
+                    )
+                )
+            }
+        }
+    }
+
+    /**
+     * Finishes edits on the form(s) and applies them to the service if [willApplyEdits] is true.
+     * This method requires that there are no validation errors in any of the forms. If there are
+     * validation errors, an [IllegalStateException] is set on the returned result.
+     *
+     * @return A [Result] indicating success or failure.
+     * @since 300.2.0
+     */
+    public suspend fun finishEditing(): Result<Unit> = runCatching {
+        _featureFormStates.forEach { it.validateAllFields() }
+        require(formsWithErrors.value == 0) {
+            "Cannot finish editing because there are validation errors in one or more forms."
+        }
+        return _featureFormGroup.finishEditing().onSuccess {
+            _featureFormStates.forEach {
+                it.refreshUtilityAssociations()
+            }
+            if (willApplyEdits) {
+                TODO("Apply edits to service feature table if applicable")
+            }
+        }
+    }
+
+    /**
+     * Internal variant of [finishEditing] that also emits the correct events. This should be used
+     * for any internal calls to finish editing, such as when the user taps the save button.
+     */
+    internal fun save() {
+        // If already saving, return early to avoid duplicate saves.
+        if (_savedEditsState.value == SavedEditsState.Saving) return
+        _savedEditsState.value = SavedEditsState.Saving
+        coroutineScope.launch {
+            _isEvaluatingExpressions.value = true
+            val evaluationResult = _featureFormGroup.evaluateExpressions()
+            val evaluationErrors = evaluationResult.getOrNull()
+            _isEvaluatingExpressions.value = false
+            // If task failed or there are evaluation errors, set error state and return.
+            if (evaluationResult.isFailure || evaluationErrors?.isNotEmpty() == true) {
+                _savedEditsState.value = SavedEditsState.Error(
+                    FormExpressionEvaluationException(
+                        evaluationErrors ?: emptyList()
+                    )
+                )
+                _editingEvent.emit(
+                    FeatureFormEditingEvent.FailedEdits(
+                        evaluationResult.exceptionOrNull() ?: Exception(
+                            evaluationErrors?.joinToString { it.error.toString() }
+                                ?: "Unknown error"
+                        )
+                    )
+                )
+                return@launch
+            }
+            // Validate all fields in the UI before finishing editing the form(s).
+            validateAllFields()
+            when {
+                // If there are errors with more than 1 form
+                formsWithErrors.value > 0 && featureFormStates.size > 1 -> {
+                    _savedEditsState.value = SavedEditsState.Error(
+                        InvalidFormGroupStateException(formsWithErrors.value)
+                    )
+                }
+
+                // If there is a single form with errors
+                formsWithErrors.value > 0 && featureFormStates.size == 1 -> {
+                    val errorCount =
+                        featureFormStates.first().featureForm.elementValidationErrors.value.size
+                    _savedEditsState.value = SavedEditsState.Error(
+                        InvalidFormStateException(errorCount)
+                    )
+                }
+
+                // No errors, proceed to finish editing the form
+                formsWithErrors.value == 0 -> {
+                    finishEditing().onSuccess {
+                        _savedEditsState.value = SavedEditsState.Saved
+                        _editingEvent.emit(
+                            FeatureFormEditingEvent.SavedEdits(
+                                activeFeatureForm,
+                                false
+                            )
+                        )
+                    }.onFailure {
+                        // set error state with the exception message
+                        _savedEditsState.value = SavedEditsState.Error(
+                            FinishEditingException(it.message ?: "Unknown error")
+                        )
+                        // emit the error event
+                        _editingEvent.emit(
+                            FeatureFormEditingEvent.FailedEdits(it)
+                        )
+                    }
                 }
             }
         }
-        return result
     }
 
     /**
@@ -211,6 +492,14 @@ public class FeatureFormState private constructor(
      */
     internal fun setNavigationCallback(navigateToRoute: ((NavigationRoute) -> Unit)?) {
         this.navigateToRoute = navigateToRoute
+    }
+
+    /**
+     * Sets the navigation callback to the provided [navigatePopUpToRoute] function. This function is
+     * called when navigating to a new [FeatureForm] and popping all destinations before navigating.
+     */
+    internal fun setNavigationPopupToCallback(navigatePopUpToRoute: ((NavigationRoute) -> Unit)?) {
+        this.navigatePopUpToRoute = navigatePopUpToRoute
     }
 
     /**
@@ -233,7 +522,10 @@ public class FeatureFormState private constructor(
         if (_activeFeatureForm.value != formStateData.featureForm) {
             _activeFeatureForm.value = formStateData.featureForm
             // refresh the feature to ensure the latest data is loaded.
-            formStateData.featureForm.feature.refresh()
+            if (!formStateData.featureForm.hasEdits.value) {
+                // only refresh the feature if there are no edits, otherwise the edits will be lost.
+                formStateData.featureForm.feature.refresh()
+            }
             if (formStateData.initialEvaluation.not()) {
                 formStateData.evaluateExpressions()
             }
@@ -253,16 +545,59 @@ public class FeatureFormState private constructor(
         val navigateTo = navigateToRoute ?: return false
         // Check if the backStackEntry is in the resumed state.
         if (backStackEntry.lifecycleIsResumed().not()) return false
+        // Create or find existing state data.
         val form = FeatureForm(feature)
-        val states = createStates(
-            form = form,
-            elements = form.elements,
-            scope = coroutineScope
-        )
-        // Add the new form to the stack.
-        store.addLast(FormStateData(form, states))
+        val formStateData = try {
+            _featureFormGroup.addForm(form)
+            FormStateData.create(
+                form = form,
+                scope = coroutineScope,
+                // Run individual eval for the form when added
+                initialEvaluation = true
+            ).also(_featureFormStates::add)
+        } catch (_: Exception) {
+            // To-do: Handle different ArcGISException types.
+            val id = feature.id()
+            _featureFormStates.firstOrNull {
+                id != null && it.featureForm.feature.id() == id
+            }
+        }
+        if (formStateData == null) return false
+        // Add the form to the stack.
+        store.addLast(formStateData)
         // Navigate to the form view.
-        navigateTo(NavigationRoute.Form)
+        navigateTo(NavigationRoute.Form(FormNavigationDirection.Next))
+        return true
+    }
+
+    /**
+     * Adds a new [FeatureForm] to the local stack and navigates to it. [updateActiveFeatureForm]
+     * must be called after this to update the [activeFeatureForm], preferably after the navigation
+     * is complete. This will clear the stack and add the new form to the stack.
+     *
+     * [setNavigationPopupToCallback] must be set before calling this function to ensure that the
+     * navigation is valid.
+     */
+    @MainThread
+    internal fun navigateToForm(
+        backStackEntry: NavBackStackEntry,
+        formStateData: FormStateData,
+        direction: FormNavigationDirection
+    ): Boolean {
+        // Early return if the formStateData is already the active form.
+        if (getActiveFormStateData() == formStateData) return false
+        val navigateTo = navigatePopUpToRoute ?: return false
+        // Check if the backStackEntry is in the resumed state.
+        if (backStackEntry.lifecycleIsResumed().not()) return false
+        // Clear the backstack and add this form to the top of the stack.
+        store.clear()
+        store.addLast(formStateData)
+        // Kick off the evaluation of expressions for the form.
+        coroutineScope.launch(start = CoroutineStart.UNDISPATCHED) {
+            formStateData.evaluateExpressions()
+        }
+        // Navigate to the form view.
+        navigateTo(NavigationRoute.Form(direction))
         return true
     }
 
@@ -316,71 +651,36 @@ public class FeatureFormState private constructor(
      */
     internal fun validateAllFields() {
         // Force validation of all the states in the current form.
-        getActiveFormStateData().stateCollection.forEach { entry ->
-            when (entry.formElement) {
-                // validate attachments
-                is AttachmentsFormElement -> {
-                    (entry.getState<AttachmentElementState>()).forceValidation()
-                }
-                // validate all fields
-                is FieldFormElement -> {
-                    entry.getState<BaseFieldState<*>>().forceValidation()
-                }
+        _featureFormStates.forEach { it.validateAllFields() }
+    }
 
-                // validate any fields that are within a group
-                is GroupFormElement -> {
-                    entry.getState<BaseGroupState>().fieldStates.forEach { childEntry ->
-                        childEntry.getState<BaseFieldState<*>>().forceValidation()
-                    }
-                }
+    /**
+     * Sets the visibility of the overview of all feature forms. This updates the [showOverview]
+     * property and can be used to show or hide the overview.
+     *
+     * @param visible true to show the overview, false to hide it.
+     */
+    internal fun showOverview(visible: Boolean) {
+        _showOverview.value = visible
+    }
 
-                else -> {}
-            }
-        }
+    /**
+     * Resets the [saveEditsState] to [SavedEditsState.Idle]. This should be called after the
+     * state result has been handled by the UI.
+     */
+    internal fun resetSavedEditsState() {
+        _savedEditsState.value = SavedEditsState.Idle
     }
 }
 
 /**
- * A structure that holds the [FeatureForm] and its associated [FormStateCollection].
- *
- * This class is also [Stable] and enables composition optimizations.
- *
- * @param featureForm the [FeatureForm] to create the state for.
- * @param stateCollection the [FormStateCollection] created for the [featureForm].
+ * UI state for different stages of saving edits in a [FeatureFormState].
  */
-@Stable
-internal data class FormStateData(
-    val featureForm: FeatureForm,
-    val stateCollection: FormStateCollection
-) {
-    /**
-     * Indicates if the expressions for the [featureForm] have been evaluated at least once.
-     */
-    var initialEvaluation: Boolean by mutableStateOf(false)
-        private set
-
-    /**
-     * Indicates if the expressions for the [featureForm] are currently being evaluated.
-     */
-    var isEvaluatingExpressions: Boolean by mutableStateOf(false)
-        private set
-
-    /**
-     * Evaluates the expressions for the [featureForm] and returns the result. After a successful
-     * evaluation, the [initialEvaluation] is set to true. While this function is running, the
-     * [isEvaluatingExpressions] will be true.
-     */
-    suspend fun evaluateExpressions(): Result<List<FormExpressionEvaluationError>> {
-        try {
-            isEvaluatingExpressions = true
-            return featureForm.evaluateExpressions().onSuccess {
-                // Set the initial evaluation to true after the first successful evaluation.
-                initialEvaluation = true
-            }
-        } finally {
-            isEvaluatingExpressions = false
-        }
-    }
+internal sealed class SavedEditsState {
+    object Idle : SavedEditsState()
+    object Saving : SavedEditsState()
+    object Saved : SavedEditsState()
+    data class Error(val error: Throwable) : SavedEditsState()
 }
 
 /**

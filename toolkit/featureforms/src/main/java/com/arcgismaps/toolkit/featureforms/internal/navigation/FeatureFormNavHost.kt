@@ -39,8 +39,6 @@ internal fun FeatureFormNavHost(
     state: FeatureFormState,
     isNavigationEnabled: Boolean,
     validationErrorVisibility: ValidationErrorVisibility,
-    onSaveForm: suspend (Boolean) -> Result<Unit>,
-    onDiscardForm: suspend (Boolean) -> Unit,
     onBarcodeButtonClick: ((FieldFormElement) -> Unit)?,
     onShowOnMapRequest: (ArcGISFeature) -> Unit,
     onNavigationEvent: (FeatureFormNavigationRoute) -> Unit,
@@ -48,7 +46,7 @@ internal fun FeatureFormNavHost(
 ) {
     NavHost(
         navController,
-        startDestination = NavigationRoute.Form,
+        startDestination = NavigationRoute.Form(),
         modifier = modifier,
         enterTransition = { slideInHorizontally { h -> h } },
         exitTransition = { fadeOut() },
@@ -71,13 +69,11 @@ internal fun FeatureFormNavHost(
             onGroupSelected = navController::navigateToUNAssociationGroupResult,
             onAddFromSourceClick = navController::navigateToAddUNAssociationFromSource,
             onNavigationEvent = onNavigationEvent,
-            state = state
+            state = state,
         )
 
         associationGroupResultDestination(
             state = state,
-            onSave = onSaveForm,
-            onDiscard = onDiscardForm,
             isNavigationEnabled = isNavigationEnabled,
             onNavigateToAssociation = navController::navigateToUNAssociationDetails,
             onNavigateToFeature = state::navigateTo,
