@@ -421,13 +421,22 @@ public class FeatureFormState private constructor(
         _savedEditsState.value = SavedEditsState.Saving
         coroutineScope.launch {
             _isEvaluatingExpressions.value = true
-            val evaluationErrors = _featureFormGroup.evaluateExpressions().getOrNull()
+            val evaluationResult = _featureFormGroup.evaluateExpressions()
+            val evaluationErrors = evaluationResult.getOrNull()
             _isEvaluatingExpressions.value = false
             // If task failed or there are evaluation errors, set error state and return.
-            if (evaluationErrors == null || evaluationErrors.isNotEmpty()) {
+            if (evaluationResult.isFailure || evaluationErrors?.isNotEmpty() == true) {
                 _savedEditsState.value = SavedEditsState.Error(
                     FormExpressionEvaluationException(
                         evaluationErrors ?: emptyList()
+                    )
+                )
+                _editingEvent.emit(
+                    FeatureFormEditingEvent.FailedEdits(
+                        evaluationResult.exceptionOrNull() ?: Exception(
+                            evaluationErrors?.joinToString { it.error.toString() }
+                                ?: "Unknown error"
+                        )
                     )
                 )
                 return@launch
@@ -467,7 +476,9 @@ public class FeatureFormState private constructor(
                             FinishEditingException(it.message ?: "Unknown error")
                         )
                         // emit the error event
-                        // TODO: emit an event for the error
+                        _editingEvent.emit(
+                            FeatureFormEditingEvent.FailedEdits(it)
+                        )
                     }
                 }
             }

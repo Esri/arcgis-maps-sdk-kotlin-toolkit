@@ -107,13 +107,14 @@ public sealed class ValidationErrorVisibility {
  *
  * @since 200.8.0
  */
-public sealed class FeatureFormEditingEvent {
+public abstract class FeatureFormEditingEvent private constructor() {
 
     /**
      * Indicates that the edits have been discarded on the [featureForm].
      *
      * @param featureForm The [FeatureForm] that was edited.
      * @param willNavigate Indicates if the form will navigate to another screen after discarding the edits.
+     * @since 200.8.0
      */
     public data class DiscardedEdits(
         @Deprecated(
@@ -123,6 +124,10 @@ public sealed class FeatureFormEditingEvent {
             level = DeprecationLevel.WARNING
         )
         val featureForm: FeatureForm,
+        @Deprecated(
+            message = "This parameter is no longer applicable. It will be removed in a future release",
+            level = DeprecationLevel.WARNING
+        )
         val willNavigate: Boolean
     ) : FeatureFormEditingEvent()
 
@@ -131,6 +136,7 @@ public sealed class FeatureFormEditingEvent {
      *
      * @param featureForm The [FeatureForm] that was edited.
      * @param willNavigate Indicates if the form will navigate to another screen after saving the edits.
+     * @since 200.8.0
      */
     public data class SavedEdits(
         @Deprecated(
@@ -140,7 +146,21 @@ public sealed class FeatureFormEditingEvent {
             level = DeprecationLevel.WARNING
         )
         val featureForm: FeatureForm,
+        @Deprecated(
+            message = "This parameter is no longer applicable. It will be removed in a future release",
+            level = DeprecationLevel.WARNING
+        )
         val willNavigate: Boolean
+    ) : FeatureFormEditingEvent()
+
+    /**
+     * Indicates that there was an error while edits were being saved.
+     *
+     * @param error The associated error
+     * @since 300.3.0
+     */
+    public data class FailedEdits(
+        val error: Throwable
     ) : FeatureFormEditingEvent()
 }
 

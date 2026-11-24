@@ -113,7 +113,6 @@ apiValidation {
         "com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationAction\$NavigateBack\$Creator",
         "com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationAction\$None\$Creator",
         "com.arcgismaps.toolkit.featureforms.internal.components.material3.ComposableSingletons\$ModalBottomSheetKt",
-        "com.arcgismaps.toolkit.featureforms.internal.screens.ComposableSingletons\$ContentAwareTopBarKt",
         "com.arcgismaps.toolkit.featureforms.internal.screens.ComposableSingletons\$UNAssociationGroupResultScreenKt",
         "com.arcgismaps.toolkit.featureforms.internal.screens.ComposableSingletons\$UNAssociationsFilterResultScreenKt",
         "com.arcgismaps.toolkit.featureforms.internal.screens.ComposableSingletons\$CreateAssociationScreenKt",
