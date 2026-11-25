@@ -22,7 +22,7 @@ MapView(
 
 ### Respond to User Input
 
-The composable `MapView`, `SceneView`, and `LocalSceneView` exposes gesture events as lambda callback parameters:
+The composable `MapView`, `SceneView`, and `LocalSceneView` expose gesture events as lambda callback parameters:
 
 ```kotlin
 val arcGISMap = remember { ArcGISMap(BasemapStyle.ArcGISImagery) }
@@ -98,7 +98,7 @@ An example of how to display the device location is available in the [MapView Lo
 
 ### Text scaling
 
-`MapView`, `SceneView`, and `LocalSceneView` accept `useSystemTextScale`, which defaults to `true` and applies the system font scale to supported text rendered by the view. Setting it to `false` to disable this behavior.
+`MapView`, `SceneView`, and `LocalSceneView` accept `useSystemTextScale`, which defaults to `true` and applies the system font scale to supported text rendered by the view. Set it to `false` to disable this behavior.
 
 ### Identify a Feature
 
