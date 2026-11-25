@@ -20,11 +20,20 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.internal.Actions.with
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.dsl.kotlinExtension
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
+/**
+ * A plugin to apply to all projects. It is applied by other convention plugins for microapps
+ * and components.
+ *
+ * @since 300.2.0
+ */
 @Suppress("UNUSED")
-class KotlinConventionPlugin : Plugin<Project> {
+class KotlinConventions : Plugin<Project> {
     override fun apply(target: Project) {
+        target.kotlinExtension.jvmToolchain(17)
+
         with(target) {
             tasks.withType(KotlinCompile::class.java).configureEach {
                 compilerOptions {

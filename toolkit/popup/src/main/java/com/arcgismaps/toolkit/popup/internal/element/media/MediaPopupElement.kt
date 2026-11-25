@@ -28,6 +28,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -96,6 +97,7 @@ private fun MediaPopupElement(
 @Composable
 private fun MediaGallery(state: LazyListState, media: List<PopupMediaState>, onClicked: (ViewableFile) -> Unit) {
     LazyRow(
+        modifier = Modifier.testTag("MediaGallery"),
         state = state,
         horizontalArrangement = Arrangement.spacedBy(15.dp),
     ) {

@@ -17,15 +17,11 @@
  */
 
 plugins {
-    id("com.android.library")
     alias(libs.plugins.android.integration.testing)
-    id("org.jetbrains.kotlin.plugin.compose")
-    id("artifact-deploy")
+    alias(libs.plugins.component.convention.plugin)
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
+    alias(libs.plugins.kotlin.serialization)
     id("kotlin-parcelize")
-    alias(libs.plugins.kotlin.convention.plugin)
-    alias(libs.plugins.binary.compatibility.validator) apply true
-    alias(libs.plugins.kotlin.serialization) apply true
 }
 
 val toolkitTests = project.findProperty("toolkitTestDir") as String
@@ -35,7 +31,6 @@ secrets {
 }
 
 kotlin {
-    jvmToolchain(17)
     compilerOptions {
         freeCompilerArgs.add("-Xconsistent-data-class-copy-visibility")
     }
@@ -43,7 +38,6 @@ kotlin {
 
 android {
     namespace = "com.arcgismaps.toolkit.featureforms"
-    compileSdk = libs.versions.compileSdk.get().toInt()
 
     // Lint crashes on the latest Android studio
     // (Bug with Android Studio Meerkat | 2024.3.1)
@@ -55,20 +49,7 @@ android {
     }
 
     defaultConfig {
-        minSdk = libs.versions.minSdk.get().toInt()
         testApplicationId = "com.arcgismaps.toolkit.featureforms.test"
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        consumerProguardFiles("consumer-rules.pro")
-    }
-
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-        }
-    }
-    buildFeatures {
-        compose = true
-        buildConfig = true
     }
 
     sourceSets {
@@ -94,32 +75,6 @@ android {
                     directories += "$toolkitTests/${project.name}/test"
                 }
             }
-        }
-    }
-    // If this were not an android project, we would just write `explicitApi()` in the Kotlin scope.
-    // but as an android project could write `freeCompilerArgs = listOf("-Xexplicit-api=strict")`
-    // in the kotlinOptions above, but that would enforce api rules on the test code, which we don't want.
-    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-        if ("Test" !in name) {
-            compilerOptions {
-                freeCompilerArgs.add("-Xexplicit-api=strict")
-            }
-        }
-    }
-
-    /**
-     * Configures the test report for connected (instrumented) tests to be copied to a central
-     * folder in the project's root directory.
-     */
-    testOptions {
-        targetSdk = libs.versions.compileSdk.get().toInt()
-        val connectedTestReportsPath: String by project
-        reportDir = "$connectedTestReportsPath/${project.name}"
-    }
-
-    publishing {
-        singleVariant("release") {
-            // This is the default variant.
         }
     }
 }
@@ -166,7 +121,10 @@ apiValidation {
         "com.arcgismaps.toolkit.featureforms.internal.screens.ComposableSingletons\$SelectNetworkSourceScreenKt",
         "com.arcgismaps.toolkit.featureforms.internal.screens.ComposableSingletons\$UtilityAssociationDetailsScreenKt",
         "com.arcgismaps.toolkit.featureforms.internal.screens.ComposableSingletons\$FeaturesFilterScreenKt",
-        "com.arcgismaps.toolkit.featureforms.internal.utils.ComposableSingletons\$SearchBarKt"
+        "com.arcgismaps.toolkit.featureforms.internal.utils.ComposableSingletons\$SearchBarKt",
+        "com.arcgismaps.toolkit.featureforms.internal.utils.ComposableSingletons\$DialogKt",
+        "com.arcgismaps.toolkit.featureforms.internal.components.attachment.ComposableSingletons\$AddAttachmentKt",
+        "com.arcgismaps.toolkit.featureforms.internal.components.attachment.ComposableSingletons\$AudioRecorderKt"
     )
     ignoredClasses.addAll(composableSingletons)
 }
@@ -194,6 +152,7 @@ dependencies {
     androidTestImplementation(libs.truth)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.bundles.composeTest)
+    androidTestImplementation(project(":microapps-lib"))
     androidTestImplementation(libs.bundles.androidXTest)
     androidTestImplementation(libs.androidx.test.espresso.core)
     androidTestImplementation(libs.androidx.espresso.intents)

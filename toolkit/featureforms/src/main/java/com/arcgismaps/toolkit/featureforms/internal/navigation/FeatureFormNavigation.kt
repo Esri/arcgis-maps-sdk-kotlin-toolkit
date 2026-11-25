@@ -28,6 +28,7 @@ import com.arcgismaps.toolkit.featureforms.ValidationErrorVisibility
 import com.arcgismaps.toolkit.featureforms.internal.screens.FeatureFormScreen
 
 internal fun NavGraphBuilder.featureFormDestination(
+    onAudioCaptureRequest: (NavBackStackEntry, Long?, Int) -> Unit,
     onBarcodeButtonClick: ((FieldFormElement) -> Unit)?,
     onUtilityFilterSelected: (NavBackStackEntry, Int) -> Unit,
     onNavigationEvent: (FeatureFormNavigationRoute) -> Unit,
@@ -38,6 +39,9 @@ internal fun NavGraphBuilder.featureFormDestination(
         val formData = remember(backStackEntry) { state.getActiveFormStateData() }
         FeatureFormScreen(
             formStateData = formData,
+            onAudioCaptureRequest = { maxDuration, stateId ->
+                onAudioCaptureRequest(backStackEntry, maxDuration, stateId)
+            },
             onBarcodeButtonClick = onBarcodeButtonClick,
             onUtilityFilterSelected = {
                 onUtilityFilterSelected(backStackEntry, it.id)

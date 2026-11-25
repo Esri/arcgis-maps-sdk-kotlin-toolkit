@@ -16,7 +16,6 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.components.attachment
 
-import android.annotation.SuppressLint
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.graphics.Bitmap
@@ -69,6 +68,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
@@ -90,7 +90,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import java.io.File
 
-@SuppressLint("LocalContextGetResourceValueCall")
 @Composable
 internal fun AttachmentTile(
     onFocused: () -> Unit,
@@ -99,12 +98,16 @@ internal fun AttachmentTile(
     displayFilename: Boolean,
     modifier: Modifier = Modifier
 ) {
+    val resources = LocalResources.current
     val name = remember(state.name) {
         if (displayFilename) {
             state.name
         } else {
             ""
         }
+    }
+    val contentDescriptionString = remember(state.name) {
+        resources.getString(R.string.attachment_with_name, state.name)
     }
     val isRenameEnabled = remember(state) {
         allowUserRename && state.size <= maxAttachmentUploadSize
@@ -126,8 +129,7 @@ internal fun AttachmentTile(
             .semantics(mergeDescendants = displayFilename) {
                 // set the content description, when displayFilename is false
                 if (name.isEmpty()) {
-                    contentDescription =
-                        context.getString(R.string.attachment_with_name, state.name)
+                    contentDescription = contentDescriptionString
                 }
             },
         colors = CardDefaults.cardColors(
@@ -260,22 +262,22 @@ internal fun AttachmentTile(
                     val limit = error.limit
                     val limitFormatted = Formatter.formatFileSize(context, limit)
                     Pair(
-                        context.getString(R.string.file_size_exceeds_limit),
-                        context.getString(R.string.attachment_size_limit_exceeded, limitFormatted)
+                        resources.getString(R.string.file_size_exceeds_limit),
+                        resources.getString(R.string.attachment_size_limit_exceeded, limitFormatted)
                     )
                 }
 
                 is EmptyAttachmentException -> {
                     Pair(
-                        context.getString(R.string.unsupported_file_type),
-                        context.getString(R.string.download_empty_file)
+                        resources.getString(R.string.unsupported_file_type),
+                        resources.getString(R.string.download_empty_file)
                     )
                 }
 
                 else -> {
                     Pair(
                         "",
-                        error.localizedMessage ?: context.getString(R.string.download_failed)
+                        error.localizedMessage ?: resources.getString(R.string.download_failed)
                     )
                 }
             }

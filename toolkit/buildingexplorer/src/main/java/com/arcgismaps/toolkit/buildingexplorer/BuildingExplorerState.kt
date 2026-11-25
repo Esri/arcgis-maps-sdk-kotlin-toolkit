@@ -1,0 +1,372 @@
+/*
+ *
+ *  Copyright 2026 Esri
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ */
+
+package com.arcgismaps.toolkit.buildingexplorer
+
+import androidx.compose.runtime.Stable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.State
+import com.arcgismaps.mapping.ArcGISScene
+import com.arcgismaps.mapping.layers.BuildingSceneLayer
+import com.arcgismaps.mapping.layers.GroupLayer
+import com.arcgismaps.mapping.layers.Layer
+import com.arcgismaps.mapping.layers.buildingscene.BuildingFilter
+import com.arcgismaps.mapping.layers.buildingscene.BuildingFilterBlock
+import com.arcgismaps.mapping.layers.buildingscene.BuildingGroupSublayer
+import com.arcgismaps.mapping.layers.buildingscene.BuildingSolidFilterMode
+import com.arcgismaps.mapping.layers.buildingscene.BuildingSublayer
+import com.arcgismaps.mapping.layers.buildingscene.BuildingXrayFilterMode
+import com.arcgismaps.mapping.view.Camera
+import com.arcgismaps.mapping.view.SceneViewingMode
+import com.arcgismaps.toolkit.geoviewcompose.LocalSceneViewProxy
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.seconds
+
+/**
+ * The state of a [BuildingExplorer].
+ *
+ * @since 300.2.0
+ */
+@Stable
+public class BuildingExplorerState internal constructor(
+    buildingSceneLayers: List<BuildingSceneLayer>,
+    arcGISScene: ArcGISScene?,
+    coroutineScope: CoroutineScope,
+    localSceneViewProxy: LocalSceneViewProxy? = null
+) {
+    private val _isStateLoaded = MutableStateFlow(false)
+    internal val isStateLoaded = _isStateLoaded.asStateFlow()
+
+    internal enum class Error {
+        NoError,
+        NoBuildingLayers,
+        RequiresLocalScene,
+        LoadFailed
+    }
+
+    internal var error: Error = Error.NoError
+
+    internal lateinit var buildingSceneLayerStates: List<BuildingSceneLayerState>
+
+    private val _buildingSceneLayerState = mutableStateOf<BuildingSceneLayerState?>(null)
+
+    internal val buildingSceneLayerState: State<BuildingSceneLayerState?> =
+        _buildingSceneLayerState
+
+    /**
+     * Creates a [BuildingExplorerState] with the given building scene layers.
+     *
+     * @param buildingSceneLayers The list of [BuildingSceneLayer]s that will appear in the component.
+     * @param coroutineScope The coroutine scope to use for asynchronous operations.
+     * @param localSceneViewProxy The proxy to provide access to the set viewpoint operation for the
+     * "Zoom to building" button. If the proxy is null then that button will not display.
+     *
+     * @since 300.2.0
+     */
+    public constructor(
+        buildingSceneLayers: List<BuildingSceneLayer>,
+        coroutineScope: CoroutineScope,
+        localSceneViewProxy: LocalSceneViewProxy? = null
+    ) : this(
+        buildingSceneLayers = buildingSceneLayers,
+        arcGISScene = null,
+        coroutineScope = coroutineScope,
+        localSceneViewProxy = localSceneViewProxy
+    )
+
+    /**
+     * Creates a [BuildingExplorerState] with using the [BuildingSceneLayer]s from the given ArcGISScene.
+     *
+     * @param arcGISScene The scene that provides [BuildingSceneLayer]s.
+     * @param coroutineScope The coroutine scope to use for asynchronous operations.
+     * @param localSceneViewProxy The proxy to provide access to the set viewpoint operation for the
+     * "Zoom to building" button. If the proxy is null then that button will not display.
+     *
+     * @since 300.2.0
+     */
+    public constructor(
+        arcGISScene: ArcGISScene,
+        coroutineScope: CoroutineScope,
+        localSceneViewProxy: LocalSceneViewProxy? = null
+    ) : this(
+        buildingSceneLayers = emptyList(),
+        arcGISScene = arcGISScene,
+        coroutineScope = coroutineScope,
+        localSceneViewProxy = localSceneViewProxy
+    )
+
+    private fun extractBuildingSceneLayers(
+        layers: List<Layer>
+    ): List<BuildingSceneLayer> = layers.flatMap { layer ->
+        when (layer) {
+            is BuildingSceneLayer -> listOf(layer)
+            is GroupLayer -> extractBuildingSceneLayers(layer.layers)
+            else -> emptyList()
+        }
+    }
+
+    init {
+        coroutineScope.launch {
+            val layers = arcGISScene?.let { scene ->
+                scene.load().fold(
+                    onSuccess = {
+                        if (scene.viewingMode == SceneViewingMode.Local) {
+                            extractBuildingSceneLayers(scene.operationalLayers)
+                        } else {
+                            error = Error.RequiresLocalScene
+                            emptyList()
+                        }
+                    },
+                    onFailure = {
+                        error = Error.LoadFailed
+                        emptyList()
+                    }
+                )
+            } ?: buildingSceneLayers
+
+            if (layers.isEmpty() && error == Error.NoError) {
+                error = Error.NoBuildingLayers
+            }
+
+            buildingSceneLayerStates = layers.map { layer ->
+                BuildingSceneLayerState(
+                    buildingSceneLayer = layer,
+                    coroutineScope = coroutineScope,
+                    localSceneViewProxy = localSceneViewProxy
+                )
+            }.sortedBy { it.name }
+
+            _buildingSceneLayerState.value = buildingSceneLayerStates.firstOrNull()
+            _isStateLoaded.value = true
+        }
+    }
+
+    internal fun onBuildingSceneLayerSelected(index: Int) {
+        _buildingSceneLayerState.value = buildingSceneLayerStates.getOrNull(index) ?: return
+    }
+}
+
+/**
+ * The state for a single [BuildingSceneLayer] in a [BuildingExplorerState].
+ *
+ * @since 300.2.0
+ */
+@Stable
+internal class BuildingSceneLayerState(
+    private val buildingSceneLayer: BuildingSceneLayer,
+    private val coroutineScope: CoroutineScope,
+    private val localSceneViewProxy: LocalSceneViewProxy?
+) {
+    private val _isStateLoaded = MutableStateFlow(false)
+    internal val isStateLoaded = _isStateLoaded.asStateFlow()
+
+    internal enum class Error {
+        NoError,
+        LoadFailed
+    }
+
+    internal var error: Error = Error.NoError
+
+    // the name of the building layer
+    internal val name = buildingSceneLayer.name
+
+    // the visibility of the building layer
+    private var _visible = mutableStateOf(true)
+    internal val visible: State<Boolean> = _visible
+
+    // whether the full model is being shown
+    private var _showFullModel = mutableStateOf(false)
+    internal val shouldShowFullModel: State<Boolean> = _showFullModel
+
+    // The selected level
+    private var _selectedLevel = mutableStateOf("All")
+    internal val selectedLevel: State<String> = _selectedLevel
+
+    // The list of available levels
+    private val _levels = mutableListOf(selectedLevel.value)
+    internal val levels: List<String> get() = _levels.toList()
+
+    // Levels elements should only show if there are more than 1 level (so 2 when counting "All")
+    internal val shouldShowLevels: Boolean
+        get() = levels.size > 2
+
+    // the index of the selected construction phase
+    private var _selectedConstructionPhase = mutableStateOf("")
+    internal val selectedConstructionPhase: State<String> = _selectedConstructionPhase
+
+    // the list of construction phases
+    private val _constructionPhases = mutableListOf<String>()
+    internal val constructionPhases: List<String> get() = _constructionPhases.toList()
+
+    // construction phase elements should only show if there is more than 1 phase
+    internal val shouldShowConstructionPhases: Boolean
+        get() = constructionPhases.size > 1
+
+    // The list of building sublayer categories
+    private val _categories = mutableListOf<BuildingSublayer>()
+    internal val categories: List<BuildingSublayer> get() = _categories.toList()
+
+    private var overviewSublayer: BuildingSublayer? = null
+    private var fullModelSublayer: BuildingSublayer? = null
+
+    // the show full model switch should only appear if both the full model and overview sublayers
+    // are available
+    private var _shouldShowFullModelSwitch = mutableStateOf(false)
+    internal val shouldShowFullModelSwitch: State<Boolean> = _shouldShowFullModelSwitch
+
+    internal val isShowZoom = localSceneViewProxy != null
+
+    init {
+        coroutineScope.launch {
+            buildingSceneLayer.let { buildingSceneLayer ->
+                // load the layer and extract the overview and full model sublayers if they are available
+                buildingSceneLayer.load().onFailure {
+                    error = Error.LoadFailed
+                }
+
+                if (error == Error.NoError) {
+                    _visible.value = buildingSceneLayer.isVisible
+
+                    val sublayers = buildingSceneLayer.sublayers
+                    overviewSublayer = sublayers.firstOrNull { it.modelName == "Overview" }
+                    fullModelSublayer = sublayers.firstOrNull { it.modelName == "FullModel" }
+                    fullModelSublayer?.let {
+                        _showFullModel.value = it.isVisible
+                    }
+
+                    _shouldShowFullModelSwitch.value =
+                        fullModelSublayer != null && overviewSublayer != null
+
+                    // Get the levels and construction phases from the statistics
+                    buildingSceneLayer.fetchStatistics().onSuccess { statistics ->
+                        statistics["BldgLevel"]?.mostFrequentValues?.let {
+                            _levels.addAll(0, it.filter { level -> level.toIntOrNull() != null }
+                                .sortedBy { level -> level.toInt() })
+                        }
+                        statistics["CreatedPhase"]?.mostFrequentValues?.let {
+                            // only allow integer phases because that is what the filter is expecting
+                            _constructionPhases.addAll(it.filter { phase -> phase.toIntOrNull() != null }
+                                .sortedBy { phase -> phase.toInt() })
+                            if (_constructionPhases.isNotEmpty()) {
+                                _selectedConstructionPhase.value = _constructionPhases.last()
+                            }
+                        }
+                    }
+                    // The top-level sublayer groups will be the categories
+                    (fullModelSublayer as? BuildingGroupSublayer)?.let { buildingSublayer ->
+                        _categories.addAll(buildingSublayer.sublayers.sortedBy { it.name })
+                    }
+
+                    // clear any preset filter on the layer
+                    filter()
+                }
+
+                _isStateLoaded.emit(true)
+            }
+        }
+    }
+
+    internal fun toggleVisibility(visible: Boolean) {
+        _visible.value = visible
+        buildingSceneLayer.isVisible = _visible.value
+    }
+
+    internal fun toggleFullModel(fullModel: Boolean) {
+        _showFullModel.value = fullModel
+        fullModelSublayer?.isVisible = _showFullModel.value
+        overviewSublayer?.isVisible = !_showFullModel.value
+    }
+
+    internal fun onLevelSelected(index: Int) {
+        _selectedLevel.value = _levels.getOrNull(index) ?: return
+        filter()
+    }
+
+    internal fun onConstructionPhaseSelected(index: Int) {
+        _selectedConstructionPhase.value = _constructionPhases.getOrNull(index) ?: return
+        filter()
+    }
+
+    internal fun filter() {
+        var solidWhere = ""
+        var xRayWhere = ""
+
+        if (shouldShowConstructionPhases) {
+            val phase = _selectedConstructionPhase.value
+            solidWhere = "CreatedPhase <= $phase"
+            xRayWhere = "CreatedPhase <= $phase"
+        }
+
+        buildingSceneLayer.let { buildingSceneLayer ->
+            if (_selectedLevel.value != "All") {
+                val level = _selectedLevel.value
+                if (solidWhere.isNotEmpty()) {
+                    solidWhere += " AND BldgLevel = $level"
+                } else {
+                    solidWhere = "BldgLevel = $level"
+                }
+                if (xRayWhere.isNotEmpty()) {
+                    xRayWhere += " AND BldgLevel < $level"
+                } else {
+                    xRayWhere = "BldgLevel < $level"
+                }
+            }
+            // Build a building filter to show the selected floor and an xray view of the floors below.
+            // Floors above the selected floor are not shown at all.
+            val buildingFilter = BuildingFilter(
+                name = "Floor filter",
+                description = "Show selected floor and xray filter for lower floors.",
+                listOf(
+                    BuildingFilterBlock(
+                        title = "solid block",
+                        whereClause = solidWhere,
+                        mode = BuildingSolidFilterMode()
+                    ),
+                    BuildingFilterBlock(
+                        title = "x ray block",
+                        whereClause = xRayWhere,
+                        mode = BuildingXrayFilterMode()
+                    )
+                )
+            )
+            buildingSceneLayer.activeFilter = buildingFilter
+        }
+    }
+
+    internal fun onZoom() {
+        coroutineScope.launch {
+            buildingSceneLayer.fullExtent?.let { fullExtent ->
+                val center = fullExtent.center
+                val camera = Camera(
+                    lookAtPoint = center,
+                    distance = 250.0,
+                    heading = 40.0,
+                    pitch = 60.0,
+                    roll = 0.0,
+                )
+                localSceneViewProxy?.setViewpointCameraAnimated(
+                    camera = camera,
+                    duration = 1.5.seconds
+                )
+            }
+        }
+    }
+}

@@ -58,6 +58,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.window.core.layout.WindowSizeClass
 import com.arcgismaps.data.FeatureTemplate
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.layers.FeatureLayer
@@ -78,8 +79,12 @@ fun AddFeatureSheet(
     paddingValues: PaddingValues = PaddingValues(0.dp),
 ) {
     val windowSize = getWindowSize(LocalContext.current)
+    // determine if the device is in compact width
+    val isCompact = windowSize.isWidthAtLeastBreakpoint(
+        WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND
+    ).not()
     val bottomSheetState = rememberStandardBottomSheetState(
-        initialValue = SheetValue.PartiallyExpanded,
+        initialValue = if (isCompact) SheetValue.PartiallyExpanded else SheetValue.Expanded,
         confirmValueChange = {
             it != SheetValue.Hidden
         },

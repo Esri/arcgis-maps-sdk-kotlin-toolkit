@@ -46,7 +46,12 @@ gradlePlugin {
 
         register("kotlinConvention") {
             id = "kotlin-convention-plugin"
-            implementationClass = "KotlinConventionPlugin"
+            implementationClass = "KotlinConventions"
+        }
+
+        register("componentConventions") {
+            id = "component-convention-plugin"
+            implementationClass = "ComponentConventions"
         }
 
         register("microappConvention") {
@@ -64,6 +69,7 @@ gradlePlugin {
 
 dependencies {
     compileOnly(libs.android.gradle.plugin)
+    compileOnly(libs.bcv.implementation)
     implementation(libs.kotlin.gradle)
     compileOnly(libs.secrets.gradle.plugin)
 }

@@ -16,6 +16,7 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.components.attachment
 
+import android.Manifest
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -73,6 +74,7 @@ import kotlinx.coroutines.launch
 @Composable
 internal fun AttachmentFormElement(
     state: AttachmentElementState,
+    onAudioCaptureRequest: (Long?) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -82,7 +84,8 @@ internal fun AttachmentFormElement(
         description = state.description,
         isEditable = editable,
         inputs = state.inputs,
-        hasCameraPermission = state.hasCameraPermissions(context),
+        hasCameraPermission = state.hasPermission(context, Manifest.permission.CAMERA),
+        hasMicrophonePermission = state.hasPermission(context, Manifest.permission.RECORD_AUDIO),
         allowUserRename = state.allowUserRename,
         displayFilename = state.displayFilename,
         minAttachmentCount = state.minAttachmentCount,
@@ -94,6 +97,7 @@ internal fun AttachmentFormElement(
         onFocused = {
             state.onFocusChanged(true)
         },
+        onAudioCaptureRequest = onAudioCaptureRequest,
         modifier = modifier
     )
 }
@@ -105,6 +109,7 @@ internal fun AttachmentFormElement(
     isEditable: Boolean,
     inputs: List<AttachmentsFormInput>,
     hasCameraPermission: Boolean,
+    hasMicrophonePermission: Boolean,
     allowUserRename: Boolean,
     displayFilename: Boolean,
     minAttachmentCount: Long,
@@ -114,6 +119,7 @@ internal fun AttachmentFormElement(
     error: ValidationErrorState,
     lazyListState: LazyListState,
     onFocused: () -> Unit,
+    onAudioCaptureRequest: (Long?) -> Unit,
     modifier: Modifier = Modifier,
     colors: AttachmentsElementColors = LocalColorScheme.current.attachmentsElementColors,
     typography: AttachmentsElementTypography = LocalTypography.current.attachmentsElementTypography
@@ -151,10 +157,12 @@ internal fun AttachmentFormElement(
                 )
                 // Add attachment button
                 AddAttachment(
+                    onAudioCaptureRequest = onAudioCaptureRequest,
                     onFocused = onFocused,
                     stateId = stateId,
                     inputs = inputs,
                     hasCameraPermission = hasCameraPermission,
+                    hasMicrophonePermission = hasMicrophonePermission,
                     enabled = canAddAttachments
                 )
             }
@@ -450,6 +458,7 @@ private fun AttachmentFormElementPreview() {
         isEditable = true,
         inputs = emptyList(),
         hasCameraPermission = true,
+        hasMicrophonePermission = true,
         allowUserRename = true,
         displayFilename = true,
         minAttachmentCount = 2,
@@ -458,6 +467,7 @@ private fun AttachmentFormElementPreview() {
         attachments = list + list + list + list,
         error = ValidationErrorState.NullNotAllowed,
         lazyListState = LazyListState(),
-        onFocused = {}
+        onFocused = {},
+        onAudioCaptureRequest = {}
     )
 }

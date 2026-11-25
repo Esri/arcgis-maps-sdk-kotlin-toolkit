@@ -23,16 +23,23 @@ plugins {
 
 // Find these in properties passed through command line or read from GRADLE_HOME/gradle.properties
 // or local gradle.properties
-val artifactoryGroupId: String by project
-val artifactoryArtifactBaseId: String by project
+fun requiredProperty(name: String): String =
+    providers.gradleProperty(name).orNull
+        ?: rootProject.findProperty(name)?.toString()
+        ?: error("Missing required project property '$name'")
+
+val artifactoryGroupId: String = requiredProperty("artifactoryGroupId")
+val artifactoryArtifactBaseId: String = requiredProperty("artifactoryArtifactBaseId")
 val artifactoryArtifactId: String = "$artifactoryArtifactBaseId-${project.name}"
-val artifactoryUrl: String by project
-val artifactoryUsername: String by project
-val artifactoryPassword: String by project
-val versionNumber: String by project
-val buildNumber: String by project
-val finalBuild: Boolean = (project.properties["finalBuild"] ?: "false")
-    .run { this == "true" }
+val artifactoryUrl: String = requiredProperty("artifactoryUrl")
+val artifactoryUsername: String = requiredProperty("artifactoryUsername")
+val artifactoryPassword: String = requiredProperty("artifactoryPassword")
+val versionNumber: String = requiredProperty("versionNumber")
+val buildNumber: String = requiredProperty("buildNumber")
+val finalBuild: Boolean = providers.gradleProperty("finalBuild")
+    .orElse("false")
+    .map { it == "true" }
+    .get()
 val artifactVersion: String = if (finalBuild) {
     versionNumber
 } else {

@@ -17,17 +17,12 @@
  */
 
 plugins {
-    id("com.android.library")
-    id("org.jetbrains.kotlin.plugin.compose")
-    id("artifact-deploy")
+    alias(libs.plugins.component.convention.plugin)
+    alias(libs.plugins.kotlin.serialization)
     id("kotlin-parcelize")
-    alias(libs.plugins.kotlin.convention.plugin)
-    alias(libs.plugins.binary.compatibility.validator) apply true
-    alias(libs.plugins.kotlin.serialization) apply true
 }
 
 kotlin {
-    jvmToolchain(17)
     compilerOptions {
         freeCompilerArgs.add("-Xconsistent-data-class-copy-visibility")
     }
@@ -35,45 +30,9 @@ kotlin {
 
 android {
     namespace = "com.arcgismaps.toolkit.popup"
-    compileSdk = libs.versions.compileSdk.get().toInt()
-
-    defaultConfig {
-        minSdk = libs.versions.minSdk.get().toInt()
-
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        consumerProguardFiles("consumer-rules.pro")
-    }
-
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-        }
-    }
-
-    buildFeatures {
-        compose = true
-    }
-    // If this were not an android project, we would just write `explicitApi()` in the Kotlin scope.
-    // but as an android project could write `freeCompilerArgs = listOf("-Xexplicit-api=strict")`
-    // in the kotlinOptions above, but that would enforce api rules on the test code, which we don't want.
-    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-        if ("Test" !in name) {
-            compilerOptions {
-                freeCompilerArgs.add("-Xexplicit-api=strict")
-            }
-        }
-    }
-
-    // Avoids an empty test report showing up in the CI integration test report.
-    // Remove this if tests will be added.
-    tasks.withType<Test> {
-        enabled = false
-    }
-
-    publishing {
-        singleVariant("release") {
-            // This is the default variant.
-        }
+    lint {
+        // remove these disables when strings.xml lint is fixed via localization
+        disable += "MissingTranslation"
     }
 }
 
@@ -111,4 +70,8 @@ dependencies {
     testImplementation(libs.bundles.unitTest)
     androidTestImplementation(libs.bundles.composeTest)
     debugImplementation(libs.bundles.debug)
+    androidTestImplementation(libs.androidx.test.runner)
+    androidTestImplementation(libs.kotlinx.coroutines.test)
+    androidTestImplementation(project(":geoview-compose"))
+    androidTestImplementation(project(":microapps-lib"))
 }

@@ -238,7 +238,7 @@ public class OfflineMapState {
                 preplannedMapAreas.addAll(
                     elements = offlineMapTask.getPreplannedMapAreas().getOrNull() ?: emptyList()
                 )
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 preplannedMapAreas.clear()
             }
             preplannedMapAreas.let { preplannedMapArea ->
@@ -284,7 +284,7 @@ public class OfflineMapState {
         val preplannedDirectory = File(
             OfflineURLs.prePlannedDirectoryPath(context, portalItem.itemId,null,false)
         )
-        val preplannedMapAreaItemIds = preplannedDirectory.listFiles()?.map { it.name.toString() }
+        val preplannedMapAreaItemIds = preplannedDirectory.listFiles()?.map { it.name }
             ?: emptyList()
 
         if (preplannedMapAreaItemIds.isNotEmpty())
@@ -307,7 +307,7 @@ public class OfflineMapState {
         val onDemandDirectory = File(
             OfflineURLs.onDemandDirectoryPath(context, portalItem.itemId)
         )
-        val onDemandMapAreaItemIds = onDemandDirectory.listFiles()?.map { it.name.toString() }
+        val onDemandMapAreaItemIds = onDemandDirectory.listFiles()?.map { it.name }
             ?: emptyList()
         if (onDemandMapAreaItemIds.isNotEmpty())
             _mode = OfflineMapMode.OnDemand
@@ -561,13 +561,13 @@ internal enum class OfflineMapMode {
  *
  * @param T a [Throwable] type which should be thrown instead of encapsulated in the [Result].
  */
-internal inline fun <reified T : Throwable, R> Result<R>.except(): Result<R> =
-    onFailure { if (it is T) throw it }
+internal inline fun <reified T : Throwable, S> Result<S>.except(): Result<S> = onFailure { if (it is T) throw it }
 
 /**
  * Runs the specified [block] with [this] value as its receiver and catches any exceptions, returning a `Result` with the
  * result of the block or the exception. If the exception is a [CancellationException], the exception will not be encapsulated
  * in the failure but will be rethrown.
  */
-internal inline fun <T, R> T.runCatchingCancellable(block: T.() -> R): Result<R> =
-    runCatching(block).except<CancellationException, R>()
+internal inline fun <T, S> T.runCatchingCancellable(block: T.() -> S): Result<S> =
+    runCatching(block)
+        .except<CancellationException, S>()

@@ -1,0 +1,12 @@
+public final class com/arcgismaps/toolkit/buildingexplorer/BuildingExplorerKt {
+	public static final fun BuildingExplorer (Lcom/arcgismaps/toolkit/buildingexplorer/BuildingExplorerState;Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
+}
+
+public final class com/arcgismaps/toolkit/buildingexplorer/BuildingExplorerState {
+	public static final field $stable I
+	public fun <init> (Lcom/arcgismaps/mapping/ArcGISScene;Lkotlinx/coroutines/CoroutineScope;Lcom/arcgismaps/toolkit/geoviewcompose/LocalSceneViewProxy;)V
+	public synthetic fun <init> (Lcom/arcgismaps/mapping/ArcGISScene;Lkotlinx/coroutines/CoroutineScope;Lcom/arcgismaps/toolkit/geoviewcompose/LocalSceneViewProxy;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/util/List;Lkotlinx/coroutines/CoroutineScope;Lcom/arcgismaps/toolkit/geoviewcompose/LocalSceneViewProxy;)V
+	public synthetic fun <init> (Ljava/util/List;Lkotlinx/coroutines/CoroutineScope;Lcom/arcgismaps/toolkit/geoviewcompose/LocalSceneViewProxy;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+

@@ -9,7 +9,9 @@ The ArcGIS Maps SDK for Kotlin Toolkit contains components that will simplify yo
   * **[TableTopSceneView](toolkit/ar#tabletopsceneview)** - Allows you to anchor scene content to a physical surface, as if it were a 3D-printed model.
   * **[WorldScaleSceneView](toolkit/ar#worldscalesceneview)** - Allows you to integrate scene content with the real world features like streets and buildings.
 * **[Authenticator](toolkit/authentication)** - Displays a user interface when network and ArcGIS authentication challenges occur.
-* **[Basemap Gallery](toolkit/basemapgallery)** - Provides a control for selecting basemaps
+* **[Basemap Gallery](toolkit/basemapgallery)** - Provides a control for selecting basemaps.
+* **[Bookmarks](toolkit/bookmarks)** - Displays a list of bookmarks from a map or scene.
+* **[BuildingExplorer](toolkit/buildingexplorer)** - Provides a control for exploring building scene layers.
 * **[Compass](toolkit/compass)** - Shows a compass direction when the map is rotated. Auto-hides when the map points north.
 * **[FeatureForms](toolkit/featureforms)** - Provides a UI for editing feature attributes.
 * **[FloorFilter](toolkit/indoors)** - Allows filtering of floor plan data in a geo view by a site, a facility in the site, or a floor in the facility.
@@ -34,7 +36,7 @@ Please see the [developer setup](doc/general/developer_setup.md) for a complete 
 other options for installing the SDK.
 * JDK 17
 
-The *ArcGIS Maps SDK for Kotlin Toolkit* has a *Minimum SDK* version of *28*, meaning that it can run on devices with *Android Pie (9.0)* or newer.
+The *ArcGIS Maps SDK for Kotlin Toolkit* has a *Minimum SDK* version of *29*, meaning that it can run on devices with *Android 10* or newer.
 
 ## Installation
 
@@ -53,9 +55,11 @@ repositories {
 The *ArcGIS Maps SDK for Kotlin Toolkit* is released with a "bill of materials" (`BOM`). The releasable BOM is versioned and represents a set of versions of the toolkit components which are compatible with one another. You may specify dependencies as follows
 
 ```
-implementation(platform("com.esri:arcgis-maps-kotlin-toolkit-bom:300.1.0"))
+implementation(platform("com.esri:arcgis-maps-kotlin-toolkit-bom:300.2.0"))
 implementation("com.esri:arcgis-maps-kotlin-toolkit-authentication")
 implementation("com.esri:arcgis-maps-kotlin-toolkit-basemapgallery")
+implementation("com.esri:arcgis-maps-kotlin-toolkit-bookmarks")
+implementation("com.esri:arcgis-maps-kotlin-toolkit-buildingexplorer")
 implementation("com.esri:arcgis-maps-kotlin-toolkit-compass")
 implementation("com.esri:arcgis-maps-kotlin-toolkit-featureforms")
 implementation("com.esri:arcgis-maps-kotlin-toolkit-geoview-compose")
@@ -123,6 +127,13 @@ Capitalization isn't necessary, but it won't capitalize anything but the first l
 A new microapp can be added by running the bash script `./new-microapp-starter.sh`. 
 This script will prompt for you to input a name for the new microapp.
 
+Both scripts require names to start with an ASCII letter and contain only ASCII letters
+and digits. Empty names, whitespace, and punctuation are rejected before copying the
+corresponding template. Microapp names should use CamelCase and end with `App`
+(for example, `BookmarksApp`); the name `App` alone is not valid.
+If optional microapp creation fails, the component script stops; the component
+template may already have been copied at that point.
+
 This script requires bash 4.0 or higher.
 
 ### About this Repo
@@ -143,8 +154,8 @@ arcgis-maps-sdk-kotlin-toolkit
 └── settings.gradle.kts
 ```
 The `toolkit` folder contains releasable libraries -- these are the components of the toolkit.
-For each module in the `toolkit` folder there is a corresponding app in the `microapps` folder which depends on it.
-The apps are not released but are useful for working on a particular component in isolation.
+The `microapps` folder contains example apps for many toolkit components.
+The apps are not released but are useful for working on components in isolation.
 
 The template and TemplateApp modules are for bootstrapping new modules.
 

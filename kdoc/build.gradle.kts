@@ -23,7 +23,10 @@ plugins {
     alias(libs.plugins.dokka)
 }
 
-val versionNumber: String by project
+val versionNumber: String =
+    providers.gradleProperty("versionNumber").orNull
+        ?: rootProject.findProperty("versionNumber")?.toString()
+        ?: error("Missing required property 'versionNumber'")
 
 // make this project get evaluated after all the other projects
 // so that we can be sure the logic to determine released components

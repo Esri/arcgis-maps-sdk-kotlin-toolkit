@@ -21,8 +21,13 @@ import com.android.build.api.variant.LibraryAndroidComponentsExtension
 import com.arcgismaps.GrantDevicePermissions
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.provider.ValueSource
+import org.gradle.api.provider.ValueSourceParameters
 import org.gradle.internal.Actions.with
+import org.gradle.internal.cc.base.logger
+import org.gradle.kotlin.dsl.of
 import org.gradle.kotlin.dsl.register
+import java.io.File
 
 /**
  * Convention plugin for Android library modules that wire prerequisite tasks for
@@ -52,6 +57,16 @@ class AndroidIntegrationTestingConventionPlugin : Plugin<Project> {
                 val androidDsl = extensions.getByType(LibraryExtension::class.java)
                 val androidComponents =
                     extensions.getByType(LibraryAndroidComponentsExtension::class.java)
+
+                val vaultTokenProvider = providers.of(VaultTokenProvider::class) {}
+                val vaultToken = vaultTokenProvider.get().trim()
+                if (vaultToken.isNotEmpty()) {
+                    androidDsl.defaultConfig.testInstrumentationRunnerArguments["openbaoToken"] =
+                        vaultToken
+                } else {
+                    logger.warn("vault token not provided")
+                }
+
                 val grantDevicePermissionsTask =
                     tasks.register<GrantDevicePermissions>("grantDevicePermissions") {
                         adbExe.set(androidComponents.sdkComponents.adb.map { it.asFile.absoluteFile })
@@ -90,7 +105,34 @@ class AndroidIntegrationTestingConventionPlugin : Plugin<Project> {
                 }
 
             }
-
         }
     }
 }
+
+/**
+ * A [ValueSource] that reads the contents of the `.vault-token` file in the user's home directory.
+ * If the file does not exist or is empty, an empty string is returned.
+ *
+ * @since 300.2.0
+ */
+@Suppress("UNUSED")
+abstract class VaultTokenProvider : ValueSource<String, ValueSourceParameters.None> {
+    override fun obtain(): String {
+        var token: String? = null
+
+        val tokenFile = File(System.getProperty("user.home"), ".vault-token")
+        if (tokenFile.exists()) {
+            tokenFile.inputStream().bufferedReader().use {
+                token = it.readText()
+            }
+        }
+
+        return if (token != null) {
+            token
+        } else {
+            logger.warn("vault token does not exist or is empty, returning an empty string.")
+            ""
+        }
+    }
+}
+
