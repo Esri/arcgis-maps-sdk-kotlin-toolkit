@@ -162,7 +162,7 @@ internal class CameraFeedRenderer(
             // onDrawFrame rather than onSurfaceCreated since the session is not guaranteed to have been
             // initialized during the execution of onSurfaceCreated.
             if (shouldInitializeDisplay) {
-                session.setCameraTextureNames(intArrayOf(cameraColorTexture.textureId))
+                session.setCameraTextureNames(intArrayOf(cameraColorTexture.textureIdValue))
             }
 
             // Notify ARCore session that the view size changed so that the perspective matrix and
